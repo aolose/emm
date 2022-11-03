@@ -8,9 +8,9 @@ export function toPromis<T>(fn: (cb: (value: (PromiseLike<unknown> | unknown)) =
     })
 }
 
-export function waitFinish<T>(target: number, fn: (done: (t?: T) => void) => void) {
-    return new Promise<T | void>(r => {
-        fn((t?: T) => {
+export function waitFinish<T>(target: number, fn: (done: (t: T) => void) => void) {
+    return new Promise<T>(r => {
+        fn((t: T) => {
                 target--
                 if (!target) r(t)
             }

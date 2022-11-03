@@ -63,7 +63,7 @@ export class DB {
 
     dropTables() {
         const names = [] as string[]
-        return waitFinish(tables.length, done => {
+        return waitFinish<string[]>(tables.length, done => {
             for (const {name} of tables) {
                 this.db.run(`DROP TABLE IF EXISTS ${name}`)
                 names.push(name)

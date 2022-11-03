@@ -16,9 +16,11 @@ describe('create table', function () {
     })
 
     function getTables() {
+        // skip database table check in idea 
+        const schema ='sqlite_schema'
         return new Promise<string[]>(r => {
             db.db.all(`SELECT name
-                       FROM sqlite_schema
+                       FROM ${schema}
                        WHERE type = 'table'
                        ORDER BY name`,
                 (a, tables) => {
@@ -30,7 +32,7 @@ describe('create table', function () {
     it('create tables', async function () {
         const nameA = await db.createTables()
         const nameB = await getTables()
-        nameA?.sort()
+        nameA.sort()
         nameB.sort()
         assert.deepEqual(nameA,nameB)
     });
