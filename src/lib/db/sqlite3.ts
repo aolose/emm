@@ -1,26 +1,30 @@
 import sqlite3 from 'sqlite3'
-import {is_dev, waitFinish} from "../utils";
-import * as models from '../model'
+import {getQueryResult, getRunResult, is_dev, noNullKVs, waitFinish} from "../utils";
+import  * as models from '../model'
+import  type * as types from '../model'
+import {getConstraint} from "./model";
+
+
 
 const {Database, verbose} = sqlite3
 const tables = Object.values(models)
 const INTEGER = 'INTEGER'
 const TEXT = 'TEXT'
 
-interface ClassRef<T> {
-    new(): T
-}
 
-function createTable<T extends object>(Model: ClassRef<T>) {
+
+// model
+type M = typeof tables[number]
+// todo how to make this clever
+type MO = types.Article|types.System|types.Count
+
+function createTable(Model: M) {
     const fields = []
-    const e = Object.entries(new Model())
+    const t = new Model()
+    const e = Object.entries(t)
     for (const [k, v] of e) {
         let type = 'BLOB'
         const t = v?.constructor?.name;
-        if (k === 'id' && type === INTEGER) {
-            fields.unshift(k + ' INTEGER AUTOINCREMENT')
-            continue
-        }
         switch (t) {
             case 'Number':
             case 'Boolean':
@@ -31,12 +35,37 @@ function createTable<T extends object>(Model: ClassRef<T>) {
                 type = TEXT;
                 break
         }
-        fields.push(`${k} ${type}`)
+        const constraint = [...getConstraint(t, k)].join(' ') || ''
+        fields.push(`${k} ${type} ${constraint}`)
     }
     return `CREATE TABLE if not exists ${Model.name}
             (
                 ${fields.join()}
             )`
+}
+
+
+function select(obj: MO) {
+    const table = obj.constructor.name
+    const [k, v] = noNullKVs(obj)
+    const where = k.length ? k.map(a => `${a}=?`).join(' and') : ''
+    return [`SELECT * FROM ${table}`, where, v]
+}
+
+function insert(obj: MO): [string, unknown[]] {
+    const table = obj.constructor.name
+    const [k, v] = noNullKVs(obj)
+    const q = new Array(k.length).fill('?').join()
+    return [`replace
+    into
+    ${table}
+    (
+    ${k.join()}
+    )
+    values
+    (
+    ${q}
+    )`, v]
 }
 
 
@@ -47,6 +76,31 @@ export class DB {
     constructor(path = 'db') {
         const D = is_dev ? verbose().Database : Database
         this.db = new D(path)
+    }
+
+
+    private select(one: boolean, o: MO, where='', values: unknown[]) {
+        const [sql, w, v] = select(o)
+        const wh= [w,where].filter(a=>a).join(' and ')
+        const s = sql + (wh? ` WHERE ${wh}`:'');
+        const params = [...v, ...values]
+        if (one) return getQueryResult<MO>((cb) => this.db.get(s, params, cb))
+        return getQueryResult<MO[]>((cb) => this.db.all(s, params, cb))
+    }
+
+    get<T extends MO>(o: T, where?: string, ...values: unknown[]) {
+        return this.select(true, o, where, values) as Promise<T>
+    }
+
+    all<T extends MO>(o: T, where?: string, ...values: unknown[]) {
+        return this.select(false, o, where, values) as Promise<T[]>
+    }
+
+    save<T extends MO>(o: T) {
+        const [sql, values] = insert(o)
+        return getRunResult(o,cb=>{
+            this.db.run(sql, values,cb)
+        })
     }
 
     createTables() {
@@ -66,7 +120,6 @@ export class DB {
         return waitFinish<string[]>(tables.length, done => {
             for (const {name} of tables) {
                 this.db.run(`DROP TABLE IF EXISTS ${name}`)
-                names.push(name)
                 done(names)
             }
         })
@@ -76,3 +129,6 @@ export class DB {
         this.db.close()
     }
 }
+
+
+

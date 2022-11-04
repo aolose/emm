@@ -1,13 +1,15 @@
 import {DB} from "./sqlite3";
 import * as assert from "assert";
+import {Article} from "../model";
 
 // test('index page has expected h1', async ({ page }) => {
 // 	await page.goto('/');
 // 	expect(await page.textContent('h1')).toBe('Welcome to SvelteKit');
 // });
+
 let db: DB
 
-describe('create table', function () {
+describe('test table', function () {
     beforeEach(() => {
         db = new DB('test.db')
     })
@@ -19,13 +21,16 @@ describe('create table', function () {
         // skip database table check in idea 
         const schema ='sqlite_schema'
         return new Promise<string[]>(r => {
-            db.db.all(`SELECT name
+            // wait tables info change
+           setTimeout(()=>{
+               db.db.all(`SELECT name
                        FROM ${schema}
                        WHERE type = 'table'
                        ORDER BY name`,
-                (a, tables) => {
-                    r(tables.map(a => a.name))
-                })
+                   (a, tables) => {
+                       r(tables.map(a => a.name))
+                   })
+           },1e3)
         })
     }
 
@@ -42,6 +47,19 @@ describe('create table', function () {
         const nameB = await getTables()
         assert.deepEqual([],nameB)
     });
+
+    it('test insert and update',async function(){
+        await db.createTables()
+        const a = new Article()
+        a.title='test'
+        await db.save(a)
+        a.title='update'
+        await db.save(a)
+        const v = await db.get(a)
+        assert.equal(a.title,v.title)
+    })
+
+
 })
 
 
