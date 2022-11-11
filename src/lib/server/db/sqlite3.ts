@@ -1,9 +1,8 @@
 import sqlite3 from 'sqlite3'
 import {getQueryResult, getRunResult, is_dev, noNullKVs, waitFinish} from "../utils";
-import  * as models from '../model'
-import  type * as types from '../model'
-import {getConstraint} from "./model";
-
+import * as models from '../model'
+import {getConstraint} from "../model/decorations";
+import type {Model} from "../types";
 
 
 const {Database, verbose} = sqlite3
@@ -12,11 +11,10 @@ const INTEGER = 'INTEGER'
 const TEXT = 'TEXT'
 
 
-
 // model
 type M = typeof tables[number]
+
 // todo how to make this clever
-type MO = types.Article|types.System|types.Count
 
 function createTable(Model: M) {
     const fields = []
@@ -45,14 +43,15 @@ function createTable(Model: M) {
 }
 
 
-function select(obj: MO) {
+function select(obj: Model) {
     const table = obj.constructor.name
     const [k, v] = noNullKVs(obj)
     const where = k.length ? k.map(a => `${a}=?`).join(' and') : ''
-    return [`SELECT * FROM ${table}`, where, v]
+    return [`SELECT *
+             FROM ${table}`, where, v]
 }
 
-function insert(obj: MO): [string, unknown[]] {
+function insert(obj: Model): [string, unknown[]] {
     const table = obj.constructor.name
     const [k, v] = noNullKVs(obj)
     const q = new Array(k.length).fill('?').join()
@@ -68,7 +67,6 @@ function insert(obj: MO): [string, unknown[]] {
     )`, v]
 }
 
-
 export class DB {
     // expose for test
     db: sqlite3.Database;
@@ -79,27 +77,27 @@ export class DB {
     }
 
 
-    private select(one: boolean, o: MO, where='', values: unknown[]) {
+    private select(one: boolean, o: Model, where = '', values: unknown[]) {
         const [sql, w, v] = select(o)
-        const wh= [w,where].filter(a=>a).join(' and ')
-        const s = sql + (wh? ` WHERE ${wh}`:'');
+        const wh = [w, where].filter(a => a).join(' and ')
+        const s = sql + (wh ? ` WHERE ${wh}` : '');
         const params = [...v, ...values]
-        if (one) return getQueryResult<MO>((cb) => this.db.get(s, params, cb))
-        return getQueryResult<MO[]>((cb) => this.db.all(s, params, cb))
+        if (one) return getQueryResult<Model>((cb) => this.db.get(s, params, cb))
+        return getQueryResult<Model[]>((cb) => this.db.all(s, params, cb))
     }
 
-    get<T extends MO>(o: T, where?: string, ...values: unknown[]) {
+    get<T extends Model>(o: T, where?: string, ...values: unknown[]) {
         return this.select(true, o, where, values) as Promise<T>
     }
 
-    all<T extends MO>(o: T, where?: string, ...values: unknown[]) {
+    all<T extends Model>(o: T, where?: string, ...values: unknown[]) {
         return this.select(false, o, where, values) as Promise<T[]>
     }
 
-    save<T extends MO>(o: T) {
+    save<T extends Model>(o: T) {
         const [sql, values] = insert(o)
-        return getRunResult(o,cb=>{
-            this.db.run(sql, values,cb)
+        return getRunResult(o, cb => {
+            this.db.run(sql, values, cb)
         })
     }
 

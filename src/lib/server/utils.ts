@@ -1,8 +1,9 @@
 import {NULL} from "./db/enum";
 import type {sqlQueryCallback, sqlRunCallback, promiseCallback} from "./types";
-import {getConstraint, primaryKey} from "./db/model";
+import {getConstraint, primaryKey} from "./model/decorations";
 
 export const is_dev = process.env.NODE_ENV !== 'production'
+
 
 
 function setPrimaryKeyId<T extends object>(o: T, id: number) {
@@ -77,4 +78,24 @@ export function noNullKVs(o: object) {
         }
     })
     return [keys, values]
+}
+
+
+function now() {
+    return `[${new Date().toLocaleString()}]`
+}
+
+export const Log = {
+    debug(label: string, ...params: unknown[]) {
+        if (is_dev) console.log(now(), label, ...params)
+    },
+    info(label: string, ...params: unknown[]) {
+        console.log(now(), label, ...params)
+    },
+    warn(label: string, ...params: unknown[]) {
+        console.warn(now(), label, ...params)
+    },
+    error(label: string, ...params: unknown[]) {
+        console.error(now(), label, ...params)
+    },
 }

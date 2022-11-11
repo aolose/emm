@@ -1,5 +1,5 @@
-import {NULL} from "./db/enum";
-import {noNull, primary, unique} from "./db/model";
+import {NULL} from "../db/enum";
+import {noNull, primary, unique} from "./decorations";
 
 const {INT, TEXT, DATE} = NULL
 
@@ -37,3 +37,5 @@ export class User {
     birth = DATE
     desc = TEXT
 }
+
+
