@@ -12,8 +12,12 @@ function job(label: string, fn: () => void, time: number) {
 const hour = 3600000
 const day = 24 * hour
 
+// todo
 export function runJobs() {
     ([
+        ['cleanToken', () => {
+            // todo
+        }, day],
         ['cleanSoftDelete', () => {
             // todo
         }, day],

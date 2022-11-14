@@ -2,7 +2,7 @@ import sqlite3 from 'sqlite3'
 import {getQueryResult, getRunResult, is_dev, noNullKVs, waitFinish} from "../utils";
 import * as models from '../model'
 import {getConstraint} from "../model/decorations";
-import type {Model} from "../types";
+import type {Model} from "../../types";
 
 
 const {Database, verbose} = sqlite3
@@ -46,7 +46,7 @@ function createTable(Model: M) {
 function select(obj: Model) {
     const table = obj.constructor.name
     const [k, v] = noNullKVs(obj)
-    const where = k.length ? k.map(a => `${a}=?`).join(' and') : ''
+    const where = k.length ? k.map(a => `${a}=?`).join(' and ') : ''
     return [`SELECT *
              FROM ${table}`, where, v]
 }

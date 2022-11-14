@@ -1,5 +1,5 @@
 import {NULL} from "./db/enum";
-import type {sqlQueryCallback, sqlRunCallback, promiseCallback} from "./types";
+import type {sqlQueryCallback, sqlRunCallback, promiseCallback} from "../types";
 import {getConstraint, primaryKey} from "./model/decorations";
 
 export const is_dev = process.env.NODE_ENV !== 'production'
@@ -67,10 +67,10 @@ export function noNullKVs(o: object) {
                     if (v === TEXT) return
                     break
                 case 'Number':
-                    if (v !== INT) return
+                    if (v === INT) return
                     break
                 case 'Date':
-                    if (v.getTime() !== DATE.getTime()) return
+                    if (v.getTime() === DATE.getTime()) return
                     break
             }
             keys.push(k)
@@ -98,4 +98,21 @@ export const Log = {
     error(label: string, ...params: unknown[]) {
         console.error(now(), label, ...params)
     },
+}
+
+export  const val =(a:unknown)=>{
+    if(a===undefined||a===null)return null
+    const t = a.constructor.name
+    switch (t){
+        case 'String':
+            if(a===NULL.TEXT)return null
+            break;
+        case 'Number':
+            if(a===NULL.INT)return null
+            break;
+        case 'Date':
+            if(a===NULL.DATE)return null
+            break
+    }
+    return  a
 }
