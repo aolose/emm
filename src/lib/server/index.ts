@@ -1,8 +1,8 @@
 import {DB} from "./db/sqlite3";
-import type {Model} from "../types";
+import type {Model} from "./types";
 import {modelCache} from "./cache";
 import {runJobs} from "./db/jobs";
-import {Log, noNullKVs} from "./utils";
+import {Log, noNullKeyValues} from "./utils";
 import {System} from "./model";
 
 export const db = new DB()
@@ -26,7 +26,7 @@ type Filter = {
 // todo desc
 function genModelFilterKey(m: Model, f?: Filter): string {
     const n = [m.constructor.name] as unknown[]
-    const [k1, v1] = noNullKVs(m)
+    const [k1, v1] = noNullKeyValues(m)
     const k2 = f ? Object.values(f) : []
     return n.concat(k1, v1, k2).join('')
 }

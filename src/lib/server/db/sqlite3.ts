@@ -1,8 +1,8 @@
 import sqlite3 from 'sqlite3'
-import {getQueryResult, getRunResult, is_dev, noNullKVs, waitFinish} from "../utils";
+import {getQueryResult, getRunResult, is_dev, noNullKeyValues, waitFinish} from "../utils";
 import * as models from '../model'
 import {getConstraint} from "../model/decorations";
-import type {Model} from "../../types";
+import type {Model} from "../types";
 
 
 const {Database, verbose} = sqlite3
@@ -45,7 +45,7 @@ function createTable(Model: M) {
 
 function select(obj: Model) {
     const table = obj.constructor.name
-    const [k, v] = noNullKVs(obj)
+    const [k, v] = noNullKeyValues(obj)
     const where = k.length ? k.map(a => `${a}=?`).join(' and ') : ''
     return [`SELECT *
              FROM ${table}`, where, v]
@@ -53,7 +53,7 @@ function select(obj: Model) {
 
 function insert(obj: Model): [string, unknown[]] {
     const table = obj.constructor.name
-    const [k, v] = noNullKVs(obj)
+    const [k, v] = noNullKeyValues(obj)
     const q = new Array(k.length).fill('?').join()
     return [`replace
     into

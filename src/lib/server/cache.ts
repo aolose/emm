@@ -1,4 +1,4 @@
-import type {Model} from "../types";
+import type {Model} from "./types";
 
 type Record = [number, Model | Model[] | undefined, Promise<Model | Model[]> | undefined]
 const modelCacheMap = new Map<string, Record>()

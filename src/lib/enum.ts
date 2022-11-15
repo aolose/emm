@@ -15,3 +15,12 @@ export enum TOKEN_FEATURE {
     allowComment,
     allowVist,
 }
+
+export const reqMethod  =[ 'POST', 'GET', 'DELETE', 'PATCH']
+
+
+export enum dataType {
+    json,
+    text,
+    buffer
+}

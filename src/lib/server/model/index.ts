@@ -1,4 +1,4 @@
-import {NULL} from "../db/enum";
+import {NULL} from "../../enum";
 import {noNull, primary, unique} from "./decorations";
 
 const {INT, TEXT, DATE} = NULL

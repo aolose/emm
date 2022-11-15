@@ -1,6 +1,6 @@
-import {DB} from "./sqlite3";
+import {DB} from "./server/db/sqlite3";
 import * as assert from "assert";
-import {Article} from "../model";
+import {Article} from "./server/model";
 
 // test('index page has expected h1', async ({ page }) => {
 // 	await page.goto('/');

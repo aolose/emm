@@ -1,10 +1,8 @@
-import {NULL} from "./db/enum";
-import type {sqlQueryCallback, sqlRunCallback, promiseCallback} from "../types";
+import {dataType, NULL} from "../enum";
+import type {promiseCallback, sqlQueryCallback, sqlRunCallback} from "./types";
 import {getConstraint, primaryKey} from "./model/decorations";
 
 export const is_dev = process.env.NODE_ENV !== 'production'
-
-
 
 function setPrimaryKeyId<T extends object>(o: T, id: number) {
     const [k, v] = Object.entries(o).find(([k, v]) =>
@@ -14,7 +12,6 @@ function setPrimaryKeyId<T extends object>(o: T, id: number) {
         // @ts-ignore
         o[k] = id
 }
-
 
 //resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void
 export function toPromise<T>(fn: promiseCallback<T>) {
@@ -55,7 +52,7 @@ export function waitFinish<T>(target: number, fn: (done: (t: T) => void) => void
     })
 }
 
-export function noNullKVs(o: object) {
+export function noNullKeyValues(o: object) {
     const keys = [] as string[]
     const values = [] as unknown[]
     const {TEXT, INT, DATE} = NULL
@@ -80,7 +77,6 @@ export function noNullKVs(o: object) {
     return [keys, values]
 }
 
-
 function now() {
     return `[${new Date().toLocaleString()}]`
 }
@@ -100,19 +96,19 @@ export const Log = {
     },
 }
 
-export  const val =(a:unknown)=>{
-    if(a===undefined||a===null)return null
+export const val = (a: unknown) => {
+    if (a === undefined || a === null) return null
     const t = a.constructor.name
-    switch (t){
+    switch (t) {
         case 'String':
-            if(a===NULL.TEXT)return null
+            if (a === NULL.TEXT) return null
             break;
         case 'Number':
-            if(a===NULL.INT)return null
+            if (a === NULL.INT) return null
             break;
         case 'Date':
-            if(a===NULL.DATE)return null
+            if (a === NULL.DATE) return null
             break
     }
-    return  a
+    return a
 }
