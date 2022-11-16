@@ -9,6 +9,6 @@ declare namespace App {
 }
 
 declare namespace DB {
-    init()
-    connect()
+	init();
+	connect();
 }
