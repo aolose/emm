@@ -4,17 +4,13 @@ import * as models from '../model'
 import {getConstraint} from "../model/decorations";
 import type {Model} from "../types";
 
-
 const {Database, verbose} = sqlite3
 const tables = Object.values(models)
 const INTEGER = 'INTEGER'
 const TEXT = 'TEXT'
 
-
 // model
 type M = typeof tables[number]
-
-// todo how to make this clever
 
 function createTable(Model: M) {
     const fields = []

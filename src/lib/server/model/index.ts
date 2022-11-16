@@ -36,7 +36,6 @@ export class Article {
     update = DATE
 }
 
-
 export class Token {
     @primary
     id = INT
@@ -52,7 +51,6 @@ export class Token {
     remark = TEXT
 }
 
-
 export class Comment {
     @primary
     id = INT;
@@ -65,7 +63,6 @@ export class Comment {
     state = INT    // -1 skip 0 - wait review  1 - review ok 2 - review no pass
     tokenId = INT
 }
-
 
 export class System {
     @primary
@@ -88,7 +85,6 @@ export class System {
     pageCss = TEXT
 }
 
-
 export class User {
     @primary
     id = INT;
@@ -100,5 +96,3 @@ export class User {
     birth = DATE
     desc = TEXT
 }
-
-

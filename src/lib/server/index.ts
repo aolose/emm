@@ -14,7 +14,6 @@ db.createTables().then(tables => {
 
 runJobs()
 
-
 type  token = string
 const Pools = {}
 

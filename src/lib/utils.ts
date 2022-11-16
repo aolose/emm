@@ -1,6 +1,7 @@
 import {req} from "./req";
 import {dataType} from "./enum";
 import type {RequestEvent} from "@sveltejs/kit";
+import type {ApiData} from "./server/types";
 
 const {subtle} = crypto
 
@@ -56,7 +57,7 @@ const algorithm_AES_CBC = {
 
 let genKey: CryptoKeyPair
 let shareKey: CryptoKey
-let serectNum: number
+export let keyNum: number
 
 
 export async function splitResult(buf: unknown) {
@@ -64,7 +65,7 @@ export async function splitResult(buf: unknown) {
         const a = new Uint8Array(buf)
         const b = a.slice(0, 2)
         const c = a.slice(2)
-        serectNum = b[0] << 8 + b[1]
+        keyNum = b[0] << 8 + b[1]
         const srvPuk = await subtle.importKey('raw', c.buffer, algorithm, true, [])
         shareKey = await genShareKey(srvPuk, genKey.privateKey)
     }
@@ -84,25 +85,9 @@ export const genPubKey = async () => {
     return await subtle.exportKey('raw', genKey.publicKey)
 }
 
-export const toBodyBuf = async (o?: object | string | number, encrypt = true) => {
-    if (!o) return o;
-    const type = typeof o
-    if (type === 'number') return o
-    let buf: ArrayBuffer
-    if (!(o instanceof ArrayBuffer)) {
-        let str = o
-        if (type === 'object') str = JSON.stringify(o)
-        const arr = [str] as BlobPart[]
-        buf = await new Blob(arr).arrayBuffer()
-    } else buf = o
-    if (!encrypt || !shareKey) return buf;
-    return new Blob([])
-}
-
-
 export const parseBuf = async (buf: ArrayBuffer, encrypt: boolean) => {
     let raw = buf
-    if (encrypt) raw = await subtle.decrypt(algorithm_AES_CBC, shareKey, buf)
+    if (encrypt && shareKey) raw = await subtle.decrypt(algorithm_AES_CBC, shareKey, buf)
     const txt = buf2Str(raw)
     return {
         json() {
@@ -128,7 +113,7 @@ export const genShareKey = async (pub: CryptoKey, pri: CryptoKey) => {
 export const syncShareKey = async () => {
     if (shareKey) return;
     const pub = await genPubKey()
-    const r = await req('hello', pub, {type: dataType.buffer, encrypt: false})
+    const r = await req('hello', pub)
     await splitResult(r)
 }
 
@@ -146,15 +131,16 @@ export const combineResult = (id: number, pk: ArrayBuffer) => {
     return nbf.buffer
 }
 
-export const getResJson = async (res: Request) => {
-    const buf = await res.arrayBuffer()
-    const r = await parseBuf(buf, true)
-    return r.json()
+export const getResJson = async (res: Request, encrypt = false) => {
+    if (encrypt) {
+        const buf = await res.arrayBuffer()
+        const r = await parseBuf(buf, encrypt)
+        return r.json()
+    } else return await res.json()
 }
 
 
-
-const dataTypes=[
+const dataTypes = [
     'application/json',
     'text/pain',
     'application/octet-stream',
@@ -166,17 +152,56 @@ function contentType(type: dataType) {
     }
 }
 
-export const jsonHeader = new Headers(contentType(dataType.json))
-export const textHeader = new Headers(contentType(dataType.text))
-
-export const getHeaderDataType = (h:Headers)=>{
-    const t = h.get('Content-Type')?.replace(/;.*/,'')
-    if(t)return dataTypes.indexOf(t)
+export const getHeaderDataType = (h: Headers) => {
+    const t = h.get('Content-Type')?.replace(/;.*/, '')
+    if (t) return dataTypes.indexOf(t)
 }
 
-export const errorResp = (code: number, msg: string) => {
-    return new Response(msg, {
+
+const parseBody = (data: ApiData) => {
+    const t = typeof data
+    let tp = dataType.text
+    if (data && t === 'object') {
+        // todo
+        if (/ArrayBuffer|Blob|File|(Uint16|Uint8)Array/g
+            .test(data.constructor.name)) tp = dataType.binary
+        else {
+            data = JSON.stringify(data)
+            tp = dataType.json
+        }
+    }
+    return [tp, data] as [dataType, ApiData]
+}
+
+export const resp = (body: ApiData, code = 200) => {
+    const [tp, data] = parseBody(body)
+    return new Response(data as BodyInit, {
         status: code,
-        headers:textHeader
+        headers: new Headers(contentType(tp))
     })
+}
+
+export const encryptResp = async (data: ApiData, code = 200) => {
+    const r = resp(data, code)
+    const buf = await encrypt(await r.arrayBuffer())
+    r.headers.set('encrypt', ' ')
+    return new Response(buf, {
+        status: code,
+        headers: r.headers
+    })
+}
+
+export const fetchOpt = async (o?: object | string | number, encrypted = false) => {
+    const headers = new Headers()
+    let [tp, data] = parseBody(o)
+    if (encrypted && data !== undefined) {
+        tp = dataType.binary
+        headers.set('encrypt', keyNum + '')
+        data = encrypt(await new Blob([data as BlobPart]).arrayBuffer())
+    }
+    headers.set('Content-Type', dataTypes[tp])
+    return {
+        body: data as BodyInit,
+        headers
+    }
 }

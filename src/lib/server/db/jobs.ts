@@ -1,6 +1,5 @@
 import {Log} from "../utils";
 
-
 function job(label: string, fn: () => void, time: number) {
     const run = () => {
         Log.info(`Job ${label} start`)

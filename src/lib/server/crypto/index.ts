@@ -8,7 +8,6 @@ const expire = 1e3 * 20
 
 let num = 0
 
-
 export const genPubKey = async (pub: ArrayBuffer): Promise<[number, ArrayBuffer]> => {
     const {subtle} = crypto
     const my = await subtle.generateKey(algorithm, false, ['deriveKey'])
@@ -24,5 +23,3 @@ export const genPubKey = async (pub: ArrayBuffer): Promise<[number, ArrayBuffer]
     ])
     return [key, myPub]
 }
-
-

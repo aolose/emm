@@ -18,9 +18,8 @@ export enum TOKEN_FEATURE {
 
 export const reqMethod  =[ 'POST', 'GET', 'DELETE', 'PATCH']
 
-
 export enum dataType {
     json,
     text,
-    buffer
+    binary
 }

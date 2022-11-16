@@ -58,8 +58,4 @@ describe('test table', function () {
         const v = await db.get(a)
         assert.equal(a.title,v.title)
     })
-
-
 })
-
-

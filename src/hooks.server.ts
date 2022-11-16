@@ -1,6 +1,7 @@
 import type {Handle} from "@sveltejs/kit";
 import * as apis from "./lib/server/api";
 import type {Api, ApiName} from "./lib/server/types";
+import {resp} from "./lib/utils";
 
 export const handle: Handle = async ({event, resolve}) => {
     // handle api
@@ -10,8 +11,13 @@ export const handle: Handle = async ({event, resolve}) => {
         const m = method.toLowerCase() as keyof Api
         const api = apis[k]?.[m]
         if (api) {
-            return await api(event.request)
+            const r = await api(event.request)
+            if (r) {
+                if (r instanceof Response) return r
+                return resp(r)
+            }
         }
+        return resp('')
     }
     return resolve(event);
 }

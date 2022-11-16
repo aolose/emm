@@ -7,12 +7,13 @@ export type promiseCallback<T> = (resolve: (value: T | PromiseLike<T>) => void, 
 
 
 import type * as models from "./model";
-
-type RespHandle = (req:Request) => Promise<Response>
+export type ApiData = ArrayBuffer | object | string | number | undefined
+type RespHandle = (req: Request) => Promise<ApiData>
 export type Model = models.System | models.Count | models.User | models.Article
 
 import type * as apis from "./api";
-export type ApiName = keyof typeof  apis
+
+export type ApiName = keyof typeof apis
 
 export type Api = {
     get?: RespHandle,

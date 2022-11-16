@@ -1,4 +1,4 @@
-import {parseBuf, toBodyBuf} from "./utils";
+import {keyNum, parseBuf, fetchOpt} from "./utils";
 import {dataType, reqMethod} from "./enum";
 import {browser} from "$app/environment";
 import type {ApiName} from "./server/types";
@@ -10,7 +10,6 @@ type reqOption = {
     cache?: 0,
     method?: 0 | 1 | 2 | 3,
     encrypt?: boolean,
-    type?: dataType,//object,string,number
     before?(data: unknown, url?: string, header?: Headers): [unknown, string | undefined, Headers?],
 }
 type reqData = object | string | number | boolean | null | void
@@ -59,7 +58,6 @@ function saveCacheToStorage() {
     localStorage.setItem(localCacheKey, JSON.stringify(o))
 }
 
-
 async function reqCache(url: string, params: reqParams, cache: number | undefined, run: (re?: cacheRecord) => Promise<reqData>) {
     if (!cache || !browser) return await run()
     if (reqCacheMap) loadCacheFromStorage()
@@ -84,51 +82,47 @@ function errorHandle() {
 }
 
 export async function req(url: ApiName, params?: reqParams, cfg?: reqOption) {
-    let headers = new Headers()
-    const ct = 'Content-Type'
-    let tp = 'application/octet-stream'
-    switch (cfg?.type) {
-        case dataType.json:
-            tp = 'application/json'
-            break
-        case dataType.text:
-            tp = 'text/pain'
-            break
-    }
-    headers.set(ct, tp)
-
     let uu = url as string
+    const opt = {
+        method: reqMethod[cfg?.method || 0],
+        ...await fetchOpt(params, cfg?.encrypt)
+    }
     if (cfg?.before) {
-        const [b, u, h] = cfg.before(params, url, headers)
+        const [b, u, h] = cfg.before(params, url, opt.headers)
         if (b) params = b
         if (u) uu = u
-        if (h) headers = h
+        if (h) opt.headers = h
     }
     const fullUrl = `/api/${uu}`
-    const opt = {
-        headers,
-        method: reqMethod[cfg?.method || 0],
-        body: await toBodyBuf(params, cfg?.encrypt) as BodyInit
-    }
     return reqCache(url, params, cfg?.cache, async (rec?: cacheRecord) => {
         const p = new Promise<reqData>((resolve, reject) => {
             fetch(fullUrl, opt).then(async r => {
                 if (r.status > 299) {
                     cfg = cfg || {}
                     cfg.cache = 0
-                    cfg.type = dataType.text
                 }
-
-                const b = await r.arrayBuffer()
-                const d = await parseBuf(await b, r.headers.has('encrypt'))
+                const e = r.headers.has('encrypt')
                 const t = getHeaderDataType(r.headers)
-                switch (t) {
-                    case dataType.json:
-                        return d.json()
-                    case dataType.text:
-                        return d.string()
+                if (e) {
+                    const b = await r.arrayBuffer()
+                    const d = await parseBuf(await b, true)
+                    switch (t) {
+                        case dataType.json:
+                            return d.json()
+                        case dataType.text:
+                            return d.string()
+                    }
+                    return d.buffer()
+                } else {
+                    switch (t) {
+                        case dataType.json:
+                            return r.json()
+                        case dataType.text:
+                            return r.text()
+                        case  dataType.binary:
+                            return r.arrayBuffer()
+                    }
                 }
-                return d.buffer()
             }).then(d => {
                 if (cfg?.cache && rec) {
                     rec[0] = Date.now() + cfg.cache
