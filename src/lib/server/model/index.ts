@@ -1,4 +1,4 @@
-import { NULL } from '../../enum';
+import { NULL } from '../enum';
 import { noNull, primary, unique } from './decorations';
 
 const { INT, TEXT, DATE } = NULL;
@@ -10,17 +10,17 @@ export class Count {
 	count = INT;
 }
 
-export class Balabala {
+export class ShortPost {
 	@primary
 	id = INT;
 	comment = true;
 	content = TEXT;
 	tokenIds = TEXT;
 	publish = DATE;
-	update = DATE;
+	modify = DATE;
 }
 
-export class Article {
+export class Post {
 	@primary
 	id = INT;
 	@unique
@@ -33,7 +33,7 @@ export class Article {
 	content = TEXT;
 	tokenIds = TEXT;
 	publish = DATE;
-	update = DATE;
+	modify = DATE;
 }
 
 export class Token {

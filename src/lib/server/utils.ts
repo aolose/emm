@@ -1,6 +1,5 @@
-import { dataType, NULL } from '../enum';
-import type { promiseCallback, sqlQueryCallback, sqlRunCallback } from '../types';
-import { getConstraint, primaryKey } from './model/decorations';
+import {NULL } from './enum';
+import {dataType } from '../enum';
 import type { ApiData } from '../types';
 import {
 	encryptType,
@@ -16,54 +15,6 @@ import {
 import { keyPool } from './crypto';
 
 export const is_dev = process.env.NODE_ENV !== 'production';
-
-function setPrimaryKeyId<T extends object>(o: T, id: number) {
-	const [k, v] =
-		Object.entries(o).find(
-			([k, v]) => getConstraint(o, k).has(primaryKey) && typeof v === 'number'
-		) || [];
-	if (k && v === NULL.INT)
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		o[k] = id;
-}
-
-export function toPromise<T>(fn: promiseCallback<T>) {
-	return new Promise<T>((resolve, reject) => {
-		fn(resolve, reject);
-	});
-}
-
-export function getQueryResult<T>(cb: sqlQueryCallback<T>) {
-	return toPromise<T>((resolve, reject) => {
-		cb((err: Error | null, result: T) => {
-			if (err) reject(err);
-			else resolve(result as T);
-		});
-	});
-}
-
-export function getRunResult<T extends object>(o: T, cb: sqlRunCallback<T>) {
-	return toPromise<[number, number]>((resolve, reject) => {
-		cb(function (err: Error | null) {
-			const { lastID, changes } = this;
-			if (err) reject(err);
-			else {
-				setPrimaryKeyId<T>(o, lastID);
-				resolve([lastID, changes]);
-			}
-		});
-	});
-}
-
-export function waitFinish<T>(target: number, fn: (done: (t: T) => void) => void) {
-	return new Promise<T>((r) => {
-		fn((t: T) => {
-			target--;
-			if (!target) r(t);
-		});
-	});
-}
 
 export function noNullKeyValues(o: object) {
 	const keys = [] as string[];
@@ -96,7 +47,8 @@ function now() {
 
 export const Log = {
 	debug(label: string, ...params: unknown[]) {
-		if (is_dev) console.log(now(), label, ...params);
+		if (is_dev)
+			console.log(now(), label, ...params);
 	},
 	info(label: string, ...params: unknown[]) {
 		console.log(now(), label, ...params);

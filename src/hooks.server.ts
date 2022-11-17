@@ -3,7 +3,8 @@ import * as apis from './lib/server/api';
 import type { Api, ApiName } from './lib/types';
 import { encryptResp, resp } from './lib/server/utils';
 import { encryptHeader, getKINums } from './lib/utils';
-
+import {server} from "./lib/server";
+server.start()
 export const handle: Handle = async ({ event, resolve }) => {
 	// handle api
 	const {
