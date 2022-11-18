@@ -1,5 +1,5 @@
-import sqlite3 from 'better-sqlite3';
-import {Log, noNullKeyValues} from '../utils';
+import better from 'better-sqlite3';
+import {noNullKeyValues, sqlVal} from '../utils';
 import * as models from '../model';
 import {getConstraint, primaryKey} from '../model/decorations';
 import type {Model} from '$lib/types';
@@ -41,9 +41,7 @@ function createTable(Model: M) {
     if (pk.length) {
         fields.push(`PRIMARY KEY (${pk.join()})`)
     }
-    const sql = `CREATE TABLE ${Model.name} (${fields.join()})`;
-    Log.debug('sql', sql)
-    return sql
+    return `CREATE TABLE ${Model.name} (${fields.join()})`
 }
 
 function select(obj: Model) {
@@ -55,17 +53,18 @@ function select(obj: Model) {
 
 function insert(obj: Model): [string, unknown[]] {
     const table = obj.constructor.name;
-    const [k, v] = noNullKeyValues(obj);
+    const [k, m] = noNullKeyValues(obj);
+    const v = sqlVal(m)
     const q = new Array(k.length).fill('?').join();
     return [`replace into ${table} (${k.join()}) values (${q})`, v];
 }
 
 export class DB {
     // expose for test
-    db: sqlite3.Database;
+    db: better.Database;
 
     constructor(path = 'db') {
-        this.db = new sqlite3(path);
+        this.db = new better(path);
         process.on('exit', () => this.db.close());
     }
 
@@ -73,7 +72,7 @@ export class DB {
         const [sql, w, v] = select(o);
         const wh = [w, where].filter((a) => a).join(' and ');
         const s = sql + (wh ? ` WHERE ${wh}` : '');
-        const params = [...v, ...values];
+        const params = sqlVal([...v, ...values]);
         const paper = this.db.prepare(s)
         if (one) return paper.get(...params)
         return paper.all(...params)
@@ -97,7 +96,7 @@ export class DB {
         const exist = this.tables()
         for (const s of tables) {
             const name = s.name
-            if(exist.indexOf(name)===-1){
+            if (exist.indexOf(name) === -1) {
                 this.db.exec(createTable(s))
                 names.push(name)
             }
@@ -106,10 +105,8 @@ export class DB {
     }
 
     dropTables() {
-        const names = [] as string[];
         for (const {name} of tables) {
-            const {changes} = this.db.prepare(`DROP TABLE IF EXISTS ${name}`).run();
-            if (changes) names.push(name)
+            this.db.exec(`DROP TABLE IF EXISTS ${name}`);
         }
     }
 
@@ -117,6 +114,6 @@ export class DB {
         return this.db.prepare(
             `SELECT name FROM sqlite_schema WHERE 
             type ='table' AND name NOT LIKE 'sqlite_%';`
-        ).all().map(a=>a.name)
+        ).all().map(a => a.name)
     }
 }
