@@ -1,10 +1,10 @@
-import { algorithm, genShareKey, maxKeyNum } from '../../utils';
+import { algorithm, genShareKey, maxKeyNum, shareKeyExpire } from '$lib/utils';
 
 type Timeout = ReturnType<typeof setTimeout>;
 type privateKey = [CryptoKey, Timeout];
 export const keyPool = new Map<number, privateKey>();
 
-const expire = 1e3 * 20;
+const expire = shareKeyExpire + 5e3;
 
 let num = 0;
 
