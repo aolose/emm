@@ -1,7 +1,7 @@
 import type * as models from './server/model';
 import type * as apis from './server/api';
 
-type RespHandle = (req: Request) => Promise<ApiData>;
+type RespHandle = (req: Request) => ApiData | Promise<ApiData>;
 
 export type Model = models.System | models.Count | models.User | models.Post;
 export type ApiBodyData = ArrayBuffer | string | number | undefined;
