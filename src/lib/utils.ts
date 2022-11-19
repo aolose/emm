@@ -1,11 +1,11 @@
 import { req } from './req';
-import { dataType } from './enum';
+import { contentType, dataType, encryptIv, encTypeIndex, getIndexType } from './enum';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { ApiData, ApiBodyData } from './types';
 
 const { subtle } = crypto;
 let genKey: CryptoKeyPair;
-export let shareKey: CryptoKey;
+export let shareKey: CryptoKey | undefined;
 export let keyNum: number;
 export const maxKeyNum = 0xffff;
 export const padNum = maxKeyNum.toString(36).length;
@@ -23,9 +23,11 @@ export async function splitResult(buf: unknown) {
 		const a = new Uint8Array(buf);
 		const b = a.slice(0, 2);
 		const c = a.slice(2);
-		keyNum = b[0] << (8 + b[1]);
+		keyNum = (b[0] << 8) + b[1];
 		const srvPuk = await subtle.importKey('raw', c.buffer, algorithm, true, []);
 		shareKey = await genShareKey(srvPuk, genKey.privateKey);
+		shareExpire = Date.now() + shareKeyExpire;
+		saveKey().then();
 	}
 }
 
@@ -55,6 +57,7 @@ export const decryptBuf = async (buf: ArrayBuffer, encrypt: number, key?: Crypto
 	};
 };
 
+const shareKeyUsage = ['encrypt', 'decrypt'] as KeyUsage[];
 export const genShareKey = async (pub: CryptoKey, pri: CryptoKey) => {
 	return await subtle.deriveKey(
 		{
@@ -63,12 +66,41 @@ export const genShareKey = async (pub: CryptoKey, pri: CryptoKey) => {
 		},
 		pri,
 		algorithm_AES_CBC,
-		false,
-		['encrypt', 'decrypt']
+		true,
+		shareKeyUsage
 	);
 };
 
+export const shareKeyExpire = 1e3 * 20;
+const skName = 'sk';
+let shareExpire = 0;
+const loadKey = async () => {
+	const n = Date.now();
+	if (shareKey && shareExpire > n) return;
+	else shareKey = undefined;
+	try {
+		const [k, exp, pr] = (sessionStorage.getItem(skName) || '').split(',');
+		if (+exp > n) {
+			const buf = data2Buf(pr);
+			if (buf) {
+				shareKey = await subtle.importKey('raw', buf, algorithm_AES_CBC, true, shareKeyUsage);
+				keyNum = +k;
+			}
+		}
+	} catch (e) {
+		// ignore
+	}
+};
+
+const saveKey = async () => {
+	if (shareKey) {
+		const buf = await subtle.exportKey('raw', shareKey);
+		sessionStorage.setItem(skName, [keyNum, shareExpire, buf2Str(buf)].join());
+	}
+};
+
 export const syncShareKey = async () => {
+	await loadKey();
 	if (shareKey) return;
 	const pub = await genPubKey();
 	const r = await req('hello', pub);
@@ -109,13 +141,10 @@ export const decryptReq = async (req: Request, shareKey: CryptoKey, server: bool
 	}
 };
 
-export const encryptType = 'Encrypt-Type';
-export const contentType = 'Content-Type';
-
 export const getHeaderDataType = (h: Headers) => {
 	let t = h.get(contentType);
-	if (h.has('encrypt')) {
-		t = h.get(encryptType);
+	if (h.has(encryptIv)) {
+		t = getIndexType(h.get(encTypeIndex));
 	}
 	return t?.replace(/;.*/, '');
 };
@@ -136,7 +165,6 @@ export const parseBody = (data: ApiData) => {
 };
 
 export const buf2Str = (buf: ArrayBuffer) => {
-	const bl = buf.byteLength;
 	const bv = new Uint16Array(buf);
 	let n = bv.length;
 	let s = '';
@@ -182,11 +210,12 @@ export const fetchOpt = async (o?: object | string | number, encrypted = false) 
 	let [tp, data] = parseBody(o);
 	if (encrypted && data !== undefined) {
 		tp = dataType.binary;
-		headers.set('encrypt', (maxKeyNum + keyNum).toString(36) + num.toString(36));
+		headers.set(encryptIv, (maxKeyNum + keyNum).toString(36) + num.toString(36));
 		const buf = data2Buf(data);
-		if (buf) data = await encrypt(buf, num, shareKey);
+		if (buf) data = shareKey && (await encrypt(buf, num, shareKey));
 	}
 	headers.set(contentType, tp);
+
 	return {
 		body: data as BodyInit,
 		headers
@@ -209,4 +238,4 @@ const algorithm_AES_CBC_Gen = (n: number) => {
 	};
 };
 
-export const encryptHeader = (req: { headers: Headers }) => req.headers.get('encrypt');
+export const encryptHeader = (req: { headers: Headers }) => req.headers.get(encryptIv);
