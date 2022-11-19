@@ -1,6 +1,5 @@
 <script>
 	import { req } from '$lib/req.ts';
-	import { syncShareKey } from '$lib/utils.ts';
 
 	$: o = {
 		usr: '',
@@ -14,7 +13,6 @@
 
 	async function submit(e) {
 		e.preventDefault();
-		await syncShareKey();
 		const r = await req('setAdmin', o, { encrypt: true });
 		console.log('rrr', r);
 	}

@@ -14,13 +14,17 @@ export const hello: Api = {
 
 export const setAdmin: Api = {
 	async post(req) {
-		if (!val(sys.admUsr)) {
-			const d = await getReqJson(req);
-			sys.admUsr = d['usr'];
-			sys.admPwd = d['pwd'];
-			return sys;
-		} else {
-			return resp('admin already exist!', 403);
-		}
+		const d = await getReqJson(req);
+		sys.admUsr = d['usr'];
+		sys.admPwd = d['pwd'];
+		return sys;
+	}
+};
+
+export const test: Api = {
+	get() {
+		return {
+			test: 1
+		};
 	}
 };
