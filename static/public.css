@@ -1,0 +1,40 @@
+@font-face {
+	font-family: 'hp';
+	font-weight: 300;
+	src: url('font/hp.woff2') format('woff2'), url('font/hp.woff') format('woff');
+	font-display: swap;
+}
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	font-family: hp, 'Helvetica Neue', Helvetica, STHeiTi, sans-serif;
+}
+a,
+img {
+	-webkit-touch-callout: none; /* 禁止长按链接与图片弹出菜单 */
+}
+html {
+	height: 100%;
+}
+body {
+	background: #15191c;
+	margin: 0;
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	font-size: 16px;
+	color: rgba(212, 219, 238, 0.8);
+}
+input {
+	background: none;
+	display: block;
+	border: 1px solid rgba(119, 129, 138, 0.3);
+	color: rgba(222, 226, 232, 0.6);
+	font-size: 15px;
+	padding: 0 10px;
+	line-height: 32px;
+}
+span {
+	color: rgba(134, 143, 150, 0.5);
+}

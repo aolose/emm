@@ -1,6 +1,3 @@
-import { useApi } from '../lib/req';
+import { initialized } from '../lib/load';
 
-export const load = useApi('test', undefined, {
-	method: 1,
-	cache: 1e3 * 60
-});
+export const load = initialized;
