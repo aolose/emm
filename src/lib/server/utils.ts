@@ -9,10 +9,15 @@ import {
 	decryptReq,
 	encryptHeader,
 	getKINums,
-	data2Buf
+	data2Buf,
+	delay,
+	hasOwnProperty
 } from '../utils';
 import { keyPool } from './crypto';
 import type { Api } from '../types';
+import type { Model } from '../types';
+import { getPrimaryKey } from './model/decorations';
+import { db } from './index';
 
 export const is_dev = process.env.NODE_ENV !== 'production';
 
@@ -36,6 +41,8 @@ export function noNullKeyValues(o: object) {
 		if (v !== undefined && v !== null) {
 			const t = v.constructor.name;
 			switch (t) {
+				case 'Boolean':
+					break;
 				case 'String':
 					if (v === TEXT) return;
 					break;
@@ -45,6 +52,8 @@ export function noNullKeyValues(o: object) {
 				case 'Date':
 					if (v.getTime() === DATE.getTime()) return;
 					break;
+				default:
+					return;
 			}
 			keys.push(k);
 			values.push(v);
@@ -143,7 +152,7 @@ export const apiHandle = async (request: Request, name: ApiName): Promise<Respon
 	const api = apis[name]?.[m];
 	if (api) {
 		const r = await api(request);
-		if (r) {
+		if (r !== undefined) {
 			if (r instanceof Response) return r;
 			const eh = encryptHeader(request);
 			if (eh) {
@@ -155,4 +164,63 @@ export const apiHandle = async (request: Request, name: ApiName): Promise<Respon
 		return resp('');
 	}
 	return resp('', 404);
+};
+
+interface Obj {
+	[key: string]: unknown;
+}
+
+type mk = keyof Model;
+export const DBProxy = <T extends Model>(o: Model, sync = true): T => {
+	let e: Map<string, unknown>;
+	const pk = getPrimaryKey(o);
+	const ch = new Map<mk, unknown>();
+	const save = delay(() => {
+		if (ch.size > 0) {
+			let c = 0;
+			const n: Obj = { [pk]: o[pk] };
+			n.constructor = o.constructor;
+			for (const [k, v] of ch) {
+				if (e.get(k) !== v) {
+					c = 1;
+					n[k] = v;
+					e.set(k, v);
+					ch.delete(k);
+				}
+				ch.delete(k);
+			}
+			if (c) {
+				const { changes, lastInsertRowid: rowid } = db.save(n);
+				if (changes && pk) {
+					const b = db.db
+						.prepare(`select ${pk} from ${o.constructor.name} where rowid=?`)
+						.get(rowid) as Model;
+					n[pk] = b[pk];
+					e.set(pk, b[pk]);
+				}
+			}
+		}
+	}, 10);
+	if (sync) {
+		if (pk && o[pk] !== undefined) {
+			const no = { [pk]: o[pk] };
+			no.constructor = o.constructor;
+			Object.assign(o, db.get(no));
+			e = new Map(Object.entries(o));
+		}
+	}
+
+	return new Proxy(o, {
+		get(target: Model, p: string, receiver: unknown) {
+			const v = Reflect.get(target, p, receiver);
+			return hasOwnProperty(target, p) ? val(v) : v;
+		},
+		set(target: Model, p: mk, newValue: unknown, receiver: unknown): boolean {
+			if (sync && hasOwnProperty(target, p)) {
+				ch.set(p as mk, newValue);
+				save();
+			}
+			return Reflect.set(target, p, newValue, receiver);
+		}
+	}) as T;
 };

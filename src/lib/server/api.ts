@@ -2,7 +2,13 @@ import type { Api } from '../types';
 import { sys } from './index';
 import { genPubKey } from './crypto';
 import { combineResult } from '../utils';
-import { getReqJson, resp, val } from './utils';
+import { getReqJson } from './utils';
+
+export const initialized: Api = {
+	get() {
+		return +!!sys.admUsr;
+	}
+};
 
 export const hello: Api = {
 	async post(request) {

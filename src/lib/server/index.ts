@@ -2,10 +2,10 @@ import { DB } from './db/sqlite3';
 import type { Model } from '../types';
 import { modelCache } from './cache';
 import { runJobs } from './db/jobs';
-import { Log, noNullKeyValues } from './utils';
+import { DBProxy, noNullKeyValues } from './utils';
 import { System } from './model';
 
-export const sys = new System();
+export let sys: System;
 runJobs();
 
 type token = string;
@@ -32,10 +32,10 @@ function limit(f: Filter): string {
 export let db: DB;
 export const server = {
 	start() {
+		console.log('server start');
 		db = new DB();
-		const tables = db.createTables();
-		Log.debug('create:', tables);
-		Log.debug('tables:', db.tables());
+		db.createTables();
+		sys = DBProxy(new System());
 	},
 	sync() {
 		// todo

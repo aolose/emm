@@ -2,7 +2,6 @@ import better from 'better-sqlite3';
 import { noNullKeyValues, sqlVal } from '../utils';
 import * as models from '../model';
 import { getConstraint, primaryKey } from '../model/decorations';
-import type { Model } from '$lib/types';
 
 const tables = Object.values(models);
 const INTEGER = 'INTEGER';
@@ -44,14 +43,14 @@ function createTable(Model: M) {
 	return `CREATE TABLE ${Model.name} (${fields.join()})`;
 }
 
-function select(obj: Model) {
+function select(obj: object) {
 	const table = obj.constructor.name;
 	const [k, v] = noNullKeyValues(obj);
 	const where = k.length ? k.map((a) => `${a}=?`).join(' and ') : '';
 	return [`SELECT * FROM ${table}`, where, v];
 }
 
-function insert(obj: Model): [string, unknown[]] {
+function insert(obj: object): [string, unknown[]] {
 	const table = obj.constructor.name;
 	const [k, m] = noNullKeyValues(obj);
 	const v = sqlVal(m);
@@ -68,7 +67,7 @@ export class DB {
 		process.on('exit', () => this.db.close());
 	}
 
-	private select(one: boolean, o: Model, where = '', values: unknown[]) {
+	private select(one: boolean, o: object, where = '', values: unknown[]) {
 		const [sql, w, v] = select(o);
 		const wh = [w, where].filter((a) => a).join(' and ');
 		const s = sql + (wh ? ` WHERE ${wh}` : '');
@@ -78,15 +77,15 @@ export class DB {
 		return paper.all(...params);
 	}
 
-	get<T extends Model>(o: T, where?: string, ...values: unknown[]) {
+	get<T extends object>(o: T, where?: string, ...values: unknown[]) {
 		return this.select(true, o, where, values) as T | undefined;
 	}
 
-	all<T extends Model>(o: T, where?: string, ...values: unknown[]) {
+	all<T extends object>(o: T, where?: string, ...values: unknown[]) {
 		return this.select(false, o, where, values) as T[];
 	}
 
-	save<T extends Model>(o: T) {
+	save<T extends object>(o: T) {
 		const [sql, values] = insert(o);
 		return this.db.prepare(sql).run(...values);
 	}

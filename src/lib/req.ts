@@ -8,7 +8,7 @@ import {
 } from './utils';
 import { dataType, reqMethod } from './enum';
 import { browser } from '$app/environment';
-import type { ApiName } from './types';
+import type { ApiName, cacheRecord, reqData, reqParams, reqCache } from './types';
 import type { PageLoad } from '../../.svelte-kit/types/src/routes/$types';
 
 const cacheData = '.d';
@@ -17,24 +17,23 @@ const cacheExpire = '.e';
 const cacheBegin = '.b';
 type reqOption = {
 	cache?: number;
+	delay?: number;
 	fetch?: typeof fetch;
 	method?: 0 | 1 | 2 | 3;
 	encrypt?: boolean;
 	before?(data: unknown, url?: string): [unknown, string | undefined, Headers?];
 };
-type reqData = object | string | number | boolean | null | void;
-type reqParams = object | string | number | undefined;
-type cacheRecord = [number, reqData, Promise<reqData> | undefined];
-type reqCacheMap = Map<string, cacheRecord>;
-let reqCacheMap: reqCacheMap;
+
+let reqCacheMap: reqCache;
 const cacheNames = [cacheData, cacheKey, cacheExpire, cacheBegin];
+const reqPromiseCache = new Map<string, Promise<reqData>>();
 const reqKey = (url: string, params: reqParams) => {
 	let key = url;
 	if (params !== undefined)
 		key =
 			url +
 			'_' +
-			Array.from(JSON.stringify(params).replace(/[{}:,']/g, '')).reduce(
+			Array.from(JSON.stringify(params).replace(/[^{}()-_'"\\/?: ]/gi, '')).reduce(
 				(a, b) => a + b.charCodeAt(0),
 				0
 			);
@@ -57,17 +56,23 @@ const saveCacheToStorage = () => {
 			e.push(dur);
 		}
 	}
-	[d, k, e, now].forEach((a, i) => localStorage.setItem(cacheNames[i], JSON.stringify(a)));
+	localStorage.setItem(cacheData, JSON.stringify(d));
+	localStorage.setItem(cacheKey, k.join());
+	localStorage.setItem(cacheBegin, e.join());
+	localStorage.setItem(cacheBegin, now + '');
 };
 
 const loadCacheFromStorage = () => {
-	if (!reqCacheMap) reqCacheMap = new Map();
 	if (!browser) return;
+	if (!reqCacheMap) reqCacheMap = new Map();
 	let ch;
 	const [d, k, e, b] = cacheNames.map((a) => localStorage.getItem(a));
 	if (d && k && e && b) {
 		try {
-			const [da, ke, ex, bg] = [d, k, e, b].map((a) => JSON.parse(a));
+			const da = JSON.parse(d);
+			const ke = k.split(',');
+			const ex = e.split(',').map((a) => +a);
+			const bg = +b;
 			const n = Date.now();
 			ex.forEach((a: number, i: number) => {
 				const exp = a + bg;
@@ -81,7 +86,15 @@ const loadCacheFromStorage = () => {
 	}
 	if (ch) saveCacheToStorage();
 };
+loadCacheFromStorage();
 
+let once = false;
+let isLoadFn = false;
+const allowReadCache = () => {
+	const r = !isLoadFn || once;
+	once = true;
+	return r;
+};
 const reqCache = (
 	url: string,
 	params: reqParams,
@@ -95,21 +108,20 @@ const reqCache = (
 	if (!browser) {
 		return run();
 	}
-	loadCacheFromStorage();
 	const rec = reqCacheMap.get(key);
 	const now = Date.now();
-	if (rec) {
+	if (allowReadCache() && rec) {
 		const [n, d, p] = rec;
 		if (p) return p;
 		if (n > now) return Promise.resolve(d);
 	}
 	const r = [-1, undefined, undefined] as cacheRecord;
-	r[2] = run(r);
 	reqCacheMap.set(key, r);
+	r[2] = run(r);
 	return r[2];
 };
 
-const query = async (url: ApiName, params?: reqParams, cfg?: reqOption) => {
+const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise<reqData> => {
 	let uu = url as string;
 	if (cfg?.before) {
 		const [b, u] = cfg.before(params, url);
@@ -122,6 +134,7 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 		method: reqMethod[cfg?.method || 0],
 		...(await fetchOpt(params, enc))
 	};
+	isLoadFn = !!cfg?.fetch;
 	const ft = cfg?.fetch || fetch;
 	const fullUrl = `/api/${uu}`;
 	return ft(fullUrl, opt).then(async (r) => {
@@ -138,7 +151,7 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 				case dataType.json:
 					return d.json();
 				case dataType.text:
-					return d.string();
+					return d.text();
 			}
 			return d.buffer();
 		} else {
@@ -147,24 +160,54 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 					return r.json();
 				case dataType.text:
 					return r.text();
-				case dataType.binary:
-					return r.arrayBuffer();
 			}
+			return r.arrayBuffer();
 		}
 	});
 };
 
+export const saveCache = (
+	url: ApiName,
+	params: reqParams | reqData,
+	data: reqData | number,
+	cache?: number
+) => {
+	let p: reqParams;
+	let d: reqData;
+	let c: number;
+	if (cache === undefined && typeof data === 'number') {
+		d = params;
+		c = data;
+	} else {
+		p = params as reqParams;
+		d = data;
+		c = cache as number;
+	}
+	const key = reqKey(url, p);
+	const now = Date.now();
+	const r = [now + c, d, undefined] as cacheRecord;
+	reqCacheMap.set(key, r);
+	saveCacheToStorage();
+};
+
 export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
-	return reqCache(url, params, cfg?.cache, async (rec) => {
-		const d = await query(url, params, cfg);
-		if (cfg?.cache && rec) {
-			rec[0] = Date.now() + cfg.cache;
-			rec[1] = d;
-			rec[2] = undefined;
-			saveCacheToStorage();
-		}
-		return d;
-	});
+	const key = reqKey(url, params);
+	let p = browser && reqPromiseCache.get(key);
+	if (!p) {
+		p = reqCache(url, params, cfg?.cache, async (rec) => {
+			const d = await query(url, params, cfg);
+			if (cfg?.cache && rec) {
+				rec[0] = Date.now() + cfg.cache;
+				rec[1] = d;
+				rec[2] = undefined;
+				saveCacheToStorage();
+			}
+			reqPromiseCache.delete(key);
+			return d;
+		});
+		if (browser) reqPromiseCache.set(key, p);
+	}
+	return p;
 };
 
 export const useApi = (url: ApiName, params?: reqParams, cfg?: reqOption): PageLoad =>

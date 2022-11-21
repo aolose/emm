@@ -13,3 +13,8 @@ export type Api = {
 	delete?: RespHandle;
 	patch?: RespHandle;
 };
+
+export type reqData = object | string | number | boolean | null | void;
+export type reqParams = object | string | number | undefined;
+export type cacheRecord = [number, reqData, Promise<reqData> | undefined];
+export type reqCache = Map<string, cacheRecord>;

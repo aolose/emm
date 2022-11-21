@@ -48,7 +48,7 @@ export const decryptBuf = async (buf: ArrayBuffer, encrypt: number, key?: Crypto
 		json() {
 			return JSON.parse(txt);
 		},
-		string() {
+		text() {
 			return txt;
 		},
 		buffer() {
@@ -152,14 +152,20 @@ export const getHeaderDataType = (h: Headers) => {
 export const parseBody = (data: ApiData) => {
 	const t = typeof data;
 	let tp = dataType.text;
-	if (data && t === 'object') {
-		// todo
-		if (/ArrayBuffer|Blob|File|(Uint16|Uint8)Array/g.test(data.constructor.name))
-			tp = dataType.binary;
-		else {
-			data = JSON.stringify(data);
+	switch (t) {
+		case 'boolean':
+		case 'number':
 			tp = dataType.json;
-		}
+			break;
+		case 'object':
+			if (data) {
+				if (/ArrayBuffer|Blob|File|(Uint16|Uint8)Array/g.test(data.constructor.name))
+					tp = dataType.binary;
+				else {
+					data = JSON.stringify(data);
+					tp = dataType.json;
+				}
+			}
 	}
 	return [tp, data] as [string, ApiBodyData];
 };
@@ -239,3 +245,14 @@ const algorithm_AES_CBC_Gen = (n: number) => {
 };
 
 export const encryptHeader = (req: { headers: Headers }) => req.headers.get(encryptIv);
+
+export const hasOwnProperty = (target: object, p: string) =>
+	Object.prototype.hasOwnProperty.call(target, p);
+
+export const delay = (fn: () => void, ms = 0) => {
+	let timer: ReturnType<typeof setTimeout>;
+	return () => {
+		clearTimeout(timer);
+		timer = setTimeout(fn, ms);
+	};
+};
