@@ -161,11 +161,10 @@ export const parseBody = (data: ApiData) => {
 			if (data) {
 				if (/ArrayBuffer|Blob|File|(Uint16|Uint8)Array/g.test(data.constructor.name))
 					tp = dataType.binary;
-				else {
-					data = JSON.stringify(data);
-					tp = dataType.json;
-				}
+				    break;
 			}
+			data = JSON.stringify(data);
+			tp = dataType.json;
 	}
 	return [tp, data] as [string, ApiBodyData];
 };
