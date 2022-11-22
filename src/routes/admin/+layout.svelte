@@ -1,5 +1,10 @@
+<script>
+	import Menu from "./sideMenu.svelte";
+</script>
 <div class="a">
-	<div class="b" />
+	<div class="b">
+		<Menu/>
+	</div>
 	<div class="c">
 		<slot />
 	</div>
