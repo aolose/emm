@@ -19,6 +19,7 @@
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/kit": "next",
 		"@types/better-sqlite3": "^7.6.2",
+		"@types/marked": "^4.0.7",
 		"@types/node": "*",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
@@ -38,5 +39,8 @@
 		"vite": "^3.1.0",
 		"vitest": "^0.25.2"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"marked": "^4.2.3"
+	}
 }

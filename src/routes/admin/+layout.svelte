@@ -27,7 +27,7 @@
 		width: 72px;
 	}
 	.c {
-		background: #23272a;
+		background: var(--bg1);
 		flex: 1;
 	}
 </style>
