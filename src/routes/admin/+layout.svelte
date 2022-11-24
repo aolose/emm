@@ -1,9 +1,10 @@
 <script>
-	import Menu from "./sideMenu.svelte";
+	import Menu from './sideMenu.svelte';
 </script>
+
 <div class="a">
 	<div class="b">
-		<Menu/>
+		<Menu />
 	</div>
 	<div class="c">
 		<slot />
@@ -22,7 +23,6 @@
 		height: 100%;
 	}
 	.b {
-		box-shadow: rgba(0, 0, 0, 0.5) 2px 0 7px -3px;
 		z-index: 1;
 		width: 72px;
 	}
