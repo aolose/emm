@@ -54,7 +54,6 @@
 	}
 
 	.icon {
-		text-decoration: none;
 		margin: 20px 0;
 		color: #999;
 		font-weight: 200;

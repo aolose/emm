@@ -6,14 +6,18 @@
 	src: url('font/hp.woff2') format('woff2'), url('font/hp.woff') format('woff');
 	font-display: swap;
 }
-
+a{
+	text-decoration: none;
+}
 :root {
 	--green: #3ab744;
+	--orange: orange;
 	--green-h: #40d14c;
 	--darkgrey: #374454;
 	--darkgrey-h: #37474f;
 	--blue: #2596e3;
-	--yellow: #cec228;
+	--yellow: yellow;
+	--pink: #f11b86;
 	--bg0: #131b22;
 	--bg1: #1a2229;
 	--bg2: #1f2631;

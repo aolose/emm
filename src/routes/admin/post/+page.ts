@@ -24,7 +24,7 @@ const genPost = () => {
 		publish: rn(100) % 2,
 		create: p,
 		update: p + rn(1e3),
-		saveAt: p + rn(1e3)
+		save: p + rn(2e3)
 	};
 };
 
