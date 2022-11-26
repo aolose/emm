@@ -1,133 +1,143 @@
 @font-face {
-	font-family: 'icon'; /* Project id 3787050 */
-	src: url('icon.woff2') format('woff2'), url('icon.woff') format('woff'),
-		url('icon.ttf') format('truetype');
+  font-family: "icon"; /* Project id 3787050 */
+  src: url('icon.woff2') format('woff2'),
+       url('icon.woff') format('woff'),
+       url('icon.ttf') format('truetype');
 }
 
 .icon {
-	font-family: 'icon' !important;
-	font-size: 16px;
-	font-style: normal;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+  font-family: "icon" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.i-ok:before {
+  content: "\e763";
+}
+
+.i-no:before {
+  content: "\e7b1";
 }
 
 .i-gravatar:before {
-	content: '\e65f';
+  content: "\e65f";
 }
 
 .i-user:before {
-	content: '\e7ae';
+  content: "\e7ae";
 }
 
 .i-key:before {
-	content: '\e7e1';
+  content: "\e7e1";
 }
 
-.i-password:before {
-	content: '\e75b';
+.i-pwd:before {
+  content: "\e75b";
 }
 
 .i-search:before {
-	content: '\e699';
+  content: "\e699";
 }
 
 .i-filter:before {
-	content: '\e6b9';
+  content: "\e6b9";
 }
 
 .i-edit:before {
-	content: '\e649';
+  content: "\e649";
 }
 
 .i-add:before {
-	content: '\e6da';
+  content: "\e6da";
 }
 
 .i-tag:before {
-	content: '\e752';
+  content: "\e752";
 }
 
 .i-upload:before {
-	content: '\e75d';
+  content: "\e75d";
 }
 
 .i-del:before {
-	content: '\e67e';
+  content: "\e67e";
 }
 
 .i-favfill:before {
-	content: '\e685';
+  content: "\e685";
 }
 
 .i-fav:before {
-	content: '\e686';
+  content: "\e686";
 }
 
 .i-reply:before {
-	content: '\e60e';
+  content: "\e60e";
 }
 
 .i-safe:before {
-	content: '\e616';
+  content: "\e616";
 }
 
 .i-post:before {
-	content: '\e68b';
+  content: "\e68b";
 }
 
 .i-risk:before {
-	content: '\e6e2';
+  content: "\e6e2";
 }
 
 .i-tags:before {
-	content: '\e7e5';
+  content: "\e7e5";
 }
 
 .i-close:before {
-	content: '\e7fc';
+  content: "\e7fc";
 }
 
 .i-exit:before {
-	content: '\e73e';
+  content: "\e73e";
 }
 
 .i-refresh:before {
-	content: '\e71e';
+  content: "\e71e";
 }
 
 .i-setting:before {
-	content: '\e711';
+  content: "\e711";
 }
 
 .i-notice:before {
-	content: '\e629';
+  content: "\e629";
 }
 
 .i-home:before {
-	content: '\e7a7';
+  content: "\e7a7";
 }
 
 .i-comment:before {
-	content: '\e7b2';
+  content: "\e7b2";
 }
 
 .i-publish:before {
-	content: '\e645';
+  content: "\e645";
 }
 
 .i-system:before {
-	content: '\e61f';
+  content: "\e61f";
 }
 
 .i-draft:before {
-	content: '\e670';
+  content: "\e670";
 }
 
 .i-create:before {
-	content: '\e66f';
+  content: "\e66f";
 }
 
 .i-save:before {
-	content: '\e610';
+  content: "\e610";
 }
+
