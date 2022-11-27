@@ -1,13 +1,31 @@
 import type { Api } from '../types';
 import { sys } from './index';
 import { genPubKey } from './crypto';
-import { combineResult } from '../utils';
-import { getReqJson } from './utils';
+import { getReqJson, combineResult } from './utils';
+import type { RespHandle } from '$lib/types';
+import fs from 'fs';
+import path from 'path';
+
+const auth = (fn: RespHandle) => (req: Request) => {
+	console.log('auth...');
+	return fn(req);
+};
 
 export const initialized: Api = {
 	get() {
 		return +!!sys.admUsr;
 	}
+};
+
+export const up: Api = {
+	post: auth(async (req) => {
+		const d = await req.formData();
+		const f = d.get('file') as Blob;
+		const n = d.get('name');
+		// todo  file path
+		// todo save to db
+		fs.writeFileSync(path.resolve(`/${n}`), new Uint8Array(await f.arrayBuffer()));
+	})
 };
 
 export const hello: Api = {

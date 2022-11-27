@@ -107,19 +107,6 @@ export const syncShareKey = async () => {
 	await splitResult(r);
 };
 
-export function auth(event: RequestEvent): Response | void {
-	// todo
-}
-
-export const combineResult = (id: number, pk: ArrayBuffer) => {
-	const bf = new Uint8Array(pk);
-	const nbf = new Uint8Array(pk.byteLength + 2);
-	nbf[0] = id >> 8;
-	nbf[1] = id & 0xff;
-	nbf.set(bf, 2);
-	return nbf.buffer;
-};
-
 export const getKINums = (ehd: string) => {
 	return [parseInt(ehd.slice(0, padNum), 36) - maxKeyNum, parseInt(ehd.slice(padNum), 36)];
 };

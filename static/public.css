@@ -6,7 +6,7 @@
 	src: url('font/hp.woff2') format('woff2'), url('font/hp.woff') format('woff');
 	font-display: swap;
 }
-a{
+a {
 	text-decoration: none;
 }
 :root {

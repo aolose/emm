@@ -1,6 +1,6 @@
 import { NULL } from './enum';
 import { contentType, dataType, encryptIv, encTypeIndex, geTypeIndex } from '../enum';
-import type { ApiData, ApiName } from '../types';
+import type { ApiData, ApiName, RespHandle } from '../types';
 import * as apis from './api';
 import {
 	encrypt,
@@ -223,4 +223,13 @@ export const DBProxy = <T extends Model>(o: Model, sync = true): T => {
 			return Reflect.set(target, p, newValue, receiver);
 		}
 	}) as T;
+};
+
+export const combineResult = (id: number, pk: ArrayBuffer) => {
+	const bf = new Uint8Array(pk);
+	const nbf = new Uint8Array(pk.byteLength + 2);
+	nbf[0] = id >> 8;
+	nbf[1] = id & 0xff;
+	nbf.set(bf, 2);
+	return nbf.buffer;
 };
