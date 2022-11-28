@@ -1,9 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { apiHandle } from '../../../lib/server/utils';
-import { server } from '../../../lib/server';
-import type { ApiName } from '../../../lib/types';
+import { apiHandle } from '$lib/server/utils';
+import type { ApiName } from '$lib/types';
 
-server.start();
 
 const handle = (): RequestHandler => {
 	return ({ request, params }) => {

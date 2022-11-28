@@ -1,21 +1,21 @@
 <script>
-	export let total = 1000;
-	export let cur = 1;
+	export let total;
+	export let page = 1;
 	export let go;
 	export let tm;
 	export let length = 4;
-	$: first = cur === 1;
-	$: last = cur === total;
+	$: first = page === 1;
+	$: last = page === total;
 	let pg;
 	$: isF = typeof go === 'function';
 
 	$: {
 		pg = [];
 		if (2 < total) {
-			if (cur < total && cur > 1) pg = [cur];
+			if (page < total && page > 1) pg = [page];
 			for (let i = 1; i <= length && pg.length < length; i++) {
-				const pr = cur - i;
-				const nx = cur + i;
+				const pr = page - i;
+				const nx = page + i;
 				if (pr > 1) pg = [pr, ...pg];
 				if (nx < total) pg = [...pg, nx];
 			}
@@ -34,9 +34,9 @@
 	{#if f}<span>{f}</span>{/if}
 	{#each pg as p}
 		{#if isF}
-			<span class="nv" class:act={cur === p} on:click={() => go(p)}>{p}</span>
+			<span class="nv" class:act={page === p} on:click={() => go(p)}>{p}</span>
 		{:else}
-			<a class="nv" class:act={cur === p} href={`${go}/${p}`}>{p}</a>
+			<a class="nv" class:act={page === p} href={`${go}/${p}`}>{p}</a>
 		{/if}
 	{/each}
 	{#if n}<span>{n}</span>{/if}
