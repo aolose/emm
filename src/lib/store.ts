@@ -10,7 +10,7 @@ const user = writable({
 
 type fileSelectCfg = {
     show?: boolean,
-    limit?:number,
+    limit?: number,
     resolve?: (v: unknown) => void,
     reject?: (v: unknown) => void,
 }
@@ -29,7 +29,7 @@ const fileManagerCfg = {} as fileSelectCfg
 export const fileManagerStore = writable(fileManagerCfg)
 export const confirmStore = writable({...confirmCfg})
 
-export const selectFile = (limit=0) => {
+export const selectFile = (limit = 0) => {
     return new Promise((resolve, reject) => {
         fileManagerStore.set({
             limit,
@@ -71,9 +71,8 @@ type fileInfo = {
     abort: () => void;
 };
 export const upFiles = writable([] as fileInfo[]);
-
+const upDonSet = new Set<number>()
 export const filesUpload = (files: FileList, cb?: (f: fView) => void) => {
-    // todo
     for (const f of files) {
         const t = f.type;
         const o: fInfo = {
@@ -117,11 +116,11 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
     });
     const id = -randNum();
     const clean = () => {
+        upDonSet.add(id)
         clearTimeout(cTimer)
         cTimer = setTimeout(() => {
-            upFiles.update((u) => {
-                return u.filter((u) => u.id !== id);
-            });
+            upFiles.update((u) =>
+                u.filter((u) => !upDonSet.delete(u.id)));
         }, 1e3)
     };
     const v = {

@@ -2,35 +2,36 @@
     import FileIcon from './fileIcon.svelte'
     import {getExt} from "$lib/utils";
     import {onMount} from "svelte";
+    import {tweened} from "svelte/motion";
+    import {cubicOut} from 'svelte/easing';
 
     let m = null
-    let left = 15
-    let top = 15
+    export let trigger
     let sh = 0
-    let flag=0
-    const timers = []
-    const clear = () => timers.forEach(clearTimeout)
-    const changePosition = () => {
-        const d = 50 * [].filter.call(
-            m.parentElement.children,
-            a => !a.className.includes('act')
-        ).indexOf(m)
-        timers.push(setTimeout(() => {
-            const {offsetLeft, offsetTop} = m
-            left = offsetLeft
-            sh = 1
-            timers.push(setTimeout(() => top = offsetTop, 100))
-        }, d))
+    let x = 15, y = 15
+    let pos = tweened({x: 15, y: 15},{
+        duration: 300,
+        easing: cubicOut
+    });
+    const changePosition = async () => {
+        const {offsetLeft, offsetTop} = m
+        sh = 1
+        if (offsetLeft === x && offsetTop === y) return
+        y = offsetTop
+        x = offsetLeft
+        await pos.update(() => ({x, y}))
+        // },100))
+        // timers.push(setTimeout(() => {
+        //
+        //     left = offsetLeft
+        //     sh = 1
+        //     timers.push(setTimeout(() => top = offsetTop, 300))
+        // }, d))
     }
     onMount(() => {
-        file.render=changePosition
-        flag = 1
         changePosition()
-        return clear
+        return trigger.subscribe(changePosition)
     })
-    $:{
-        if (flag) changePosition()
-    }
     export let file = {
         id: 0,
         name: '',
@@ -46,7 +47,7 @@
 
 <div class="m" bind:this={m}></div>
 <div class="a m"
-     style:transform={`translate3d(${left}px,${top}px,0)`}
+     style:transform={`translate3d(${$pos.x}px,${$pos.y}px,0)`}
      class:act on:click class:sh>
     <div class="p" style:background-image={pic?`url(${pic})`:''}>
         {#if !pic}
@@ -83,17 +84,18 @@
     left: 0;
     top: 0;
     position: absolute;
-    transition: .3s linear;
+    transition: .3s linear opacity;
     cursor: pointer;
     background: var(--bg0);
     border: 1px solid transparent;
+
     &:hover {
       border-color: var(--darkgrey);
     }
 
     &.act {
       border-color: #5679a8;
-      box-shadow: rgba(0,0,0,.2) 1px 2px 4px;
+      box-shadow: rgba(0, 0, 0, .2) 1px 2px 4px;
     }
   }
 

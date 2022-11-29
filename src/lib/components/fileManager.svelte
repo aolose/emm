@@ -4,9 +4,9 @@
     import {confirm, fileManagerStore, filesUpload, getProgress, upFiles} from '$lib/store';
     import {req} from "$lib/req";
     import {onMount, tick} from "svelte";
-    import {get} from "svelte/store";
+    import {get, writable} from "svelte/store";
     import {slidLeft} from '../transition'
-    import {fade} from "svelte/transition";
+    import {fade, slide} from "svelte/transition";
 
     let cfg = {}
     let total = 1
@@ -14,6 +14,7 @@
     let ls = []
     let loading = false
     const size = 15
+    const trigger = writable(0)
 
     function ok() {
         cfg.resolve?.([...selected].map(a => `/res/${a.id}`))
@@ -33,12 +34,13 @@
             loading = 0
             total = t
             ls = items
-            const n=[...selected]
-            items.forEach(f=>{
-                const idx = n.findIndex(a=>a.id===f.id)
-                if(idx!==-1)n[idx]=f
+            const n = [...selected]
+            items.forEach(f => {
+                const idx = n.findIndex(a => a.id === f.id)
+                if (idx !== -1) n[idx] = f
             })
-            selected=new Set(n)
+            selected = new Set(n)
+            rePosition()
         })
     }
 
@@ -51,6 +53,7 @@
         state = 0;
         const files = e.type === 'drop' ? e.dataTransfer.files : e.target.files;
         filesUpload(files, f => {
+            if (ls.find(a => a.id === f.id)) return
             ls = [f].concat(ls)
             rePosition()
         });
@@ -58,7 +61,7 @@
 
     function rePosition() {
         tick().then(() => {
-            ls.forEach(f => f.render?.())
+            trigger.update(a => a + 1)
         })
     }
 
@@ -80,7 +83,7 @@
 
     $:limit = cfg.limit || 0
     let selected = new Set();
-    $:ss = `${selected.size}${limit ? ' / '+limit : ''}`
+    $:ss = `${selected.size}${limit ? ' / ' + limit : ''}`
 
     const sel = f => () => {
         if (selected.has(f)) selected.delete(f)
@@ -109,7 +112,7 @@
     >
         <div class="dp" on:click|stopPropagation></div>
         <div class="b" on:click|stopPropagation>
-            <div class="h">{limit}
+            <div class="h">
                 <div class="g">
                     <button class="icon i-add" title="upload files">
                         <input type="file" on:change={upload}/>
@@ -134,20 +137,22 @@
             </div>
             <div class="ls">
                 {#each ls as file,index (file.id)}
-                    <Item bind:file act={selected.has(file)} on:click={sel(file)}/>
+                    <Item bind:file trigger={trigger} act={selected.has(file)} on:click={sel(file)}/>
                 {/each}
             </div>
-            <div class="u" class:act={$upFiles.length}>
-                {#each fs as u}
-                    <div class="r">
-                        <span>{u[0]}</span>
-                        <div class="t">
-                            <div style:width={`${get(u[1])}%`}></div>
+            {#if $upFiles.length}
+                <div class="u" transition:slide>
+                    {#each fs as u}
+                        <div class="r">
+                            <span title={u[0]}>{u[0]}</span>
+                            <div class="t">
+                                <div style:width={`${get(u[1])}%`}></div>
+                            </div>
+                            <button class="icon i-close" on:click={u[2]}></button>
                         </div>
-                        <button class="icon i-close" on:click={u[2]}></button>
-                    </div>
-                {/each}
-            </div>
+                    {/each}
+                </div>
+            {/if}
             <div class="p">
                 <Pg go={load} total={total}/>
             </div>
@@ -173,18 +178,14 @@
   }
 
   .u {
-    height: 0;
-    overflow: hidden;
     transition: 0.3s ease-in-out;
-    padding: 0 10px;
+    border: 15px solid transparent;
+    border-bottom: 0;
     display: flex;
     flex-wrap: wrap;
     align-content: center;
-
-    &.act {
-      height: 100px;
-      overflow: auto;
-    }
+    height: 100px;
+    overflow: auto;
 
     button {
       font-size: 12px;
@@ -234,6 +235,7 @@
   }
 
   .dp {
+    pointer-events: none;
     position: absolute;
     left: 10px;
     top: 10px;

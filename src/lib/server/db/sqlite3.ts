@@ -95,10 +95,9 @@ export class DB {
     }
 
     page<T extends Model>(o: Class<T>, page: number, size: number, order = [] as string[]) {
-        // todo
         const s = `select * from ${o.name}`
         const d = order.length ? ` order by ${order.join()}` : ''
-        const l = ` limit ${page * size} offset ${size * (page - 1)}`
+        const l = ` limit ${size * (page - 1)},${size}`
         return this.db.prepare(s + d + l).all() as T[]
     }
 
@@ -120,9 +119,9 @@ export class DB {
         return r
     }
 
-    delByPk<T extends Model>(c:Class<T>, pks:unknown[]){
+    delByPk<T extends Model>(c: Class<T>, pks: unknown[]) {
         const pk = pkMap[c.name]
-        const sql = `delete from ${c.name} where ${pk} in (${pks.map(a=>'?').join()})`
+        const sql = `delete from ${c.name} where ${pk} in (${pks.map(a => '?').join()})`
         return this.db.prepare(sql).run(...pks)
     }
 
