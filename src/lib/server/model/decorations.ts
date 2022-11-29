@@ -7,7 +7,7 @@ interface PKMap {
 	[key: string]: k;
 }
 
-const pkMap: PKMap = {};
+export const pkMap: PKMap = {};
 
 function set(o: object, name: string, v: string) {
 	const k = o.constructor.name + '_' + name;

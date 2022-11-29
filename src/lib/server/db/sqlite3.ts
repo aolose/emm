@@ -1,7 +1,7 @@
 import better from 'better-sqlite3';
 import {noNullKeyValues, sqlVal} from '../utils';
 import * as models from '../model';
-import {getConstraint, getPrimaryKey, primaryKey} from '../model/decorations';
+import {getConstraint, getPrimaryKey, pkMap, primaryKey} from '../model/decorations';
 import type {Class, Model} from "$lib/types";
 
 const tables = Object.values(models);
@@ -99,7 +99,6 @@ export class DB {
         const s = `select * from ${o.name}`
         const d = order.length ? ` order by ${order.join()}` : ''
         const l = ` limit ${page * size} offset ${size * (page - 1)}`
-        console.log(s + d + l)
         return this.db.prepare(s + d + l).all() as T[]
     }
 
@@ -119,6 +118,12 @@ export class DB {
             }
         }
         return r
+    }
+
+    delByPk<T extends Model>(c:Class<T>, pks:unknown[]){
+        const pk = pkMap[c.name]
+        const sql = `delete from ${c.name} where ${pk} in (${pks.map(a=>'?').join()})`
+        return this.db.prepare(sql).run(...pks)
     }
 
     del<T extends object>(o: T) {

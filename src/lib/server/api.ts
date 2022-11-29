@@ -40,7 +40,7 @@ const saveFile = (name: string | number, dir: string, buf: Buffer) => {
 export const res: Api = {
     delete: auth(async (req) => {
         const r = new Uint8Array(await req.arrayBuffer())
-        const {changes} = db.dels(Res, [...r])
+        const {changes} = db.delByPk(Res, [...r])
         return changes
     }),
     post: auth(async (req) => {
