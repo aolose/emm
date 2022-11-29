@@ -4,8 +4,8 @@
     import {onMount} from "svelte";
 
     let m = null
-    let left = 0
-    let top = 0
+    let left = 15
+    let top = 15
     let sh = 0
     let flag=0
     const timers = []

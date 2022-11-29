@@ -14,6 +14,7 @@
     let ls = []
     let loading = false
     const size = 15
+
     function ok() {
         cfg.resolve?.([...selected].map(a => `/res/${a.id}`))
         fileManagerStore.set({})
@@ -32,6 +33,12 @@
             loading = 0
             total = t
             ls = items
+            const n=[...selected]
+            items.forEach(f=>{
+                const idx = n.findIndex(a=>a.id===f.id)
+                if(idx!==-1)n[idx]=f
+            })
+            selected=new Set(n)
         })
     }
 
