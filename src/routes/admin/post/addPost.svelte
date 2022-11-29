@@ -1,13 +1,20 @@
 <script>
+	import {selectFile} from "$lib/store";
+
 	export let a = '';
 	$: {
 		a = a.replace(/^\s+|\s+$/, '');
+	}
+	function select(){
+		selectFile(2).then(r=>{
+			alert(r.join())
+		})
 	}
 </script>
 
 <div class="a">
 	<input placeholder="write a new story..." bind:value={a} />
-	<button class="icon i-add" class:act={a} />
+	<button class="icon i-add" class:act={a} on:click={select}></button>
 </div>
 
 <style lang="scss">
