@@ -1,17 +1,30 @@
 <script>
     import Pg from './pg.svelte';
     import Item from './fItems.svelte';
-    import {filesUpload, getProgress, upFiles} from '$lib/store';
+    import {confirm, fileManagerStore, filesUpload, getProgress, upFiles} from '$lib/store';
     import {req} from "$lib/req";
-    import {onMount} from "svelte";
+    import {onMount, tick} from "svelte";
     import {get} from "svelte/store";
+    import {slidLeft} from '../transition'
+    import {fade} from "svelte/transition";
 
-
+    let cfg = {}
     let total = 1
     let state = '';
     let ls = []
     let loading = false
-    const size = 20
+    const size = 15
+    function ok() {
+        cfg.resolve?.([...selected].map(a => `/res/${a.id}`))
+        fileManagerStore.set({})
+        selected = new Set()
+    }
+
+    function cancel() {
+        cfg.reject?.()
+        fileManagerStore.set({})
+        selected = new Set()
+    }
 
     function load(page = 1) {
         loading = 1
@@ -32,65 +45,122 @@
         const files = e.type === 'drop' ? e.dataTransfer.files : e.target.files;
         filesUpload(files, f => {
             ls = [f].concat(ls)
+            rePosition()
         });
+    }
+
+    function rePosition() {
+        tick().then(() => {
+            ls.forEach(f => f.render?.())
+        })
+    }
+
+    function del() {
+        const s = selected.size
+        confirm(`Are you sure to delete the selected file${s > 1 ? 's' : ''}?`).then(() => {
+            return req('res', new Uint8Array([...selected].map(a => a.id)), {method: 2})
+        }).then(a => {
+            if (a) ls = ls.filter(a => !selected.has(a))
+            rePosition()
+            selected = new Set()
+        })
     }
 
     onMount(() => {
         load()
+        return fileManagerStore.subscribe(s => cfg = s)
     })
 
-    export let select = [];
+    $:limit = cfg.limit || 0
+    let selected = new Set();
+    $:ss = `${selected.size}${limit ? ' / '+limit : ''}`
+
+    const sel = f => () => {
+        if (selected.has(f)) selected.delete(f)
+        else {
+            const n = [...selected]
+            if (limit && limit === selected.size) {
+                n.shift()
+            }
+            n.push(f)
+            selected = new Set(n)
+        }
+        selected = new Set(selected)
+    }
 </script>
 
-<div
-        class="a"
-        class:dr={state === 1}
-        on:dragover|preventDefault={() => state = 1}
-        on:drop|preventDefault={upload}
-        on:dragleave|preventDefault={()=>state = 0}
-        on:dragend|preventDefault={()=>state = 0}
->
-    <div class="dp"/>
-    <div class="b">
-        <div class="h">
-            <div class="t">
-                <button class="icon i-add">
-                    <input type="file" on:change={upload}/>
-                </button>
-                <button class="icon i-del"/>
-                <button class="icon i-no"/>
-                <button class="icon i-ok"/>
-            </div>
-            <s/>
-            <div class="s">
-                <button class="icon i-search"/>
-                <input/>
-            </div>
-            <button class="icon i-close"/>
-        </div>
-        <div class="ls">
-            {#each ls as file}
-                <Item bind:file/>
-            {/each}
-        </div>
-        <div class="u" class:act={$upFiles.length}>
-            {#each fs as u}
-                <div class="r">
-                    <span>{u[0]}</span>
-                    <div class="t">
-                        <div style:width={`${get(u[1])}%`}/>
-                    </div>
-                    <button class="icon i-close" on:click={u[2]}/>
+{#if cfg.show}
+    <div
+            transition:fade
+            class="a"
+            class:dr={state === 1}
+            on:dragover|preventDefault={() => state = 1}
+            on:drop|preventDefault={upload}
+            on:dragleave|preventDefault={()=>state = 0}
+            on:dragend|preventDefault={()=>state = 0}
+            on:click={cancel}
+    >
+        <div class="dp" on:click|stopPropagation></div>
+        <div class="b" on:click|stopPropagation>
+            <div class="h">{limit}
+                <div class="g">
+                    <button class="icon i-add" title="upload files">
+                        <input type="file" on:change={upload}/>
+                    </button>
+                    {#if selected.size}
+                        <button transition:slidLeft|local class="icon i-ok" title="use selected"
+                                on:click={ok}
+                        ></button>
+                        <button transition:slidLeft|local class="icon i-no" title="clear selected"
+                                on:click={()=>selected=new Set()}></button>
+                        <button transition:slidLeft|local class="icon i-del" title="delete selected"
+                                on:click={del}></button>
+                        <span class="v">{ss}</span>
+                    {/if}
                 </div>
-            {/each}
-        </div>
-        <div class="p">
-            <Pg go={load}/>
+                <s></s>
+                <div class="s">
+                    <button class="icon i-search"></button>
+                    <input/>
+                </div>
+                <button class="icon i-close" on:click={cancel}></button>
+            </div>
+            <div class="ls">
+                {#each ls as file,index (file.id)}
+                    <Item bind:file act={selected.has(file)} on:click={sel(file)}/>
+                {/each}
+            </div>
+            <div class="u" class:act={$upFiles.length}>
+                {#each fs as u}
+                    <div class="r">
+                        <span>{u[0]}</span>
+                        <div class="t">
+                            <div style:width={`${get(u[1])}%`}></div>
+                        </div>
+                        <button class="icon i-close" on:click={u[2]}></button>
+                    </div>
+                {/each}
+            </div>
+            <div class="p">
+                <Pg go={load} total={total}/>
+            </div>
         </div>
     </div>
-</div>
+{/if}
 
 <style lang="scss">
+  .g {
+    display: flex;
+    align-items: center;
+  }
+
+  .v {
+    background: var(--bg0);
+    font-size: 12px;
+    padding: 0 5px;
+    color: #707e94;
+  }
+
   s {
     flex: 1;
   }
@@ -221,9 +291,6 @@
     display: flex;
   }
 
-  .t {
-  }
-
   .a {
     z-index: 5;
     position: fixed;
@@ -248,6 +315,7 @@
   }
 
   .ls {
+    position: relative;
     background: var(--bg1);
     flex: 1;
     display: flex;

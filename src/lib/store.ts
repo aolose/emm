@@ -1,12 +1,50 @@
 import {writable, get, readable} from 'svelte/store';
 import {Upload} from 'upload';
 import Compressor from 'compressorjs';
-import {randNum} from '$lib/utils';
 import type {fView} from "$lib/types";
+import {randNum} from "$lib/utils";
 
 const user = writable({
     token: 'test'
 });
+
+type fileSelectCfg = {
+    show?: boolean,
+    limit?:number,
+    resolve?: (v: unknown) => void,
+    reject?: (v: unknown) => void,
+}
+
+type cfOpt = {
+    show: boolean,
+    text?: string,
+    ok?: string,
+    cancel?: string,
+    resolve?: (v: unknown) => void,
+    reject?: (v: unknown) => void,
+}
+const confirmCfg = {} as cfOpt
+const fileManagerCfg = {} as fileSelectCfg
+
+export const fileManagerStore = writable(fileManagerCfg)
+export const confirmStore = writable({...confirmCfg})
+
+export const selectFile = (limit=0) => {
+    return new Promise((resolve, reject) => {
+        fileManagerStore.set({
+            limit,
+            show: true, resolve, reject
+        })
+    })
+}
+
+export const confirm = (msg: string, ok = 'ok', cancel = 'cancel') => {
+    return new Promise((resolve, reject) => {
+        const cfg = {...confirmCfg, ok, cancel, resolve, reject, show: true, text: msg}
+        confirmStore.set(cfg)
+    })
+}
+
 
 export const getProgress = (f: fileInfo) => {
     let b = 0;
@@ -50,8 +88,9 @@ export const filesUpload = (files: FileList, cb?: (f: fView) => void) => {
                     o.file = file;
                     up(o, cb);
                 },
-                error() {
-                    up(o);
+                error(e) {
+                    console.error(e)
+                    up(o, cb);
                 }
             });
         } else up(o, cb);
@@ -62,7 +101,8 @@ type fInfo = {
     name: string;
     file: Blob;
 };
-
+type Timer = ReturnType<typeof setTimeout>
+let cTimer: Timer
 const up = (info: fInfo, cb?: (f: fView) => void) => {
     const token = get(user).token;
     if (!token) return;
@@ -77,9 +117,12 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
     });
     const id = -randNum();
     const clean = () => {
-        upFiles.update((u) => {
-            return u.filter((u) => u.id !== id);
-        });
+        clearTimeout(cTimer)
+        cTimer = setTimeout(() => {
+            upFiles.update((u) => {
+                return u.filter((u) => u.id !== id);
+            });
+        }, 1e3)
     };
     const v = {
         id,
@@ -99,16 +142,15 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
         v.up = p;
         if (p === 100) clean();
     });
-    up.upload().then((r) => {
-        if (r && cb) {
+    up.upload().then(({data}) => {
+        if (data && cb) {
             cb({
-                id: +r,
+                id: +data,
                 size: info.file.size,
                 name: info.name,
                 type: info.file.type
             })
         }
-        console.log(r);
     });
     return v;
 };
