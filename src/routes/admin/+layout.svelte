@@ -1,5 +1,6 @@
 <script>
 	import Menu from './sideMenu.svelte';
+	import Confirm from '$lib/components/confirm.svelte'
 </script>
 
 <div class="a">
@@ -9,6 +10,7 @@
 	<div class="c">
 		<slot />
 	</div>
+	<Confirm/>
 </div>
 
 <style lang="scss">
