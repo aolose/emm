@@ -38,17 +38,21 @@ const saveFile = (name: string | number, dir: string, buf: Buffer) => {
 
 
 export const res: Api = {
+    delete: auth(async (req) => {
+        const r = new Uint8Array(await req.arrayBuffer())
+        const {changes} = db.dels(Res, [...r])
+        return changes
+    }),
     post: auth(async (req) => {
         const r = new Uint8Array(await req.arrayBuffer())
         const p = r[0]
         const s = r[1]
         const c = cacheCount(Res) as number
-        console.log(c,)
         return {
             total: Math.floor((c + s - 1) / s),
             items: arrPick(
                 db.page(Res, p, s, ['save desc'])
-                ,'id','name','size','type','thumb'
+                , 'id', 'name', 'size', 'type', 'thumb'
             )
         }
     })
@@ -89,6 +93,7 @@ export const up: Api = {
             console.error(e)
             db.del(res)
         }
+        return  res.id
     })
 };
 
