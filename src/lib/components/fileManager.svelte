@@ -17,7 +17,7 @@
     const trigger = writable(0)
 
     function ok() {
-        cfg.resolve?.([...selected].map(a => `/res/${a.id}`))
+        cfg.resolve?.([...selected])
         fileManagerStore.set({})
         selected = new Set()
     }
@@ -70,9 +70,11 @@
         confirm(`Are you sure to delete the selected file${s > 1 ? 's' : ''}?`).then(() => {
             return req('res', new Uint8Array([...selected].map(a => a.id)), {method: 2})
         }).then(a => {
-            if (a) ls = ls.filter(a => !selected.has(a))
-            rePosition()
-            selected = new Set()
+            if (a) {
+                ls = ls.filter(a => !selected.has(a))
+                rePosition()
+                selected = new Set()
+            }
         })
     }
 

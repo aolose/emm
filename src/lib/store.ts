@@ -1,28 +1,15 @@
 import {writable, get, readable} from 'svelte/store';
 import {Upload} from 'upload';
 import Compressor from 'compressorjs';
-import type {fView} from "$lib/types";
+import type {fView, fileInfo, fInfo, Timer, fileSelectCfg, cfOpt} from "$lib/types";
+import type {Post} from "$lib/server/model";
+
 import {randNum} from "$lib/utils";
 
 const user = writable({
     token: 'test'
 });
 
-type fileSelectCfg = {
-    show?: boolean,
-    limit?: number,
-    resolve?: (v: unknown) => void,
-    reject?: (v: unknown) => void,
-}
-
-type cfOpt = {
-    show: boolean,
-    text?: string,
-    ok?: string,
-    cancel?: string,
-    resolve?: (v: unknown) => void,
-    reject?: (v: unknown) => void,
-}
 const confirmCfg = {} as cfOpt
 const fileManagerCfg = {} as fileSelectCfg
 
@@ -35,14 +22,14 @@ export const selectFile = (limit = 0) => {
             limit,
             show: true, resolve, reject
         })
-    })
+    }).catch(() => void 0)
 }
 
 export const confirm = (msg: string, ok = 'ok', cancel = 'cancel') => {
     return new Promise((resolve, reject) => {
         const cfg = {...confirmCfg, ok, cancel, resolve, reject, show: true, text: msg}
         confirmStore.set(cfg)
-    })
+    }).catch(() => void 0)
 }
 
 
@@ -61,18 +48,9 @@ export const getProgress = (f: fileInfo) => {
         };
     });
 };
-
-type fileInfo = {
-    id: number;
-    size: number;
-    name: string;
-    type: string;
-    up: number;
-    abort: () => void;
-};
 export const upFiles = writable([] as fileInfo[]);
 const upDonSet = new Set<number>()
-export const filesUpload = (files: FileList, cb?: (f: fView) => void) => {
+export const filesUpload = (files: FileList | File[], cb?: (f: fView) => void) => {
     for (const f of files) {
         const t = f.type;
         const o: fInfo = {
@@ -96,11 +74,6 @@ export const filesUpload = (files: FileList, cb?: (f: fView) => void) => {
     }
 };
 
-type fInfo = {
-    name: string;
-    file: Blob;
-};
-type Timer = ReturnType<typeof setTimeout>
 let cTimer: Timer
 const up = (info: fInfo, cb?: (f: fView) => void) => {
     const token = get(user).token;
@@ -153,3 +126,5 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
     });
     return v;
 };
+
+export const editPost = writable({} as Post)
