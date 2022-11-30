@@ -252,7 +252,7 @@ export const arrPick = <T extends object>(o: T[], ...keys: (keyof T)[]) => {
 }
 
 export const getExt = (f: fView) => {
-	if(!f)return
+    if (!f) return
     const t = f.type.split('/')[1]
     if (t) {
         const match = (/^(x-)?([a-z0-9]+)/.exec(t) || [])[2]
@@ -260,4 +260,45 @@ export const getExt = (f: fView) => {
     }
     const d = f.name.lastIndexOf('.')
     return f.name.substring(d)
+}
+
+
+export function fileSize(size: number) {
+    const m = ['B', 'KB', 'MB', 'GB']
+    let n = 0
+    while (size > 512 && n < 3) {
+        size = size / 1024
+        n++
+    }
+    return size.toFixed(1) + m[n]
+}
+
+export function createUrl(f: fView | File) {
+    if (f instanceof File) {
+        return URL.createObjectURL(f as File)
+    }
+    return `/res/${f.id}`
+}
+
+export function createFileMd(f: fView | File, u = '') {
+    const {name, size, type} = f
+    if (!u) u = createUrl(f)
+    if (type.startsWith('image/')) {
+        return `![${name}](${u})`
+    }
+    if (type.startsWith('audio/')) {
+        return `<label class="x-audio">${name}<audio controls><source src="${u}" type="${type}"></audio></label>`
+    }
+    if (type.startsWith('video/')) {
+        return `<label class="x-video">${name}<video controls><source src="${u}" type="${type}"></video></label>`
+    }
+    return `<a class="x-file" download href="${u}"><p>${name}</p><span>${fileSize(size)}</span><i class="icon i-down"></i></a>`
+}
+
+export function file2Md(f: fView[] | File[]) {
+    const s = [] as string[]
+    f.forEach((o) => {
+        s.push(createFileMd(o))
+    })
+    return s.join('\n')
 }
