@@ -2,11 +2,13 @@
     import Pg from './pg.svelte';
     import Item from './fItems.svelte';
     import {confirm, fileManagerStore, filesUpload, getProgress, upFiles} from '$lib/store';
-    import {req} from "$lib/req";
+    import {api} from "$lib/req";
     import {onMount, tick} from "svelte";
     import {get, writable} from "svelte/store";
     import {slidLeft} from '../transition'
     import {fade, slide} from "svelte/transition";
+
+    const getRes = api('res')
 
     let cfg = {}
     let total = 1
@@ -30,7 +32,7 @@
 
     function load(page = 1) {
         loading = 1
-        req('res', new Uint8Array([page, size])).then(({total: t, items}) => {
+        getRes(new Uint8Array([page, size])).then(({total: t, items}) => {
             loading = 0
             total = t
             ls = items
@@ -79,8 +81,10 @@
     }
 
     onMount(() => {
-        load()
-        return fileManagerStore.subscribe(s => cfg = s)
+        return fileManagerStore.subscribe(s => {
+            cfg = s
+            if (s.show) load()
+        })
     })
 
     $:limit = cfg.limit || 0
@@ -117,7 +121,7 @@
             <div class="h">
                 <div class="g">
                     <button class="icon i-add" title="upload files">
-                        <input type="file" on:change={upload}/>
+                        <input type="file" on:change={upload} multiple/>
                     </button>
                     {#if selected.size}
                         <button transition:slidLeft|local class="icon i-ok" title="use selected"
