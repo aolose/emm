@@ -70,6 +70,10 @@
 </div>
 
 <style lang="scss">
+  .d {
+    display: none
+  }
+
   .e {
     height: 100%;
     overflow: hidden;

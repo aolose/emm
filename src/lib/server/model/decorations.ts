@@ -1,4 +1,4 @@
-import type { Model } from '../../types';
+import type { Model } from '$lib/types';
 
 const sqlInfo = new Map();
 export const primaryKey = 'PRIMARY KEY';

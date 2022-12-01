@@ -1,8 +1,10 @@
 import {writable, get, readable} from 'svelte/store';
 import {Upload} from 'upload';
 import Compressor from 'compressorjs';
-import type {fView, fileInfo, fInfo, Timer, fileSelectCfg, cfOpt} from "$lib/types";
-import type {Post} from "$lib/server/model";
+import type {
+    fView, fileInfo, fInfo, Timer,
+    fileSelectCfg, cfOpt, EditPost
+} from "$lib/types";
 
 import {randNum} from "$lib/utils";
 
@@ -127,4 +129,5 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
     return v;
 };
 
-export const editPost = writable({} as Post)
+export const originPost = writable({} as EditPost)
+export const editPost = writable({} as EditPost)

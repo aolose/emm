@@ -5,12 +5,14 @@
     import Editor from './editor.svelte';
     import FileWin from '$lib/components/fileManager.svelte';
     import Viewer from '$lib/components/viewer.svelte'
-    import {editPost} from "$lib/store";
+    import {editPost, originPost} from "$lib/store";
 
     export let data;
 
+
     function sel(p) {
-        editPost.set(p)
+        originPost.set({...p, _})
+        editPost.set({...p, _})
     }
 
     function d(a) {

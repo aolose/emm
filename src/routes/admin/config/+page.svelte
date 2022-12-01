@@ -15,7 +15,7 @@
 	async function submit(e) {
 		e.preventDefault();
 		const r = await req('setAdmin', o, { encrypt: true });
-		saveCache('initialized', r, 1e5);
+		saveCache('initialized', r, 1e5,1);
 		await goto('/');
 	}
 </script>

@@ -193,7 +193,7 @@ const delayMap = new Map<string, [number, reqParams?]>()
 
 export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
     const delay = cfg?.delay
-    if (delay) {
+    if (browser && delay) {
         const delayKey = reqKey(url, params, cfg?.method, cfg?.delayKey || cfg?.delay)
         delayMap.set(delayKey, [Date.now() + delay, params])
         let p = delayPms.get(delayKey)
@@ -213,7 +213,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
                     }
                 })
                 run()
-            }).finally(()=>{
+            }).finally(() => {
                 delayMap.delete(delayKey)
                 delayPms.delete(delayKey)
             })
@@ -234,7 +234,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
                 saveCacheToStorage();
             }
             return d;
-        }).finally(()=>reqPromiseCache.delete(key))
+        }).finally(() => reqPromiseCache.delete(key))
         if (browser) {
             reqPromiseCache.set(key, p);
         }

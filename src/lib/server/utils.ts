@@ -1,6 +1,6 @@
 import {NULL} from './enum';
 import {contentType, dataType, encryptIv, encTypeIndex, geTypeIndex} from '../enum';
-import type {ApiData, ApiName, Class, RespHandle} from '../types';
+import type {ApiData, ApiName, Class, CliObj, RespHandle} from '../types';
 import * as apis from './api';
 import {
     encrypt,
@@ -249,4 +249,16 @@ export const cacheCount = (o: Class<Model>, num?: number) => {
         setTimeout(() => countMap.delete(nm), 1e4)
     }
     return n;
+}
+
+export const model = <T extends Model>(m: Class<T>, o: object) => {
+    const d = {...o} as { _?: unknown }
+    delete d._
+    Object.defineProperty(d, 'constructor', {
+        enumerable: false,
+        get() {
+            return m
+        }
+    })
+    return d as T
 }

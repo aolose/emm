@@ -2,6 +2,7 @@
     import {marked} from 'marked'
     import {onMount} from "svelte";
     import {editPost} from "$lib/store";
+    import {fade} from "svelte/transition";
 
     let el
     let patchMod = false
@@ -17,7 +18,6 @@
     $:v = `<div class="${el?.className}">${marked.parse(content || '')}</div>`
     $:{
         if (patchMod && el) {
-            console.log(v)
             rd(el, v)
         }
     }
@@ -27,22 +27,24 @@
             rd = d.default
             patchMod = true
             return editPost.subscribe(p => {
-                title = p._title
-                content = p._content
+                title = p.title_d
+                content = p.content_d
             })
         }
     })
 </script>
-<div class="a" class:p={preview}>
-    <div class="t">
-        <h1>{title || ''}</h1>
+{#if title || content}
+    <div class="a" class:p={preview} transition:fade>
+        <div class="t">
+            <h1>{title || ''}</h1>
+        </div>
+        <div class="c" bind:this={el}>
+            {#if !preview}
+                {@html v}
+            {/if}
+        </div>
     </div>
-    <div class="c" bind:this={el}>
-        {#if !preview}
-            {@html v}
-        {/if}
-    </div>
-</div>
+{/if}
 <style lang="scss">
   .a {
     overflow: auto;
