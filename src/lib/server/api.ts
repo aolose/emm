@@ -1,15 +1,16 @@
-import type {Api} from '../types';
+import type {Api, CliObj} from '../types';
 import {db, sys} from './index';
 import {genPubKey} from './crypto';
-import {getReqJson, combineResult, cacheCount} from './utils';
+import {getReqJson, combineResult, cacheCount, model} from './utils';
 import type {RespHandle} from '$lib/types';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
-import {Res} from "$lib/server/model";
+import {Post, Res} from "$lib/server/model";
 import crypto from 'crypto'
-import {arrPick} from "$lib/utils";
+import {arrPick, diffObj} from "$lib/utils";
+import {NULL} from "$lib/server/enum";
 
 const auth = (fn: RespHandle) => (req: Request) => {
     console.log('auth...');
@@ -34,6 +35,25 @@ const saveFile = (name: string | number, dir: string, buf: Buffer) => {
     }
     const p = path.resolve(dir, name + '')
     fs.writeFileSync(p, buf, {flag: 'w'});
+}
+// todo: link flag to session
+// need a clientMap
+let curPostFlag = [0, 0]
+export const post: Api = {
+    post: auth(async (req) => {
+        const [flag, id] = curPostFlag
+        const o = await getReqJson(req) as CliObj<Post>
+        o.save = NULL.DATE
+        if (!o.id) {
+            if (flag === o._) {
+                o.id = id
+            } else o.id = NULL.INT
+        }
+        const d = model(Post, o)
+        db.save(d)
+        if (o._) curPostFlag = [o._, d.id]
+        return diffObj(o as Post, d)
+    })
 }
 
 
@@ -93,7 +113,7 @@ export const up: Api = {
             console.error(e)
             db.del(res)
         }
-        return  res.id
+        return res.id
     })
 };
 
