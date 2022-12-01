@@ -44,16 +44,14 @@ export class Tag {
 export class Post {
     @primary
     id = INT
-    @unique
-    @noNull
     slug = TEXT
     desc = TEXT
     tag = TEXT
     comment = true
     title = TEXT
     content = TEXT
-    _title = TEXT
-    _content = TEXT
+    title_d = TEXT
+    content_d = TEXT
     token = TEXT
     publish = DATE
     modify = DATE
