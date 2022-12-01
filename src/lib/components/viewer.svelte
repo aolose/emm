@@ -27,8 +27,8 @@
             rd = d.default
             patchMod = true
             return editPost.subscribe(p => {
-                title = p.title
-                content = p.draft
+                title = p._title
+                content = p._content
             })
         }
     })

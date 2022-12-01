@@ -1,8 +1,8 @@
 <script>
     import Search from './search.svelte';
-    import AddPost from './addPost.svelte';
+    import AddPost from './add.svelte';
     import Pg from '$lib/components/pg.svelte';
-    import Editor from './mdEditor.svelte';
+    import Editor from './editor.svelte';
     import FileWin from '$lib/components/fileManager.svelte';
     import Viewer from '$lib/components/viewer.svelte'
     import {editPost} from "$lib/store";
