@@ -302,3 +302,15 @@ export function file2Md(f: fView[] | File[]) {
     })
     return s.join('\n')
 }
+
+export function diffObj<T extends object>(origin: T, change: T) {
+    const d = {} as T
+    let ch = 0
+    for (const [a, b] of Object.entries(change)) {
+        if (origin[a as keyof T] !== b && b !== null && b !== undefined) {
+            d[a as keyof T] = b
+            ch = 1
+        }
+    }
+    if (ch) return d
+}
