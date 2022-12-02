@@ -1,6 +1,6 @@
 import {req} from './req';
 import {contentType, dataType, encryptIv, encTypeIndex, getIndexType} from './enum';
-import type {ApiData, ApiBodyData, fView} from './types';
+import type {ApiData, ApiBodyData, fView, Model, Obj} from './types';
 
 const {subtle} = crypto;
 let genKey: CryptoKeyPair;
@@ -241,14 +241,20 @@ export const delay = (fn: () => void, ms = 0) => {
     };
 };
 
-export const pick = <T extends object>(o: T, ...keys: (keyof T)[]) => {
-    const a = {} as T
-    keys.forEach(k => a[k] = o[k])
-    return a
+export const pick = <T extends Model>(o: Obj<T>, keys?: (keyof T)[]) => {
+    if (!keys || !keys.length) return o
+    Object.keys(o).forEach(_ => {
+        const k = _ as keyof T
+        const v = o[k]
+        if (v === null || v === undefined || keys.indexOf(k as keyof T) === -1) delete o[k]
+    })
+    return o
 }
 
-export const arrPick = <T extends object>(o: T[], ...keys: (keyof T)[]) => {
-    return o.map(v => pick(v, ...keys))
+export const arrPick = <T extends Model>(o: T[], keys?: (keyof T)[]) => {
+    if (!keys || !keys.length) return o
+    o.forEach(v => pick(v, keys))
+    return o
 }
 
 export const getExt = (f: fView) => {

@@ -1,28 +1,49 @@
 import type * as models from './server/model';
-import type * as apis from './server/api';
+import type {apiPath} from './server/api'
 import type {Post} from "./server/model";
+import type {Database} from 'better-sqlite3';
 
 export type MethodNumber = 0 | 1 | 2 | 3
 export type Class<T> = new (...args: unknown[]) => T;
 export type RespHandle = (req: Request) => ApiData | Promise<ApiData>;
-export type Model = models.System | models.Count | models.User | models.Post | models.Res;
-export type Parameters<T extends (...args: unknown[]) => unknown> = T extends (...args: infer P) => unknown ? P : never;
 
-export type Obj<T extends object> = {
+interface dbHooks {
+    onSave?: (db: Database) => boolean
+    onDel?: (db: Database) => boolean
+}
+
+export type Model = (models.System | models.Count | models.User | models.Post | models.Res) & dbHooks;
+
+export type Obj<T extends Model> = {
     [key in keyof T]?: T[key];
+}
+
+export type reqOption = {
+    cache?: number;
+    delay?: number;
+    delayKey?: number | string;
+    fetch?: typeof fetch;
+    method?: 0 | 1 | 2 | 3;
+    encrypt?: boolean;
+    before?(data: unknown, url?: string): [unknown, string | undefined, Headers?];
 };
 
-export type CliObj<T extends object> = Obj<T> & { _: number }
+export type CliObj<T extends Model> = Obj<T> & { _: number }
 
 export type ApiBodyData = ArrayBuffer | string | number | undefined;
 export type ApiData = ApiBodyData | object;
-export type ApiName = keyof typeof apis;
+export type ApiName = typeof apiPath[number];
 export type Api = {
     get?: RespHandle;
     post?: RespHandle;
     delete?: RespHandle;
     patch?: RespHandle;
 };
+
+
+export type APIRoutes = {
+    [key: string]: Api
+}
 
 export type reqData = object | string | number | boolean | null | void;
 export type reqParams = object | string | number | undefined;
@@ -63,4 +84,4 @@ export  type fileSelectCfg = {
     resolve?: (v: unknown) => void,
     reject?: (v: unknown) => void,
 }
-export type EditPost = Obj<Post> & { _?: number }
+export type curPost = Obj<Post> & { _?: number }

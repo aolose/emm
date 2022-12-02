@@ -1,9 +1,9 @@
 import {DB} from './db/sqlite3';
 import type {Model} from '../types';
-import {modelCache} from './cache';
 import {runJobs} from './db/jobs';
 import {DBProxy, noNullKeyValues, val} from './utils';
 import {System} from './model';
+import type {Obj} from "../types";
 
 export let sys: System;
 runJobs();
@@ -18,7 +18,7 @@ type Filter = {
 };
 
 // todo desc
-function genModelFilterKey(m: Model, f?: Filter): string {
+function genModelFilterKey(m: Obj<Model>, f?: Filter): string {
     const n = [m.constructor.name] as unknown[];
     const [k1, v1] = noNullKeyValues(m);
     const k2 = f ? Object.values(f) : [];
@@ -32,7 +32,7 @@ export const server = {
         console.log('server start');
         if (!db) db = new DB();
         db.createTables();
-        sys = DBProxy(new System());
+        sys = DBProxy(System);
         const {uploadDir, thumbDir} = sys
         if (!val(uploadDir)) sys.uploadDir = '/res'
         if (!val(thumbDir)) sys.thumbDir = '/thumb'

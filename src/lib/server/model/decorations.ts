@@ -16,8 +16,8 @@ function set(o: object, name: string, v: string) {
 	sqlInfo.set(k, p);
 }
 
-export function getPrimaryKey(o: object) {
-	return pkMap[o.constructor.name];
+export function getPrimaryKey(o: string) {
+	return pkMap[o];
 }
 
 export function getConstraint(o: object, k: string) {

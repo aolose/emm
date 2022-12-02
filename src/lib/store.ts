@@ -3,7 +3,7 @@ import {Upload} from 'upload';
 import Compressor from 'compressorjs';
 import type {
     fView, fileInfo, fInfo, Timer,
-    fileSelectCfg, cfOpt, EditPost
+    fileSelectCfg, cfOpt, curPost
 } from "$lib/types";
 
 import {randNum} from "$lib/utils";
@@ -129,5 +129,18 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
     return v;
 };
 
-export const originPost = writable({} as EditPost)
-export const editPost = writable({} as EditPost)
+export const originPost = writable({} as curPost)
+export const editPost = writable({} as curPost)
+export const posts = writable([] as curPost[])
+
+editPost.subscribe(p => {
+    if (!p._ && !p.id) return
+    let ls = get(posts)
+    let c = ls.findIndex(o => {
+        return (p._ && o._ === p._) || (p.id && p.id === o.id)
+    })
+    if (c !== -1) {
+        ls[c] = {...ls[c], ...p}
+    } else ls = [p].concat(ls)
+    posts.set([...ls])
+})

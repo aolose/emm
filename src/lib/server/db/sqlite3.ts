@@ -1,16 +1,12 @@
 import better from 'better-sqlite3';
-import {noNullKeyValues, sqlVal} from '../utils';
+import {noNullKeyValues, setKey, sqlVal, val} from '../utils';
 import * as models from '../model';
 import {getConstraint, getPrimaryKey, pkMap, primaryKey} from '../model/decorations';
-import type {Class, Model} from "$lib/types";
+import type {Class, Model, Obj} from "$lib/types";
 
 const tables = Object.values(models);
 const INTEGER = 'INTEGER';
 const TEXT = 'TEXT';
-
-interface svM extends Object {
-    save: number
-}
 
 // model
 type M = typeof tables[number];
@@ -21,6 +17,7 @@ function createTable(Model: M) {
     const e = Object.entries(t);
     const pk = [];
     for (const [k, v] of e) {
+        if (typeof v === "function") continue
         let type = 'BLOB';
         const name = v?.constructor?.name;
         switch (name) {
@@ -48,20 +45,35 @@ function createTable(Model: M) {
     return `CREATE TABLE ${Model.name} (${fields.join()})`;
 }
 
-function select(obj: object) {
+function select(obj: Obj<Model>) {
     const table = obj.constructor.name;
     const [k, v] = noNullKeyValues(obj);
     const where = k.length ? k.map((a) => `${a}=?`).join(' and ') : '';
     return [`SELECT * FROM ${table}`, where, v];
 }
 
-function insert(obj: object): [string, unknown[]] {
+function insert(obj: Obj<Model>): [string, unknown[]] {
     const table = obj.constructor.name;
     const [k, m] = noNullKeyValues(obj);
     const v = sqlVal(m);
     const q = new Array(k.length).fill('?').join();
-    return [`replace into ${table} (${k.join()}) values (${q})`, v];
+    return [`insert into ${table} (${k.join()}) values (${q})`, v];
 }
+
+function update(obj: Obj<Model>): [string, unknown[]] {
+    const table = obj.constructor.name;
+    const pk = getPrimaryKey(table)
+    const [k, m] = noNullKeyValues(obj);
+    const v = sqlVal(m);
+    const w = []
+    if (pk) {
+        const i = k.indexOf(pk)
+        w.push(k.splice(i, 1)[0])
+        v.push(v.splice(i, 1)[0])
+    }
+    return [`update ${table} set ${k.map(a => `${a} = ?`).join()}${w.length ? ` where ${pk}=?` : ''}`, v]
+}
+
 
 export class DB {
     // expose for test
@@ -72,7 +84,7 @@ export class DB {
         process.on('exit', () => this.db.close());
     }
 
-    private select(one: boolean, o: object, where = '', values: unknown[]) {
+    private select(one: boolean, o: Obj<Model>, where = '', values: unknown[]) {
         const [sql, w, v] = select(o);
         const wh = [w, where].filter((a) => a).join(' and ');
         const s = sql + (wh ? ` WHERE ${wh}` : '');
@@ -82,11 +94,11 @@ export class DB {
         return paper.all(...params);
     }
 
-    get<T extends object>(o: T, where?: string, ...values: unknown[]) {
+    get<T extends Model>(o: Obj<T>, where?: string, ...values: unknown[]) {
         return this.select(true, o, where, values) as T | undefined;
     }
 
-    all<T extends object>(o: T, where?: string, ...values: unknown[]) {
+    all<T extends Model>(o: Obj<T>, where?: string, ...values: unknown[]) {
         return this.select(false, o, where, values) as T[];
     }
 
@@ -94,26 +106,43 @@ export class DB {
         return this.db.prepare(`select count(*) as c from ${o.name}`).get().c as number
     }
 
-    page<T extends Model>(o: Class<T>, page: number, size: number, order = [] as string[]) {
+    page<T extends Model>(
+        o: Class<T>,
+        page: number,
+        size: number,
+        order = [] as string[],
+        where?: [string, ...unknown[]],
+    ) {
         const s = `select * from ${o.name}`
         const d = order.length ? ` order by ${order.join()}` : ''
         const l = ` limit ${size * (page - 1)},${size}`
         return this.db.prepare(s + d + l).all() as T[]
     }
 
-    save<T extends object>(o: T) {
-        if (Object.hasOwn(o, 'save')) {
-            (o as svM).save = Date.now()
+    save<T extends Model>(o: Obj<T>) {
+        if (o.onSave) {
+            o.onSave(this.db)
         }
-        const [sql, values] = insert(o);
+        const now = Date.now()
+        const table = o.constructor.name
+        setKey(o, 'save', now)
+        const pk = getPrimaryKey(table)
+        const kv = val(o[pk])
+        let sql: string
+        let values: unknown[]
+        if (!kv) {
+            setKey(o, 'createAt', now);
+            [sql, values] = insert(o);
+        } else [sql, values] = update(o);
         const r = this.db.prepare(sql).run(...values);
-        if (r.changes === 1) {
-            const pk = getPrimaryKey(o)
-            const t = typeof o[pk]
+        if (r.changes === 1 && !kv) {
+            const t = typeof kv
             if (t === 'number' || t === 'bigint') {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 o[pk] = r.lastInsertRowid
+            } else {
+                o[pk] = this.db.prepare(`select ${pk} from ${table} where rowid=?`).get(r.lastInsertRowid)[pk]
             }
         }
         return r
@@ -125,8 +154,8 @@ export class DB {
         return this.db.prepare(sql).run(...pks)
     }
 
-    del<T extends object>(o: T) {
-        const pk = getPrimaryKey(o)
+    del<T extends Model>(o: Obj<T>) {
+        const pk = getPrimaryKey(o.constructor.name)
         if (!pk) return
         const v = o[pk]
         const sql = `delete from ${o.constructor.name} where ${pk}=?`

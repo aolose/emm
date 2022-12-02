@@ -29,6 +29,7 @@ export class ShortPost {
     token = TEXT
     publish = DATE
     modify = DATE
+    createAt = DATE
 }
 
 export class Tag {
@@ -39,6 +40,7 @@ export class Tag {
     name = TEXT
     desc = TEXT
     save = DATE
+    createAt = DATE
 }
 
 export class Post {
@@ -47,12 +49,14 @@ export class Post {
     slug = TEXT
     desc = TEXT
     tag = TEXT
+    published = false
     comment = true
     title = TEXT
     content = TEXT
     title_d = TEXT
     content_d = TEXT
     token = TEXT
+    createAt = DATE
     publish = DATE
     modify = DATE
     save = DATE
@@ -71,6 +75,7 @@ export class Token {
     expire = INT
     targetIds = TEXT
     remark = TEXT
+    createAt = DATE
 }
 
 export class Comment {
@@ -80,11 +85,12 @@ export class Comment {
     name = TEXT
     @noNull
     say = TEXT
-    modify = DATE
     publish = DATE
     reply = INT
     state = INT // -1 skip 0 - wait review  1 - review ok 2 - review no pass
     token = INT
+    createAt = DATE
+    modify = DATE
 }
 
 export class System {
@@ -120,4 +126,5 @@ export class User {
     pwd = TEXT
     birth = DATE
     desc = TEXT
+    createAt = DATE
 }

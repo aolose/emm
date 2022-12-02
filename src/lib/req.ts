@@ -8,22 +8,14 @@ import {
 } from './utils';
 import {dataType, reqMethod} from './enum';
 import {browser} from '$app/environment';
-import type {ApiName, cacheRecord, reqData, reqParams, reqCache, MethodNumber,} from './types';
+import type {ApiName, cacheRecord, reqData, reqParams, reqCache, MethodNumber, reqOption} from './types';
 import type {PageLoad} from '../../.svelte-kit/types/src/routes/$types';
 
 const cacheData = '.d';
 const cacheKey = '.k';
 const cacheExpire = '.e';
 const cacheBegin = '.b';
-type reqOption = {
-    cache?: number;
-    delay?: number;
-    delayKey?: number | string;
-    fetch?: typeof fetch;
-    method?: 0 | 1 | 2 | 3;
-    encrypt?: boolean;
-    before?(data: unknown, url?: string): [unknown, string | undefined, Headers?];
-};
+
 
 let reqCacheMap: reqCache;
 const cacheNames = [cacheData, cacheKey, cacheExpire, cacheBegin];
