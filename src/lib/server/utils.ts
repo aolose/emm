@@ -1,7 +1,7 @@
 import {NULL} from './enum';
 import {contentType, dataType, encryptIv, encTypeIndex, geTypeIndex} from '../enum';
-import type {ApiData, ApiName, Class, CliObj, RespHandle} from '../types';
-import * as apis from './api';
+import type {ApiData, ApiName, Class, Obj} from '../types';
+import apis from './api';
 import {
     encrypt,
     parseBody,
@@ -10,14 +10,17 @@ import {
     encryptHeader,
     getKINums,
     data2Buf,
-    delay,
-    hasOwnProperty
+    hasOwnProperty, arrPick, pick, delay, diffObj
 } from '../utils';
 import {keyPool} from './crypto';
 import type {Api} from '../types';
 import type {Model} from '../types';
 import {getPrimaryKey} from './model/decorations';
 import {db} from './index';
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import {Res} from "$lib/server/model";
 
 export const is_dev = process.env.NODE_ENV !== 'production';
 
@@ -33,7 +36,11 @@ export const sqlVal = (values: unknown[]) =>
         return a;
     });
 
-export function noNullKeyValues(o: object) {
+export function noNullKeyValues<T extends Model>(o: Obj<T>) {
+    const C = o.constructor as Class<T>
+    const ks = Object.keys(new C()) as (keyof T)[]
+    // for safe
+    pick(o, ks)
     const keys = [] as string[];
     const values = [] as unknown[];
     const {TEXT, INT, DATE} = NULL;
@@ -50,7 +57,7 @@ export function noNullKeyValues(o: object) {
                     if (v === INT) return;
                     break;
                 case 'Date':
-                    if (v.getTime() === DATE.getTime()) return;
+                    if ((v as Date).getTime() === DATE.getTime()) return;
                     break;
                 default:
                     return;
@@ -166,60 +173,47 @@ export const apiHandle = async (request: Request, name: ApiName): Promise<Respon
     return resp('', 404);
 };
 
-interface Obj {
-    [key: string]: unknown;
-}
 
-type mk = keyof Model;
-export const DBProxy = <T extends Model>(o: Model, sync = true): T => {
-    let e: Map<string, unknown>;
-    const pk = getPrimaryKey(o);
-    const ch = new Map<mk, unknown>();
+export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}): T => {
+    type key = keyof T
+    type value = T[key]
+    const pk = getPrimaryKey(C.name) as keyof T
+    let o = model(C, init)
+    let ori = {} as Obj<T>
+
     const save = delay(() => {
-        if (ch.size > 0) {
-            let c = 0;
-            const n: Obj = {[pk]: o[pk]};
-            n.constructor = o.constructor;
-            for (const [k, v] of ch) {
-                if (e.get(k) !== v) {
-                    c = 1;
-                    n[k] = v;
-                    e.set(k, v);
-                    ch.delete(k);
-                }
-                ch.delete(k);
-            }
-            if (c) {
-                const {changes, lastInsertRowid: rowid} = db.save(n);
-                if (changes && pk) {
-                    const b = db.db
-                        .prepare(`select ${pk} from ${o.constructor.name} where rowid=?`)
-                        .get(rowid) as Model;
-                    n[pk] = b[pk];
-                    e.set(pk, b[pk]);
-                }
-            }
-        }
-    }, 10);
-    if (sync) {
-        if (pk && o[pk] !== undefined) {
-            const no = {[pk]: o[pk]};
-            no.constructor = o.constructor;
-            Object.assign(o, db.get(no));
-            e = new Map(Object.entries(o));
+        const p = diffObj(ori, o)
+        if (!p) return
+        if (pk) p[pk] = o[pk]
+        const ch = model(C, p)
+        db.save(ch)
+        ori = {...Object.assign(o, ch)}
+    }, 100)
+    const k = o[pk]
+    let u = 0
+    if (k) {
+        const e = db.get(model(C, {[pk]: k}))
+        if (e) {
+            ori = {...e}
+            o = Object.assign(e, o)
+            u = 1
         }
     }
-
+    if (!u) {
+        const r = db.get(o)
+        if (r) {
+            ori = {...r}
+            o = Object.assign(r, o)
+        }
+    }
+    save()
     return new Proxy(o, {
-        get(target: Model, p: string, receiver: unknown) {
+        get(target: T, p: string, receiver: T) {
             const v = Reflect.get(target, p, receiver);
             return hasOwnProperty(target, p) ? val(v) : v;
         },
-        set(target: Model, p: mk, newValue: unknown, receiver: unknown): boolean {
-            if (sync && hasOwnProperty(target, p)) {
-                ch.set(p as mk, newValue);
-                save();
-            }
+        set(target: T, p: string, newValue: value, receiver: T): boolean {
+            save()
             return Reflect.set(target, p, newValue, receiver);
         }
     }) as T;
@@ -251,14 +245,49 @@ export const cacheCount = (o: Class<Model>, num?: number) => {
     return n;
 }
 
-export const model = <T extends Model>(m: Class<T>, o: object) => {
-    const d = {...o} as { _?: unknown }
-    delete d._
-    Object.defineProperty(d, 'constructor', {
-        enumerable: false,
-        get() {
-            return m
-        }
+export const model = <T extends Model>(M: Class<T>, o: object) => {
+    const a = new M() as Obj<T>
+    Object.keys(a).forEach((k) => {
+        const o = k as keyof T
+        if (typeof a[o] !== 'function') delete a[o]
     })
-    return d as T
+    return pick(Object.assign(a, o), Object.keys(o) as (keyof T)[])
+}
+
+export const md5 = (buf: Buffer) => {
+    const hashSum = crypto.createHash('md5');
+    hashSum.update(buf);
+    return hashSum.digest('hex');
+}
+
+export const saveFile = (name: string | number, dir: string, buf: Buffer) => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, {recursive: true})
+    }
+    const p = path.resolve(dir, name + '')
+    fs.writeFileSync(p, buf, {flag: 'w'});
+}
+
+export const pageBuilder = async <T extends Model>(
+    req: Request,
+    model: Class<T>,
+    orders: string[],
+    keys?: (keyof T)[]
+) => {
+    const r = new Uint8Array(await req.arrayBuffer())
+    const p = r[0]
+    const s = r[1]
+    const c = cacheCount(Res) as number
+    return {
+        total: Math.floor((c + s - 1) / s),
+        items: arrPick(db.page(model, p, s, orders), keys)
+    }
+}
+
+export const hasKey = <T extends Model>(o: Obj<T>, key: string) => {
+    const C = o.constructor as Class<T>
+    return Object.hasOwn(new C(), key)
+}
+export const setKey = <T extends Model>(o: Obj<T>, key: string, value: unknown) => {
+    if (hasKey(o, key)) o[key as keyof T] = value as T[keyof T]
 }
