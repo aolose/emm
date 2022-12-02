@@ -55,7 +55,7 @@
         })
     })
 </script>
-{#if $editPost._}
+{#if $editPost._ || $editPost.id}
     <div class="a" transition:fade>
         <div class="t">
             <input bind:value={title}/>

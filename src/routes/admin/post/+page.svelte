@@ -3,31 +3,32 @@
     import AddPost from './add.svelte';
     import Pg from '$lib/components/pg.svelte';
     import Editor from './editor.svelte';
+    import PItem from './pItem.svelte'
     import FileWin from '$lib/components/fileManager.svelte';
     import Viewer from '$lib/components/viewer.svelte'
-    import {editPost, originPost} from "$lib/store";
+    import {editPost, originPost, posts} from "$lib/store";
+    import {api} from "$lib/req";
+    import {onMount} from "svelte";
 
-    export let data;
-
+    const getPost = api('posts')
+    let pages = 1
 
     function sel(p) {
         originPost.set({...p, _})
         editPost.set({...p, _})
     }
 
-    function d(a) {
-        return new Intl.DateTimeFormat('en-GB', {
-            year: '2-digit',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).format(new Date(a));
+    function page(n = 1) {
+        getPost(new Uint8Array([n, 10])).then(p => {
+            const {total, items = []} = p
+            if (items) posts.set(items)
+            pages = total
+        })
     }
 
-    function getPosts(n) {
-        // todo
-    }
+    onMount(() => {
+        page()
+    })
 </script>
 
 <div class="x">
@@ -38,24 +39,12 @@
                 <AddPost/>
             </div>
             <div class="ls">
-                {#each data.p as p}
-                    <div class="pi" on:click={() => sel(p)} class:act={$editPost.id === p.id}>
-                        <div class="v">
-                            {#if p.save > p.update}<span class="vd" title="draft">D</span>{/if}
-                            {#if p.publish}<span class="vp" title="published">P</span>{/if}
-                        </div>
-                        <h3>{p.title}</h3>
-                        <p>{p.desc}</p>
-                        <div>
-                            <label>create:<span>{d(p.create)}</span></label>
-                            <label>update:<span>{d(p.update)}</span></label>
-                            <label>save:<span>{d(p.save)}</span></label>
-                        </div>
-                    </div>
+                {#each $posts as p}
+                    <PItem p={p} sel={sel}/>
                 {/each}
             </div>
             <div class="p">
-                <Pg go={getPosts}/>
+                <Pg go={page} total={pages}/>
             </div>
         </div>
         <div class="b">
@@ -69,35 +58,8 @@
 </div>
 
 <style lang="scss">
-  .v {
-    position: absolute;
-    right: 10%;
-    top: 20px;
-    display: flex;
-    line-height: 1;
 
-    span {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      width: 14px;
-      height: 14px;
-      margin-right: 5px;
-      font-weight: 800;
-      padding: 0 !important;
-      opacity: 0.5;
-      border: 1px solid currentColor;
-    }
-  }
 
-  .vd {
-    color: var(--blue);
-  }
-
-  .vp {
-    color: var(--green-h);
-  }
 
   .x {
     width: 100%;
@@ -149,46 +111,5 @@
 
   .c {
     width: 800px;
-  }
-
-  .pi {
-    position: relative;
-    direction: ltr;
-
-    &:not(.act):hover {
-      background: var(--bg0);
-    }
-
-    &.act {
-      background: var(--bg2);
-    }
-
-    transition: 0.3s ease-in-out;
-
-    h3 {
-      padding-right: 80px;
-      line-height: 3;
-      font-weight: 200;
-    }
-
-    padding: 10px 10%;
-
-    p {
-      opacity: 0.5;
-      font-size: 12px;
-    }
-
-    div {
-      padding: 10px 0;
-      font-size: 12px;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      line-height: 1.5;
-
-      span {
-        padding-left: 5px;
-      }
-    }
   }
 </style>

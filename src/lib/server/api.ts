@@ -1,4 +1,4 @@
-import type {APIRoutes, CliObj} from '../types';
+import type {APIRoutes, curPost} from '../types';
 import {db, sys} from './index';
 import {genPubKey} from './crypto';
 import {getReqJson, combineResult, model, md5, saveFile, pageBuilder} from './utils';
@@ -6,7 +6,7 @@ import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
 import {Post, Res} from "$lib/server/model";
-import { diffObj} from "$lib/utils";
+import {diffObj} from "$lib/utils";
 import {NULL} from "$lib/server/enum";
 
 const auth = (fn: RespHandle, fail?: RespHandle) => (req: Request) => {
@@ -34,14 +34,14 @@ const apis: APIRoutes = {
     post: {
         post: auth(async (req) => {
             const [flag, id] = curPostFlag
-            const o = await getReqJson(req) as CliObj<Post>
+            const o =  model(Post,await getReqJson(req)) as curPost
             o.save = NULL.DATE
             if (!o.id) {
                 if (flag === o._) {
                     o.id = id
                 } else o.id = NULL.INT
             }
-            const d = model(Post, o)
+            const d = model(Post, o) as { id: number }
             db.save(d)
             if (o._) curPostFlag = [o._, d.id]
             return diffObj(o as Post, d)
