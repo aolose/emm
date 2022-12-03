@@ -50,7 +50,7 @@ body {
 	color: rgba(212, 219, 238, 0.8);
 }
 
-input {
+input,textarea{
 	background: none;
 	display: block;
 	border: 1px solid rgba(119, 129, 138, 0.3);

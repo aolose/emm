@@ -13,6 +13,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.i-pic:before {
+  content: "\e716";
+}
+
 .i-file:before {
   content: "\e671";
 }

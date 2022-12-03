@@ -4,6 +4,7 @@
     import Pg from '$lib/components/pg.svelte';
     import Editor from './editor.svelte';
     import PItem from './pItem.svelte'
+    import Setting from './setting.svelte'
     import FileWin from '$lib/components/fileManager.svelte';
     import Viewer from '$lib/components/viewer.svelte'
     import {editPost, originPost, posts} from "$lib/store";
@@ -12,8 +13,10 @@
 
     const getPost = api('posts')
     let pages = 1
+    let tmpMark = 1
 
     function sel(p) {
+        const _ = tmpMark++
         originPost.set({...p, _})
         editPost.set({...p, _})
     }
@@ -54,11 +57,11 @@
             <Viewer preview={true}/>
         </div>
         <FileWin/>
+        <Setting/>
     </div>
 </div>
 
 <style lang="scss">
-
 
 
   .x {

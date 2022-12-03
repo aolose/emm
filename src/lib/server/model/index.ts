@@ -89,6 +89,7 @@ export class Comment {
     reply = INT
     state = INT // -1 skip 0 - wait review  1 - review ok 2 - review no pass
     token = INT
+    pass = true
     createAt = DATE
     modify = DATE
 }
