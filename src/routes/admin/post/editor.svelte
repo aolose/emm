@@ -1,22 +1,28 @@
 <script>
     import {onMount} from "svelte";
     import Editor from '$lib/components/editor.svelte'
-    import {editPost, originPost} from "$lib/store";
+    import {editPost, originPost,setting} from "$lib/store";
     import {api} from "$lib/req";
     import {diffObj} from "$lib/utils";
     import {get} from "svelte/store";
     import {browser} from "$app/environment";
     import {fade} from "svelte/transition";
-
     let title = ''
     let draft = ''
+    const tools=[{
+        name: "setting",
+        action: () => {
+            setting.set(1)
+        },
+        className: "icon i-system",
+        title: "setting",
+    }]
     $:{
         if (browser) editPost.update(p => {
             if (!p._) return p
             const np = {
                 ...p, content_d: draft, title_d: title
             }
-            autoSave(np)
             return np
         })
     }
@@ -52,6 +58,7 @@
         return editPost.subscribe(p => {
             draft = p.content_d || p.content || '';
             title = p.title_d || p.title || '';
+            autoSave(p)
         })
     })
 </script>
@@ -62,7 +69,7 @@
             <button class="icon i-publish"></button>
         </div>
         <div class="e">
-            <Editor bind:value={draft}/>
+            <Editor bind:value={draft} toolbar={tools}/>
         </div>
     </div>
 {/if}

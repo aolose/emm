@@ -47,7 +47,7 @@
                 'bold', 'italic', 'strikethrough', 'heading-smaller',
                 'heading-bigger', 'code', 'quote', 'unordered-list',
                 'ordered-list', 'link', 'table', {
-                    name: "image",
+                    name: "files",
                     action: async (editor) => {
                         const f = await selectFile()
                         if (f && f.length) {

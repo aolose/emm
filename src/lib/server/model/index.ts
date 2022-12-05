@@ -36,13 +36,14 @@ export class Tag {
     @primary
     name = TEXT
     desc = TEXT
-    save = DATE
     createAt = DATE
+    post=TEXT
 }
 
 export class Post {
     @primary
     id = INT
+    banner = INT
     slug = TEXT
     desc = TEXT
     tag = TEXT
@@ -64,7 +65,10 @@ export class Token {
     id = INT
     @noNull
     @unique
-    key = TEXT
+    name = TEXT
+    @noNull
+    @unique
+    code = TEXT
     @noNull
     type = INT // enum.type
     features = TEXT // enum.features
@@ -73,6 +77,7 @@ export class Token {
     targetIds = TEXT
     remark = TEXT
     createAt = DATE
+
 }
 
 export class Comment {

@@ -1,8 +1,9 @@
 <script>
     import {tick} from "svelte";
 
-    const tags = new Set(['aaa', 'aab', 'aac', 'aad', 'aae', 'aaf', 'bfa', 'bba'])
-    let items = new Set(['aaa'])
+    export let tags = []
+    $:allTags = new Set(tags)
+    let items = new Set()
     let value = ''
     let ipt
     let show = 0
@@ -28,7 +29,7 @@
 
         if (code === 'Backquote') {
             e.preventDefault()
-            show = 1-show
+            show = 1 - show
         }
         if (code === 'Enter') {
             value = value.slice(0, s) + ',' + value.slice(s)
@@ -48,7 +49,7 @@
     let selects = []
     $:pre = selects[idx] || value
     $:(async () => {
-        selects = [...tags].filter(a => !items.has(a) && value !== a && a.toLowerCase().startsWith(value.toLowerCase()))
+        selects = [...allTags].filter(a => !items.has(a) && value !== a && a.toLowerCase().startsWith(value.toLowerCase()))
         selects.sort((a, b) => a < b ? -1 : 1)
         const lh = selects.length
         idx = lh && idx % lh
