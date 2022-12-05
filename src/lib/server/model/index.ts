@@ -34,9 +34,6 @@ export class ShortPost {
 
 export class Tag {
     @primary
-    id = INT
-    @unique
-    @noNull
     name = TEXT
     desc = TEXT
     save = DATE

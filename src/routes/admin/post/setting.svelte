@@ -1,5 +1,6 @@
 <script>
     import CheckBox from '$lib/components/check.svelte'
+    import Tags from '$lib/components/tags.svelte'
 
     let sh = false
 </script>
@@ -26,6 +27,9 @@
         </div>
         <div class="r">
             <h3>Tags</h3>
+            <div class="t">
+                <Tags/>
+            </div>
         </div>
         <div class="r">
             <h3>Tokens</h3>
@@ -59,9 +63,10 @@
   }
 
   .h {
-    span{
+    span {
       color: #6c7a93;
     }
+
     padding: 20px;
     display: flex;
     justify-content: space-between;
@@ -78,19 +83,23 @@
     cursor: pointer;
     transition: .3s ease-in-out;
     width: 80px;
-    span{
+
+    span {
       font-size: 18px;
       position: relative;
       display: block;
-      color: inherit!important;
+      color: inherit !important;
     }
-    &:hover{
+
+    &:hover {
       color: #fff;
     }
   }
-  .i-close{
+
+  .i-close {
     justify-content: flex-end;
   }
+
   .r {
     padding: 20px;
   }
@@ -102,7 +111,7 @@
     line-height: 2;
   }
 
-  input, textarea, .p {
+  input, textarea, .p, .t {
     display: block;
     margin-top: 20px;
     border: none;

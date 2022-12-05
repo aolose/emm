@@ -59,7 +59,12 @@ input,textarea{
 	padding: 0 10px;
 	line-height: 32px;
 }
-
+button{
+	background: none;
+	border: none;
+	color: currentColor;
+	cursor: pointer;
+}
 span {
 	color: rgba(134, 143, 150, 0.5);
 }
