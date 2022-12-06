@@ -13,6 +13,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.i-drop:before {
+  content: "\e6a8";
+}
+
 .i-pic:before {
   content: "\e716";
 }
@@ -33,7 +37,7 @@
   content: "\e7b1";
 }
 
-.i-gravatar:before {
+.i-av:before {
   content: "\e65f";
 }
 
@@ -117,7 +121,7 @@
   content: "\e71e";
 }
 
-.i-setting:before {
+.i-set:before {
   content: "\e711";
 }
 
@@ -133,11 +137,11 @@
   content: "\e7b2";
 }
 
-.i-publish:before {
+.i-pub:before {
   content: "\e645";
 }
 
-.i-system:before {
+.i-sys:before {
   content: "\e61f";
 }
 
