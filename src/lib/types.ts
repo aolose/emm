@@ -2,14 +2,15 @@ import type * as models from './server/model';
 import type {apiPath} from './server/api'
 import type {Post} from "./server/model";
 import type {Database} from 'better-sqlite3';
+import type {method} from "$lib/enum";
 
 export type MethodNumber = 0 | 1 | 2 | 3
 export type Class<T> = new (...args: unknown[]) => T;
 export type RespHandle = (req: Request) => ApiData | Promise<ApiData>;
 
-interface dbHooks {
-    onSave?: (db: Database) => boolean
-    onDel?: (db: Database) => boolean
+export interface dbHooks {
+    onSave?: (db: Database, now?: number) => boolean | void
+    onDel?: (db: Database, now?: number) => boolean | void
 }
 
 export type Model = (models.System | models.Count | models.User | models.Post | models.Res) & dbHooks;
@@ -23,7 +24,7 @@ export type reqOption = {
     delay?: number;
     delayKey?: number | string;
     fetch?: typeof fetch;
-    method?: 0 | 1 | 2 | 3;
+    method?: method;
     encrypt?: boolean;
     before?(data: unknown, url?: string): [unknown, string | undefined, Headers?];
 };

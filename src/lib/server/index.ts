@@ -2,19 +2,21 @@ import {DB} from './db/sqlite3';
 import type {Model} from '../types';
 import {runJobs} from './db/jobs';
 import {DBProxy, noNullKeyValues, val} from './utils';
-import {System} from './model';
+import {System, Tag} from './model';
 import type {Obj} from "../types";
 
 export let sys: System;
 runJobs();
 
 type token = string;
-const Pools = {};
+export const pools = {
+    tags: new Set<string>()
+};
 
 type Filter = {
     page: 1;
     size: 10;
-    desc: 'publish';
+    desc: 'createAt';
 };
 
 // todo desc
@@ -36,8 +38,10 @@ export const server = {
         const {uploadDir, thumbDir} = sys
         if (!val(uploadDir)) sys.uploadDir = '/res'
         if (!val(thumbDir)) sys.thumbDir = '/thumb'
+        this.sync()
     },
     sync() {
+        pools.tags = new Set(db.all(new Tag()).map(a => a.name))
         // todo
     },
     auth(token: string) {

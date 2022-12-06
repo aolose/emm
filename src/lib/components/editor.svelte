@@ -8,9 +8,41 @@
     let editor
     export let value = ''
     export let toolbar = []
+    let ts = ''
+    const base = ['bold', 'italic', 'strikethrough', 'code', 'quote', 'unordered-list',
+        'ordered-list', 'link', 'table', {
+            name: "files",
+            action: async (editor) => {
+                const f = await selectFile()
+                if (f && f.length) {
+                    editor.codemirror.replaceSelection(file2Md(f))
+                }
+            },
+            className: "icon i-file",
+            title: "Files",
+        },'|']
+    $:tools = base.concat(toolbar)
     $:{
         if (editor && value !== editor.value())
             editor.value(value)
+        const s = JSON.stringify(toolbar)
+        if (editor && ts !== s) {
+            ts = s
+            const bar = editor.toolbar_div
+            const cm = editor.codemirror
+            cm.off('cursorActivity')
+            const fn = cm.getWrapperElement
+            cm.getWrapperElement = () => {
+                cm.getWrapperElement = fn
+                return {
+                    parentNode: {
+                        insertBefore(a) {
+                            bar.replaceWith(a)
+                        }
+                    }
+                }
+            }
+        }
     }
     onMount(async () => {
         const eModule = await import('easymde')
@@ -20,6 +52,7 @@
             spellChecker: false,
             uploadImage: true,
             syncSideBySidePreviewScroll: false,
+            toolbar: tools,
             imageUploadFunction: (f) => {
                 const cm = editor.codemirror
                 const url = createUrl(f)
@@ -42,22 +75,7 @@
                 fullscreen: null,
                 guide: null,
                 'upload-image': null,
-            },
-            toolbar: [
-                'bold', 'italic', 'strikethrough', 'heading-smaller',
-                'heading-bigger', 'code', 'quote', 'unordered-list',
-                'ordered-list', 'link', 'table', {
-                    name: "files",
-                    action: async (editor) => {
-                        const f = await selectFile()
-                        if (f && f.length) {
-                            editor.codemirror.replaceSelection(file2Md(f))
-                        }
-                    },
-                    className: "icon i-file",
-                    title: "Files",
-                }
-            ].concat(toolbar)
+            }
         })
         editor.codemirror.on("change", () => {
             value = editor.value()

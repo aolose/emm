@@ -1,22 +1,28 @@
 <script>
     import Date from './timLabel.svelte'
+    import {slide, fade} from "svelte/transition"
 
     export let sel = () => 0
     export let p = {}
 
     $:isPublish = p.published
-    $:title = isPublish ? p.title : p.title_d || p.title || ''
-    $:desc = (isPublish ? p.content : p.content_d || p.content || '').substring(0,128)
+    $:hasDraft = p.save > (p.modify || 0)
+    $:title = p.title || p.title_d
+    $:title_d = title === p.title_d ? '' : p.title_d
+    $:desc = (p.content_d || p.content || '').substring(0, 128)
 
     import {editPost} from "$lib/store";
 </script>
 
-<div class="pi" on:click={() => sel(p)} class:act={$editPost.id === p.id}>
+<div class="pi" on:click={() => sel(p)} class:act={$editPost.id === p.id} transition:slide|local>
     <div class="v">
-        {#if !isPublish || p.save > p.update}<span class="vd" title="draft">D</span>{/if}
+        {#if hasDraft}<span class="vd" title="draft">D</span>{/if}
         {#if isPublish}<span class="vp" title="published">P</span>{/if}
     </div>
     <h3>{title}</h3>
+    {#if title_d}
+        <h5 transition:slide|local>{title_d}</h5>
+    {/if}
     <p>{desc}</p>
     <div>
         <Date name="create" value={p.createAt}/>
@@ -58,6 +64,9 @@
   }
 
   .pi {
+    min-width: 400px;
+    min-height: 100px;
+    max-width: 100%;
     position: relative;
     direction: ltr;
 
@@ -72,9 +81,17 @@
     transition: 0.3s ease-in-out;
 
     h3 {
+      height: 56px;
       padding-right: 80px;
       line-height: 3;
       font-weight: 200;
+    }
+
+    h5 {
+      line-height: 1;
+      font-weight: 200;
+      padding-bottom: 10px;
+      color: #3574a8;
     }
 
     padding: 10px 10%;

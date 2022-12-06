@@ -1,12 +1,12 @@
 import type {APIRoutes, curPost} from '../types';
 import {db, sys} from './index';
 import {genPubKey} from './crypto';
-import {getReqJson, combineResult, model, md5, saveFile, pageBuilder} from './utils';
+import {getReqJson, combineResult, model, md5, saveFile, pageBuilder, uniqSlug} from './utils';
 import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
 import {Post, Res} from "$lib/server/model";
-import {diffObj} from "$lib/utils";
+import {diffObj, filter} from "$lib/utils";
 import {NULL} from "$lib/server/enum";
 
 const auth = (fn: RespHandle, fail?: RespHandle) => (req: Request) => {
@@ -27,14 +27,25 @@ const apis: APIRoutes = {
     posts: {
         post: auth((req) => {
             return pageBuilder(req, Post,
-                ['save desc']
+                ['createAt desc']
             )
         })
     },
+    slug:{
+        post:auth(async req=>{
+            const s = await req.text()
+            const [id,slug] = s.match(/(\d*?),(.*)/).slice(1)
+             return uniqSlug(+id,slug)
+        })
+    },
     post: {
+        delete: auth(async (req) => {
+            const i = new Uint8Array(await req.arrayBuffer())
+            return db.delByPk(Post, [...i]).changes
+        }),
         post: auth(async (req) => {
             const [flag, id] = curPostFlag
-            const o =  model(Post,await getReqJson(req)) as curPost
+            const o = model(Post, await getReqJson(req)) as curPost
             o.save = NULL.DATE
             if (!o.id) {
                 if (flag === o._) {
@@ -44,7 +55,7 @@ const apis: APIRoutes = {
             const d = model(Post, o) as { id: number }
             db.save(d)
             if (o._) curPostFlag = [o._, d.id]
-            return diffObj(o as Post, d)
+            return filter(diffObj(o as Post, d),[],false)
         })
     },
     res: {

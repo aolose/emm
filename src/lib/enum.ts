@@ -1,5 +1,10 @@
 export const reqMethod = ['POST', 'GET', 'DELETE', 'PATCH'];
-
+export enum method {
+	POST,
+	GET,
+	DELETE,
+	PATCH
+}
 export const dataType = {
 	json: 'application/json',
 	text: 'text/pain',

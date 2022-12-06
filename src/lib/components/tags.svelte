@@ -3,8 +3,9 @@
 
     export let tags = []
     $:allTags = new Set(tags)
-    let items = new Set()
-    let value = ''
+    export let value = ''
+    let items = new Set(value.split(','))
+    let val = ''
     let ipt
     let show = 0
     const rm = v => () => {
@@ -17,8 +18,8 @@
         if (code.startsWith('Arrow')) {
             switch (code[5]) {
                 case 'R':
-                    if (s === value.length)
-                        return value = pre
+                    if (s === val.length)
+                        return val = pre
                     break
                 case 'U':
                     return idx--
@@ -32,7 +33,7 @@
             show = 1 - show
         }
         if (code === 'Enter') {
-            value = value.slice(0, s) + ',' + value.slice(s)
+            val = val.slice(0, s) + ',' + val.slice(s)
         } else if (code === 'Backspace') {
             if (!s) {
                 const siz = [...items][items.size - 1]
@@ -47,27 +48,27 @@
     let dp
     let idx = 0
     let selects = []
-    $:pre = selects[idx] || value
+    $:pre = selects[idx] || val
     $:(async () => {
-        selects = [...allTags].filter(a => !items.has(a) && value !== a && a.toLowerCase().startsWith(value.toLowerCase()))
+        selects = [...allTags].filter(a => !items.has(a) && val !== a && a.toLowerCase().startsWith(val.toLowerCase()))
         selects.sort((a, b) => a < b ? -1 : 1)
         const lh = selects.length
         idx = lh && idx % lh
-        const l = value.length
+        const l = val.length
         let s = 0
         let h = 0
         for (let i = 0; i < l;) {
             const r = /^[ ,;\t\n\r]+/g
-            if (r.test(value.substring(i))) {
+            if (r.test(val.substring(i))) {
                 if (s < i) {
-                    items.add(value.slice(s, i))
+                    items.add(val.slice(s, i))
                     h = 1
                 }
                 i += r.lastIndex
                 s = i
             } else i++
         }
-        value = value.substring(s)
+        val = val.substring(s)
         if (h) {
             items = new Set(items)
             await tick()
@@ -78,14 +79,15 @@
             const a = dp.querySelector('.act')
             a?.scrollIntoView({behavior: 'smooth', block: 'center'})
         }
+        value = [...items].join()
     })()
 </script>
 
 <div class="a">
-    {#if selects.length && (show || value)}
+    {#if selects.length && (show || val)}
         <div class="d" bind:this={dp}>
             {#each selects as sec}
-                <div class:act={sec===pre} on:click={()=>value=sec}>{sec}</div>
+                <div class:act={sec===pre} on:click={()=>val=sec}>{sec}</div>
             {/each}
         </div>
     {/if}
@@ -95,9 +97,9 @@
         </div>
     {/each}
     <div class="c">
-        <span>{value}</span>
-        <span>{pre.replace(value, '')}</span>
-        <input bind:value={value}
+        <span>{val}</span>
+        <span>{pre.replace(val, '')}</span>
+        <input bind:value={val}
                bind:this={ipt}
                on:blur={()=>show=0}
                on:keydown={keyPress}/>

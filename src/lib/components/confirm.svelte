@@ -20,7 +20,7 @@
 </script>
 {#if cfg.show}
     <div class="a" on:click={cancel} class:act={cfg.show} transition:fade>
-        <div class="b" on:click|stopPropagation>
+        <div class="b" on:click|stopPropagation={()=>0} >
             <p>{cfg.text}</p>
             <div class="n">
                 {#if cfg.ok}
@@ -50,26 +50,27 @@
 
   .b {
     width: 280px;
-    padding: 20px;
+    padding: 15px 10px 15px;
     border-radius: 6px;
-    background: var(--bg0);
+    background: var(--bg2);
     box-shadow: rgba(0, 0, 0, .2) 2px 3px 9px;
   }
 
   .n {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
   }
 
   p {
     line-height: 2;
     font-size: 15px;
-    margin: 0 0 10px;
+    margin: 0 0 20px;
+    text-align: center;
   }
 
   button {
     cursor: pointer;
-    margin: 0 5px;
+    margin: 0 15px;
     background: none;
     color: #b6bac0;
     padding: 4px 8px;

@@ -1,4 +1,5 @@
 <script>
+    import {slide} from "svelte/transition";
     export let value = 0
     export let name=''
     $:time = +value && new Intl.DateTimeFormat('en-GB', {
@@ -6,13 +7,14 @@
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        second:'2-digit'
     }).format(new Date(+value))
 
 </script>
 
 {#if +value}
-    <label>{name}:<span>{time}</span></label>
+    <label transition:slide>{name}:<span>{time}</span></label>
 {/if}
 
 <style lang="scss">

@@ -10,7 +10,7 @@ import {
     encryptHeader,
     getKINums,
     data2Buf,
-    hasOwnProperty, arrPick, pick, delay, diffObj
+    hasOwnProperty, arrFilter, filter, delay, diffObj
 } from '../utils';
 import {keyPool} from './crypto';
 import type {Api} from '../types';
@@ -40,11 +40,12 @@ export function noNullKeyValues<T extends Model>(o: Obj<T>) {
     const C = o.constructor as Class<T>
     const ks = Object.keys(new C()) as (keyof T)[]
     // for safe
-    pick(o, ks)
+    filter(o, ks)
     const keys = [] as string[];
     const values = [] as unknown[];
     const {TEXT, INT, DATE} = NULL;
     Object.entries(o).forEach(([k, v]) => {
+        if (k[0] === '_') return;
         if (v !== undefined && v !== null) {
             const t = v.constructor.name;
             switch (t) {
@@ -62,9 +63,10 @@ export function noNullKeyValues<T extends Model>(o: Obj<T>) {
                 default:
                     return;
             }
-            keys.push(k);
-            values.push(v);
         }
+        if (v === undefined) v = null
+        keys.push(k);
+        values.push(v);
     });
     return [keys, values];
 }
@@ -122,6 +124,24 @@ export const getShareKey = (req: Request) => {
         return keyPool.get(num)?.[0];
     }
 };
+
+export const uniqSlug = (id: number, slug: string) => {
+    const params = [`slug%`]
+    let sql = `select slug from post where slug like ?`
+    if (id) {
+        sql = `${sql} and id != ?`
+        params.push(id)
+    }
+    const slugs = db.db.prepare(sql).all(...params).map(a => a.slug)
+    if (slugs.length) {
+        const n = slugs.map(a => +a.replace(slug, '')).filter(a => a).reduce((a, b) => a > b ? a : b)
+        return `${slug}-${n}`
+    }
+}
+
+export const setNull = <T extends object>(o: T, key: string) => {
+    (o as { [key: string]: unknown })[key] = null
+}
 
 export const getReqJson = async (req: Request) => {
     const shareKey = getShareKey(req);
@@ -245,13 +265,13 @@ export const cacheCount = (o: Class<Model>, num?: number) => {
     return n;
 }
 
-export const model = <T extends Model>(M: Class<T>, o: object) => {
+export const model = <T extends Model>(M: Class<T>, o: object = {}) => {
     const a = new M() as Obj<T>
     Object.keys(a).forEach((k) => {
         const o = k as keyof T
         if (typeof a[o] !== 'function') delete a[o]
     })
-    return pick(Object.assign(a, o), Object.keys(o) as (keyof T)[])
+    return filter(Object.assign(a, o), Object.keys(o) as (keyof T)[])
 }
 
 export const md5 = (buf: Buffer) => {
@@ -272,7 +292,7 @@ export const pageBuilder = async <T extends Model>(
     req: Request,
     model: Class<T>,
     orders: string[],
-    keys?: (keyof T)[]
+    keys: (keyof T)[] = []
 ) => {
     const r = new Uint8Array(await req.arrayBuffer())
     const p = r[0]
@@ -280,7 +300,7 @@ export const pageBuilder = async <T extends Model>(
     const c = cacheCount(Res) as number
     return {
         total: Math.floor((c + s - 1) / s),
-        items: arrPick(db.page(model, p, s, orders), keys)
+        items: arrFilter(db.page(model, p, s, orders), keys, false)
     }
 }
 

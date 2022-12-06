@@ -136,11 +136,12 @@ export const tags = writable([] as Tag[])
 export const tokens = writable([] as Token[])
 export const posts = writable([] as curPost[])
 export const setting = writable(0)
+export const saveNow = writable(0)
 
 editPost.subscribe(p => {
     if (!p._ && !p.id) return
     let ls = get(posts)
-    let c = ls.findIndex(o => {
+    const c = ls.findIndex(o => {
         return (p._ && o._ === p._) || (p.id && p.id === o.id)
     })
     if (c !== -1) {

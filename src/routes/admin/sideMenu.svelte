@@ -14,8 +14,8 @@
 		<a use:act href="/admin" class="icon i-home" />
 		<a use:act href="/admin/post" class="icon i-post" />
 		<a href="/admin/tag" class="icon i-comment" />
-		<a class="icon i-setting" />
-		<a class="icon i-system" />
+		<a class="icon i-set" />
+		<a class="icon i-sys" />
 		<s />
 		<s />
 	</div>

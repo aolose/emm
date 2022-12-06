@@ -1,7 +1,7 @@
 import {req} from './req';
 import {contentType, dataType, encryptIv, encTypeIndex, getIndexType} from './enum';
 import type {ApiData, ApiBodyData, fView, Model, Obj} from './types';
-
+import pinyin from 'tiny-pinyin'
 const {subtle} = crypto;
 let genKey: CryptoKeyPair;
 export let shareKey: CryptoKey | undefined;
@@ -241,19 +241,19 @@ export const delay = (fn: () => void, ms = 0) => {
     };
 };
 
-export const pick = <T extends Model>(o: Obj<T>, keys?: (keyof T)[]) => {
-    if (!keys || !keys.length) return o
+export const filter = <T extends Model>(o: Obj<T>, keys: (keyof T)[], nullAble = true) => {
+    const hasKey = keys && keys.length
     Object.keys(o).forEach(_ => {
         const k = _ as keyof T
         const v = o[k]
-        if (v === null || v === undefined || keys.indexOf(k as keyof T) === -1) delete o[k]
+        if ((!nullAble && (v === undefined || v === null)) ||
+            (hasKey && keys.indexOf(k as keyof T) === -1)) delete o[k]
     })
     return o
 }
 
-export const arrPick = <T extends Model>(o: T[], keys?: (keyof T)[]) => {
-    if (!keys || !keys.length) return o
-    o.forEach(v => pick(v, keys))
+export const arrFilter = <T extends Model>(o: T[], keys: (keyof T)[], nullAble = true) => {
+    o.forEach(v => filter(v, keys, nullAble))
     return o
 }
 
@@ -312,11 +312,17 @@ export function file2Md(f: fView[] | File[]) {
 export function diffObj<T extends object>(origin: T, change: T) {
     const d = {} as T
     let ch = 0
+    const s = new Set(Object.keys(origin))
     for (const [a, b] of Object.entries(change)) {
-        if (origin[a as keyof T] !== b && b !== null && b !== undefined) {
+        if (origin[a as keyof T] !== b &&  b !== undefined) {
             d[a as keyof T] = b
             ch = 1
+            s.delete(a)
         }
     }
     if (ch) return d
+}
+
+export function slugGen(title:string){
+  return pinyin.convertToPinyin(title,'',true).replace(/ /,'-')
 }

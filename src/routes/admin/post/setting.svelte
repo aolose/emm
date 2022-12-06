@@ -2,24 +2,45 @@
     import CheckBox from '$lib/components/check.svelte'
     import Tags from '$lib/components/tags.svelte'
     import {onMount} from "svelte";
-    import {editPost, selectFile, setting, tags, tokens} from "$lib/store";
+    import {editPost, saveNow, selectFile, setting, tags, tokens} from "$lib/store";
     import {fade} from "svelte/transition";
+    import {api} from "$lib/req";
+    import {get} from "svelte/store";
 
     let tg = []
     let tk = []
     let post = {}
+    const getSlug = api('slug')
+    let slugInfo = ''
+    let t = -1
+    const checkSlug = () => {
+        clearTimeout(t)
+        slugInfo = 'checking...'
+        const slug = post.slug
+        if (slug) getSlug([post.id||'', post.slug].join()).then(s => {
+            if (get(setting) && post.slug === slug) {
+                if (s) {
+                    t = setTimeout(() => slugInfo = '', 5e3)
+                    slugInfo = 'slug auto modified!'
+                    post.slug = s
+                } else {
+                    slugInfo = ''
+                }
+            }
+        })
+    }
     const pickPic = () => {
         setting.set(0)
         selectFile(1).then(a => {
-            console.log(a)
             post = {...post, banner: a[0].id}
         }).finally(() => setting.set(1))
     }
     const rmPic = () => {
-        delete post.banner
+        post.banner = null
         post = {...post}
     }
     const ok = () => {
+        saveNow.set(1)
         setting.set(0)
         editPost.update(p => ({...p, ...post}))
     }
@@ -53,12 +74,12 @@
             </div>
             <div class="f">
                 <div class="r">
-                    <h3>Slug</h3>
-                    <input/>
+                    <h3>Slug<span>{slugInfo}</span></h3>
+                    <input bind:value={post.slug} on:blur={checkSlug}/>
                 </div>
                 <div class="r">
                     <h3>Description</h3>
-                    <textarea></textarea>
+                    <textarea bind:value={post.desc}></textarea>
                 </div>
                 <div class="r">
                     <h3>Banner</h3>
@@ -77,7 +98,7 @@
                 <div class="r">
                     <h3>Tags</h3>
                     <div class="t">
-                        <Tags tags={tg}/>
+                        <Tags tags={tg} bind:value={post.tag}/>
                     </div>
                 </div>
                 <div class="r">
@@ -180,7 +201,14 @@
     color: #545e72;
     font-weight: 200;
     font-size: 13px;
+    align-items: center;
     line-height: 2;
+    display: flex;
+    span{
+      flex: 1;
+      text-align: right;
+      color: #566279;
+    }
   }
 
   input, textarea, .p, .t {

@@ -16,9 +16,14 @@
     let tmpMark = 1
 
     function sel(p) {
-        const _ = tmpMark++
-        originPost.set({...p, _})
-        editPost.set({...p, _})
+        const o = {...p}
+        if (!o.id) {
+            o._ = tmpMark++
+        }
+        if (!o.title_d) o.title_d = o.title
+        if (!o.content_d) o.content_d = o.content
+        originPost.set({...o})
+        editPost.set({...o})
     }
 
     function page(n = 1) {
@@ -29,8 +34,10 @@
         })
     }
 
+    let ps = []
     onMount(() => {
         page()
+        return posts.subscribe(p => ps = p)
     })
 </script>
 
@@ -42,7 +49,7 @@
                 <AddPost/>
             </div>
             <div class="ls">
-                {#each $posts as p}
+                {#each ps as p (p._||p.id)}
                     <PItem p={p} sel={sel}/>
                 {/each}
             </div>
@@ -94,7 +101,8 @@
     position: relative;
     flex: 1;
     overflow: auto;
-
+    overflow-x: hidden;
+    width: 100%;
     &::-webkit-scrollbar-track {
       -webkit-box-shadow: inset var(--bg1) 0 0 10px;
     }
