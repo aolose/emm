@@ -17,7 +17,7 @@ function createTable(Model: M) {
     const e = Object.entries(t);
     const pk = [];
     for (const [k, v] of e) {
-        if (typeof v === "function") continue
+        if (typeof v === "function" || k[0] === '_') continue
         let type = 'BLOB';
         const name = v?.constructor?.name;
         switch (name) {
@@ -120,10 +120,10 @@ export class DB {
     }
 
     save<T extends Model>(o: Obj<T>) {
-        if (o.onSave) {
-            o.onSave(this.db)
-        }
         const now = Date.now()
+        if (o.onSave) {
+            o.onSave(this,now)
+        }
         const table = o.constructor.name
         setKey(o, 'save', now)
         const pk = getPrimaryKey(table)
