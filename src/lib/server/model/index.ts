@@ -1,7 +1,9 @@
 import {NULL} from '../enum'
 import {noNull, primary, unique} from './decorations'
+import {model, setNull, uniqSlug} from "$lib/server/utils";
+import {slugGen} from "$lib/utils";
 
-const {INT, TEXT, DATE} = NULL
+const {INT, TEXT} = NULL
 
 export class Count {
     @primary
@@ -17,7 +19,7 @@ export class Res {
     name = TEXT
     @unique
     md5 = TEXT
-    save = DATE
+    save = INT
     thumb = INT
 }
 
@@ -27,17 +29,17 @@ export class ShortPost {
     comment = true
     content = TEXT
     token = TEXT
-    publish = DATE
-    modify = DATE
-    createAt = DATE
+    publish = INT
+    modify = INT
+    createAt = INT
 }
 
 export class Tag {
     @primary
     name = TEXT
     desc = TEXT
-    createAt = DATE
-    post=TEXT
+    createAt = INT
+    post = TEXT
 }
 
 export class Post {
@@ -54,10 +56,41 @@ export class Post {
     title_d = TEXT
     content_d = TEXT
     token = TEXT
-    createAt = DATE
-    publish = DATE
-    modify = DATE
-    save = DATE
+    createAt = INT
+    publish = INT
+    modify = INT
+    save = INT
+    _p = 0
+
+    onSave(db, now) {
+        if (this._p) {
+            const {id, title_d, title, content_d, content} = this
+            const ori = id ? db.get(model(this.constructor, {id})) : {}
+            if (ori.publish) {
+                this.modify = now
+            } else this.publish = now
+            if (!ori.published) this.published = 1
+            const c = content_d || ori.content_d
+            const t = title_d || ori.title_d
+            if (t && ori.title !== t) {
+                this.title = t
+                if (ori.title_d) setNull(this, 'title_d')
+            }
+            if (c && this.content !== c) {
+                this.content = c
+                if (ori.content_d) setNull(this, 'content_d')
+            }
+            const ti = t || title || ori.title
+            const sl = this.slug || ori.slug
+            if (!sl && ti) {
+                this.slug = slugGen(ti)
+            }
+            if (this.slug) {
+                const s = uniqSlug(this.id, this.slug)
+                if (s && ori.slug !== this.slug) this.slug = s
+            }
+        }
+    }
 }
 
 export class Token {
@@ -76,7 +109,7 @@ export class Token {
     expire = INT
     targetIds = TEXT
     remark = TEXT
-    createAt = DATE
+    createAt = INT
 
 }
 
@@ -87,13 +120,13 @@ export class Comment {
     name = TEXT
     @noNull
     say = TEXT
-    publish = DATE
+    publish = INT
     reply = INT
     state = INT // -1 skip 0 - wait review  1 - review ok 2 - review no pass
     token = INT
     pass = true
-    createAt = DATE
-    modify = DATE
+    createAt = INT
+    modify = INT
 }
 
 export class System {
@@ -127,7 +160,7 @@ export class User {
     avatar = TEXT
     @noNull
     pwd = TEXT
-    birth = DATE
+    birth = INT
     desc = TEXT
-    createAt = DATE
+    createAt = INT
 }
