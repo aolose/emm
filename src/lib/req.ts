@@ -184,6 +184,7 @@ const delayPms = new Map<string, Promise<reqData>>()
 const delayMap = new Map<string, [number, reqParams?]>()
 
 export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
+    const done = cfg?.done
     const delay = cfg?.delay
     if (browser && delay) {
         const delayKey = reqKey(url, params, cfg?.method, cfg?.delayKey || cfg?.delay)
@@ -231,7 +232,10 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
             reqPromiseCache.set(key, p);
         }
     }
-    return p;
+    return p.then(d => {
+        if (done) done(d)
+        return d
+    });
 };
 export const api = (url: ApiName, cfg?: reqOption) => {
     const c = {...(cfg || {})}
