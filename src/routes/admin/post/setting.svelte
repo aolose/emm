@@ -2,12 +2,11 @@
     import CheckBox from '$lib/components/check.svelte'
     import Tags from '$lib/components/tags.svelte'
     import {onMount} from "svelte";
-    import {editPost, saveNow, selectFile, setting, tags, tokens} from "$lib/store";
+    import {editPost, saveNow, selectFile, setting, tokens, patchedTag} from "$lib/store";
     import {fade} from "svelte/transition";
     import {api} from "$lib/req";
     import {get} from "svelte/store";
 
-    let tg = []
     let tk = []
     let post = {}
     const getSlug = api('slug')
@@ -17,7 +16,7 @@
         clearTimeout(t)
         slugInfo = 'checking...'
         const slug = post.slug
-        if (slug) getSlug([post.id||'', post.slug].join()).then(s => {
+        if (slug) getSlug([post.id || '', post.slug].join()).then(s => {
             if (get(setting) && post.slug === slug) {
                 if (s) {
                     t = setTimeout(() => slugInfo = '', 5e3)
@@ -50,11 +49,9 @@
 
     onMount(() => {
         const f0 = editPost.subscribe(p => post = {...p})
-        const f1 = tags.subscribe(t => tg = t.map(a => a.name))
         const f2 = tokens.subscribe(t => tk = t.map(a => a.name))
         return () => {
             f0()
-            f1()
             f2()
         }
     })
@@ -98,13 +95,13 @@
                 <div class="r">
                     <h3>Tags</h3>
                     <div class="t">
-                        <Tags tags={tg} bind:value={post.tag}/>
+                        <Tags tags={$patchedTag.tags} bind:value={post.tag}/>
                     </div>
                 </div>
                 <div class="r">
                     <h3>Tokens</h3>
                     <div class="t">
-                        <Tags tags={tg}/>
+                        <Tags tags={tk}/>
                     </div>
                 </div>
                 <div class="r">
@@ -139,6 +136,7 @@
 
     &::-webkit-scrollbar-track {
       background: var(--bg2);
+      box-shadow: none;
     }
 
     &::-webkit-scrollbar-thumb {
@@ -204,7 +202,8 @@
     align-items: center;
     line-height: 2;
     display: flex;
-    span{
+
+    span {
       flex: 1;
       text-align: right;
       color: #566279;
