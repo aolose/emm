@@ -1,6 +1,6 @@
 import {NULL} from './enum';
 import {contentType, dataType, encryptIv, encTypeIndex, geTypeIndex} from '../enum';
-import type {ApiData, ApiName, Class, Obj} from '../types';
+import type {ApiData, ApiName, Class, DiffFn, Obj, PatchFn} from '../types';
 import apis from './api';
 import {
     encrypt,
@@ -126,7 +126,7 @@ export const getShareKey = (req: Request) => {
 };
 
 export const uniqSlug = (id: number, slug: string) => {
-    const params = [`slug%`]
+    const params = [`slug%`] as unknown[]
     let sql = `select slug from post where slug like ?`
     if (id) {
         sql = `${sql} and id != ?`
@@ -194,13 +194,12 @@ export const apiHandle = async (request: Request, name: ApiName): Promise<Respon
 };
 
 
-export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}): T => {
+export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = true): T => {
     type key = keyof T
     type value = T[key]
     const pk = getPrimaryKey(C.name) as keyof T
     let o = model(C, init)
     let ori = {} as Obj<T>
-
     const save = delay(() => {
         const p = diffObj(ori, o)
         if (!p) return
@@ -209,24 +208,26 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}): T => {
         db.save(ch)
         ori = {...Object.assign(o, ch)}
     }, 100)
-    const k = o[pk]
-    let u = 0
-    if (k) {
-        const e = db.get(model(C, {[pk]: k}))
-        if (e) {
-            ori = {...e}
-            o = Object.assign(e, o)
-            u = 1
+    if (load) {
+        const k = o[pk]
+        let u = 0
+        if (k) {
+            const e = db.get(model(C, {[pk]: k}))
+            if (e) {
+                ori = {...e}
+                o = Object.assign(e, o)
+                u = 1
+            }
         }
-    }
-    if (!u) {
-        const r = db.get(o)
-        if (r) {
-            ori = {...r}
-            o = Object.assign(r, o)
+        if (!u) {
+            const r = db.get(o)
+            if (r) {
+                ori = {...r}
+                o = Object.assign(r, o)
+            }
         }
+        save()
     }
-    save()
     return new Proxy(o, {
         get(target: T, p: string, receiver: T) {
             const v = Reflect.get(target, p, receiver);
@@ -265,7 +266,7 @@ export const cacheCount = (o: Class<Model>, num?: number) => {
     return n;
 }
 
-export const model = <T extends Model>(M: Class<T>, o: object = {}) => {
+export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: object = {}) => {
     const a = new M() as Obj<T>
     Object.keys(a).forEach((k) => {
         const o = k as keyof T
@@ -310,4 +311,18 @@ export const hasKey = <T extends Model>(o: Obj<T>, key: string) => {
 }
 export const setKey = <T extends Model>(o: Obj<T>, key: string, value: unknown) => {
     if (hasKey(o, key)) o[key as keyof T] = value as T[keyof T]
+}
+
+export const patchTags: PatchFn<Set<string>> = (data, add, del) => {
+    const d = new Set(data)
+    if (del) for (const s of del) d.delete(s)
+    if (add) for (const s of add) d.add(s)
+    return d
+}
+export const diffTags: DiffFn<Set<string>> = (old, cur) => {
+    const add = new Set<string>()
+    const del = new Set<string>()
+    for (const o of cur) if (!old.has(o)) add.add(o)
+    for (const o of old) if (!cur.has(o)) del.add(o)
+    return {add, del}
 }

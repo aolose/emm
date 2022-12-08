@@ -1,7 +1,11 @@
 import {NULL} from '../enum'
 import {noNull, primary, unique} from './decorations'
-import {model, setNull, uniqSlug} from "$lib/server/utils";
+import {DBProxy, diffTags, model, setNull, uniqSlug} from "$lib/server/utils";
 import {slugGen} from "$lib/utils";
+import type {DB} from "$lib/server/db/sqlite3";
+import type {Class, Model} from "$lib/types";
+import {tags} from "$lib/store";
+import {get} from "svelte/store";
 
 const {INT, TEXT} = NULL
 
@@ -49,8 +53,8 @@ export class Post {
     slug = TEXT
     desc = TEXT
     tag = TEXT
-    published = false
-    comment = true
+    published = 0
+    comment = 1
     title = TEXT
     content = TEXT
     title_d = TEXT
@@ -62,11 +66,12 @@ export class Post {
     save = INT
     _p = 0
 
-    onSave(db, now) {
+    onSave(db: DB, now: number) {
+        const {id, title_d, title, content_d, content} = this
+        const oo = id ? db.get(model(this.constructor as FunctionConstructor, {id})) : {}
+        const ori = oo as Post
         if (this._p) {
-            const {id, title_d, title, content_d, content} = this
-            const ori = id ? db.get(model(this.constructor, {id})) : {}
-            if (ori.publish) {
+            if (ori?.publish) {
                 this.modify = now
             } else this.publish = now
             if (!ori.published) this.published = 1
@@ -88,6 +93,42 @@ export class Post {
             if (this.slug) {
                 const s = uniqSlug(this.id, this.slug)
                 if (s && ori.slug !== this.slug) this.slug = s
+            }
+        }
+        if (this.tag && id) {
+            const cur = this.tag.split(',')
+            let as = new Set<string>(cur)
+            let ds = new Set<string>()
+            if (ori.tag) {
+                const old = ori.tag.split(',')
+                const {add, del} = diffTags(new Set(old), new Set(cur))
+                as = new Set([...as, ...add])
+                ds = new Set([...del])
+            }
+            const tgs = get(tags)
+            const _id = id + ''
+            tgs.forEach(t => {
+                const {name} = t
+                const ps = new Set(t.post.split(','))
+                let ch = 0
+                if (as.has(name)) {
+                    if (!ps.has(_id)) {
+                        ps.add(_id)
+                        ch = 1
+                    }
+                    as.delete(name)
+                }
+                if (ds.has(name)) {
+                    if (ps.has(_id)) {
+                        ps.delete(_id)
+                        ch = 1
+                    }
+                    ds.delete(name)
+                }
+                if (ch) t.post = [...ps].join()
+            })
+            if (as.size) {
+                tags.update(u => u.concat([...as].map(a => DBProxy(Tag, {name: a, post: _id}))))
             }
         }
     }

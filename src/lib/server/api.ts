@@ -1,4 +1,4 @@
-import type {APIRoutes, curPost} from '../types';
+import type {APIRoutes, curPost, Obj} from '../types';
 import {db, sys} from './index';
 import {genPubKey} from './crypto';
 import {getReqJson, combineResult, model, md5, saveFile, pageBuilder, uniqSlug} from './utils';
@@ -8,6 +8,7 @@ import {Buffer} from "buffer";
 import {Post, Res} from "$lib/server/model";
 import {diffObj, filter} from "$lib/utils";
 import {NULL} from "$lib/server/enum";
+import {tagPatcher} from "$lib/server/cache";
 
 const auth = (fn: RespHandle, fail?: RespHandle) => (req: Request) => {
     console.log('auth...', fail);
@@ -24,6 +25,13 @@ const apis: APIRoutes = {
             return +!!sys.admUsr;
         }
     },
+    tags: {
+        post: auth(async req => {
+            const ver = +(await req.text()) || undefined
+            const [v,a,d] = tagPatcher(ver)
+            return
+        })
+    },
     posts: {
         post: auth((req) => {
             return pageBuilder(req, Post,
@@ -31,11 +39,14 @@ const apis: APIRoutes = {
             )
         })
     },
-    slug:{
-        post:auth(async req=>{
+    slug: {
+        post: auth(async req => {
             const s = await req.text()
-            const [id,slug] = s.match(/(\d*?),(.*)/).slice(1)
-             return uniqSlug(+id,slug)
+            const mt = s.match(/(\d*?),(.*)/)
+            if (mt) {
+                const [id, slug] = mt.slice(1)
+                return uniqSlug(+id, slug)
+            }
         })
     },
     post: {
@@ -46,7 +57,6 @@ const apis: APIRoutes = {
         post: auth(async (req) => {
             const [flag, id] = curPostFlag
             const o = model(Post, await getReqJson(req)) as curPost
-            o.save = NULL.DATE
             if (!o.id) {
                 if (flag === o._) {
                     o.id = id
@@ -55,7 +65,7 @@ const apis: APIRoutes = {
             const d = model(Post, o) as { id: number }
             db.save(d)
             if (o._) curPostFlag = [o._, d.id]
-            return filter(diffObj(o as Post, d),[],false)
+            return filter(diffObj(o as Post, d) as Obj<Post>, [], false)
         })
     },
     res: {

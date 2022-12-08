@@ -1,19 +1,20 @@
 import type * as models from './server/model';
 import type {apiPath} from './server/api'
 import type {Post} from "./server/model";
-import type {Database} from 'better-sqlite3';
 import type {method} from "$lib/enum";
+import type {DB} from "$lib/server/db/sqlite3";
 
 export type MethodNumber = 0 | 1 | 2 | 3
 export type Class<T> = new (...args: unknown[]) => T;
 export type RespHandle = (req: Request) => ApiData | Promise<ApiData>;
 
 export interface dbHooks {
-    onSave?: (db: Database, now?: number) => boolean | void
-    onDel?: (db: Database, now?: number) => boolean | void
+    onSave?: (db: DB, now?: number) => boolean | void
+    onDel?: (db: DB, now?: number) => boolean | void
 }
 
-export type Model = (models.System | models.Count | models.User | models.Post | models.Res) & dbHooks;
+export type Model =
+    (models.System | models.Tag | models.Comment | models.Count | models.User | models.Post | models.Res)
 
 export type Obj<T extends Model> = {
     [key in keyof T]?: T[key];
@@ -86,3 +87,13 @@ export  type fileSelectCfg = {
     reject?: (v: unknown) => void,
 }
 export type curPost = Obj<Post> & { _?: number }
+export type DatePatch<T> = {
+    expire: number
+    add?: T
+    del?: T,
+    size: number
+}
+export type version = number
+export type PatchPool<T> = Map<version, DatePatch<T>>
+export type PatchFn<T> = (data: T, add?: T, del?: T) => T
+export type DiffFn<T> = (old: T, cur: T) => ({ add: T, del: T })

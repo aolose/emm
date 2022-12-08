@@ -2,7 +2,7 @@ import better from 'better-sqlite3';
 import {noNullKeyValues, setKey, sqlVal, val} from '../utils';
 import * as models from '../model';
 import {getConstraint, getPrimaryKey, pkMap, primaryKey} from '../model/decorations';
-import type {Class, Model, Obj} from "$lib/types";
+import type {Class, dbHooks, Model, Obj} from "$lib/types";
 
 const tables = Object.values(models);
 const INTEGER = 'INTEGER';
@@ -119,10 +119,11 @@ export class DB {
         return this.db.prepare(s + d + l).all() as T[]
     }
 
-    save<T extends Model>(o: Obj<T>) {
+    save<T extends Model>(a: Obj<T>) {
         const now = Date.now()
+        const o = a as Obj<T> & dbHooks
         if (o.onSave) {
-            o.onSave(this,now)
+            o.onSave(this, now)
         }
         const table = o.constructor.name
         setKey(o, 'save', now)
@@ -137,13 +138,10 @@ export class DB {
         const r = this.db.prepare(sql).run(...values);
         if (r.changes === 1 && !kv) {
             const t = typeof kv
-            if (t === 'number' || t === 'bigint') {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                o[pk] = r.lastInsertRowid
-            } else {
-                o[pk] = this.db.prepare(`select ${pk} from ${table} where rowid=?`).get(r.lastInsertRowid)[pk]
-            }
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            o[pk] = (t === 'number' || t === 'bigint') ? r.lastInsertRowid :
+                this.db.prepare(`select ${pk} from ${table} where rowid=?`).get(r.lastInsertRowid)[pk]
         }
         return r
     }
