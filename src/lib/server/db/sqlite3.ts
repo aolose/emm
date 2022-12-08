@@ -119,7 +119,7 @@ export class DB {
         return this.db.prepare(s + d + l).all() as T[]
     }
 
-    save<T extends Model>(a: Obj<T>) {
+    save<T extends Model>(a: Obj<T>,create?:boolean) {
         const now = Date.now()
         const o = a as Obj<T> & dbHooks
         if (o.onSave) {
@@ -131,7 +131,7 @@ export class DB {
         const kv = val(o[pk])
         let sql: string
         let values: unknown[]
-        if (!kv) {
+        if (!kv||create) {
             setKey(o, 'createAt', now);
             [sql, values] = insert(o);
         } else [sql, values] = update(o);
