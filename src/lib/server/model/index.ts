@@ -1,10 +1,11 @@
 import {NULL} from '../enum'
 import {noNull, primary, unique} from './decorations'
-import {DBProxy, diffTags, model, setNull, uniqSlug} from "$lib/server/utils";
+import {DBProxy, model, setNull, uniqSlug} from "$lib/server/utils";
 import {slugGen} from "$lib/utils";
 import type {DB} from "$lib/server/db/sqlite3";
 import {tags} from "$lib/store";
 import {get} from "svelte/store";
+import {diffTags} from "$lib/tagPatchFn";
 
 const {INT, TEXT} = NULL
 
@@ -94,9 +95,9 @@ export class Post {
                 if (s && ori.slug !== this.slug) this.slug = s
             }
         }
-        if (this.tag && id) {
-            const cur = this.tag.split(',')
-            let as = new Set<string>(cur)
+        if (this.tag !== undefined && id) {
+            const cur = this.tag?.split(',') || []
+            let as = new Set<string>(cur.filter(a=>!!a))
             let ds = new Set<string>()
             if (ori.tag) {
                 const old = ori.tag.split(',')
@@ -104,7 +105,7 @@ export class Post {
                 as = new Set([...as, ...add])
                 ds = new Set([...del])
             }
-            const tgs = get(tags)
+            const tgs = get(tags).filter(a=>!!a)
             const _id = id + ''
             tgs.forEach(t => {
                 const {name} = t
