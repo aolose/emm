@@ -1,10 +1,12 @@
 <script>
     import {tick} from "svelte";
+    import {slide} from "svelte/transition";
+    import {idGen} from "$lib/utils";
 
     export let tags = []
     $:allTags = new Set(tags)
-    export let value = ''
-    let items = new Set(value.split(','))
+    export let value = null
+    let items = new Set(value ? value?.split(',').filter(a => !!a) : [])
     let val = ''
     let ipt
     let show = 0
@@ -45,10 +47,11 @@
             }
         }
     }
+    let id = idGen()
     let dp
     let idx = 0
     let selects = []
-    $:pre = selects[idx] || val
+    $:pre = (show || val) ? (selects[idx] || val) : ''
     $:(async () => {
         selects = [...allTags].filter(a => !items.has(a) && val !== a && a.toLowerCase().startsWith(val.toLowerCase()))
         selects.sort((a, b) => a < b ? -1 : 1)
@@ -79,15 +82,15 @@
             const a = dp.querySelector('.act')
             a?.scrollIntoView({behavior: 'smooth', block: 'center'})
         }
-        value = [...items].join()
+        value = [...items].join() || null
     })()
 </script>
 
-<div class="a">
+<label class="a" for={id}>
     {#if selects.length && (show || val)}
-        <div class="d" bind:this={dp}>
-            {#each selects as sec}
-                <div class:act={sec===pre} on:click={()=>val=sec}>{sec}</div>
+        <div class="d" bind:this={dp} transition:slide>
+            {#each selects as sec,index}
+                <div class:act={idx===index} on:click={()=>val=sec}>{sec}</div>
             {/each}
         </div>
     {/if}
@@ -99,12 +102,12 @@
     <div class="c">
         <span>{val}</span>
         <span>{pre.replace(val, '')}</span>
-        <input bind:value={val}
+        <input id={id} bind:value={val}
                bind:this={ipt}
-               on:blur={()=>show=0}
+               on:blur={()=>setTimeout(()=>show=0,100)}
                on:keydown={keyPress}/>
     </div>
-</div>
+</label>
 
 <style lang="scss">
   span {
@@ -157,14 +160,14 @@
   button {
     padding: 5px;
     border-left: 1px solid #171b2a;
-
+    color: #627184;
     &:hover {
-
+       color: #8aa3ab;
     }
-  ;
   }
 
   .b, .c {
+    height: 28px;
     display: flex;
     align-items: center;
     margin: 2px 3px;
@@ -190,6 +193,7 @@
     }
 
     input {
+      min-width: 0;
       width: 100%;
       color: #b5c8ea;
       position: absolute;
