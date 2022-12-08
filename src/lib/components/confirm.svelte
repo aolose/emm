@@ -10,24 +10,34 @@
 
     function ok() {
         cancel()
-        cfg.resolve?.()
+        cfg.resolve?.(1)
     }
 
     function cancel(e) {
         confirmStore.set({...cfg, show: false})
         if (e) cfg.reject?.()
     }
+    function esc(e){
+        if(cfg.show&&e.code==='Escape'){
+            cancel()
+        }
+    }
+    let bo,bc
+    $:{
+        if(cfg.show)(bo||bc)?.focus()
+    }
 </script>
+<svelte:window on:keydown={esc} />
 {#if cfg.show}
     <div class="a" on:click={cancel} class:act={cfg.show} transition:fade>
-        <div class="b" on:click|stopPropagation={()=>0} >
+        <div class="b" on:click|stopPropagation={()=>0}>
             <p>{cfg.text}</p>
             <div class="n">
                 {#if cfg.ok}
-                    <button on:click={ok}>{cfg.ok}</button>
+                    <button bind:this={bo} on:click={ok}>{cfg.ok}</button>
                 {/if}
                 {#if cfg.cancel}
-                    <button on:click={cancel}>{cfg.cancel}</button>
+                    <button bind:this={bc} on:click={cancel}>{cfg.cancel}</button>
                 {/if}
             </div>
         </div>
