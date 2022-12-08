@@ -1,13 +1,14 @@
 <script>
     import {onMount} from "svelte";
     import Editor from '$lib/components/editor.svelte'
-    import {confirm, editPost, originPost, posts, saveNow, setting} from "$lib/store";
+    import {confirm, editPost, originPost, patchedTag, posts, saveNow, setting} from "$lib/store";
     import {api, req} from "$lib/req";
     import {diffObj} from "$lib/utils";
     import {get} from "svelte/store";
     import {browser} from "$app/environment";
     import {fade} from "svelte/transition";
     import {method} from "$lib/enum";
+    import {patchTags} from "$lib/tagPatchFn";
 
     let title = ''
     let draft = ''
@@ -54,7 +55,8 @@
     const tDel = {
         name: "delete",
         action: () => {
-            confirm('sure to delete?').then(() => {
+            confirm('sure to delete?').then((ok) => {
+                if(!ok)return;
                 req('post', new Uint8Array([cid]), {method: method.DELETE}).then(a => {
                     if (a) {
                         posts.update(u => {
@@ -80,6 +82,25 @@
 
     const delaySave = api('post', {delay: 3e3})
     const save = api('post')
+    const loadTag = () => {
+        const {ver, tags} = get(patchedTag)
+        req('tags', +ver).then(d => {
+            const ds = d.split(' ')
+            const [a, b, c] = ds
+            const da = b ? b.split(',') : []
+            const dl = c ? c.split(',') : []
+            let data
+            if (ds.length === 2) {
+                data = da
+            } else {
+                data = [...patchTags(new Set(tags), new Set(da), new Set(dl))]
+            }
+            patchedTag.set({
+                ver: +a,
+                tags: data
+            })
+        })
+    }
     let saving = 0
     const id = a => a.id || a._
     const autoSave = async (p, isPublish) => {
@@ -89,7 +110,8 @@
         saveNow.set(0)
         const ori = get(originPost)
         const o = diffObj(ori, p)
-        if (!isPublish && (!o || !Object.values({...o, id: ''}).join(''))) return saving = 0
+        const ol = o && Object.keys(o).length
+        if (!isPublish && (!o || (!(o.title_d + o.content_d) && ol === 2) || ol === 0)) return saving = 0
         const _ = p._
         const v = {...o, _}
         if (p.id) {
@@ -99,6 +121,7 @@
         const k = id(p)
         if (isPublish) v._p = isPublish
         const r = await (now ? save : delaySave)(v) || {}
+        if (v.tag) await loadTag()
         originPost.update(u => {
             if (k === id(u)) {
                 return {...u, ...o, ...r}
@@ -116,6 +139,7 @@
 
 
     onMount(async () => {
+        loadTag()
         return editPost.subscribe(p => {
             draft = p.content_d || '';
             title = p.title_d || '';

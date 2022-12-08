@@ -20,30 +20,36 @@
             },
             className: "icon i-file",
             title: "Files",
-        },'|']
+        }, '|']
     $:tools = base.concat(toolbar)
+    const changeTools = () => {
+        const bar = editor.toolbar_div
+        const cm = editor.codemirror
+        cm.off('cursorActivity')
+        const fn = cm.getWrapperElement
+        cm.getWrapperElement = () => {
+            cm.getWrapperElement = fn
+            return {
+                parentNode: {
+                    insertBefore(a) {
+                        bar.replaceWith(a)
+                        editor.toolbar_div = a
+                    }
+                }
+            }
+        }
+        editor.createToolbar(tools)
+    }
     $:{
         if (editor && value !== editor.value())
             editor.value(value)
         const s = JSON.stringify(toolbar)
         if (editor && ts !== s) {
             ts = s
-            const bar = editor.toolbar_div
-            const cm = editor.codemirror
-            cm.off('cursorActivity')
-            const fn = cm.getWrapperElement
-            cm.getWrapperElement = () => {
-                cm.getWrapperElement = fn
-                return {
-                    parentNode: {
-                        insertBefore(a) {
-                            bar.replaceWith(a)
-                        }
-                    }
-                }
-            }
+            changeTools()
         }
     }
+
     onMount(async () => {
         const eModule = await import('easymde')
         const Easy = eModule.default
@@ -77,7 +83,7 @@
                 'upload-image': null,
             }
         })
-        editor.codemirror.on("change", () => {
+        editor?.codemirror?.on("change", () => {
             value = editor.value()
         });
     })
