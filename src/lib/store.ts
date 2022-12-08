@@ -133,6 +133,10 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
 export const originPost = writable({} as curPost)
 export const editPost = writable({} as curPost)
 export const tags = writable([] as Tag[])
+export const patchedTag = writable({
+    ver:0,
+    tags:[] as string[]
+})
 export const tokens = writable([] as Token[])
 export const posts = writable([] as curPost[])
 export const setting = writable(0)
