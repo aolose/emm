@@ -16,7 +16,7 @@ import {keyPool} from './crypto';
 import type {Api} from '../types';
 import type {Model} from '../types';
 import {getPrimaryKey} from './model/decorations';
-import {db} from './index';
+import {db, server, sys} from './index';
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
@@ -325,4 +325,36 @@ export const diffTags: DiffFn<Set<string>> = (old, cur) => {
     for (const o of cur) if (!old.has(o)) add.add(o)
     for (const o of old) if (!cur.has(o)) del.add(o)
     return {add, del}
+}
+
+export let sysStatue = 0
+const chk =()=>{
+    // step1 config db
+    const dbc = '.config.db'
+    if (fs.existsSync(dbc)) {
+        if (dbc) {
+            const p = fs.readFileSync(dbc).toString()
+            if (!p) return 0
+            if (!fs.existsSync(p)) {
+                try {
+                    fs.mkdirSync(path.dirname(p), {recursive: true})
+                    server.start(p)
+                } catch (e) {
+                    console.log(e)
+                    return 0
+                }
+            }
+        }
+    } else return 0
+    // step2 set admin:
+    if (!sys.admUsr || !sys.admPwd) return 1
+    // step3 set upload
+    if (!sys.uploadDir || !sys.thumbDir) return 2
+    // step4 set geo ip
+    if (!sys.ipLiteToken) return 3
+    return 9
+}
+export const checkStatue = () => {
+    sysStatue = chk()
+    return sysStatue
 }

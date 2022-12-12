@@ -2,6 +2,7 @@ import {req} from './req';
 import {contentType, dataType, encryptIv, encTypeIndex, getIndexType} from './enum';
 import type {ApiData, ApiBodyData, fView, Model, Obj} from './types';
 import pinyin from 'tiny-pinyin'
+
 const {subtle} = crypto;
 let genKey: CryptoKeyPair;
 export let shareKey: CryptoKey | undefined;
@@ -314,7 +315,7 @@ export function diffObj<T extends object>(origin: T, change: T) {
     let ch = 0
     const s = new Set(Object.keys(origin))
     for (const [a, b] of Object.entries(change)) {
-        if (origin[a as keyof T] !== b &&  b !== undefined) {
+        if (origin[a as keyof T] !== b && b !== undefined) {
             d[a as keyof T] = b
             ch = 1
             s.delete(a)
@@ -323,6 +324,24 @@ export function diffObj<T extends object>(origin: T, change: T) {
     if (ch) return d
 }
 
-export function slugGen(title:string){
-  return pinyin.convertToPinyin(title,'',true).replace(/ /,'-')
+export function slugGen(title: string) {
+    return pinyin.convertToPinyin(title, '', true).replace(/ /, '-')
+}
+
+export function checkRedirect(statue: number, path: string) {
+    const done = statue === 9
+    const config = '/config';
+    if (!done) {
+        if (!done && !path.startsWith(config)) {
+            return config
+        }
+    } else if (done && path === config) {
+        return '/'
+    }
+    return ''
+}
+
+export const checkStatue = async () => {
+    const s = await req('init', undefined, {method: 1}) || 0
+    return +s
 }

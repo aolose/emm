@@ -1,7 +1,17 @@
 import type {APIRoutes, curPost, Obj} from '../types';
 import {db, sys} from './index';
 import {genPubKey} from './crypto';
-import {getReqJson, combineResult, model, md5, saveFile, pageBuilder, uniqSlug} from './utils';
+import {
+    getReqJson,
+    combineResult,
+    model,
+    md5,
+    saveFile,
+    pageBuilder,
+    uniqSlug,
+    sysStatue,
+    resp
+} from './utils';
 import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
@@ -11,6 +21,7 @@ import {NULL} from "$lib/server/enum";
 import {tagPatcher} from "$lib/server/cache";
 
 const auth = (fn: RespHandle, fail?: RespHandle) => (req: Request) => {
+    if(!sysStatue)return resp('system uninitialized',403)
     console.log('auth...', fail);
     return fn(req);
 };
@@ -20,15 +31,11 @@ const auth = (fn: RespHandle, fail?: RespHandle) => (req: Request) => {
 let curPostFlag = [0, 0]
 
 const apis: APIRoutes = {
-    initialized: {
-        get() {
-            return +!!sys.admUsr;
-        }
-    },
+    check: {},
     tags: {
         post: auth(async req => {
             const ver = +(await req.text()) || undefined
-            const [v,a,d] = tagPatcher(ver)
+            const [v, a, d] = tagPatcher(ver)
             return
         })
     },
