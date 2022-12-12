@@ -13,8 +13,13 @@ export interface dbHooks {
     onDel?: (db: DB, now?: number) => boolean | void
 }
 
-export type Model =
-    (models.System | models.Tag | models.Comment | models.Count | models.User | models.Post | models.Res)
+export type Model = (
+    models.System | models.Tag |
+    models.Comment | models.Count |
+    models.User | models.Post |
+    models.Res | models.FWRule |
+    models.FwLog | models.Token
+    )
 
 export type Obj<T extends Model> = {
     [key in keyof T]?: T[key];
