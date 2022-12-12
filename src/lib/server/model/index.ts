@@ -3,7 +3,6 @@ import {noNull, primary, unique} from './decorations'
 import {DBProxy, diffTags, model, setNull, uniqSlug} from "$lib/server/utils";
 import {slugGen} from "$lib/utils";
 import type {DB} from "$lib/server/db/sqlite3";
-import type {Class, Model} from "$lib/types";
 import {tags} from "$lib/store";
 import {get} from "svelte/store";
 
@@ -180,6 +179,7 @@ export class System {
     blogName = TEXT
     blogUrl = TEXT
     blogBio = TEXT
+    ipLiteToken = TEXT
     description = TEXT
     keywords = TEXT
     apiCors = TEXT
@@ -204,4 +204,31 @@ export class User {
     birth = INT
     desc = TEXT
     createAt = INT
+}
+
+export class FWRule {
+    @primary
+    id = INT
+    mark = TEXT
+    @noNull
+    @unique
+    ip = TEXT
+    path = TEXT
+    ua = TEXT
+    createAt = INT
+    save = INT
+    log = false
+    noAccess = false
+    country = TEXT
+}
+
+export class FwLog {
+    @primary
+    id = INT
+    ip = TEXT
+    path = TEXT
+    ua = TEXT
+    save = INT
+    mark = TEXT
+    _city = ''
 }
