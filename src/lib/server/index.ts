@@ -9,14 +9,23 @@ export let sys: System;
 runJobs();
 export let db: DB;
 export const server = {
-    start(path:string) {
-        if(db)return
-        console.log('server start');
-        if (!db) db = new DB(path);
-        db.createTables();
-        sys = DBProxy(System);
-        this.sync()
-        loadGeoDb()
+    start(path: string) {
+        if (db) return
+        try {
+            console.log('server start');
+            db = new DB(path);
+            db.createTables();
+            sys = DBProxy(System);
+            this.sync()
+            loadGeoDb()
+        } catch (e) {
+            if (db) db.db.close();
+            (db as DB | null) = null;
+            (sys as System | null) = null;
+            const er = e?.toString()
+            console.log(er)
+            return er
+        }
         // const {uploadDir, thumbDir,ipLiteToken} = sys
         // if (!val(uploadDir)) sys.uploadDir = '/res'
         // if (!val(thumbDir)) sys.thumbDir = '/thumb'
@@ -24,7 +33,7 @@ export const server = {
 
     },
     sync() {
-        tags.set(db.all(new Tag()).map(a=>DBProxy(Tag,a,false)))
+        tags.set(db.all(new Tag()).map(a => DBProxy(Tag, a, false)))
         // todo
     }
 };

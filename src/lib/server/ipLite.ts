@@ -6,7 +6,7 @@ import {sys} from "$lib/server/index";
 import path from "path";
 
 const ip2location = new IP2Location();
-const db_type = 'DB5'
+const db_type = 'DB3'
 const url = `https://www.ip2location.com/download/?token=$TOKEN&file=${db_type}LITEBINIPV6`
 const zip = new JSZip()
 const maxSize = 1024 * 1024 * 50
@@ -16,10 +16,11 @@ let curDownLoad = ''
 
 async function update() {
     clearTimeout(t)
+    const dir = sys.ipLiteDir
     const tk = sys.ipLiteToken
     if (!tk) return 0
     const name = `ip_${Date.now()}`
-    const latest = path.resolve('.', name)
+    const latest = path.resolve(dir, name)
     let siz = 0
     if (curDownLoad && curDownLoad === tk) return 0
     else {
@@ -44,10 +45,10 @@ async function update() {
             res.on('end', () => {
                 try {
                     ip2location.close()
-                    fs.readdirSync('.').forEach(a => {
+                    fs.readdirSync(dir).forEach(a => {
                         if (/^ip_\d+$/.test(a)) {
                             try {
-                                fs.unlinkSync(path.resolve('.', a))
+                                fs.unlinkSync(path.resolve(dir, a))
                             } catch (e) {
                                 console.log('unlink error:', a, '\n', e?.toString())
                             }
@@ -59,7 +60,7 @@ async function update() {
                         fs.writeFileSync(latest, r)
                         load(latest)
                         resolve(1)
-                    }).catch(e=>{
+                    }).catch(e => {
                         console.log(e);
                     })
 
@@ -84,29 +85,31 @@ const load = (file?: string) => {
     ip2location.open(file)
     if (ip2location.loadBin()) {
         geoIp = ip2location
-        console.log(JSON.stringify(info('8.8.8.8'), null, ' '))
     } else console.log('fail load bin!')
 }
 export const loadGeoDb = () => {
-    const n = Date.now()
-    const file = fs.readdirSync('./').reduce((a, b) => {
-        if (/^ip_\d+/.test(b)) {
-            const c = +b.replace(/^ip_/, '')
-            if (c < a) return c
+    const dir = sys.ipLiteDir
+    if (dir) {
+        const n = Date.now()
+        const file = fs.readdirSync(dir).reduce((a, b) => {
+            if (/^ip_\d+/.test(b)) {
+                const c = +b.replace(/^ip_/, '')
+                if (c < a) return c
+            }
+            return a
+        }, n)
+        const next = 1e3 * 3600 * 24 * 14
+        let delay = 0
+        if (file && file !== n) {
+            load(path.resolve(dir, `ip_${file}`))
+            delay = next - Date.now() + file
         }
-        return a
-    }, n)
-    const next = 1e3 * 3600 * 24 * 14
-    let delay = 0
-    if (file && file !== n) {
-        load(path.resolve('.', `ip_${file}`))
-        delay = next - Date.now() + file
+        setTimeout(() => {
+            update().finally(() => {
+                t = setTimeout(update, next)
+            })
+        }, delay)
     }
-    setTimeout(() => {
-        update().finally(() => {
-            t = setTimeout(update, next)
-        })
-    }, delay)
 }
 
 export const info = (ip: string) => {

@@ -1,5 +1,5 @@
 import type {APIRoutes, curPost, Obj} from '../types';
-import {db, sys} from './index';
+import {db, server, sys} from './index';
 import {genPubKey} from './crypto';
 import {
     getReqJson,
@@ -10,7 +10,7 @@ import {
     pageBuilder,
     uniqSlug,
     sysStatue,
-    resp
+    resp, checkStatue, mkdir
 } from './utils';
 import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
@@ -19,9 +19,11 @@ import {Post, Res} from "$lib/server/model";
 import {diffObj, filter} from "$lib/utils";
 import {NULL} from "$lib/server/enum";
 import {tagPatcher} from "$lib/server/cache";
+import path from "path";
+import fs from "fs";
 
 const auth = (fn: RespHandle, fail?: RespHandle) => (req: Request) => {
-    if(!sysStatue)return resp('system uninitialized',403)
+    if (!sysStatue) return resp('system uninitialized', 403)
     console.log('auth...', fail);
     return fn(req);
 };
@@ -31,7 +33,29 @@ const auth = (fn: RespHandle, fail?: RespHandle) => (req: Request) => {
 let curPostFlag = [0, 0]
 
 const apis: APIRoutes = {
-    check: {},
+    dbPath: {
+        post: async (req) => {
+            if (sysStatue) return resp('', 403)
+            const p = await req.text()
+            if (!p) return 'empty path'
+            const pa = path.resolve(p)
+            const dir = path.dirname(pa)
+            try {
+                const ex = fs.existsSync(dir)
+                if (!ex) {
+                    fs.mkdirSync(dir, {recursive: true})
+                }
+                const err = server.start(p)
+                if (err) return err
+                else {
+                    fs.writeFileSync('.config.db', p)
+                    checkStatue()
+                }
+            } catch (e) {
+                return e?.toString()
+            }
+        }
+    },
     tags: {
         post: auth(async req => {
             const ver = +(await req.text()) || undefined
@@ -134,11 +158,36 @@ const apis: APIRoutes = {
         }
     },
     setAdmin: {
+        // todo set cookie
         async post(req) {
+            if (!sys || (sys.admUsr && sys.admPwd)) return resp('', 403)
             const d = await getReqJson(req);
-            sys.admUsr = d['usr'];
-            sys.admPwd = d['pwd'];
-            return sys;
+            const {usr, pwd} = d
+            if (usr && pwd) {
+                sys.admUsr = md5(usr);
+                sys.admPwd = md5(pwd);
+                checkStatue()
+                return '';
+            } else {
+                return resp('username or password is empty', 500)
+            }
+        }
+    },
+    setUp: {
+        // todo auth need
+        post: async (req) => {
+            const p = await req.text()
+            if (!p) return resp('invalid directory', 500)
+            const [a, b] = p.split(',')
+            if (!a || !b || a === b) return resp('invalid directory', 500)
+            let err = mkdir(a)
+            if (!err) err = mkdir(b)
+            if (!err) {
+                sys.uploadDir = a
+                sys.thumbDir = b
+            }
+            checkStatue()
+            return resp(err, err ? 500 : 200)
         }
     },
     test: {

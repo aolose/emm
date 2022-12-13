@@ -275,10 +275,21 @@ export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: obj
     return filter(Object.assign(a, o), Object.keys(o) as (keyof T)[])
 }
 
-export const md5 = (buf: Buffer) => {
+export const md5 = (buf: Buffer | string) => {
     const hashSum = crypto.createHash('md5');
     hashSum.update(buf);
     return hashSum.digest('hex');
+}
+
+export const mkdir = (dir: string) => {
+    try {
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, {recursive: true})
+        }
+        return  ''
+    } catch (e) {
+        return e?.toString() || 'error'
+    }
 }
 
 export const saveFile = (name: string | number, dir: string, buf: Buffer) => {
@@ -328,30 +339,32 @@ export const diffTags: DiffFn<Set<string>> = (old, cur) => {
 }
 
 export let sysStatue = 0
-const chk =()=>{
+const chk = () => {
     // step1 config db
     const dbc = '.config.db'
+    let dbOk = false
     if (fs.existsSync(dbc)) {
-        if (dbc) {
-            const p = fs.readFileSync(dbc).toString()
-            if (!p) return 0
-            if (!fs.existsSync(p)) {
-                try {
-                    fs.mkdirSync(path.dirname(p), {recursive: true})
-                    server.start(p)
-                } catch (e) {
-                    console.log(e)
-                    return 0
-                }
+        const p = fs.readFileSync(dbc).toString()
+        if (!p) return 0
+        if (!fs.existsSync(p)) {
+            try {
+                fs.mkdirSync(path.dirname(p), {recursive: true})
+            } catch (e) {
+                console.log(e)
             }
         }
-    } else return 0
+        const er = server.start(p)
+        if (er) {
+            return 0
+        } else dbOk = true
+    }
+    if (!dbOk) return 0
     // step2 set admin:
     if (!sys.admUsr || !sys.admPwd) return 1
     // step3 set upload
     if (!sys.uploadDir || !sys.thumbDir) return 2
     // step4 set geo ip
-    if (!sys.ipLiteToken) return 3
+    if (sys.ipLiteToken === null) return 3
     return 9
 }
 export const checkStatue = () => {

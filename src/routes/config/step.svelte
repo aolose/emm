@@ -1,27 +1,23 @@
 <script>
     export let value = 0
-    const info = [
-        'Config database path',
-        'Set an administrator',
-        'Config upload directory',
-        'Set ipLocation api'
-    ]
+    export  let info = []
     const l = [0, [0, 30, 60, 90], [10, 40, 70, 100]]
-    $:cp = n => `polygon(0 0,100% 0,100% ${l[n][value]}%, 0 ${l[n][value]}%)`
+    const fx = a => (Math.floor(a + 0.5))
+    const cc = n => `polygon(0 0,100% 0,100% ${l[n][fx(value)]}%, 0 ${l[n][fx(value)]}%)`
 </script>
 <div class="k">
     {#each [0, 1, 2] as n}
         <div class="a"
              class:f={n===1}
              class:e={n===2}
-             style:clip-path={n&&cp(n)}
+             style:clip-path={n&&cc(n)}
         >
             {#each info as i,index}
                 <div class="s"
-                     class:d={value>index}
-                     class:c={value===index}>
+                     class:d={fx(value)>index}
+                     class:c={fx(value)===index}>
                     {#if index !== 3}<i></i>{/if}
-                    <span>{index + 1}</span>
+                    <span>{index + 1}.</span>
                     <p>{i}</p>
                 </div>
             {/each}
@@ -46,6 +42,7 @@
     z-index: 2;
     left: 0;
     top: 0;
+    opacity: .5;
     position: absolute;
     color: #fff;
     clip-path: polygon(0 0, 100% 0, 100% 0%, 0 0%);
@@ -73,21 +70,21 @@
 
   p {
     font-size: 18px;
-    top: 50%;
+    top: 55%;
     transform: translateY(-50%);
     position: absolute;
-    left: 50px;
+    left: 45px;
     white-space: nowrap;
   }
 
   i {
     display: block;
-    left: 25px;
+    left: 20px;
     top: 100px;
     height: 100%;
-    width: 1px;
-    background: currentColor;
+    border-left: 1px dashed currentColor;
     position: absolute;
+    opacity: .3;
   }
 
 

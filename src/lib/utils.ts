@@ -340,8 +340,3 @@ export function checkRedirect(statue: number, path: string) {
     }
     return ''
 }
-
-export const checkStatue = async () => {
-    const s = await req('init', undefined, {method: 1}) || 0
-    return +s
-}

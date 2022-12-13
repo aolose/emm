@@ -180,6 +180,7 @@ export class System {
     blogUrl = TEXT
     blogBio = TEXT
     ipLiteToken = TEXT
+    ipLiteDir = TEXT
     description = TEXT
     keywords = TEXT
     apiCors = TEXT
