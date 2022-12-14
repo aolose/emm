@@ -196,7 +196,7 @@ export const apiHandle = async (request: Request, name: ApiName): Promise<Respon
         }
         return resp('');
     }
-    return resp('', 404);
+    return resp('', 405);
 };
 
 
