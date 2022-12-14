@@ -9,7 +9,7 @@ import {
 import {dataType, reqMethod} from './enum';
 import {browser} from '$app/environment';
 import type {ApiName, cacheRecord, reqData, reqParams, reqCache, MethodNumber, reqOption} from './types';
-import type {PageLoad} from '../../.svelte-kit/types/src/routes/$types';
+import type {PageLoad} from "../../.svelte-kit/types/src/routes/admin/config/$types";
 
 const cacheData = '.d';
 const cacheKey = '.k';

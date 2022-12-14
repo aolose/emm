@@ -1,26 +1,32 @@
-import {NULL} from './enum';
+import {NULL, permission, token_statue} from './enum';
 import {contentType, dataType, encryptIv, encTypeIndex, geTypeIndex} from '../enum';
-import type {ApiData, ApiName, Class, DiffFn, Obj, PatchFn} from '../types';
+import cookie from 'cookie'
+import type {CookieSerializeOptions} from 'cookie'
+import type {Api, ApiData, ApiName, Class, Model, Obj} from '../types';
 import apis from './api';
 import {
-    encrypt,
-    parseBody,
-    randNum,
-    decryptReq,
-    encryptHeader,
-    getKINums,
+    arrFilter,
     data2Buf,
-    hasOwnProperty, arrFilter, filter, delay, diffObj
+    decryptReq,
+    delay,
+    diffObj,
+    encrypt,
+    encryptHeader,
+    filter,
+    getKINums,
+    hasOwnProperty,
+    parseBody,
+    randNum
 } from '../utils';
 import {keyPool} from './crypto';
-import type {Api} from '../types';
-import type {Model} from '../types';
 import {getPrimaryKey} from './model/decorations';
 import {db, server, sys} from './index';
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import {Res} from "$lib/server/model";
+import type {RequestEvent} from "@sveltejs/kit";
+import {getPermissions} from "$lib/server/token";
 
 export const is_dev = process.env.NODE_ENV !== 'production';
 
@@ -200,12 +206,13 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
     const pk = getPrimaryKey(C.name) as keyof T
     let o = model(C, init)
     let ori = {} as Obj<T>
+    let create = false
     const save = delay(() => {
         const p = diffObj(ori, o)
         if (!p) return
         if (pk) p[pk] = o[pk]
         const ch = model(C, p)
-        db.save(ch)
+        db.save(ch, create)
         ori = {...Object.assign(o, ch)}
     }, 100)
     if (load) {
@@ -217,7 +224,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
                 ori = {...e}
                 o = Object.assign(e, o)
                 u = 1
-            }
+            } else create = true
         }
         if (!u) {
             const r = db.get(o)
@@ -286,7 +293,7 @@ export const mkdir = (dir: string) => {
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, {recursive: true})
         }
-        return  ''
+        return ''
     } catch (e) {
         return e?.toString() || 'error'
     }
@@ -324,20 +331,6 @@ export const setKey = <T extends Model>(o: Obj<T>, key: string, value: unknown) 
     if (hasKey(o, key)) o[key as keyof T] = value as T[keyof T]
 }
 
-export const patchTags: PatchFn<Set<string>> = (data, add, del) => {
-    const d = new Set(data)
-    if (del) for (const s of del) d.delete(s)
-    if (add) for (const s of add) d.add(s)
-    return d
-}
-export const diffTags: DiffFn<Set<string>> = (old, cur) => {
-    const add = new Set<string>()
-    const del = new Set<string>()
-    for (const o of cur) if (!old.has(o)) add.add(o)
-    for (const o of old) if (!cur.has(o)) del.add(o)
-    return {add, del}
-}
-
 export let sysStatue = 0
 const chk = () => {
     // step1 config db
@@ -370,4 +363,75 @@ const chk = () => {
 export const checkStatue = () => {
     sysStatue = chk()
     return sysStatue
+}
+
+export const getClientAddr = (event: RequestEvent) => {
+    const hdr = event.request.headers
+    let addr = (hdr.get('x-forwarded-for') || hdr.get('x-real-ip') || '').split(/ +/)[0]
+    if (!addr) {
+        try {
+            addr = event.getClientAddress()
+        } catch (e) {
+            console.log(e?.toString())
+        }
+    }
+    return addr || ''
+}
+
+
+const getCookie = (req: Request, key: string) => {
+    const c = req.headers.get('cookie')
+    if (c) {
+        const ck = cookie.parse(c)
+        return ck[key]
+    }
+}
+const ckCfg = {
+    httpOnly: true,
+    sameSite: 'strict',
+    path: '/'
+} as CookieSerializeOptions
+
+const delCookie = (resp: Response, key: string) => {
+    resp.headers.append('set-cookie', cookie.serialize(key, '', {
+        ...ckCfg,
+        expires: new Date(0)
+    }))
+}
+
+const setCookie = (resp: Response, key: string, value: string) => {
+    const c = cookie.serialize(key, value, ckCfg)
+    resp.headers.append('set-cookie', c)
+}
+
+export const getTokens = (req: Request) => {
+    return (getCookie(req, 'token') || '').split(',')
+}
+
+export const setTokens = (resp: Response, tokens: string[]) => {
+    setCookie(resp, 'token', tokens.join(','))
+}
+
+export function checkRedirect(statue: number, path: string, req: Request) {
+    let needLogin = false
+    const done = statue === 9
+    const login = '/login'
+    const config = '/config';
+    if (statue > 1) {
+        const tks = getTokens(req)
+        const pms = getPermissions(tks)
+        needLogin = pms.get(permission.Admin) !== token_statue.ok
+    }
+    if (needLogin) {
+        if (path !== login) return login
+        return ''
+    }
+    if (!done) {
+        if (!done && !path.startsWith(config)) {
+            return config
+        }
+    } else if (done && path === config) {
+        return '/'
+    }
+    return ''
 }

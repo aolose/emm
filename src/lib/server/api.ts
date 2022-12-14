@@ -2,36 +2,56 @@ import type {APIRoutes, curPost, Obj} from '../types';
 import {db, server, sys} from './index';
 import {genPubKey} from './crypto';
 import {
-    getReqJson,
+    checkStatue,
     combineResult,
-    model,
+    getReqJson,
+    getTokens,
     md5,
-    saveFile,
+    mkdir,
+    model,
     pageBuilder,
-    uniqSlug,
+    resp,
+    saveFile, setTokens,
     sysStatue,
-    resp, checkStatue, mkdir
+    uniqSlug
 } from './utils';
 import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
 import {Post, Res} from "$lib/server/model";
 import {diffObj, filter} from "$lib/utils";
-import {NULL} from "$lib/server/enum";
+import {NULL, permission, token_statue} from "$lib/server/enum";
 import {tagPatcher} from "$lib/server/cache";
 import path from "path";
 import fs from "fs";
+import {genToken, getPermissions} from "$lib/server/token";
 
-const auth = (fn: RespHandle, fail?: RespHandle) => (req: Request) => {
+const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
+    console.log('auth...', req.url);
     if (!sysStatue) return resp('system uninitialized', 403)
-    console.log('auth...', fail);
-    return fn(req);
+    ps = ([] as permission[]).concat(ps)
+    const tokens = getTokens(req)
+    const pms = getPermissions(tokens)
+    for (const p of ps) {
+        const s = pms.get(p)
+        let err = ''
+        if (s === undefined) err = 'invalid token'
+        else switch (s) {
+            case token_statue.expire:
+                err = 'token expire'
+                break
+            case token_statue.unknown:
+                err = 'unknown token'
+        }
+        if (err) return resp(err, 403)
+    }
+    return fn(req, pms);
 };
 
 // todo: link flag to session
 // need a clientMap
 let curPostFlag = [0, 0]
-
+const {Admin} = permission
 const apis: APIRoutes = {
     dbPath: {
         post: async (req) => {
@@ -57,21 +77,25 @@ const apis: APIRoutes = {
         }
     },
     tags: {
-        post: auth(async req => {
-            const ver = +(await req.text()) || undefined
-            const [v, a, d] = tagPatcher(ver)
-            return
+        post: auth(Admin, async req => {
+            const ver = +(await req.text())
+            const r = tagPatcher(ver)
+            let d = r[0] + ''
+            if (r.length === 2) {
+                d = [d, [...r[1]].join()].join(' ')
+            } else d = [d, r[1] ? [...r[1]].join() : '', r[2] ? [...r[2]].join() : ''].join(' ')
+            return d
         })
     },
     posts: {
-        post: auth((req) => {
+        post: auth(Admin, (req) => {
             return pageBuilder(req, Post,
                 ['createAt desc']
             )
         })
     },
     slug: {
-        post: auth(async req => {
+        post: auth(Admin, async req => {
             const s = await req.text()
             const mt = s.match(/(\d*?),(.*)/)
             if (mt) {
@@ -81,11 +105,11 @@ const apis: APIRoutes = {
         })
     },
     post: {
-        delete: auth(async (req) => {
+        delete: auth(Admin, async (req) => {
             const i = new Uint8Array(await req.arrayBuffer())
             return db.delByPk(Post, [...i]).changes
         }),
-        post: auth(async (req) => {
+        post: auth(Admin, async (req) => {
             const [flag, id] = curPostFlag
             const o = model(Post, await getReqJson(req)) as curPost
             if (!o.id) {
@@ -100,12 +124,12 @@ const apis: APIRoutes = {
         })
     },
     res: {
-        delete: auth(async (req) => {
+        delete: auth(Admin, async (req) => {
             const r = new Uint8Array(await req.arrayBuffer())
             const {changes} = db.delByPk(Res, [...r])
             return changes
         }),
-        post: auth(async (req) => {
+        post: auth(Admin, async (req) => {
             return pageBuilder(req, Res,
                 ['save desc'],
                 ['id', 'name', 'size', 'type', 'thumb']
@@ -113,7 +137,7 @@ const apis: APIRoutes = {
         })
     },
     up: {
-        post: auth(async (req) => {
+        post: auth(Admin, async (req) => {
             const d = await req.formData();
             const f = d.get('file') as Blob;
             const n = d.get('name') as string;
@@ -157,6 +181,7 @@ const apis: APIRoutes = {
             return combineResult(id, pk);
         }
     },
+
     setAdmin: {
         // todo set cookie
         async post(req) {
@@ -166,8 +191,10 @@ const apis: APIRoutes = {
             if (usr && pwd) {
                 sys.admUsr = md5(usr);
                 sys.admPwd = md5(pwd);
+                const res = resp('')
                 checkStatue()
-                return '';
+                setTokens(res, [genToken(Admin)])
+                return res;
             } else {
                 return resp('username or password is empty', 500)
             }
@@ -175,7 +202,7 @@ const apis: APIRoutes = {
     },
     setUp: {
         // todo auth need
-        post: async (req) => {
+        post: auth(Admin, async (req) => {
             const p = await req.text()
             if (!p) return resp('invalid directory', 500)
             const [a, b] = p.split(',')
@@ -188,7 +215,17 @@ const apis: APIRoutes = {
             }
             checkStatue()
             return resp(err, err ? 500 : 200)
-        }
+        })
+    },
+    setGeoDb: {
+        post: auth(Admin, async req => {
+            const p = await req.text()
+            if (!p) {
+                sys.ipLiteToken = ''
+            }
+            return ''
+
+        })
     },
     test: {
         get() {

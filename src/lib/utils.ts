@@ -328,15 +328,8 @@ export function slugGen(title: string) {
     return pinyin.convertToPinyin(title, '', true).replace(/ /, '-')
 }
 
-export function checkRedirect(statue: number, path: string) {
-    const done = statue === 9
-    const config = '/config';
-    if (!done) {
-        if (!done && !path.startsWith(config)) {
-            return config
-        }
-    } else if (done && path === config) {
-        return '/'
-    }
-    return ''
+let _id = 0
+
+export function idGen() {
+    return `_${_id++}`
 }

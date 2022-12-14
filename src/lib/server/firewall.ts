@@ -4,7 +4,7 @@ import {db} from "$lib/server/index";
 import {FwLog, FWRule} from "$lib/server/model";
 import {filter} from "$lib/utils";
 import type {Obj} from "$lib/types";
-import {model} from "$lib/server/utils";
+import {getClientAddr, model} from "$lib/server/utils";
 import {info} from "$lib/server/ipLite";
 
 
@@ -50,7 +50,7 @@ const max = 1000
 export const fwFilter = (event: RequestEvent) => {
     if (!db) return false
     if (!rules) loadRules()
-    const ip = event.getClientAddress()
+    const ip = getClientAddr(event)
     const path = event.url.pathname
     const ua = event.request.headers.get('user-agent') || ''
     logCache.push([ip, path, ua, Date.now()])

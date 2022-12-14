@@ -2,14 +2,13 @@ import type {Handle} from '@sveltejs/kit';
 import {contentType, encryptIv, encTypeIndex} from '$lib/enum';
 import {fwFilter} from "$lib/server/firewall";
 import {checkStatue, sysStatue} from "$lib/server/utils";
-import {checkRedirect} from "$lib/utils";
+import {checkRedirect} from "$lib/server/utils";
 
 checkStatue()
 export const handle: Handle = async ({event, resolve}) => {
     const pn = event.url.pathname
-    console.log(pn)
     if (!/^\/(api|res|font|src)/.test(pn)) {
-        const p = checkRedirect(sysStatue, pn)
+        const p = checkRedirect(sysStatue, pn,event.request)
         if (p) {
             return new Response('', {
                 status: 307,
@@ -17,7 +16,6 @@ export const handle: Handle = async ({event, resolve}) => {
                     location: p
                 })
             })
-        }else if(pn==='/config'){
         }
     }
     const r = fwFilter(event)

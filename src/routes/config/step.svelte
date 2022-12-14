@@ -1,9 +1,9 @@
 <script>
     export let value = 0
-    export  let info = []
+    export let info = []
     const l = [0, [0, 30, 60, 90], [10, 40, 70, 100]]
     const fx = a => (Math.floor(a + 0.5))
-    const cc = n => `polygon(0 0,100% 0,100% ${l[n][fx(value)]}%, 0 ${l[n][fx(value)]}%)`
+    $:cc = n => `polygon(0 0,100% 0,100% ${l[n][fx(value)]}%, 0 ${l[n][fx(value)]}%)`
 </script>
 <div class="k">
     {#each [0, 1, 2] as n}
@@ -84,7 +84,6 @@
     height: 100%;
     border-left: 1px dashed currentColor;
     position: absolute;
-    opacity: .3;
   }
 
 

@@ -4,14 +4,14 @@ export const NULL = {
 	DATE: new Date(0)
 };
 
-export enum TOKEN_TYPE {
+export enum permission {
 	Admin,
-	Aulth,
 	Article, // for pwd article
 	Comment // for comment owner
 }
 
-export enum TOKEN_FEATURE {
-	allowComment,
-	allowVist
+export enum token_statue{
+	ok,
+	expire,
+	unknown
 }
