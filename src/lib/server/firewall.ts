@@ -3,7 +3,7 @@ import ipRangeCheck from 'ip-range-check'
 import {db} from "$lib/server/index";
 import {FwLog, FWRule} from "$lib/server/model";
 import {filter} from "$lib/utils";
-import type {Obj} from "$lib/types";
+import type {Obj, Timer} from "$lib/types";
 import {getClientAddr, model} from "$lib/server/utils";
 import {info} from "$lib/server/ipLite";
 
@@ -79,4 +79,25 @@ export const fwFilter = (event: RequestEvent) => {
         }
     }
     return false
+}
+
+type times = number
+type expire = number
+type bkRec = [times, expire, Timer]
+const bkLis = new Map<string, bkRec>()
+export const blockIp = (key: string, ip: string):[bkRec,()=>void] => {
+    const k = `${key}-${ip}`
+    const q = (bkLis.get(k) || [0, 0, null]) as bkRec
+    return [q, () => {
+        if (q[2]) clearTimeout(q[2])
+        if (!q[0]) {
+            bkLis.delete(k)
+        } else {
+            bkLis.set(k, q as bkRec)
+            q[2] = setTimeout(() => {
+                q[1] = 0
+                bkLis.set(k, q)
+            }, q[1])
+        }
+    }]
 }

@@ -19,12 +19,13 @@ import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
 import {Post, Res} from "$lib/server/model";
-import {diffObj, filter} from "$lib/utils";
+import {diffObj, enc, filter} from "$lib/utils";
 import {NULL, permission, token_statue} from "$lib/server/enum";
 import {tagPatcher} from "$lib/server/cache";
 import path from "path";
 import fs from "fs";
 import {genToken, getPermissions} from "$lib/server/token";
+import {blockIp} from "$lib/server/firewall";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
     console.log('auth...', req.url);
@@ -53,6 +54,33 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 let curPostFlag = [0, 0]
 const {Admin} = permission
 const apis: APIRoutes = {
+    login: {
+        post: async (req) => {
+            if (sysStatue < 2) return resp(-1, 403)
+            const tryTimes = 3
+            const base = 1e4
+            const ip = req.headers.get('x-forwarded-for') || ''
+            console.log(ip)
+            const [q, sv] = blockIp('lg', ip)
+            if (q[1]) {
+                sv()
+                return resp(q[1], 403)
+            }
+            const [u, p, v] = await getReqJson(req)
+            if (await enc(sys.admUsr + v) === u && await enc(sys.admPwd + v) === p) {
+                const res = resp('')
+                setTokens(res, [genToken(Admin)])
+                q[0] = 0
+                sv()
+                return res
+            } else {
+                q[0]++
+                q[1] = Math.floor(Math.pow(2, q[0] - tryTimes)) * base
+                sv()
+                return resp(q[1], 403)
+            }
+        }
+    },
     dbPath: {
         post: async (req) => {
             if (sysStatue) return resp('', 403)
@@ -189,8 +217,8 @@ const apis: APIRoutes = {
             const d = await getReqJson(req);
             const {usr, pwd} = d
             if (usr && pwd) {
-                sys.admUsr = md5(usr);
-                sys.admPwd = md5(pwd);
+                sys.admUsr = await enc(usr);
+                sys.admPwd = await enc(pwd);
                 const res = resp('')
                 checkStatue()
                 setTokens(res, [genToken(Admin)])
