@@ -12,10 +12,11 @@
     let w = 0
 
     let tm = -1
+    const df = 'Have a nice day !'
     const setMsg = (m) => {
         clearTimeout(tm)
         msg = m
-        tm = setTimeout(() => msg = '', 5e3)
+        tm = setTimeout(() => msg = df, 5e3)
     }
     const t = setInterval(() => {
         if (wt > 0) {
@@ -87,7 +88,7 @@
         <div class="bx">
             <LD act={w}/>
             <div class="msg" style={ftt}>
-                <Tm defaultText="Have a nice day !" msg={msg}/>
+                <Tm defaultText={df} msg={msg}/>
             </div>
             <div class="br" style={`left:${ft}px`} class:bk={bk} bind:this={br}>
                 {#if msg}

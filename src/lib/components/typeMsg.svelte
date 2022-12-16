@@ -17,7 +17,7 @@
         }
         if (start) {
             clearTimeout(t);
-            if ((msg + ' ' !== pv)) {
+            if (msg && (msg + ' ' !== pv)) {
                 t = setTimeout(function () {
                     if (a++ < 3) {
                         pr = base[Math.floor(Math.random() * l)];
