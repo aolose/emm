@@ -162,6 +162,27 @@ export const buf2Str = (buf: ArrayBuffer) => {
     while (n--) s = String.fromCharCode(bv[n]) + s;
     return s;
 };
+const buf264 = (buf: ArrayBuffer) => {
+    const bv = new Uint8Array(buf);
+    let n = bv.length;
+    let s = '';
+    const k='1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+='
+    while (n) {
+        const v = [0,0]
+        let x=2
+        while (x--&&n--){
+            v[x]=bv[n]
+        }
+        let  m =v[1]+(v[2]<<8)+(v[0]<<16)
+        while (m>=64){
+            const l = m%64
+            s+=k[l]
+            m=(m-l)/64
+        }
+        s+=k[m]
+    }
+    return s;
+};
 
 export const buf2Num = (buf: ArrayBuffer) => {
     const bv = new Uint8Array(buf);
@@ -332,4 +353,10 @@ let _id = 0
 
 export function idGen() {
     return `_${_id++}`
+}
+
+export async function enc(str: string) {
+    const vi=`2321aSDWas!@#$`
+    const d = data2Buf(str+vi) || new Uint8Array([])
+    return buf264(await subtle.digest('sha-384', d))
 }

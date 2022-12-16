@@ -21,7 +21,6 @@
 	}
 	.b,
 	.c {
-		position: relative;
 		height: 100%;
 	}
 	.b {

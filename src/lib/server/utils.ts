@@ -44,7 +44,7 @@ export const sqlVal = (values: unknown[]) =>
 
 export function noNullKeyValues<T extends Model>(o: Obj<T>) {
     const C = o.constructor as Class<T>
-    const ks = Object.keys(new C()) as (keyof T)[]
+    const ks = Object.keys(new C() as object) as (keyof T)[]
     // for safe
     filter(o, ks)
     const keys = [] as string[];
@@ -180,10 +180,14 @@ export const encryptResp = async (params: ApiData, keyNum: number, code = 200) =
     return resp('', 403);
 };
 
-export const apiHandle = async (request: Request, name: ApiName): Promise<Response> => {
+export const apiHandle = async (event: RequestEvent): Promise<Response> => {
+    const {request, params} = event
+    const name = params.api as ApiName;
     const m = request.method.toLowerCase() as keyof Api;
     const api = apis[name]?.[m];
     if (api) {
+        const ip = getClientAddr(event)
+        request.headers.set('x-forwarded-for', ip)
         const r = await api(request);
         if (r !== undefined) {
             if (r instanceof Response) return r;
@@ -236,11 +240,11 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
         save()
     }
     return new Proxy(o, {
-        get(target: T, p: string, receiver: T) {
+        get(target, p: string, receiver: T) {
             const v = Reflect.get(target, p, receiver);
             return hasOwnProperty(target, p) ? val(v) : v;
         },
-        set(target: T, p: string, newValue: value, receiver: T): boolean {
+        set(target, p: string, newValue: value, receiver: T): boolean {
             save()
             return Reflect.set(target, p, newValue, receiver);
         }
@@ -325,7 +329,7 @@ export const pageBuilder = async <T extends Model>(
 
 export const hasKey = <T extends Model>(o: Obj<T>, key: string) => {
     const C = o.constructor as Class<T>
-    return Object.hasOwn(new C(), key)
+    return Object.hasOwn(new C() as object, key)
 }
 export const setKey = <T extends Model>(o: Obj<T>, key: string, value: unknown) => {
     if (hasKey(o, key)) o[key as keyof T] = value as T[keyof T]

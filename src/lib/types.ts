@@ -35,7 +35,8 @@ export type reqOption = {
     method?: method;
     encrypt?: boolean;
     before?(data: unknown, url?: string): [unknown, string | undefined, Headers?];
-    done?(data: unknown): void;
+    done?(result: unknown): void;
+    fail?(result: unknown,req:Response): void;
 };
 
 export type CliObj<T extends Model> = Obj<T> & { _: number }

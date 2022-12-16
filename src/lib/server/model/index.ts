@@ -9,12 +9,6 @@ import {diffTags} from "$lib/tagPatchFn";
 
 const {INT, TEXT} = NULL
 
-export class Count {
-    @primary
-    key = INT
-    count = INT
-}
-
 export class Res {
     @primary
     id = INT
@@ -25,6 +19,7 @@ export class Res {
     md5 = TEXT
     save = INT
     thumb = INT
+    userId=INT
 }
 
 export class ShortPost {
@@ -36,6 +31,7 @@ export class ShortPost {
     publish = INT
     modify = INT
     createAt = INT
+    userId=INT
 }
 
 export class Tag {
@@ -44,6 +40,7 @@ export class Tag {
     desc = TEXT
     createAt = INT
     post = TEXT
+    userId=INT
 }
 
 export class Post {
@@ -64,6 +61,7 @@ export class Post {
     publish = INT
     modify = INT
     save = INT
+    userId=INT
     _p = 0
 
     onSave(db: DB, now: number) {
@@ -168,6 +166,7 @@ export class Comment {
     pass = true
     createAt = INT
     modify = INT
+    userId=INT
 }
 
 export class System {
@@ -206,6 +205,7 @@ export class User {
     birth = INT
     desc = TEXT
     createAt = INT
+    role=INT
 }
 
 export class FWRule {

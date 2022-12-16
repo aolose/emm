@@ -96,7 +96,6 @@
 
   .ls {
     direction: rtl;
-    position: relative;
     flex: 1;
     overflow: auto;
     overflow-x: hidden;
