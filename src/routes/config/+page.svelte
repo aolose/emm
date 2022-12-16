@@ -20,8 +20,8 @@
     };
 
     let rows = [
-        ['usr', 'Username', [/^[a-z0-9]{3,}$/i, 'username requires least 3 letters or numbers'], 'text'],
-        ['pwd', 'Password', [/^.{8,}$/, 'password requires least 8 characters'], 'password'],
+        ['usr', 'Username', [/^[a-z0-9]{2,20}$/i, 'username requires 2-20 letters or numbers'], 'text'],
+        ['pwd', 'Password', [/^.{4,30}$/, 'password requires least 4-30 characters'], 'password'],
         ['pwd2', 'Confirm password', [{test: n => n === o.pwd}, 'passwords not match'], 'password']
     ];
 
@@ -72,7 +72,7 @@
         if (upDir && upDir === tbDir) tip = 'The Upload directory should be different from the Thumbnail directory.'
     }
 
-    const ck3=()=>{
+    const ck3 = () => {
 
     }
 
@@ -199,15 +199,17 @@
 </div>
 
 <style lang="scss">
-  a{
+  a {
     line-height: 2;
     color: var(--darkgrey);
     margin-left: 10px;
-    &:hover{
+
+    &:hover {
       color: #6c7a93;
       text-decoration: underline;
     }
   }
+
   .m {
     opacity: .5;
     width: 400px;
@@ -237,7 +239,6 @@
     margin: 20px auto;
     width: 400px;
     border-bottom: 1px solid var(--darkgrey);
-    position: relative;
     height: 50px;
 
     span {
@@ -274,7 +275,8 @@
       opacity: .4;
     }
   }
-  .l{
+
+  .l {
     margin-bottom: 40px;
   }
 
@@ -318,6 +320,7 @@
 
   .f {
     display: flex;
+    position: static;
     align-items: center;
     flex-direction: column;
     justify-content: center;
@@ -364,13 +367,15 @@
     font-size: 20px;
     color: var(--darkgrey);
   }
-  .k{
+
+  .k {
     border: none;
     color: #6c7a93;
     position: absolute;
     right: 50px;
     bottom: 40px;
-    &:hover{
+
+    &:hover {
       color: #fff;
       background: var(--blue);
     }

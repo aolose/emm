@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'ibm';
+    src: local('IBM Plex Mono Regular'), local('IBMPlexMono-Regular'),
+        url('ibm.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+

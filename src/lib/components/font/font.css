@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Architects Daughter';
+    src: local('Architects Daughter Regular'), local('ArchitectsDaughter-Regular'),
+        url('msg.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
