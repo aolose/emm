@@ -23,7 +23,6 @@
 <style lang="scss">
 	.a {
 		border-radius: 4px;
-		position: relative;
 		background: currentColor;
 		clip-path: polygon(0 0, 70% 0, 100% 25%, 100% 100%, 0 100%);
 	}

@@ -177,7 +177,6 @@
 
     span {
       font-size: 18px;
-      position: relative;
       display: block;
       color: inherit !important;
     }
@@ -224,7 +223,6 @@
   }
 
   .p {
-    position: relative;
     cursor: pointer;
     height: 200px;
     color: var(--darkgrey);

@@ -21,7 +21,6 @@
 		display: flex;
 		width: 300px;
 		margin: 20px auto;
-		position: relative;
 		height: 40px;
 		border-bottom: 1px solid var(--darkgrey);
 		align-items: center;

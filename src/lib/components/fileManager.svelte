@@ -258,7 +258,6 @@
   }
 
   .icon {
-    position: relative;
     background: var(--darkgrey);
     font-size: 18px;
     padding: 10px;
@@ -321,7 +320,6 @@
   }
 
   .b {
-    position: relative;
     width: 600px;
     height: 600px;
     background: var(--bg2);
@@ -330,7 +328,6 @@
   }
 
   .ls {
-    position: relative;
     background: var(--bg1);
     flex: 1;
     display: flex;

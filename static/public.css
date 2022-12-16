@@ -29,11 +29,20 @@ a {
 	margin: 0;
 	padding: 0;
 	font-family: hp, 'Helvetica Neue', Helvetica, STHeiTi, sans-serif;
+	position: relative;
+	background: none;
+	border: none;
+	outline: none;
 }
 
 a,
 img {
 	-webkit-touch-callout: none; /* 禁止长按链接与图片弹出菜单 */
+}
+i {
+	display: block;
+	background: no-repeat center;
+	background-size: contain;
 }
 
 html {
@@ -45,7 +54,6 @@ body {
 	margin: 0;
 	height: 100%;
 	overflow: hidden;
-	position: relative;
 	font-size: 16px;
 	color: rgba(212, 219, 238, 0.8);
 }
@@ -81,4 +89,10 @@ span {
 *::-webkit-scrollbar-thumb {
 	background-color: rgba(255, 255, 255, 0.1);
 	border-radius: 30px;
+}
+
+.ld {
+	transition: .3s ease-in-out;
+	pointer-events: none;
+	animation: ss .3s linear infinite;
 }

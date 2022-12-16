@@ -119,7 +119,6 @@
     display: flex;
     flex-wrap: wrap;
     min-height: 30px;
-    position: relative;
   }
 
   .d {
@@ -174,7 +173,6 @@
   }
 
   .c {
-    position: relative;
     flex: 1;
     min-width: 80px;
     line-height: 18px;
@@ -186,7 +184,6 @@
       padding: 5px 0;
       background: none;
       border: none;
-      position: relative;
       line-height: inherit;
       outline: none;
       font-size: 15px;

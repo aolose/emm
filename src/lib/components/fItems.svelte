@@ -106,7 +106,6 @@
 
   .p {
     border-radius: inherit;
-    position: relative;
     padding-top: 100%;
     background: var(--bg2);
     background-size: cover;

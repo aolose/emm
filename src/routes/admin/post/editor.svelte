@@ -180,7 +180,6 @@
 
   .e {
     flex: 1;
-    position: relative;
   }
 
   .t {

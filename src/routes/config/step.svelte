@@ -28,14 +28,12 @@
   .a {
     padding-left: 50px;
     width: 400px;
-    position: relative;
     z-index: 0;
     transition: clip-path 1s linear;
     color: var(--darkgrey);
   }
 
   .k {
-    position: relative;
   }
 
   .e, .f {
@@ -106,7 +104,6 @@
   .s {
     padding: 20px 0;
     margin-bottom: 100px;
-    position: relative;
     display: flex;
 
     &:last-child {

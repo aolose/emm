@@ -30,7 +30,6 @@
 		width: 80%;
 		margin: 20px auto;
 		padding-top: 80%;
-		position: relative;
 	}
 	.u {
 		justify-content: center;
@@ -73,7 +72,6 @@
 	}
 
 	.o {
-		position: relative;
 		cursor: pointer;
 		margin: 30px auto 10px;
 		width: 60px;

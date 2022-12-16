@@ -67,7 +67,6 @@
     min-width: 400px;
     min-height: 100px;
     max-width: 100%;
-    position: relative;
     direction: ltr;
 
     &:not(.act):hover {
