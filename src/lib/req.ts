@@ -9,7 +9,7 @@ import {
 import {dataType, reqMethod} from './enum';
 import {browser} from '$app/environment';
 import type {ApiName, cacheRecord, reqData, reqParams, reqCache, MethodNumber, reqOption} from './types';
-import type {PageLoad} from "../../.svelte-kit/types/src/routes/admin/config/$types";
+import type {Load} from "@sveltejs/kit";
 
 const cacheData = '.d';
 const cacheKey = '.k';
@@ -127,31 +127,47 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
     const ft = cfg?.fetch || fetch;
     const fullUrl = `/api/${uu}`;
     return ft(fullUrl, opt).then(async (r) => {
+        let fal = false
         if (r.status >= 400) {
+            fal = true
             cfg = cfg || {};
             cfg.cache = 0;
         }
         const e = encryptHeader(r);
         const t = getHeaderDataType(r.headers);
+        let ru
         if (e) {
             const b = await r.arrayBuffer();
             const d = await decryptBuf(b, parseInt(e, 36), shareKey);
             switch (t) {
                 case dataType.json:
-                    return d.json();
+                    ru = d.json();
+                    break;
                 case dataType.text:
-                    return d.text();
+                    ru = d.text();
+                    break
+                default:
+                    ru = d.buffer();
             }
-            return d.buffer();
         } else {
             switch (t) {
                 case dataType.json:
-                    return r.json();
+                    ru = r.json();
+                    break;
                 case dataType.text:
-                    return r.text();
+                    ru = r.text();
+                    break
+                default:
+                    ru = r.arrayBuffer();
             }
-            return r.arrayBuffer();
         }
+        if (fal) {
+            throw {
+                status: r.status,
+                data: await ru
+            }
+        }
+        return ru
     });
 };
 
@@ -227,15 +243,19 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
                 saveCacheToStorage();
             }
             return d;
+        }).then(d => {
+            if (done) done(d)
+            return d
+        }).catch(e => {
+            if (cfg?.fail) {
+                cfg.fail(e.data, e.status)
+            } else throw e
         }).finally(() => reqPromiseCache.delete(key))
         if (browser) {
             reqPromiseCache.set(key, p);
         }
     }
-    return p.then(d => {
-        if (done) done(d)
-        return d
-    });
+    return p;
 };
 export const api = (url: ApiName, cfg?: reqOption) => {
     const c = {...(cfg || {})}
@@ -244,7 +264,7 @@ export const api = (url: ApiName, cfg?: reqOption) => {
         return req(url, params, c)
     }
 }
-export const useApi = (url: ApiName, params?: reqParams, cfg?: reqOption): PageLoad =>
+export const useApi = (url: ApiName, params?: reqParams, cfg?: reqOption): Load =>
     async function ({fetch}) {
         (cfg = cfg || {}).fetch = fetch;
         return await req(url, params, cfg);
