@@ -338,17 +338,15 @@ export const setKey = <T extends Model>(o: Obj<T>, key: string, value: unknown) 
 export let sysStatue = 0
 const chk = () => {
     // step1 config db
-    const dbc = '.config.db'
+    const dbc = '.dbCfg'
     let dbOk = false
     if (fs.existsSync(dbc)) {
         const p = fs.readFileSync(dbc).toString()
         if (!p) return 0
-        if (!fs.existsSync(p)) {
-            try {
-                fs.mkdirSync(path.dirname(p), {recursive: true})
-            } catch (e) {
-                console.log(e)
-            }
+        const err = mkdir(path.dirname(p))
+        if(err){
+            console.log(err)
+            return  0
         }
         const er = server.start(p)
         if (er) {
@@ -366,6 +364,7 @@ const chk = () => {
 }
 export const checkStatue = () => {
     sysStatue = chk()
+    console.log(sysStatue)
     return sysStatue
 }
 

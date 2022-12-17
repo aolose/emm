@@ -26,6 +26,7 @@ import path from "path";
 import fs from "fs";
 import {genToken, getPermissions} from "$lib/server/token";
 import {blockIp} from "$lib/server/firewall";
+import {loadGeoDb} from "$lib/server/ipLite";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
     console.log('auth...', req.url);
@@ -96,11 +97,11 @@ const apis: APIRoutes = {
                 const err = server.start(p)
                 if (err) return err
                 else {
-                    fs.writeFileSync('.config.db', p)
+                    fs.writeFileSync('.dbCfg', p)
                     checkStatue()
                 }
             } catch (e) {
-                return e?.toString()
+                return resp(e?.toString(),500)
             }
         }
     },
@@ -245,11 +246,17 @@ const apis: APIRoutes = {
             return resp(err, err ? 500 : 200)
         })
     },
-    setGeoDb: {
+    setGeo: {
         post: auth(Admin, async req => {
             const p = await req.text()
             if (!p) {
                 sys.ipLiteToken = ''
+            }else {
+                const  [tk,ph] = p.split(',')
+                if(tk)sys.ipLiteToken=tk
+                if(ph)sys.ipLiteDir=ph
+                checkStatue()
+                loadGeoDb()
             }
             return ''
 

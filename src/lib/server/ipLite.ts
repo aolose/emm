@@ -4,6 +4,7 @@ import * as https from "https";
 import {IP2Location} from 'ip2location-nodejs'
 import {sys} from "$lib/server/index";
 import path from "path";
+import {mkdir} from "$lib/server/utils";
 
 const ip2location = new IP2Location();
 const db_type = 'DB3'
@@ -19,6 +20,11 @@ async function update() {
     const dir = sys.ipLiteDir
     const tk = sys.ipLiteToken
     if (!tk) return 0
+    const err = mkdir(dir)
+    if (err) {
+        console.log(err)
+        return 0
+    }
     const name = `ip_${Date.now()}`
     const latest = path.resolve(dir, name)
     let siz = 0
@@ -90,19 +96,24 @@ const load = (file?: string) => {
 export const loadGeoDb = () => {
     const dir = sys.ipLiteDir
     if (dir) {
-        const n = Date.now()
-        const file = fs.readdirSync(dir).reduce((a, b) => {
-            if (/^ip_\d+/.test(b)) {
-                const c = +b.replace(/^ip_/, '')
-                if (c < a) return c
-            }
-            return a
-        }, n)
         const next = 1e3 * 3600 * 24 * 14
         let delay = 0
-        if (file && file !== n) {
-            load(path.resolve(dir, `ip_${file}`))
-            delay = next - Date.now() + file
+        const err = mkdir(dir)
+        if (err) {
+            console.log(err)
+        } else {
+            const n = Date.now()
+            const file = fs.readdirSync(dir).reduce((a, b) => {
+                if (/^ip_\d+/.test(b)) {
+                    const c = +b.replace(/^ip_/, '')
+                    if (c < a) return c
+                }
+                return a
+            }, n)
+            if (file && file !== n) {
+                load(path.resolve(dir, `ip_${file}`))
+                delay = next - Date.now() + file
+            }
         }
         setTimeout(() => {
             update().finally(() => {

@@ -26,11 +26,6 @@ export const server = {
             console.log(er)
             return er
         }
-        // const {uploadDir, thumbDir,ipLiteToken} = sys
-        // if (!val(uploadDir)) sys.uploadDir = '/res'
-        // if (!val(thumbDir)) sys.thumbDir = '/thumb'
-        // if (!val(ipLiteToken)) sys.ipLiteToken = 'p2FQqUZE4YOZtlv1VuZ5oonLwFA9wUA1BoC0hfkF3dzepkskUz8P9RSwdeYhIinG'
-
     },
     sync() {
         tags.set(db.all(new Tag()).map(a => DBProxy(Tag, a, false)))
