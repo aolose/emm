@@ -2,6 +2,7 @@
     import Step from './step.svelte'
     import {req} from "$lib/req";
     import {slide, fade} from "svelte/transition";
+    import {goto} from "$app/navigation";
 
     export let data
     let step = data.d
@@ -72,39 +73,33 @@
         if (upDir && upDir === tbDir) tip = 'The Upload directory should be different from the Thumbnail directory.'
     }
 
-    const ck3 = () => {
-
-    }
-
     async function submit(e) {
         e.preventDefault();
         switch (step) {
             case 0:
                 if (!db) db = defaultPath
-                err = await req('dbPath', db)
-                if (!err) {
-                    swi(1)
-                }
+                req('dbPath', db).then(() => swi(1))
+                    .catch(e => err = e)
                 break;
             case 1:
                 if (ck('usr') && ck('pwd')) {
-                    err = await req('setAdmin',
-                        {pwd: o.pwd, usr: o.usr},
-                        {encrypt: true})
-                    if (!err) {
-                        swi(2)
-                    }
+                    req('setAdmin', {pwd: o.pwd, usr: o.usr}, {encrypt: true})
+                        .then(() => swi(2)).catch(e => err = e)
                 }
                 break;
             case 2:
                 if (upDir && tbDir) {
-                    err = await req('setUp', [upDir, tbDir].join())
-                    if (!err) {
-                        swi(3)
-                    }
+                    req('setUp', [upDir, tbDir].join())
+                        .then(() => {
+                            swi(3)
+                        }).catch(e => err = e)
                 }
                 break;
             case 3:
+                req('setGeo', (ipTk || ipDir) ? ipTk + ',' + ipDir : '')
+                    .then(() => {
+                        goto('/admin', {replaceState: true})
+                    }).catch(e => err = e)
                 break;
         }
     }
@@ -170,7 +165,7 @@
         {#if step === 3}
             <div class="f" transition:fade class:act={ipDir&&ipTk}>
                 <h1>{steps[3]}</h1>
-                <div class="r l" class:act={ipTk} on:blur={ck3}>
+                <div class="r l" class:act={ipTk}>
                     <input bind:value={ipTk}/>
                     <i></i>
                     <span>IpLocation Database Token</span>
@@ -188,7 +183,7 @@
                 {/if}
                 <button class="h" on:click={submit}>submit</button>
             </div>
-            <button class="k">Skip</button>
+            <button class="k" on:click={submit}>Skip</button>
         {/if}
         {#if err}
             <div class="e" transition:slide>
