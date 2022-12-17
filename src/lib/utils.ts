@@ -167,20 +167,20 @@ const buf2x = (buf: ArrayBuffer) => {
     let n = bv.length;
     let s = '';
     const k = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+=!@#$%^&*<>?:_-|~(){}[],.'
-    const t = BigInt(k.length)
+    const t = k.length
     while (n) {
-        const v = [0n, 0n, 0n, 0n]
+        const v = [0, 0, 0, 0]
         let x = 4
         while (x && n) {
-            v[--x] = BigInt(bv[--n])
+            v[--x] = bv[--n]
         }
-        let m = v[3] + (v[2] << 8n) + (v[1] << 16n) + (v[0] << 24n)
+        let m = v[3] + (v[2] << 8) + (v[1] << 16) + ((v[0] << 24) >>> 0)
         while (m >= t) {
             const l = m % t
-            s += k[Number(l)]
+            s += k[l]
             m = (m - l) / t
         }
-        s += k[Number(m)]
+        s += k[m]
     }
     return s;
 };
