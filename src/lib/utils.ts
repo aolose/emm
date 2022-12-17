@@ -162,24 +162,25 @@ export const buf2Str = (buf: ArrayBuffer) => {
     while (n--) s = String.fromCharCode(bv[n]) + s;
     return s;
 };
-const buf264 = (buf: ArrayBuffer) => {
+const buf2x = (buf: ArrayBuffer) => {
     const bv = new Uint8Array(buf);
     let n = bv.length;
     let s = '';
-    const k='1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+='
+    const k = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+=!@#$%^&*<>?:_-|~(){}[],.'
+    const t = BigInt(k.length)
     while (n) {
-        const v = [0,0]
-        let x=2
-        while (x--&&n--){
-            v[x]=bv[n]
+        const v = [0n, 0n, 0n, 0n]
+        let x = 4
+        while (x && n) {
+            v[--x] = BigInt(bv[--n])
         }
-        let  m =v[1]+(v[2]<<8)+(v[0]<<16)
-        while (m>=64){
-            const l = m%64
-            s+=k[l]
-            m=(m-l)/64
+        let m = v[3] + (v[2] << 8n) + (v[1] << 16n) + (v[0] << 24n)
+        while (m >= t) {
+            const l = m % t
+            s += k[Number(l)]
+            m = (m - l) / t
         }
-        s+=k[m]
+        s += k[Number(m)]
     }
     return s;
 };
@@ -356,7 +357,7 @@ export function idGen() {
 }
 
 export async function enc(str: string) {
-    const vi=`2321aSDWas!@#$`
-    const d = data2Buf(str+vi) || new Uint8Array([])
-    return buf264(await subtle.digest('sha-384', d))
+    const vi = `2321aSDWas!@#$`
+    const d = data2Buf(str + vi) || new Uint8Array([])
+    return buf2x(await subtle.digest('sha-256', d))
 }
