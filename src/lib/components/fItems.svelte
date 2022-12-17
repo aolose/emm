@@ -107,7 +107,7 @@
   .p {
     border-radius: inherit;
     padding-top: 100%;
-    background: var(--bg2);
+    background: var(--bg2) center;
     background-size: cover;
   }
 
