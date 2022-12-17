@@ -29,8 +29,8 @@
         if (!usr || !pwd) return
         w = 1
         const v = randNum()
-        const u = await enc(usr + v)
-        const p = await enc(pwd + v)
+        const u = await enc(await enc(usr)+v)
+        const p = await enc(await enc(pwd)+v)
         req('login', [u, p, v]).then(() => {
             goto('/admin')
         }).catch(({data})=> {
