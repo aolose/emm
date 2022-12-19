@@ -1,27 +1,32 @@
 import type {Handle} from '@sveltejs/kit';
 import {contentType, encryptIv, encTypeIndex} from '$lib/enum';
-import {fwFilter} from "$lib/server/firewall";
+import {fwFilter, reqRLog} from "$lib/server/firewall";
 import {checkStatue, sysStatue} from "$lib/server/utils";
 import {checkRedirect} from "$lib/server/utils";
 
 checkStatue()
 export const handle: Handle = async ({event, resolve}) => {
     const pn = event.url.pathname
+    let mk = ''
+    let res: Response | undefined
     if (!/^\/(api|res|font|src)/.test(pn)) {
-        const p = checkRedirect(sysStatue, pn,event.request)
+        const p = checkRedirect(sysStatue, pn, event.request)
         if (p) {
-            return new Response('', {
+            res = new Response('', {
                 status: 307,
                 headers: new Headers({
                     location: p
                 })
             })
         }
+    } else {
+        mk = fwFilter(event)
+        if (mk) res = new Response('', {status: 403})
     }
-    const r = fwFilter(event)
-    if (r) return new Response('', {status: 403})
-    return resolve(event, {
+    if (!res) res = await resolve(event, {
         filterSerializedResponseHeaders: (name) =>
             [contentType, encryptIv, encTypeIndex].indexOf(name.toLowerCase()) > -1
     });
+    reqRLog(event, res.status, mk)
+    return res
 };

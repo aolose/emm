@@ -17,7 +17,7 @@ export interface dbHooks {
 
 export type Model = (
     models.System | models.Tag |
-    models.Comment | models.Count |
+    models.Comment | models.ShortPost |
     models.User | models.Post |
     models.Res | models.FWRule |
     models.FwLog | models.Token

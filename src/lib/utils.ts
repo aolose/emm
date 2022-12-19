@@ -361,3 +361,17 @@ export async function enc(str: string) {
     const d = data2Buf(str + vi) || new Uint8Array([])
     return buf2x(await subtle.digest('sha-256', d))
 }
+
+
+export const time = (value:number)=>{
+    const d = new Date(value)
+    if(!d||!d.getTime())return ''
+    return new Intl.DateTimeFormat('en-GB', {
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second:'2-digit'
+    }).format(d)
+}

@@ -62,7 +62,7 @@ function insert(obj: Obj<Model>): [string, unknown[]] {
 
 function update(obj: Obj<Model>): [string, unknown[]] {
     const table = obj.constructor.name;
-    const pk = getPrimaryKey(table)
+    const pk = getPrimaryKey(table) as string
     const [k, m] = noNullKeyValues(obj);
     const v = sqlVal(m);
     const w = []
@@ -127,7 +127,7 @@ export class DB {
         }
         const table = o.constructor.name
         setKey(o, 'save', now)
-        const pk = getPrimaryKey(table)
+        const pk = getPrimaryKey(table) as keyof typeof o & string
         const kv = val(o[pk])
         let sql: string
         let values: unknown[]
@@ -147,13 +147,13 @@ export class DB {
     }
 
     delByPk<T extends Model>(c: Class<T>, pks: unknown[]) {
-        const pk = pkMap[c.name]
+        const pk = pkMap[c.name] as string
         const sql = `delete from ${c.name} where ${pk} in (${pks.map(a => '?').join()})`
         return this.db.prepare(sql).run(...pks)
     }
 
     del<T extends Model>(o: Obj<T>) {
-        const pk = getPrimaryKey(o.constructor.name)
+        const pk = getPrimaryKey(o.constructor.name) as keyof typeof o & string
         if (!pk) return
         const v = o[pk]
         const sql = `delete from ${o.constructor.name} where ${pk}=?`

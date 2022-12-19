@@ -123,7 +123,8 @@ export const loadGeoDb = () => {
     }
 }
 
-export const info = (ip: string) => {
+export const ipInfo = (ip: string) => {
+    if(!ip)return {}
     if (geoIp) {
         const r = geoIp.getAll(ip)
         return {
@@ -133,4 +134,5 @@ export const info = (ip: string) => {
             city: r.city
         }
     }
+    return {}
 }

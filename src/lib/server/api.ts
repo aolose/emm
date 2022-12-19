@@ -11,7 +11,7 @@ import {
     model,
     pageBuilder,
     resp,
-    saveFile, setTokens,
+    saveFile, setTokens, skipLogin,
     sysStatue,
     uniqSlug
 } from './utils';
@@ -25,15 +25,15 @@ import {tagPatcher} from "$lib/server/cache";
 import path from "path";
 import fs from "fs";
 import {genToken, getPermissions} from "$lib/server/token";
-import {blockIp} from "$lib/server/firewall";
+import {blockIp, logCache} from "$lib/server/firewall";
 import {loadGeoDb} from "$lib/server/ipLite";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
-    console.log('auth...', req.url);
     if (!sysStatue) return resp('system uninitialized', 403)
     ps = ([] as permission[]).concat(ps)
     const tokens = getTokens(req)
     const pms = getPermissions(tokens)
+    if(skipLogin)pms.delete(Admin)
     for (const p of ps) {
         const s = pms.get(p)
         let err = ''
@@ -55,6 +55,12 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 let curPostFlag = [0, 0]
 const {Admin} = permission
 const apis: APIRoutes = {
+    log:{
+        async post(req){
+            const t = +await req.text()
+            return logCache.filter(a=>a[0]>=t)
+        }
+    },
     login: {
         post: async (req) => {
             if (sysStatue < 2) return resp(-1, 403)

@@ -5,7 +5,7 @@ import {FwLog, FWRule} from "$lib/server/model";
 import {filter} from "$lib/utils";
 import type {Obj, Timer} from "$lib/types";
 import {getClientAddr, model} from "$lib/server/utils";
-import {info} from "$lib/server/ipLite";
+import {ipInfo} from "$lib/server/ipLite";
 
 
 export let rules: Obj<FWRule>[]
@@ -45,47 +45,58 @@ export const hitFwRules = (t: FWRule) => {
     }
     return ids
 }
-let logCache: [string, string, string, number][] = []
+type log = [number, string, string, string, number, string, string]
+export let logCache: log[] = []
 const max = 1000
-export const fwFilter = (event: RequestEvent) => {
-    if (!db) return false
+export const reqRLog = (event: RequestEvent, statue: number, mark = '') => {
+    const ip = getClientAddr(event)
+    const path = event.url.pathname
+    if(path==='/api/log')return
+    const ua = event.request.headers.get('user-agent') || ''
+    const r = [Date.now(), ip, path, ua, statue, ipInfo(ip)?.short || '', mark] as log
+    console.log('req:', r.join('\t'))
+    logCache.push(r)
+    const l = logCache.length
+    if (l > max) logCache = logCache.slice(l - max)
+}
+export const fwFilter = (event: RequestEvent): string => {
+    if (!db) return ''
     if (!rules) loadRules()
     const ip = getClientAddr(event)
     const path = event.url.pathname
     const ua = event.request.headers.get('user-agent') || ''
-    logCache.push([ip, path, ua, Date.now()])
-    const l = logCache.length
-    if (l > max) logCache = logCache.slice(l - max)
     let o: Obj<FWRule> | undefined
     for (const k of rules) {
         if (k.path && path !== k.path) continue
         if (k.ua && new RegExp(ua).test(ua)) continue
         if (k.ip && ipRangeCheck(ip, k.ip)) continue
-        if (!o) o = {}
+        if (!o) o = {mark: ''}
+        if (k.mark) o.mark = o.mark?.split(',').concat(k.mark).join()
         Object.assign(o, filter(k, ['noAccess', 'log'], false))
     }
     if (o) {
+        const rs = o.mark || 'unknown'
         if (o.log) {
             db.save(model(FwLog, {
-                ua, path, ip, mark: o.noAccess ? 'no access' : ''
+                ua, path, ip, mark: o.mark
             }))
         }
         if (o.noAccess) {
-            return true
+            return rs
         }
         if (ip && o.country) {
-            const f = info(ip)
-            if (f && f.short === o.country) return true
+            const f = ipInfo(ip)
+            if (f && f.short === o.country) return rs
         }
     }
-    return false
+    return ''
 }
 
 type times = number
 type expire = number
 type bkRec = [times, expire, Timer]
 const bkLis = new Map<string, bkRec>()
-export const blockIp = (key: string, ip: string):[bkRec,()=>void] => {
+export const blockIp = (key: string, ip: string): [bkRec, () => void] => {
     const k = `${key}-${ip}`
     const q = (bkLis.get(k) || [0, 0, null]) as bkRec
     return [q, () => {
