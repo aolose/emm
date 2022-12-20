@@ -192,6 +192,7 @@ export class System {
     rss = false // use rss
     pageScript = TEXT
     pageCss = TEXT
+    robots = TEXT
 }
 
 export class User {
