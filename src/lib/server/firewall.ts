@@ -51,7 +51,7 @@ const max = 1000
 export const reqRLog = (event: RequestEvent, statue: number, mark = '') => {
     const ip = getClientAddr(event)
     const path = event.url.pathname
-    if(path==='/api/log')return
+    if (path === '/api/log') return
     const ua = event.request.headers.get('user-agent') || ''
     const r = [Date.now(), ip, path, ua, statue, ipInfo(ip)?.short || '', mark] as log
     console.log('req:', r.join('\t'))
@@ -59,17 +59,52 @@ export const reqRLog = (event: RequestEvent, statue: number, mark = '') => {
     const l = logCache.length
     if (l > max) logCache = logCache.slice(l - max)
 }
+
+function match(rule: string, target: string) {
+    const reg = rule.match(/^\/(.*?)\/([gimy]+)?$/)
+    if (reg) {
+        try {
+            const f = Array.from(new Set(reg[2] || '')).join('')
+            const r = new RegExp(reg[1], f)
+            if (r.test(target)) return true
+        } catch (e) {
+            console.log(e)
+        }
+    } else if (target === rule) {
+        return true
+    }
+    return false
+}
+
+function matchHeader(h: string, hs: Headers) {
+    const s = h.split('\n')
+    for (const v of s) {
+        const m = v.match(/^\s*([a-z0-9_-]+)\s*:\s*(.*?)\s*$/)
+        if (m?.length === 2) {
+            const k = m[1]
+            const v = m[2]
+            const hv = hs.get(k) || ''
+            if (!hv) {
+                if (v) return false
+            }else if (!match(v, hv)) return false
+        }
+    }
+    return true
+}
+
 export const fwFilter = (event: RequestEvent): string => {
     if (!db) return ''
     if (!rules) loadRules()
     const ip = getClientAddr(event)
     const path = event.url.pathname
+    const headers = event.request.headers
     const ua = event.request.headers.get('user-agent') || ''
     let o: Obj<FWRule> | undefined
     for (const k of rules) {
-        if (k.path && path !== k.path) continue
-        if (k.ua && new RegExp(ua).test(ua)) continue
-        if (k.ip && ipRangeCheck(ip, k.ip)) continue
+        if (k.path && !match(k.path, path)) continue
+        if (k.ua && !match(k.ua, ua)) continue
+        if (k.header && !matchHeader(k.header, headers)) continue
+        if (k.ip && !ipRangeCheck(ip, k.ip)) continue
         if (!o) o = {mark: ''}
         if (k.mark) o.mark = o.mark?.split(',').concat(k.mark).join()
         Object.assign(o, filter(k, ['noAccess', 'log'], false))
