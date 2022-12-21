@@ -30,11 +30,11 @@ import {loadGeoDb} from "$lib/server/ipLite";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
     if (!sysStatue) return resp('system uninitialized', 403)
-    ps = ([] as permission[]).concat(ps)
+    const requires = new Set(([] as permission[]).concat(ps))
     const tokens = getTokens(req)
     const pms = getPermissions(tokens)
-    if(skipLogin)pms.delete(Admin)
-    for (const p of ps) {
+    if (skipLogin) requires.delete(Admin)
+    for (const p of requires) {
         const s = pms.get(p)
         let err = ''
         if (s === undefined) err = 'invalid token'
@@ -55,10 +55,10 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 let curPostFlag = [0, 0]
 const {Admin} = permission
 const apis: APIRoutes = {
-    log:{
-        async post(req){
+    log: {
+        async post(req) {
             const t = +await req.text()
-            return logCache.filter(a=>a[0]>=t)
+            return logCache.filter(a => a[0] >= t)
         }
     },
     login: {
@@ -107,7 +107,7 @@ const apis: APIRoutes = {
                     checkStatue()
                 }
             } catch (e) {
-                return resp(e?.toString(),500)
+                return resp(e?.toString(), 500)
             }
         }
     },
@@ -257,10 +257,10 @@ const apis: APIRoutes = {
             const p = await req.text()
             if (!p) {
                 sys.ipLiteToken = ''
-            }else {
-                const  [tk,ph] = p.split(',')
-                if(tk)sys.ipLiteToken=tk
-                if(ph)sys.ipLiteDir=ph
+            } else {
+                const [tk, ph] = p.split(',')
+                if (tk) sys.ipLiteToken = tk
+                if (ph) sys.ipLiteDir = ph
                 checkStatue()
                 loadGeoDb()
             }
