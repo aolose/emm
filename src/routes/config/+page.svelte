@@ -55,6 +55,7 @@
     }
 
     let tip = ''
+    const fail = e => err = e?.data || e
     const ck = n => {
         const v = o[n]
         if (!v) return
@@ -79,12 +80,12 @@
             case 0:
                 if (!db) db = defaultPath
                 req('dbPath', db).then(() => swi(1))
-                    .catch(e => err = e)
+                    .catch(fail)
                 break;
             case 1:
                 if (ck('usr') && ck('pwd')) {
                     req('setAdmin', {pwd: o.pwd, usr: o.usr}, {encrypt: true})
-                        .then(() => swi(2)).catch(e => err = e)
+                        .then(() => swi(2)).catch(fail)
                 }
                 break;
             case 2:
@@ -92,14 +93,14 @@
                     req('setUp', [upDir, tbDir].join())
                         .then(() => {
                             swi(3)
-                        }).catch(e => err = e)
+                        }).catch(fail)
                 }
                 break;
             case 3:
                 req('setGeo', (ipTk || ipDir) ? ipTk + ',' + ipDir : '')
                     .then(() => {
                         goto('/admin', {replaceState: true})
-                    }).catch(e => err = e)
+                    }).catch(fail)
                 break;
         }
     }
