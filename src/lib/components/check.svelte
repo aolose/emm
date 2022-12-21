@@ -41,7 +41,7 @@
       color: #afd4d7;
     }
     span{
-      color: #6e8591;
+      color: #617c94;
     }
   }
 </style>
