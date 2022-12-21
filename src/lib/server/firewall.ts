@@ -60,20 +60,30 @@ export const reqRLog = (event: RequestEvent, statue: number, mark = '') => {
     if (l > max) logCache = logCache.slice(l - max)
 }
 
+/**
+ * compare
+ * @param rule
+ * @param target
+ */
 function match(rule: string, target: string) {
+    const rv = rule.startsWith('!')
+    if (rv) rule = rule.substring(1)
     const reg = rule.match(/^\/(.*?)\/([gimy]+)?$/)
+    let hit = false
     if (reg) {
         try {
             const f = Array.from(new Set(reg[2] || '')).join('')
             const r = new RegExp(reg[1], f)
-            if (r.test(target)) return true
+            if (!r.test(target)) {
+                hit = true
+            }
         } catch (e) {
             console.log(e)
         }
     } else if (target === rule) {
-        return true
+        hit = true
     }
-    return false
+    return rv ? !hit : hit
 }
 
 function matchHeader(h: string, hs: Headers) {
@@ -86,7 +96,7 @@ function matchHeader(h: string, hs: Headers) {
             const hv = hs.get(k) || ''
             if (!hv) {
                 if (v) return false
-            }else if (!match(v, hv)) return false
+            } else if (!match(v, hv)) return false
         }
     }
     return true

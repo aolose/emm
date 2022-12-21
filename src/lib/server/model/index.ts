@@ -19,7 +19,7 @@ export class Res {
     md5 = TEXT
     save = INT
     thumb = INT
-    userId=INT
+    userId = INT
 }
 
 export class ShortPost {
@@ -31,7 +31,7 @@ export class ShortPost {
     publish = INT
     modify = INT
     createAt = INT
-    userId=INT
+    userId = INT
 }
 
 export class Tag {
@@ -40,7 +40,7 @@ export class Tag {
     desc = TEXT
     createAt = INT
     post = TEXT
-    userId=INT
+    userId = INT
 }
 
 export class Post {
@@ -61,7 +61,7 @@ export class Post {
     publish = INT
     modify = INT
     save = INT
-    userId=INT
+    userId = INT
     _p = 0
 
     onSave(db: DB, now: number) {
@@ -95,7 +95,7 @@ export class Post {
         }
         if (this.tag !== undefined && id) {
             const cur = this.tag?.split(',') || []
-            let as = new Set<string>(cur.filter(a=>!!a))
+            let as = new Set<string>(cur.filter(a => !!a))
             let ds = new Set<string>()
             if (ori.tag) {
                 const old = ori.tag.split(',')
@@ -103,7 +103,7 @@ export class Post {
                 as = new Set([...as, ...add])
                 ds = new Set([...del])
             }
-            const tgs = get(tags).filter(a=>!!a)
+            const tgs = get(tags).filter(a => !!a)
             const _id = id + ''
             tgs.forEach(t => {
                 const {name} = t
@@ -166,7 +166,7 @@ export class Comment {
     pass = true
     createAt = INT
     modify = INT
-    userId=INT
+    userId = INT
 }
 
 export class System {
@@ -183,13 +183,10 @@ export class System {
     ipLiteDir = TEXT
     description = TEXT
     keywords = TEXT
-    apiCors = TEXT
     comment = false // use comment
     noSpam = false // check spam comment
     commentReview = false // check comment
-    firewall = false // use firewall
     analysis = false // use analysis
-    rss = false // use rss
     pageScript = TEXT
     pageCss = TEXT
     robots = TEXT
@@ -206,7 +203,7 @@ export class User {
     birth = INT
     desc = TEXT
     createAt = INT
-    role=INT
+    role = INT
 }
 
 export class FWRule {
@@ -217,6 +214,7 @@ export class FWRule {
     @unique
     ip = TEXT
     path = TEXT
+    header = TEXT
     ua = TEXT
     createAt = INT
     save = INT
