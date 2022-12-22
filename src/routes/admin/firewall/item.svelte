@@ -1,13 +1,14 @@
 <script>
-    import {time} from "$lib/utils";
+    import {str2Hds, time} from "$lib/utils";
     import {fade, slide} from "svelte/transition";
 
     export let data = []
-    const [tm, ip, ph, ua, st, ct, mk] = data
+    const [tm, ip, ph, hds, st, ct, mk] = data
     export let sel
-    export let isDb=0
     export let ck
 
+    let exp=0
+    $:hd = str2Hds(hds).filter(([a])=> exp ? 1 : /^user-agent$/gi.test(a))
 
     function col(n, s) {
         if (n < 300) return 0 === s
@@ -15,6 +16,8 @@
         if (n >= 400) return 2 === s
         return 1 === s
     }
+
+
 </script>
 
 <div class="r" class:act={sel.has(tm+ip)} transition:fade on:click={ck(tm+ip)}>
@@ -29,7 +32,17 @@
     <div class="r2"><span>{ph}</span></div>
     <div class="r6"><span>{ct}</span></div>
     <div class="r4"><span>{mk}</span></div>
-    <div class="r5"><span>{ua}</span></div>
+    <div class="r5">
+        <button class="icon"
+                on:click|stopPropagation={()=>exp=1-exp}
+                class:i-add={!exp} class:i-no={exp}></button>
+        {#each hd as [k, v]}
+            <div transition:slide>
+                <span>{k}:</span>
+                <span>{v}</span>
+            </div>
+        {/each}
+    </div>
 </div>
 
 <style lang="scss">
@@ -40,9 +53,9 @@
     display: flex;
     font-size: 13px;
     border-radius: 5px;
-    margin-bottom: 10px;
 
     span {
+      padding: 0 10px;
       transition: .3s ease-in-out;
       color: #72849b;
     }
@@ -67,10 +80,25 @@
         }
       }
     }
+    .c0 {
+      color: #13ad13
+    }
+
+    .c1 {
+      color: #b6a963
+    }
+
+    .c2 {
+      color: #e06914
+    }
+
+    .c3 {
+      color: #d33232
+    }
   }
 
+
   .r0 {
-    text-align: center;
     width: 110px;
 
     span {
@@ -106,33 +134,33 @@
   .r5 {
     background: #192125;
     width: 100%;
-
+    button{
+      position: absolute;
+      left: 10px;
+      padding:7px 10px;
+      &:hover{
+        color: #fff;
+      }
+    }
     span {
-      color: #3e505d;
+      padding: 0;
+      color: #6c8598;
+      opacity: .7;
+
+      & + span {
+        font-weight: 200;
+        opacity: 1;
+        padding-left: 10px;
+      }
     }
   }
-
-  .r {
-    .c0 {
-      color: #13ad13
-    }
-
-    .c1 {
-      color: #b6a963
-    }
-
-    .c2 {
-      color: #e06914
-    }
-
-    .c3 {
-      color: #d33232
+  .r{
+    .r5{
+      padding: 5px 10px 12px 40px;
     }
   }
-
   .act {
     z-index: 90;
-    box-shadow: #14171a 0 2px 5px;
     background: #294272;
 
     span {
@@ -140,8 +168,7 @@
     }
 
     .r5 {
-      background: #487ec2;
-
+      background: #122536;
       span {
         color: #d4e3f5;
       }

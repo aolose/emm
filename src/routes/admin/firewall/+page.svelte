@@ -215,7 +215,6 @@
       right: 50%;
       transition: .1s ease-in-out;
       background: var(--darkgrey);
-      box-shadow: rgba(0, 0, 0, .5) 0 3px 6px;
     }
 
     span {
@@ -298,7 +297,7 @@
   }
 
   .d {
-    padding-bottom: 5px;
+    border-bottom: 1px solid #1e222c;
     flex-wrap: wrap;
     display: flex;
     background: var(--bg2);

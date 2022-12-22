@@ -58,7 +58,7 @@ const apis: APIRoutes = {
     log: {
         async post(req) {
             const t = +await req.text()
-            return logCache.filter(a => a[0] >= t)
+            return logCache.filter(a => a[0] > t)
         }
     },
     login: {

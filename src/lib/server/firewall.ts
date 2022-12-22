@@ -2,14 +2,14 @@ import type {RequestEvent} from "@sveltejs/kit";
 import ipRangeCheck from 'ip-range-check'
 import {db} from "$lib/server/index";
 import {FwLog, FWRule} from "$lib/server/model";
-import {filter} from "$lib/utils";
+import {filter, hds2Str} from "$lib/utils";
 import type {Obj, Timer} from "$lib/types";
 import {getClientAddr, model} from "$lib/server/utils";
 import {ipInfo} from "$lib/server/ipLite";
 
 
 export let rules: Obj<FWRule>[]
-const fk = (fr: Obj<FWRule>) => `${fr.ip}-${fr.ua}-${fr.country}-${fr.path}`
+const fk = (fr: Obj<FWRule>) => `${fr.ip}-${fr.headers}-${fr.country}-${fr.path}`
 export const addRule = (fr: FWRule) => {
     const r = rules.find(a => fk(a) === fk(fr))
     if (r) {
@@ -32,19 +32,6 @@ function loadRules() {
     setTimeout(loadRules, 1e3 * 3600 * 72)
 }
 
-export const hitFwRules = (t: FWRule) => {
-    const ip = t.ip
-    const path = t.path
-    const ua = t.ua
-    const ids = []
-    for (const k of rules) {
-        if (k.path && path !== k.path) continue
-        if (k.ua && new RegExp(ua).test(ua)) continue
-        if (k.ip && ipRangeCheck(ip, k.ip)) continue
-        ids.push(k.ip)
-    }
-    return ids
-}
 type log = [number, string, string, string, number, string, string]
 export let logCache: log[] = []
 const max = 1000
@@ -52,9 +39,8 @@ export const reqRLog = (event: RequestEvent, statue: number, mark = '') => {
     const ip = getClientAddr(event)
     const path = event.url.pathname
     if (path === '/api/log') return
-    const ua = event.request.headers.get('user-agent') || ''
+    const ua = hds2Str(event.request.headers)
     const r = [Date.now(), ip, path, ua, statue, ipInfo(ip)?.short || '', mark] as log
-    console.log('req:', r.join('\t'))
     logCache.push(r)
     const l = logCache.length
     if (l > max) logCache = logCache.slice(l - max)
@@ -108,12 +94,10 @@ export const fwFilter = (event: RequestEvent): string => {
     const ip = getClientAddr(event)
     const path = event.url.pathname
     const headers = event.request.headers
-    const ua = event.request.headers.get('user-agent') || ''
     let o: Obj<FWRule> | undefined
     for (const k of rules) {
         if (k.path && !match(k.path, path)) continue
-        if (k.ua && !match(k.ua, ua)) continue
-        if (k.header && !matchHeader(k.header, headers)) continue
+        if (k.headers && !matchHeader(k.headers, headers)) continue
         if (k.ip && !ipRangeCheck(ip, k.ip)) continue
         if (!o) o = {mark: ''}
         if (k.mark) o.mark = o.mark?.split(',').concat(k.mark).join()
@@ -123,7 +107,7 @@ export const fwFilter = (event: RequestEvent): string => {
         const rs = o.mark || 'unknown'
         if (o.log) {
             db.save(model(FwLog, {
-                ua, path, ip, mark: o.mark
+                path, ip, mark: o.mark, headers: hds2Str(headers)
             }))
         }
         if (o.noAccess) {

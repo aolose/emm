@@ -214,8 +214,7 @@ export class FWRule {
     @unique
     ip = TEXT
     path = TEXT
-    header = TEXT
-    ua = TEXT
+    headers = TEXT
     createAt = INT
     save = INT
     log = false
@@ -228,7 +227,7 @@ export class FwLog {
     id = INT
     ip = TEXT
     path = TEXT
-    ua = TEXT
+    headers = TEXT
     save = INT
     mark = TEXT
     _city = ''

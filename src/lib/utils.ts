@@ -379,6 +379,7 @@ export const time = (value: number) => {
 export const hds2Str = (hs: Headers | [string, string][]) => {
     const h = []
     for (const [k, v] of hs) {
+        console.log(k,v)
         if(k) h.push(`${k}:${v.replace(/\n/g,'')}`)
     }
     return h.join('\n')
@@ -389,8 +390,8 @@ export const str2Hds = (str: string) => {
     str.split('\n').forEach(a => {
         const u = a.match(/^(.*?):(.*)$/)
         if (u) {
-            const x = u[0].replace(/[^a-z0-9-_]/ig, '')
-            if (x) v.push([x, u[1].replace(/^\s+|\s+$/gi, '')])
+            const x = u[1].replace(/[^a-z0-9-_]/ig, '')
+            if (x) v.push([x, u[2].replace(/^\s+|\s+$/gi, '')])
         }
     })
     return v
