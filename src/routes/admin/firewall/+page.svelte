@@ -1,13 +1,13 @@
 <script>
     import {onMount} from "svelte";
     import {req} from "$lib/req";
-    import {time} from "$lib/utils";
-    import {fade} from "svelte/transition";
+    import Itm from './item.svelte'
     import Pg from '$lib/components/pg.svelte'
     import Ck from '$lib/components/check.svelte'
     import Ld from '$lib/components/loading.svelte'
+    import HdsIpt from './headers.svelte'
 
-    let sel = null
+    let sel = new Set()
     let tab = 0
     let ls = []
     let lastL = 0
@@ -51,15 +51,12 @@
         return () => clearInterval(t)
     })
 
-    function col(n, s) {
-        if (n < 300) return 0 === s
-        if (n >= 500) return 3 === s
-        if (n >= 400) return 2 === s
-        return 1 === s
-    }
-
     function ck(k) {
-        return () => sel = sel === k ? '' : k
+        return () => {
+            if(sel.has(k))sel.delete(k)
+            else sel.add(k)
+            sel=new Set(sel)
+        }
     }
 </script>
 <div class="a">
@@ -68,12 +65,31 @@
             <div class="h">
                 <h1>Logs</h1>
                 <s></s>
-                <div class="tb">
-                    <span></span>
+                <div class="tb" class:ac={tab}>
+                    <span on:click={()=>tab=0}>real-time</span>
+                    <span on:click={()=>tab=1}>firewall</span>
+                    <i></i>
                 </div>
                 <button on:click={loadLog} class="icon i-refresh"></button>
                 <Ck name="auto refresh" bind:value={loop}/>
             </div>
+        </div>
+        <div class="e">
+            <div class="b">
+                {#each lss as d (d[0] + d[1])}
+                    <Itm ck={ck} data={d} sel={sel} isDb={tab}/>
+                {/each}
+            </div>
+            <Pg total={total} page={p} go={n=>p=n}/>
+        </div>
+        <Ld act={ld}/>
+    </div>
+    <div class="f">
+        <button class="clo">
+            <i></i>
+            <i></i>
+        </button>
+        <div class="f0">
             <label>
                 <span>IP:</span>
                 <input/>
@@ -83,55 +99,165 @@
                 <input/>
             </label>
             <label>
-                <span>ua:</span>
-                <input/>
-            </label>
-            <label>
                 <span>country:</span>
                 <input/>
             </label>
-            {#if tab}
-                <label>
-                    <span>header:</span>
-                    <input/>
-                </label>
-                <label>
-                    <span>mark:</span>
-                    <input/>
-                </label>
-            {/if}
+            <label>
+                <span>mark:</span>
+                <input/>
+            </label>
+            <label>
+                <span>header:</span>
+                <HdsIpt/>
+            </label>
         </div>
-        <div class="e">
-            <div class="b">
-                {#each lss as [tm, ip, ph, ua, st, ct, mk] (tm + ip)}
-                    <div class="r" class:act={sel === tm+ip} transition:fade on:click={ck(tm+ip)}>
-                        <div class="r0"><span>{time(tm)}</span></div>
-                        <div class="r1"><span>{ip}</span></div>
-                        <div class="r3"><span
-                                class:c0={col(st,0)}
-                                class:c1={col(st,1)}
-                                class:c2={col(st,2)}
-                                class:c3={col(st,3)}
-                        >{st}</span></div>
-                        <div class="r2"><span>{ph}</span></div>
-                        <div class="r6"><span>{ct}</span></div>
-                        <div class="r4"><span>{mk}</span></div>
-                        <div class="r5"><span>{ua}</span></div>
-                    </div>
-                {/each}
-            </div>
-            <Pg total={total} page={p} go={n=>p=n}/>
-            <Ld act={ld}/>
+        <div class="fn">
+            <button>create rule</button>
+            <button>search</button>
         </div>
     </div>
 </div>
 <style lang="scss">
-  h1{
+  .clo {
+    position: absolute;
+    transition: .2s ease-in-out;
+    left: 10px;
+    top: 10px;
+    width: 50px;
+    height: 50px;
+    color: #3a537c;
+
+    &:hover {
+      color: #00d2ff;
+
+      i {
+        transform: rotate(35deg);
+        transform-origin: right;
+        width: 20px;
+        margin-left: 20px;
+
+        & + i {
+          transform: rotate(-35deg);
+        }
+      }
+    }
+
+    i {
+      transition: inherit;
+      transform: rotate(45deg);
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 24px 10px;
+      background: currentColor;
+      width: 30px;
+      height: 1px;
+
+      & + i {
+        transform: rotate(-45deg);
+      }
+    }
+  }
+
+  .f0 {
+    flex: 1;
+  }
+
+  .fn {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      border-radius: 20px;
+      cursor: pointer;
+      color: #354e65;
+      border: 1px solid currentColor;
+      margin: 0 20px;
+      padding: 5px 20px;
+      transition: .3s ease-in-out;
+
+      &:hover {
+        background: #1c93ff;
+        color: #fff;
+        border-color: transparent;
+      }
+    }
+  }
+
+  .f {
+    width: 600px;
+    height: 100%;
+    padding: 70px 20px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .g {
+    display: flex;
+  }
+
+  .tb {
+    margin-right: 10px;
+    display: flex;
+    height: 20px;
+    align-items: center;
+    border-radius: 100px;
+    background: var(--bg0);
+
+    i {
+      border-radius: inherit;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 50%;
+      transition: .1s ease-in-out;
+      background: var(--darkgrey);
+      box-shadow: rgba(0, 0, 0, .5) 0 3px 6px;
+    }
+
+    span {
+      cursor: pointer;
+      transition: .1s ease-in-out;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      line-height: 1;
+      color: #8aa4af;
+      z-index: 3;
+
+      & + span {
+        color: #858fa1;
+        margin-left: -10px;
+      }
+    }
+  }
+
+  .ac {
+    i {
+      transform: translateX(100%);
+    }
+
+    span {
+      color: #858fa1;
+
+      & + span {
+        color: #8aa4af;
+      }
+    }
+  }
+
+  h1 {
     font-weight: 400;
     font-size: 18px;
-    padding:  0 10px;
+    padding: 0 10px;
     color: #6d7f94;
   }
+
   .h {
     height: 60px;
     align-items: center;
@@ -139,7 +265,6 @@
     display: flex;
     width: 100%;
     padding: 0 10px;
-    margin-bottom: 5px;
 
     s {
       flex: 1;
@@ -147,9 +272,13 @@
   }
 
   label {
+    width: 100%;
     font-size: 15px;
+    align-items: flex-start;
 
     input {
+      width: 0;
+      resize: none;
       border: 1px solid #304565;
       background: var(--bg1);
       flex: 1;
@@ -157,15 +286,14 @@
     }
 
     span {
+      line-height: 32px;
       color: #8092a9;
       text-align: right;
       padding-right: 10px;
       width: 80px;
     }
 
-
     display: flex;
-    align-items: center;
     padding: 10px;
   }
 
@@ -174,16 +302,15 @@
     flex-wrap: wrap;
     display: flex;
     background: var(--bg2);
-    margin-bottom: 10px;
   }
 
   .e {
-    background: var(--bg2);
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding-bottom: 10px;
+    background: var(--bg2);
+    padding-bottom: 20px;
   }
 
   button {
@@ -196,40 +323,6 @@
     display: flex;
   }
 
-  .r {
-    transition: .3s ease-in-out;
-    background: #1e2633;
-    flex-wrap: wrap;
-    display: flex;
-    font-size: 13px;
-
-    span {
-      transition: .3s ease-in-out;
-      color: #72849b;
-    }
-
-    div {
-      flex-grow: 1;
-      transition: .3s ease-in-out;
-      padding: 5px 10px;
-      white-space: normal;
-      word-break: break-all;
-      height: 100%;
-      min-height: 30px;
-      align-self: center;
-      border-bottom: 1px solid rgba(255,255,255,.05);
-    }
-
-    &:not(.act):hover {
-      background: #233146;
-
-      .r5 {
-        span {
-          color: #95a3c9;
-        }
-      }
-    }
-  }
 
   .c {
     display: flex;
@@ -237,91 +330,12 @@
     height: 100%;
     //width: 600px;
     width: 100%;
-    max-width: 1000px;
   }
 
   .b {
-    margin-bottom: 10px;
     flex: 1;
     height: 100%;
     overflow: auto;
   }
 
-  .r0 {
-    text-align: center;
-    width: 100px;
-    span {
-      font-size: 12px;
-      color: #717d8c;
-    }
-  }
-
-  .r1 {
-    width: 120px;
-  }
-
-  .r2 {
-    width: 120px;
-
-    span {
-      color: #72849b;
-    }
-  }
-
-  .r3 {
-    width: 80px;
-  }
-
-  .r4 {
-    flex: 1;
-  }
-
-  .r6 {
-    width: 50px;
-  }
-
-  .r5 {
-    background: #191d28;
-    width: 100%;
-
-    span {
-      color: #3e505d;
-    }
-  }
-
-  .r {
-    .c0 {
-      color: #13ad13
-    }
-
-    .c1 {
-      color: #b6a963
-    }
-
-    .c2 {
-      color: #e06914
-    }
-
-    .c3 {
-      color: #d33232
-    }
-  }
-
-  .act {
-    z-index: 90;
-    box-shadow: #14171a 0 2px 5px;
-    background: #294272;
-
-    span {
-      color: #a8bfe5;
-    }
-
-    .r5 {
-      background: #487ec2;
-
-      span {
-        color: #d4e3f5;
-      }
-    }
-  }
 </style>

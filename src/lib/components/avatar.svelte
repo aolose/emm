@@ -5,7 +5,7 @@
 
 <div class="a" class:c={href}>
 	<div class="b" style:background-image={pic ? `url(${pic})` : ''} />
-	<div class="icon i-gravatar" />
+	<div class="icon i-av" />
 </div>
 
 <style lang="scss">
