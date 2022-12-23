@@ -99,7 +99,7 @@
 
 
   .r0 {
-    width: 110px;
+    width: 127px;
 
     span {
       font-size: 12px;
@@ -156,7 +156,7 @@
   }
   .r{
     .r5{
-      padding: 5px 10px 12px 40px;
+      padding: 5px 10px 12px 35px;
     }
   }
   .act {

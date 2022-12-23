@@ -13,6 +13,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.i-ed:before {
+  content: "\e621";
+}
+
+.i-target:before {
+  content: "\e61d";
+}
+
+.i-geo:before {
+  content: "\e651";
+}
+
+.i-log:before {
+  content: "\e657";
+}
+
+.i-fbi:before {
+  content: "\e691";
+}
+
+.i-ip:before {
+  content: "\e6e8";
+}
+
 .i-drop:before {
   content: "\e6a8";
 }

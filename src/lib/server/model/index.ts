@@ -220,6 +220,7 @@ export class FWRule {
     log = false
     noAccess = false
     country = TEXT
+    active = true
 }
 
 export class FwLog {
