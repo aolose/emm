@@ -18,14 +18,14 @@ import {
 import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
-import {Post, Res} from "$lib/server/model";
+import {FwLog, FWRule, Post, Res} from "$lib/server/model";
 import {diffObj, enc, filter} from "$lib/utils";
 import {NULL, permission, token_statue} from "$lib/server/enum";
 import {tagPatcher} from "$lib/server/cache";
 import path from "path";
 import fs from "fs";
 import {genToken, getPermissions} from "$lib/server/token";
-import {blockIp, logCache} from "$lib/server/firewall";
+import {addRule, blockIp, delRule, filterLog, fw2log, logCache} from "$lib/server/firewall";
 import {loadGeoDb} from "$lib/server/ipLite";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
@@ -57,9 +57,35 @@ const {Admin} = permission
 const apis: APIRoutes = {
     log: {
         async post(req) {
-            const t = +await req.text()
-            return logCache.filter(a => a[0] > t)
+            const t = (await req.json()) as FWRule & { type: number, page: number, size: number, t: number }
+            const lgs = t.type ? db.all(model(FwLog)).map(fw2log) : logCache
+            const total = Math.floor((lgs.length + t.size - 1) / t.size)
+            const d = filterLog(lgs, t).slice((t.page - 1) * t.size, t.page * t.size).filter(a => t.t ? a[0] > t.t : 1)
+            if (t) {
+                return {total, data: d}
+            }
         }
+    },
+    rule: {
+        post: auth(Admin, async req => {
+            const r = model(FWRule, await req.json())
+            addRule(r as FWRule)
+            return r.id
+        })
+    },
+    rules: {
+        delete: auth(Admin, async req => {
+            const ids = (await req.text()).split(',').filter(a => a).map(v => +v)
+            delRule(ids)
+            return
+        }),
+        post: auth(Admin, async (req) => {
+            return pageBuilder(req, FWRule,
+                ['createAt desc'],
+                ['id', 'path', 'headers', 'ip', 'mark',
+                    'country', 'log', 'active', 'noAccess']
+            )
+        })
     },
     login: {
         post: async (req) => {

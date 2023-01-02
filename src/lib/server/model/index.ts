@@ -210,10 +210,9 @@ export class FWRule {
     @primary
     id = INT
     mark = TEXT
-    @noNull
-    @unique
     ip = TEXT
     path = TEXT
+    method = TEXT
     headers = TEXT
     createAt = INT
     save = INT
@@ -228,6 +227,7 @@ export class FwLog {
     id = INT
     ip = TEXT
     path = TEXT
+    method = TEXT
     headers = TEXT
     save = INT
     mark = TEXT

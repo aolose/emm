@@ -1,59 +1,60 @@
 <script>
     import Pg from '$lib/components/pg.svelte'
+    import {confirm} from "$lib/store";
+    import {req} from "$lib/req";
+    import {method} from "$lib/enum";
+    import {onMount} from "svelte";
 
     let total = 1
+    let p = 1
     export let pop
-    let go = () => {
-
+    let go = (n) => {
+        p = n
+        req('rules', new Uint8Array([p,20])).then(d => {
+            ls = d.items
+            total = d.total
+        })
     }
     const add = () => {
         pop(2).then(d => {
-            console.log(d)
+            if(!d)return
+            req('rule', d).then(id => {
+                d.id = id
+                ls = [d, ...ls]
+            })
         })
     }
 
     const del = (id) => {
-
-    }
-
-    const edit = (d) => {
-        pop(1, d).then(d => {
-            console.log(d)
+        confirm('sure to delete?').then(ok => {
+            if (ok) {
+                req('rules', id, {method: method.DELETE})
+                    .then(() => {
+                        ls = ls.filter(a => a.id !== id)
+                    })
+            }
         })
     }
 
-    const d = [
-        {
-            ip: '10.0.0.1',
-            mark: '',
-            path: '',
-            country: '',
-            header: '',
-            active: 0,
-            log: 1,
-            noAccess: 1,
-        },
-        {
-            ip: '10.0.0.1',
-            mark: 'whatever',
-            path: '/path',
-            country: '',
-            header: '',
-            active: 1,
-            log: 1,
-            noAccess: 1,
-        },
-        {
-            ip: '10.0.0.1',
-            mark: '',
-            path: '/admin/posts',
-            country: 'spider',
-            header: 'type:ccc\nxxx:yyy',
-            active: 0,
-            log: 0,
-            noAccess: 0,
-        },
-    ]
+    const edit = (da) => {
+        pop(1, da).then(d => {
+            if(!d)return
+            d.id=da.id
+            req('rule', d).then(() => {
+                const idx = ls.indexOf(da)
+                if (idx > -1) {
+                    ls = [...ls]
+                    ls[idx] = d
+                }
+            })
+        })
+    }
+
+    let ls = []
+
+    onMount(() => {
+        go(1)
+    })
 
 </script>
 <div class="a">
@@ -64,7 +65,7 @@
         </div>
     </div>
     <div class="c">
-        {#each d as r}
+        {#each ls as r}
             <div class="u" class:act={r.active}>
                 <div class="i">
                     {#if r.ip}

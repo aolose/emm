@@ -1,17 +1,20 @@
 <script>
     import HdsIpt from './headers.svelte'
     import {fade} from "svelte/transition";
+    import {slidLeft} from "$lib/transition";
     import Ck from './ck.svelte'
+    import Sel from './sel.svelte'
 
     let d = {}
     let show = 0
     let tp = 0  // 0- filter 1-editor 2-create
     let ok = () => 0
     let cancel = () => 0
+    $:hasV=(d.ip||d.path||d.headers||d.mark||d.country||'').replace(/^\s+|\s+$/g,'')
     export const pop = (type, data = {}) => {
         tp = type
         if (tp === 2) {
-            data.active = data.log = data.noAccess = true
+            data.active = data.log = true
         }
         return new Promise((resolve) => {
             show = 1
@@ -38,16 +41,13 @@
             {#if tp}
                 <div class="f1">
                     <label>
-                        <Ck bind:value={d.active}/>
-                        <span>activate</span>
+                        <Ck bind:value={d.active}>activate</Ck>
                     </label>
                     <label>
-                        <Ck bind:value={d.log}/>
-                        <span>log</span>
+                        <Ck bind:value={d.log}>log</Ck>
                     </label>
                     <label>
-                        <Ck bind:value={d.noAccess}/>
-                        <span>no access</span>
+                        <Ck bind:value={d.noAccess}>no access</Ck>
                     </label>
                 </div>
             {/if}
@@ -59,6 +59,11 @@
                 <label>
                     <span>path:</span>
                     <input bind:value={d.path}/>
+                </label>
+                <label>
+                    <span>method:</span>
+                    <Sel items={['GET','POST','DELETE','PATCH','PUT','HEAD','OPTIONS']}
+                            bind:value={d.method}/>
                 </label>
                 <label>
                     <span>country:</span>
@@ -74,7 +79,11 @@
                 </label>
             </div>
             <div class="fn">
-                <button on:click={ok}>{['search', 'update', 'create'][tp]}</button>
+                <button on:click={()=>d={}}>clear</button>
+                {#if !tp||hasV}
+                    <button transition:slidLeft
+                            on:click={ok}>{['search', 'save', 'create'][tp]}</button>
+                {/if}
             </div>
         </div>
     </div>
@@ -144,7 +153,8 @@
     justify-content: center;
 
     button {
-      width: 180px;
+      font-size: 14px;
+      width: 150px;
       border-radius: 20px;
       cursor: pointer;
       color: #354e65;

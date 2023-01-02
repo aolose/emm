@@ -18,8 +18,28 @@
     let p = 1
     let total
     let ld = false
-    $:total = Math.floor((ls.length + size - 1) / size)
+    let filter = {}
     $:lss = ls.slice(size * (p - 1), size * p)
+    let hasF = 0
+    $:{
+        let c = 0
+        hasF = 0
+        Object.keys(filter).forEach(k => {
+            if (!filter[k]) {
+                c = 1
+                delete filter[k]
+            } else hasF = 1
+        })
+        if (c) filter = {...filter}
+    }
+
+    function tabCk(a) {
+        return () => {
+            if (tab === a) return;
+            tab = a
+            loadLog(1)
+        }
+    }
 
     function fx() {
         const l = []
@@ -37,10 +57,21 @@
         ls = l
     }
 
-    function loadLog() {
+    function loadLog(page) {
         ld = true
-        req('log', lastL).then(r => {
-            ls.push(...r)
+        const opt = {
+            ...filter,
+            page: p,
+            type: tab,
+            size,
+        }
+        if (page) {
+            opt.page = p = page
+            ls = []
+        } else opt.t = lastL
+        req('log', opt).then(r => {
+            ls.push(...r.data)
+            total = r.total
             fx()
         }).finally(() => ld = false)
     }
@@ -49,7 +80,7 @@
         let t = setInterval(() => {
             if (loop) loadLog()
         }, 3e3)
-        loadLog()
+        loadLog(1)
         return () => clearInterval(t)
     })
 
@@ -60,9 +91,13 @@
             sel = new Set(sel)
         }
     }
-    function search(){
-        pop(0).then(d=>{
-            console.log(d)
+
+    function search() {
+        pop(0, filter).then(d => {
+            if (!d) return
+            filter = d
+            ls = []
+            loadLog(1)
         })
     }
 
@@ -74,13 +109,13 @@
                 <h1>Logs</h1>
                 <s></s>
                 <div class="tb" class:ac={tab}>
-                    <span on:click={()=>tab=0}>real-time</span>
-                    <span on:click={()=>tab=1}>firewall</span>
+                    <span on:click={tabCk(0)}>real-time</span>
+                    <span on:click={tabCk(1)}>firewall</span>
                     <i></i>
                 </div>
                 <Ck name="auto" bind:value={loop}/>
                 <button on:click={loadLog} class="icon i-refresh"></button>
-                <button class="icon i-filter" on:click={search}></button>
+                <button class="icon i-filter" class:act={hasF} on:click={search}></button>
             </div>
         </div>
         <div class="e">
@@ -89,7 +124,7 @@
                     <Itm ck={ck} data={d} sel={sel} isDb={tab}/>
                 {/each}
             </div>
-            <Pg total={total} page={p} go={n=>p=n}/>
+            <Pg total={total} page={p} go={loadLog}/>
         </div>
         <Ld act={ld}/>
     </div>
@@ -99,6 +134,12 @@
     </div>
 </div>
 <style lang="scss">
+  .i-filter {
+    &.act {
+      color: #1c93ff;
+    }
+  }
+
   .sd {
     width: 600px;
     display: flex;

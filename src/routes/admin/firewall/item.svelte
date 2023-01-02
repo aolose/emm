@@ -3,12 +3,12 @@
     import {fade, slide} from "svelte/transition";
 
     export let data = []
-    const [tm, ip, ph, hds, st, ct, mk] = data
+    const [tm, ip, ph, hds, st, ct, mk, mt] = data
     export let sel
     export let ck
 
-    let exp=0
-    $:hd = str2Hds(hds).filter(([a])=> exp ? 1 : /^user-agent$/gi.test(a))
+    let exp = 0
+    $:hd = str2Hds(hds).filter(([a]) => exp ? 1 : /^user-agent$/gi.test(a))
 
     function col(n, s) {
         if (n < 300) return 0 === s
@@ -23,12 +23,15 @@
 <div class="r" class:act={sel.has(tm+ip)} transition:fade on:click={ck(tm+ip)}>
     <div class="r0"><span>{time(tm)}</span></div>
     <div class="r1"><span>{ip}</span></div>
-    <div class="r3"><span
-            class:c0={col(st,0)}
-            class:c1={col(st,1)}
-            class:c2={col(st,2)}
-            class:c3={col(st,3)}
-    >{st}</span></div>
+    <div class="r6"><span>{(mt||'').toUpperCase()}</span></div>
+    {#if st}
+        <div class="r3"><span
+                class:c0={col(st,0)}
+                class:c1={col(st,1)}
+                class:c2={col(st,2)}
+                class:c3={col(st,3)}
+        >{st}</span></div>
+    {/if}
     <div class="r2"><span>{ph}</span></div>
     <div class="r6"><span>{ct}</span></div>
     <div class="r4"><span>{mk}</span></div>
@@ -80,6 +83,7 @@
         }
       }
     }
+
     .c0 {
       color: #13ad13
     }
@@ -134,14 +138,17 @@
   .r5 {
     background: #192125;
     width: 100%;
-    button{
+
+    button {
       position: absolute;
       left: 10px;
-      padding:7px 10px;
-      &:hover{
+      padding: 7px 10px;
+
+      &:hover {
         color: #fff;
       }
     }
+
     span {
       padding: 0;
       color: #6c8598;
@@ -154,11 +161,13 @@
       }
     }
   }
-  .r{
-    .r5{
+
+  .r {
+    .r5 {
       padding: 5px 10px 12px 35px;
     }
   }
+
   .act {
     z-index: 90;
     background: #294272;
@@ -169,6 +178,7 @@
 
     .r5 {
       background: #122536;
+
       span {
         color: #d4e3f5;
       }

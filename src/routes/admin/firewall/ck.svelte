@@ -1,10 +1,22 @@
 <script>
+    export const ck = ()=>value=!value
     export let value = false
 </script>
-<div class="a" class:c={value} on:click={()=>value=!value}>
+<div class="a" class:c={value}>
     {value ? '✓' : ''}
 </div>
+<span  on:click={ck}><slot></slot></span>
 <style>
+    span{
+        height: 20px;
+        top: 7px;
+        padding-left: 10px;
+        user-select: none;
+        line-height: 20px;
+    }
+    .c+span{
+        color: #7c93a9;
+    }
     .a {
         width: 20px;
         height: 20px;

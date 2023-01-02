@@ -2,48 +2,59 @@ import type {RequestEvent} from "@sveltejs/kit";
 import ipRangeCheck from 'ip-range-check'
 import {db} from "$lib/server/index";
 import {FwLog, FWRule} from "$lib/server/model";
-import {filter, hds2Str} from "$lib/utils";
+import {filter, hds2Str, str2Hds} from "$lib/utils";
 import type {Obj, Timer} from "$lib/types";
 import {getClientAddr, model} from "$lib/server/utils";
 import {ipInfo} from "$lib/server/ipLite";
 
 
-export let rules: Obj<FWRule>[]
+export let rules: FWRule[]
 const fk = (fr: Obj<FWRule>) => `${fr.ip}-${fr.headers}-${fr.country}-${fr.path}`
 export const addRule = (fr: FWRule) => {
-    const r = rules.find(a => fk(a) === fk(fr))
-    if (r) {
-        db.save(Object.assign(r, filter(fr, ['noAccess', 'log'], false)))
-    }
+    db.save(fr)
+    const r = rules.findIndex(a => a.id === fr.id)
+    if (r === -1) {
+        rules.push(fr)
+    } else rules[r] = fr
 }
 
-export const delRule = (id: number) => {
-    const rule = db.get(model(FWRule, {id}))
-    if (rule) {
-        const r = rules.findIndex(a => fk(a) === fk(rule))
-        if (r > -1) rules.splice(r, 1)
-        return db.del(rule)?.changes
-    }
+export const delRule = (ids: number[]) => {
+    db.delByPk(FWRule, ids)
+    rules = rules.filter(a => ids.indexOf(a.id) === -1)
 }
 
 function loadRules() {
-    rules = []
-    db.all(new FWRule()).forEach(addRule)
+    rules = db.all(model(FWRule))
     setTimeout(loadRules, 1e3 * 3600 * 72)
 }
 
-type log = [number, string, string, string, number, string, string]
+type log = [number, string, string, string, number, string, string, string]
 export let logCache: log[] = []
 const max = 1000
 export const reqRLog = (event: RequestEvent, statue: number, mark = '') => {
     const ip = getClientAddr(event)
     const path = event.url.pathname
+    const method = event.request.method
     if (path === '/api/log') return
     const ua = hds2Str(event.request.headers)
-    const r = [Date.now(), ip, path, ua, statue, ipInfo(ip)?.short || '', mark] as log
+    const r = [Date.now(), ip, path, ua, statue, ipInfo(ip)?.short || '', mark, method] as log
     logCache.push(r)
     const l = logCache.length
     if (l > max) logCache = logCache.slice(l - max)
+}
+
+export const fw2log = (l: FwLog) => {
+    return [l.save, l.ip, l.path, l.headers, 0, ipInfo(l.ip)?.short || '', l.mark, l.method] as log
+}
+export const filterLog = (logs: log[], t: FWRule) => {
+    return logs.filter(a => {
+        if (t.headers && !matchHeader(t.headers, new Headers(str2Hds(a[3])))) return
+        if (t.path && !match(t.path, a[2])) return;
+        if (t.ip && !ipRangeCheck(a[1], t.ip)) return;
+        if (t.country && !match(t.country, a[5])) return;
+        if (t.method && a[6].toLowerCase() !== t.method.toLowerCase()) return;
+        return true;
+    })
 }
 
 /**
@@ -60,7 +71,7 @@ function match(rule: string, target: string) {
         try {
             const f = Array.from(new Set(reg[2] || '')).join('')
             const r = new RegExp(reg[1], f)
-            if (!r.test(target)) {
+            if (r.test(target)) {
                 hit = true
             }
         } catch (e) {
@@ -94,20 +105,23 @@ export const fwFilter = (event: RequestEvent): string => {
     const ip = getClientAddr(event)
     const path = event.url.pathname
     const headers = event.request.headers
+    const method = event.request.method.toLowerCase()
     let o: Obj<FWRule> | undefined
     for (const k of rules) {
+        if (!k.active) continue
         if (k.path && !match(k.path, path)) continue
+        if (k.method && k.method.toLowerCase() !== method) continue
         if (k.headers && !matchHeader(k.headers, headers)) continue
         if (k.ip && !ipRangeCheck(ip, k.ip)) continue
         if (!o) o = {mark: ''}
-        if (k.mark) o.mark = o.mark?.split(',').concat(k.mark).join()
+        if (k.mark) o.mark = o.mark?.split(',').concat(k.mark).filter(a => a.replace(/^\s+|\s+$/g, '')).join()
         Object.assign(o, filter(k, ['noAccess', 'log'], false))
     }
     if (o) {
         const rs = o.mark || 'unknown'
         if (o.log) {
             db.save(model(FwLog, {
-                path, ip, mark: o.mark, headers: hds2Str(headers)
+                path, ip, mark: o.mark, headers: hds2Str(headers), method
             }))
         }
         if (o.noAccess) {
@@ -115,7 +129,7 @@ export const fwFilter = (event: RequestEvent): string => {
         }
         if (ip && o.country) {
             const f = ipInfo(ip)
-            if (f && f.short === o.country) return rs
+            if (f && match(o.country, f.short || '')) return rs
         }
     }
     return ''
