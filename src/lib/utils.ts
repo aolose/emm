@@ -379,7 +379,6 @@ export const time = (value: number) => {
 export const hds2Str = (hs: Headers | [string, string][]) => {
     const h = []
     for (const [k, v] of hs) {
-        console.log(k,v)
         if(k) h.push(`${k}:${v.replace(/\n/g,'')}`)
     }
     return h.join('\n')

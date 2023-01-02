@@ -1,7 +1,7 @@
 <script>
-    import {hds2Str, str2Hds} from "$lib/utils";
+    import {hds2Str} from "$lib/utils";
 
-    export let value = ''
+    export let value
     let fields = []
     function ck(i){
         return ()=>{
@@ -15,7 +15,7 @@
     }
     $:{
         if(!fields.length)fields=[['','']]
-        fields.forEach((a,i)=>{
+        fields.forEach((a)=>{
             a[0]=a[0].replace(/[^0-9a-z_-]/ig,'')
             a[1]=a[1].replace(/\n/g,'')
         })
@@ -87,6 +87,9 @@
   .b {
     width: 100%;
     display: flex;
+    &:hover{
+      background: rgba(0, 0, 0, 0.3);
+    }
     &+.b{
       border-top: inherit;
     }

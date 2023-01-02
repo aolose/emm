@@ -2,8 +2,26 @@
     import Pg from '$lib/components/pg.svelte'
 
     let total = 1
+    export let pop
     let go = () => {
+
     }
+    const add = () => {
+        pop(2).then(d => {
+            console.log(d)
+        })
+    }
+
+    const del = (id) => {
+
+    }
+
+    const edit = (d) => {
+        pop(1, d).then(d => {
+            console.log(d)
+        })
+    }
+
     const d = [
         {
             ip: '10.0.0.1',
@@ -42,7 +60,7 @@
     <div class="b">
         <div class="d">
             <h1>Rules</h1>
-            <button class="icon i-add"></button>
+            <button on:click={add} class="icon i-add"></button>
         </div>
     </div>
     <div class="c">
@@ -59,7 +77,9 @@
                         <div class="icon i-geo"><span>{r.country}</span></div>
                     {/if}
                     {#if r.header}
-                        <div class="icon i-comment"><pre>{r.header}</pre></div>
+                        <div class="icon i-comment">
+                            <pre>{r.header}</pre>
+                        </div>
                     {/if}
                 </div>
                 <div class="r">
@@ -70,8 +90,8 @@
                         <span class="icon i-fbi"></span>
                     {/if}
                     <span class="m">{r.mark || ''}</span>
-                    <button class="icon i-del"></button>
-                    <button class="icon i-ed"></button>
+                    <button class="icon i-del" on:click={()=>del(r.id)}></button>
+                    <button class="icon i-ed" on:click={()=>edit(r)}></button>
                 </div>
             </div>
         {/each}
@@ -116,7 +136,7 @@
   pre {
     flex: 1;
     font-size: 13px;
-    padding:  0 10px;
+    padding: 0 10px;
   }
 
   .i {
@@ -134,7 +154,8 @@
         padding-left: 10px;
       }
     }
-    .i-comment{
+
+    .i-comment {
       line-height: 2;
       align-items: flex-start;
       display: flex;
@@ -183,9 +204,11 @@
     align-items: center;
     padding: 0 0 0 10px;
     height: 60px;
-    button{
-      padding:  10px 20px;
-      &:hover{
+
+    button {
+      padding: 10px 20px;
+
+      &:hover {
         color: #fff;
       }
     }

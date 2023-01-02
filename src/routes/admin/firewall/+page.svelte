@@ -5,8 +5,10 @@
     import Pg from '$lib/components/pg.svelte'
     import Ck from '$lib/components/check.svelte'
     import Ld from '$lib/components/loading.svelte'
-    import Ft from './filter.svelte'
+    import Ft from './pop.svelte'
     import Ru from './rules.svelte'
+
+    let pop
     let sel = new Set()
     let tab = 0
     let ls = []
@@ -53,11 +55,17 @@
 
     function ck(k) {
         return () => {
-            if(sel.has(k))sel.delete(k)
+            if (sel.has(k)) sel.delete(k)
             else sel.add(k)
-            sel=new Set(sel)
+            sel = new Set(sel)
         }
     }
+    function search(){
+        pop(0).then(d=>{
+            console.log(d)
+        })
+    }
+
 </script>
 <div class="a">
     <div class="c">
@@ -72,7 +80,7 @@
                 </div>
                 <Ck name="auto" bind:value={loop}/>
                 <button on:click={loadLog} class="icon i-refresh"></button>
-                <button class="icon i-filter"></button>
+                <button class="icon i-filter" on:click={search}></button>
             </div>
         </div>
         <div class="e">
@@ -85,18 +93,19 @@
         </div>
         <Ld act={ld}/>
     </div>
-     <div class="sd">
-         <Ru/>
-         <Ft/>
-     </div>
+    <div class="sd">
+        <Ru {pop}/>
+        <Ft bind:pop={pop}/>
+    </div>
 </div>
 <style lang="scss">
- .sd{
-   width: 600px;
-   display: flex;
-   flex-direction: column;
-   height: 100%;
- }
+  .sd {
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   .f0 {
     flex: 1;
   }

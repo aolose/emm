@@ -1,0 +1,233 @@
+<script>
+    import HdsIpt from './headers.svelte'
+    import {fade} from "svelte/transition";
+    import Ck from './ck.svelte'
+
+    let d = {}
+    let show = 0
+    let tp = 0  // 0- filter 1-editor 2-create
+    let ok = () => 0
+    let cancel = () => 0
+    export const pop = (type, data = {}) => {
+        tp = type
+        if (tp === 2) {
+            data.active = data.log = data.noAccess = true
+        }
+        return new Promise((resolve) => {
+            show = 1
+            d = {...data}
+            ok = () => {
+                resolve({...d})
+                show = 0
+            }
+            cancel = () => {
+                resolve()
+                show = 0
+            }
+        })
+    }
+</script>
+{#if show}
+    <div class="m" transition:fade>
+        <div class="f">
+            <h1>{['Search logs', 'Edit Rule', 'Create Rule'][tp]}</h1>
+            <button class="clo" on:click={cancel}>
+                <i></i>
+                <i></i>
+            </button>
+            {#if tp}
+                <div class="f1">
+                    <label>
+                        <Ck bind:value={d.active}/>
+                        <span>activate</span>
+                    </label>
+                    <label>
+                        <Ck bind:value={d.log}/>
+                        <span>log</span>
+                    </label>
+                    <label>
+                        <Ck bind:value={d.noAccess}/>
+                        <span>no access</span>
+                    </label>
+                </div>
+            {/if}
+            <div class="f0">
+                <label>
+                    <span>IP:</span>
+                    <input bind:value={d.ip}/>
+                </label>
+                <label>
+                    <span>path:</span>
+                    <input bind:value={d.path}/>
+                </label>
+                <label>
+                    <span>country:</span>
+                    <input bind:value={d.country}/>
+                </label>
+                <label>
+                    <span>mark:</span>
+                    <input bind:value={d.mark}/>
+                </label>
+                <label>
+                    <span>header:</span>
+                    <HdsIpt bind:value={d.header}/>
+                </label>
+            </div>
+            <div class="fn">
+                <button on:click={ok}>{['search', 'update', 'create'][tp]}</button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+
+<style lang="scss">
+  h1 {
+    width: 100%;
+    background: #19222d;
+    pointer-events: none;
+    top: 0;
+    padding: 0 20px;
+    border-radius: 10px 10px 0 0;
+    left: 0;
+    color: #465469;
+    font-size: 22px;
+    line-height: 60px;
+    font-weight: 200;
+    position: absolute;
+  }
+
+  .clo {
+    position: absolute;
+    transition: .2s ease-in-out;
+    right: 10px;
+    top: 5px;
+    width: 50px;
+    height: 50px;
+    color: #3a537c;
+    &:hover {
+      color: #00d2ff;
+
+      i {
+        transform: rotate(35deg);
+        transform-origin: right;
+        width: 20px;
+        margin-left: 20px;
+
+        & + i {
+          transform: rotate(-35deg);
+        }
+      }
+    }
+
+    i {
+      transition: inherit;
+      transform: rotate(45deg);
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 24px 10px;
+      background: currentColor;
+      width: 30px;
+      height: 1px;
+
+      & + i {
+        transform: rotate(-45deg);
+      }
+    }
+  }
+
+  .fn {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      width: 180px;
+      border-radius: 20px;
+      cursor: pointer;
+      color: #354e65;
+      border: 1px solid currentColor;
+      margin: 0 20px;
+      padding: 7px 20px;
+      transition: .3s ease-in-out;
+
+      &:hover {
+        background: #1c93ff;
+        color: #fff;
+        border-color: transparent;
+      }
+    }
+  }
+
+  label {
+    width: 100%;
+    font-size: 15px;
+    align-items: flex-start;
+
+    input {
+      width: 0;
+      resize: none;
+      border: 1px solid #304565;
+      background: var(--bg1);
+      flex: 1;
+      box-shadow: inset var(--bg0) 0 0 5px;
+    }
+
+    span {
+      line-height: 32px;
+      color: #8092a9;
+      text-align: right;
+      padding-right: 10px;
+      width: 80px;
+    }
+
+    display: flex;
+    padding: 10px;
+  }
+
+  .f {
+    transition: .3s ease-in-out;
+    height: 600px;
+    padding: 60px 0 0;
+    display: flex;
+    flex-direction: column;
+    width: 500px;
+    background: var(--bg0);
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, .3) 0 10px 30px;
+  }
+
+  .f0 {
+    flex: 1;
+    padding: 20px;
+    overflow: auto;
+  }
+
+  .f1 {
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    padding: 0 20px;
+
+    span {
+      width: auto;
+      text-align: left;
+      padding-left: 10px;
+    }
+  }
+
+  .m {
+    backdrop-filter: blur(1px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, .6);
+  }
+</style>
