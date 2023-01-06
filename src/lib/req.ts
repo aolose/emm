@@ -260,8 +260,8 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 export const api = (url: ApiName, cfg?: reqOption) => {
     const c = {...(cfg || {})}
     if (c.delay) c.delayKey = randNum().toString(36)
-    return (params?: reqParams) => {
-        return req(url, params, c)
+    return (params?: reqParams,cfg?:reqOption) => {
+        return req(url, params, {...c,...cfg})
     }
 }
 export const useApi = (url: ApiName, params?: reqParams, cfg?: reqOption): Load =>

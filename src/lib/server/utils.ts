@@ -315,7 +315,8 @@ export const pageBuilder = async <T extends Model>(
     req: Request,
     model: Class<T>,
     orders: string[],
-    keys: (keyof T)[] = []
+    keys: (keyof T)[] = [],
+    where?: [string, ...unknown[]]
 ) => {
     const r = new Uint8Array(await req.arrayBuffer())
     const p = r[0]
@@ -323,7 +324,7 @@ export const pageBuilder = async <T extends Model>(
     const c = cacheCount(Res) as number
     return {
         total: Math.floor((c + s - 1) / s),
-        items: arrFilter(db.page(model, p, s, orders), keys, false)
+        items: arrFilter(db.page(model, p, s, orders, where), keys, false)
     }
 }
 
@@ -344,9 +345,9 @@ const chk = () => {
         const p = fs.readFileSync(dbc).toString()
         if (!p) return 0
         const err = mkdir(path.dirname(p))
-        if(err){
+        if (err) {
             console.log(err)
-            return  0
+            return 0
         }
         const er = server.start(p)
         if (er) {
@@ -425,7 +426,7 @@ export function checkRedirect(statue: number, path: string, req: Request) {
         const pms = getPermissions(tks)
         needLogin = pms.get(permission.Admin) !== token_statue.ok
     }
-    if (needLogin&&!skipLogin) {
+    if (needLogin && !skipLogin) {
         if (path !== login) return login
         return ''
     }

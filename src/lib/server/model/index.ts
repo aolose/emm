@@ -41,6 +41,7 @@ export class Tag {
     createAt = INT
     post = TEXT
     userId = INT
+    banner=TEXT
 }
 
 export class Post {

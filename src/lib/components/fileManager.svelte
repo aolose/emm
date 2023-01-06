@@ -2,7 +2,7 @@
     import Pg from './pg.svelte';
     import Item from './fItems.svelte';
     import {confirm, fileManagerStore, filesUpload, getProgress, upFiles} from '$lib/store';
-    import {api} from "$lib/req";
+    import {api, req} from "$lib/req";
     import {onMount, tick} from "svelte";
     import {get, writable} from "svelte/store";
     import {slidLeft} from '../transition'
@@ -32,7 +32,12 @@
 
     function load(page = 1) {
         loading = 1
-        getRes(new Uint8Array([page, size])).then(({total: t, items}) => {
+        const ext = {}
+        if (cfg.type)
+            ext.headers = new Headers({
+                filetype: cfg.type
+            })
+        getRes(new Uint8Array([page, size]), ext).then(({total: t, items}) => {
             loading = 0
             total = t
             ls = items
@@ -53,7 +58,9 @@
 
     function upload(e) {
         state = 0;
-        const files = e.type === 'drop' ? e.dataTransfer.files : e.target.files;
+        let files = e.type === 'drop' ? e.dataTransfer.files : e.target.files;
+        const tp = cfg.type
+        if (tp) files = files.filter(f => f.type === tp)
         filesUpload(files, f => {
             if (ls.find(a => a.id === f.id)) return
             ls = [f].concat(ls)
@@ -121,7 +128,9 @@
             <div class="h">
                 <div class="g">
                     <button class="icon i-add" title="upload files">
-                        <input type="file" on:change={upload} multiple/>
+                        <input type="file"
+                               accept={cfg.type||'*/*'}
+                               on:change={upload} multiple/>
                     </button>
                     {#if selected.size}
                         <button transition:slidLeft|local class="icon i-ok" title="use selected"

@@ -30,7 +30,7 @@
     }
     const pickPic = () => {
         setting.set(0)
-        selectFile(1).then(a => {
+        selectFile(1,'image/*').then(a => {
             post = {...post, banner: a[0].id}
         }).finally(() => setting.set(1))
     }

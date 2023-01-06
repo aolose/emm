@@ -92,6 +92,7 @@ export type cfOpt = {
 export  type fileSelectCfg = {
     show?: boolean,
     limit?: number,
+    type?: string,
     resolve?: (v: unknown) => void,
     reject?: (v: unknown) => void,
 }

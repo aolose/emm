@@ -116,10 +116,13 @@ export class DB {
         const s = `select * from ${o.name}`
         const d = order.length ? ` order by ${order.join()}` : ''
         const l = ` limit ${size * (page - 1)},${size}`
-        return this.db.prepare(s + d + l).all() as T[]
+        let sql = s + d + l
+        if (where) sql = `${sql} where ${where}`
+        const p =  where?.slice(1)|| []
+        return this.db.prepare(sql).all(...p) as T[]
     }
 
-    save<T extends Model>(a: Obj<T>,create?:boolean) {
+    save<T extends Model>(a: Obj<T>, create?: boolean) {
         const now = Date.now()
         const o = a as Obj<T> & dbHooks
         if (o.onSave) {
@@ -131,7 +134,7 @@ export class DB {
         const kv = val(o[pk])
         let sql: string
         let values: unknown[]
-        if (!kv||create) {
+        if (!kv || create) {
             setKey(o, 'createAt', now);
             [sql, values] = insert(o);
         } else [sql, values] = update(o);

@@ -27,6 +27,8 @@ import fs from "fs";
 import {genToken, getPermissions} from "$lib/server/token";
 import {addRule, blockIp, delRule, filterLog, fw2log, logCache} from "$lib/server/firewall";
 import {loadGeoDb} from "$lib/server/ipLite";
+import {tags} from "$lib/store";
+import {get} from "svelte/store";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
     if (!sysStatue) return resp('system uninitialized', 403)
@@ -137,6 +139,11 @@ const apis: APIRoutes = {
             }
         }
     },
+    tagLS:{
+        post:auth(Admin,async req=>{
+            return get(tags)
+        })
+    },
     tags: {
         post: auth(Admin, async req => {
             const ver = +(await req.text())
@@ -191,9 +198,19 @@ const apis: APIRoutes = {
             return changes
         }),
         post: auth(Admin, async (req) => {
+            const params = []
+            const where = []
+            let type = req.headers.get('filetype')
+            if (type) {
+                type=type.replace(/\*/g,'%')
+                where.push('type like ?')
+                params.push(type)
+            }
+            if (where.length) params.unshift(where.join('and'))
             return pageBuilder(req, Res,
                 ['save desc'],
-                ['id', 'name', 'size', 'type', 'thumb']
+                ['id', 'name', 'size', 'type', 'thumb'],
+                params as [string, ...unknown[]]
             )
         })
     },

@@ -19,10 +19,11 @@ const fileManagerCfg = {} as fileSelectCfg
 export const fileManagerStore = writable(fileManagerCfg)
 export const confirmStore = writable({...confirmCfg})
 
-export const selectFile = (limit = 0) => {
+export const selectFile = (limit = 0,type='') => {
     return new Promise((resolve, reject) => {
         fileManagerStore.set({
             limit,
+            type,
             show: true, resolve, reject
         })
     }).catch(() => void 0)
