@@ -4,6 +4,7 @@
     import FileWin from '$lib/components/fileManager.svelte'
     import {req} from "$lib/req";
     import {onMount} from "svelte";
+    import {method} from "$lib/enum";
 
     let ls = []
     let name = ''
@@ -21,9 +22,11 @@
 
     function ss(n){
         return (e)=>{
+            let t
             e.stopPropagation()
             if(sel===n)sel={}
-            else sel=n
+            else t=sel=n
+            setTag(t)
         }
     }
 
@@ -34,25 +37,38 @@
         name = name.replace(/[;, \t\s]/g, '')
         ok = name && !ls.find(a => a.name === name)
     }
+    let setTag;
+    function del(name){
+       req('tag',name,{method:method.DELETE}).then(()=>{
+           ls=ls.filter(a=>a.name!==name)
+       })
+    }
 </script>
-<div class="a">
-    <div class="r h" class:o={ok}>
-        <span>Tags</span>
-        <s></s>
-        <input placeholder="Enter tag name" bind:value={name}/>
-        <button class="icon i-add" on:click={add}></button>
+<div class="c">
+    <div class="a">
+        <div class="r h" class:o={ok}>
+            <span>Tags</span>
+            <s></s>
+            <input placeholder="Enter tag name" bind:value={name}/>
+            <button class="icon i-add" on:click={add}></button>
+        </div>
+        <div class="ls">
+            {#each ls as i}
+                <T d={i} ck={ss(i)} sel={sel===i} del={del}/>
+            {/each}
+        </div>
     </div>
-    <div class="ls">
-        {#each ls as i}
-            <T d={i} ck={ss(i)} sel={sel===i}/>
-        {/each}
-    </div>
+    <P bind:setTag={setTag}/>
 </div>
-<P/>
 <FileWin/>
 
 
 <style lang="scss">
+  .c{
+    width: 100%;
+    height: 100%;
+    display: flex;
+  }
   s{
     flex: 1;
   }

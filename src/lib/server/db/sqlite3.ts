@@ -122,10 +122,10 @@ export class DB {
         return this.db.prepare(sql).all(...p) as T[]
     }
 
-    save<T extends Model>(a: Obj<T>, create?: boolean) {
+    save<T extends Model>(a: Obj<T>, create?: boolean,skipSave?:boolean) {
         const now = Date.now()
         const o = a as Obj<T> & dbHooks
-        if (o.onSave) {
+        if (!skipSave&&o.onSave) {
             o.onSave(this, now)
         }
         const table = o.constructor.name

@@ -13,12 +13,12 @@ import {
     resp,
     saveFile, setTokens, skipLogin,
     sysStatue,
-    uniqSlug
+    uniqSlug, val
 } from './utils';
 import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
-import {FwLog, FWRule, Post, Res} from "$lib/server/model";
+import {FwLog, FWRule, Post, Res, Tag} from "$lib/server/model";
 import {diffObj, enc, filter} from "$lib/utils";
 import {NULL, permission, token_statue} from "$lib/server/enum";
 import {tagPatcher} from "$lib/server/cache";
@@ -139,10 +139,31 @@ const apis: APIRoutes = {
             }
         }
     },
-    tagLS:{
-        post:auth(Admin,async req=>{
+    tagLS: {
+        post: auth(Admin, async req => {
             return get(tags)
         })
+    },
+    tag: {
+        delete: auth(Admin, async req => {
+            const name = await req.text()
+            const t = get(tags).find(t => t.name === name)
+            if (t) {
+                const ids = (val(t.post) as string || '').split(',')
+                if (ids.length) {
+                    const e = new Array(ids.length).fill('?').join(',')
+                    const p = db.all(model(Post), `id in (${e})`, ...ids)
+                    p.forEach(a => {
+                        const ts = new Set(a.tag?.split(','))
+                        ts.delete(name)
+                        const t = ts.size ? [...ts].join() : null
+                        db.db.prepare('update post set tag=? where id=?').run(t, a.id)
+                    })
+                }
+                db.delByPk(Tag, ids)
+                tags.update(tt => tt.filter(a => a.name && a.name !== name))
+            }
+        }),
     },
     tags: {
         post: auth(Admin, async req => {
@@ -202,7 +223,7 @@ const apis: APIRoutes = {
             const where = []
             let type = req.headers.get('filetype')
             if (type) {
-                type=type.replace(/\*/g,'%')
+                type = type.replace(/\*/g, '%')
                 where.push('type like ?')
                 params.push(type)
             }
