@@ -42,16 +42,14 @@ export const sqlVal = (values: unknown[]) =>
         return a;
     });
 
-export function noNullKeyValues<T extends Model>(o: Obj<T>) {
-    const C = o.constructor as Class<T>
-    const ks = Object.keys(new C() as object) as (keyof T)[]
-    // for safe
-    filter(o, ks)
+export function noNullKeyValues(o:Obj<Model>) {
+    const C = o.constructor as Class<Model>
+    const ks = new Set<string>(Object.keys(new C() as object) as (keyof Model)[])
     const keys = [] as string[];
     const values = [] as unknown[];
     const {TEXT, INT, DATE} = NULL;
     Object.entries(o).forEach(([k, v]) => {
-        if (k[0] === '_') return;
+        if (k[0] === '_'&&!ks.has(k[0])) return;
         if (v !== undefined && v !== null) {
             const t = v.constructor.name;
             switch (t) {

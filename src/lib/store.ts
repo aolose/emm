@@ -81,7 +81,6 @@ export const filesUpload = (files: FileList | File[], cb?: (f: fView) => void) =
 let cTimer: Timer
 const up = (info: fInfo, cb?: (f: fView) => void) => {
     const token = get(user).token;
-    if (!token) return;
     const f = new FormData();
     Object.entries(info).forEach(([k, v]) => f.set(k, v));
     const up = new Upload({

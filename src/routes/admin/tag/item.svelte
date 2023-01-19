@@ -26,6 +26,9 @@
   .t{
     display: flex;
   }
+  .t,p{
+    text-shadow: rgba(0,0,0,.5) 0 0 3px;
+  }
   button{
     cursor: pointer;
     opacity: .5;
@@ -57,13 +60,30 @@
  .s{
    background: var(--bg0);
    border-color: rgb(39, 64, 85);
+   .b{
+     filter: grayscale(0);
+     opacity: .2;
+   }
  }
  h4{
    padding:  10px 20px;
  }
  p{
+   color: #8e9bb2;
    padding:  10px 20px;
    white-space: normal;
    word-break: break-all;
+ }
+ .b{
+   position: absolute;
+   left: 0;
+   right: 0;
+   top: 0;
+   bottom: 0;
+   pointer-events: none;
+   opacity: .1;
+   background: center;
+   background-size: cover;
+   filter: grayscale(1);
  }
 </style>

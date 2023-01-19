@@ -12,7 +12,8 @@
 
     let cfg = {}
     let total = 1
-    let state = '';
+    let state = ''
+    let ss
     let ls = []
     let loading = false
     const size = 15
@@ -60,8 +61,8 @@
         state = 0;
         let files = e.type === 'drop' ? e.dataTransfer.files : e.target.files;
         const tp = cfg.type
-        if (tp) files = files.filter(f => f.type === tp)
-        filesUpload(files, f => {
+        if (tp&&files?.length) files = [].filter.call(files,f => new RegExp(tp.replace(/[*]/g,'.*')).test(f.type))
+        if(files?.length) filesUpload(files, f => {
             if (ls.find(a => a.id === f.id)) return
             ls = [f].concat(ls)
             rePosition()

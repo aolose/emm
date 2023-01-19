@@ -117,7 +117,7 @@ export class DB {
         const d = order.length ? ` order by ${order.join()}` : ''
         const l = ` limit ${size * (page - 1)},${size}`
         let sql = s + d + l
-        if (where) sql = `${sql} where ${where}`
+        if (where?.length) sql = `${sql} where ${where}`
         const p =  where?.slice(1)|| []
         return this.db.prepare(sql).all(...p) as T[]
     }

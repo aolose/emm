@@ -5,28 +5,45 @@
     import {req} from "$lib/req";
     import {onMount} from "svelte";
     import {method} from "$lib/enum";
+    import {diffObj} from "$lib/utils";
 
     let ls = []
     let name = ''
     let ok = false
     let sel = {}
+
     function allTags() {
         req('tagLS').then(d => {
             ls = d
         })
     }
 
-    function add(){
-
+    function add() {
+        ss({name})()
+        name = ''
     }
 
-    function ss(n){
-        return (e)=>{
+    function ss(n) {
+        return (e) => {
             let t
-            e.stopPropagation()
-            if(sel===n)sel={}
-            else t=sel=n
-            setTag(t)
+            if (e) e.stopPropagation()
+            if (sel === n) sel = {}
+            else t = sel = n
+            setTag(t).then(d => {
+                sel = {}
+                if (d) {
+                    const c = ls.find(a => a.name === n.name)
+                    const o = c ? diffObj(n, d) : d
+                    if (o && d.name === n.name) {
+                        o.name = d.name
+                        req('tag', o).then(() => {
+                            if (c) Object.assign(n, o)
+                            else ls.unshift(d)
+                            ls = [...ls]
+                        })
+                    }
+                }
+            })
         }
     }
 
@@ -38,10 +55,11 @@
         ok = name && !ls.find(a => a.name === name)
     }
     let setTag;
-    function del(name){
-       req('tag',name,{method:method.DELETE}).then(()=>{
-           ls=ls.filter(a=>a.name!==name)
-       })
+
+    function del(name) {
+        req('tag', name, {method: method.DELETE}).then(() => {
+            ls = ls.filter(a => a.name !== name)
+        })
     }
 </script>
 <div class="c">
@@ -64,35 +82,41 @@
 
 
 <style lang="scss">
-  .c{
+  .c {
     width: 100%;
     height: 100%;
     display: flex;
   }
-  s{
+
+  s {
     flex: 1;
   }
-  .h{
+
+  .h {
     padding: 20px 30px;
     border-bottom: 1px solid #343c4d;
     align-items: center;
     justify-content: center;
-    input{
+
+    input {
       background: var(--bg0);
       margin-right: 10px;
     }
-    button{
+
+    button {
       border-radius: 4px;
       height: 34px;
       width: 34px;
       background: #6c7a93;
     }
   }
-  .o{
-    button{
+
+  .o {
+    button {
       background: #1c93ff;
     }
   }
+
   .a {
     background: var(--bg2);
     width: 100%;
@@ -101,7 +125,8 @@
     display: flex;
     flex-direction: column;
   }
-  .ls{
+
+  .ls {
     flex: 1;
     display: flex;
     flex-wrap: wrap;
@@ -109,6 +134,7 @@
     padding: 20px;
     align-content: flex-start;
   }
+
   .r {
     display: flex;
   }

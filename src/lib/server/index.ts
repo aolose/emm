@@ -28,7 +28,8 @@ export const server = {
         }
     },
     sync() {
-        tags.set(db.all(new Tag()).map(a => DBProxy(Tag, a, false)))
+        const ts = db.db.prepare('select * from Tag order by createAt desc').all()
+        tags.set(ts.map(a => DBProxy(Tag, a, false)))
         // todo
     }
 };

@@ -3,7 +3,7 @@ import {db, server, sys} from './index';
 import {genPubKey} from './crypto';
 import {
     checkStatue,
-    combineResult,
+    combineResult, DBProxy,
     getReqJson,
     getTokens,
     md5,
@@ -145,6 +145,16 @@ const apis: APIRoutes = {
         })
     },
     tag: {
+        post: auth(Admin, async req => {
+            const ts = get(tags)
+            const tag = await req.json() as Tag
+            if (tag.name) {
+                const t = ts.find(a => a.name === tag.name)
+                if (t) Object.assign(t, tag)
+                else ts.unshift(DBProxy(Tag,tag))
+                tags.set([...ts])
+            }
+        }),
         delete: auth(Admin, async req => {
             const name = await req.text()
             const t = get(tags).find(t => t.name === name)
