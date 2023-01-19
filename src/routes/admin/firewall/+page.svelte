@@ -267,6 +267,7 @@
     flex: 1;
     height: 100%;
     overflow: auto;
+    margin-bottom: 15px;
   }
 
 </style>
