@@ -7,16 +7,13 @@
     import {req} from "$lib/req";
     import {goto} from "$app/navigation";
     import {enc, randNum} from "$lib/utils";
+    import {msg} from "$lib/store";
 
     let wt = 0
     let w = 0
 
-    let tm = -1
-    const df = 'Have a nice day !'
     const setMsg = (m) => {
-        clearTimeout(tm)
-        msg = m
-        tm = setTimeout(() => msg = df, 5e3)
+        msg.set(m)
     }
     const t = setInterval(() => {
         if (wt > 0) {
@@ -48,7 +45,6 @@
     let ftt = ''
     let usr = ""
     let pwd = ""
-    let msg = ''
     let iu, ip
     $:{
         dis = usr.length < 2 || pwd.length < 4 || pwd.length > 30 || usr.length > 20
@@ -88,10 +84,10 @@
         <div class="bx">
             <LD act={w}/>
             <div class="msg" style={ftt}>
-                <Tm defaultText={df} msg={msg}/>
+                <Tm defaultText="Have a nice day !"/>
             </div>
             <div class="br" style={`left:${ft}px`} class:bk={bk} bind:this={br}>
-                {#if msg}
+                {#if $msg}
                     <div class="v"></div>
                 {/if}
                 {#key ke}<i in:jump={{y:-18,duration:150}}></i>{/key}

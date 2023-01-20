@@ -153,3 +153,6 @@ editPost.subscribe(p => {
     } else ls = [p].concat(ls)
     posts.set([...ls])
 })
+
+export const msg = writable('');
+export const bg = writable('')

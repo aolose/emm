@@ -9,7 +9,8 @@ import {
 import {dataType, reqMethod} from './enum';
 import {browser} from '$app/environment';
 import type {ApiName, cacheRecord, reqData, reqParams, reqCache, MethodNumber, reqOption} from './types';
-import type {Load} from "@sveltejs/kit";
+import type {Load, LoadEvent} from "@sveltejs/kit";
+import type {PageLoadEvent} from "../../.svelte-kit/types/src/routes/posts/[[page]]/$types";
 
 const cacheData = '.d';
 const cacheKey = '.k';
@@ -260,12 +261,13 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 export const api = (url: ApiName, cfg?: reqOption) => {
     const c = {...(cfg || {})}
     if (c.delay) c.delayKey = randNum().toString(36)
-    return (params?: reqParams,cfg?:reqOption) => {
-        return req(url, params, {...c,...cfg})
+    return (params?: reqParams, cfg?: reqOption) => {
+        return req(url, params, {...c, ...cfg})
     }
 }
-export const useApi = (url: ApiName, params?: reqParams, cfg?: reqOption): Load =>
-    async function ({fetch}) {
+export const useApi = (url: ApiName, getParams?: (event: LoadEvent) => reqParams, cfg?: reqOption): Load =>
+    async function (event) {
+        const {fetch} = event;
         (cfg = cfg || {}).fetch = fetch;
-        return await req(url, params, cfg);
+        return {d: await req(url, getParams?.(event), cfg)};
     };

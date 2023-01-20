@@ -1,7 +1,9 @@
 import {req} from './req';
 import {contentType, dataType, encryptIv, encTypeIndex, getIndexType} from './enum';
-import type {ApiData, ApiBodyData, fView, Model, Obj} from './types';
+import type {ApiData, ApiBodyData, fView, Model, Obj, Timer} from './types';
 import pinyin from 'tiny-pinyin'
+import {marked} from "marked";
+import {convert} from 'html-to-text'
 
 const {subtle} = crypto;
 let genKey: CryptoKeyPair;
@@ -379,7 +381,7 @@ export const time = (value: number) => {
 export const hds2Str = (hs: Headers | [string, string][]) => {
     const h = []
     for (const [k, v] of hs) {
-        if(k) h.push(`${k}:${v.replace(/\n/g,'')}`)
+        if (k) h.push(`${k}:${v.replace(/\n/g, '')}`)
     }
     return h.join('\n')
 }
@@ -394,4 +396,57 @@ export const str2Hds = (str: string) => {
         }
     })
     return v
+}
+
+export const upDownScroller = (fn: (a: number) => void) => {
+    let e = 0, t: Element;
+    let stop = 0;
+    let a = 0
+    let tm: Timer
+    return function (x: Event) {
+        const tr = x.target as Element;
+        if (tr === t) {
+            const v = t.scrollTop - e
+            if (Math.abs(v) > 10) {
+                const z = v > 0 ? 1 : 0
+                if (z !== a && !stop) {
+                    a = z
+                    fn(z)
+                    stop = 1
+                    clearTimeout(tm)
+                    tm = setTimeout(() => stop = 0, 300)
+                }
+                e = t.scrollTop;
+            }
+        } else {
+            t = tr
+            e = t.scrollTop
+        }
+    }
+}
+
+
+const colors = [
+    '#9CAFB7',
+    '#E6B89C',
+    '#274C77',
+    '#EAD2AC',
+    '#6096BA',
+    '#B7B7A4',
+    '#8B8C89',
+    '#014F86',
+    '#89B0AE',
+    '#2C7DA0',
+    '#A5A58D',
+    '#5C677D',
+    '#4281A4'
+]
+
+export const getColor = (a: number) => {
+    a = Math.floor(a);
+    return colors[a % colors.length]
+}
+
+export const getPain = (src: string) => {
+   return  src?convert(marked.parse(src)):''
 }

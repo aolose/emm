@@ -21,6 +21,7 @@
             className: "icon i-file",
             title: "Files",
         }, '|']
+    let tools
     $:tools = base.concat(toolbar)
     const changeTools = () => {
         const bar = editor.toolbar_div

@@ -187,7 +187,8 @@ const apis: APIRoutes = {
         })
     },
     posts: {
-        post: auth(Admin, (req) => {
+        post: auth([], (req,pms) => {
+            // todo
             return pageBuilder(req, Post,
                 ['createAt desc']
             )
