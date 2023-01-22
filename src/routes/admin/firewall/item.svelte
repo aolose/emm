@@ -51,7 +51,7 @@
 <style lang="scss">
   .r {
     transition: .3s ease-in-out;
-    background: #1e2633;
+    background: #17202e;
     flex-wrap: wrap;
     display: flex;
     font-size: 13px;
@@ -70,7 +70,7 @@
       white-space: normal;
       word-break: break-all;
       height: 100%;
-      min-height: 30px;
+      min-height: 35px;
       align-self: center;
     }
 
@@ -136,9 +136,8 @@
   }
 
   .r5 {
-    background: #192125;
+    background: #131822;
     width: 100%;
-
     button {
       position: absolute;
       left: 10px;
@@ -177,7 +176,7 @@
     }
 
     .r5 {
-      background: #122536;
+      background: #0e182c;
 
       span {
         color: #d4e3f5;

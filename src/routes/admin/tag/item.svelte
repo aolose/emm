@@ -54,7 +54,7 @@
    min-width: 200px;
    min-height: 100px;
    margin: 10px;
-   background: var(--bg1);
+   background: var(--bg2);
    padding-bottom: 20px;
  }
  .s{
@@ -66,6 +66,7 @@
    }
  }
  h4{
+   font-weight: 400;
    padding:  10px 20px;
  }
  p{

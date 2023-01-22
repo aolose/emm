@@ -94,7 +94,6 @@
 
   .h {
     padding: 20px 30px;
-    border-bottom: 1px solid #343c4d;
     align-items: center;
     justify-content: center;
 
@@ -118,7 +117,7 @@
   }
 
   .a {
-    background: var(--bg2);
+    background: var(--bg1);
     width: 100%;
     max-width: 600px;
     height: 100%;

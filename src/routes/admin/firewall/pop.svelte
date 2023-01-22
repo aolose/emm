@@ -75,7 +75,7 @@
                 </label>
                 <label>
                     <span>header:</span>
-                    <HdsIpt bind:value={d.header}/>
+                    <HdsIpt bind:value={d.headers}/>
                 </label>
             </div>
             <div class="fn">

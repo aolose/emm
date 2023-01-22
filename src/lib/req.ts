@@ -1,16 +1,17 @@
 import {
+    body2query,
     decryptBuf,
-    fetchOpt,
-    shareKey,
     encryptHeader,
+    fetchOpt,
     getHeaderDataType,
-    syncShareKey, randNum
+    randNum,
+    shareKey,
+    syncShareKey
 } from './utils';
-import {dataType, reqMethod} from './enum';
+import {dataType, method, reqMethod} from './enum';
 import {browser} from '$app/environment';
-import type {ApiName, cacheRecord, reqData, reqParams, reqCache, MethodNumber, reqOption} from './types';
+import type {ApiName, cacheRecord, MethodNumber, reqCache, reqData, reqOption, reqParams} from './types';
 import type {Load, LoadEvent} from "@sveltejs/kit";
-import type {PageLoadEvent} from "../../.svelte-kit/types/src/routes/posts/[[page]]/$types";
 
 const cacheData = '.d';
 const cacheKey = '.k';
@@ -126,7 +127,11 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
     };
     isLoadFn = !!cfg?.fetch;
     const ft = cfg?.fetch || fetch;
-    const fullUrl = `/api/${uu}`;
+    let fullUrl = `/api/${uu}`;
+    if (cfg?.method === method.GET && opt.body) {
+        fullUrl += `?${body2query(opt.body)}`
+        delete (opt as { body?: BodyInit }).body
+    }
     return ft(fullUrl, opt).then(async (r) => {
         let fal = false
         if (r.status >= 400) {

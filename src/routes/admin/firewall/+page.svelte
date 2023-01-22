@@ -217,7 +217,7 @@
   .h {
     height: 60px;
     align-items: center;
-    background: #242b38;
+    background: #141a25;
     display: flex;
     width: 100%;
     padding: 0 10px;
@@ -240,7 +240,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: var(--bg2);
+    background: #141a25;
     padding-bottom: 20px;
   }
 

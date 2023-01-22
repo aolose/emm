@@ -64,10 +64,9 @@
 <style lang="scss">
   .b {
     flex: 1;
-    max-width: 500px;
+    max-width: 600px;
     height: 100%;
-    background: var(--bg1);
-    border-right: 1px solid #1c334a;
+    background: var(--bg2);
   }
 
   input, .x {
@@ -151,26 +150,25 @@
     justify-content: space-between;
     height: 75px;
     padding: 0 20px;
-    border-bottom: 1px solid #343c4d;
-
     .i-close {
+      color: #485c6c;
       font-size: 20px;
-      opacity: .5;
+      &:hover{
+        color: #7987a2;
+      }
     }
   }
 
   .s {
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: 100px;
     font-size: 16px;
-    color: #6f777e;
+    color: #485c6c;
     padding: 5px 20px;
     border: 1px solid currentColor;
     transition: .2s;
     &:hover{
-      background: #6c7a93;
-      color: #fff;
-      border-color: #6c7a93;
+      color: #7a91bb;
     }
   }
 

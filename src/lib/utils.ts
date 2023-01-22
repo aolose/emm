@@ -4,6 +4,7 @@ import type {ApiData, ApiBodyData, fView, Model, Obj, Timer} from './types';
 import pinyin from 'tiny-pinyin'
 import {marked} from "marked";
 import {convert} from 'html-to-text'
+import {goto} from "$app/navigation";
 
 const {subtle} = crypto;
 let genKey: CryptoKeyPair;
@@ -237,6 +238,15 @@ export const fetchOpt = async (o?: object | string | number, encrypted = false) 
     };
 };
 
+export const body2query = (body: BodyInit) => {
+    const t = Object.prototype.toString.call([]).replace(/\[object |]/g, '')
+    if (t === 'object') {
+        return Object.entries(body).map(([a, b]) => `${a}=${encodeURI(b)}`).join('?')
+    }
+    if (typeof body === 'object') return JSON.stringify(body)
+    return body
+}
+
 export const ivGen = (num: number) => {
     let n = 16;
     const a = new Uint8Array(n);
@@ -258,11 +268,11 @@ export const encryptHeader = (req: { headers: Headers }) => req.headers.get(encr
 export const hasOwnProperty = (target: object, p: string) =>
     Object.prototype.hasOwnProperty.call(target, p);
 
-export const delay = (fn: () => void, ms = 0) => {
-    let timer: ReturnType<typeof setTimeout>;
-    return () => {
+export const delay = (fn: (...params:never[]) => void, ms = 0) => {
+    let timer: number;
+    return (...params:unknown[]) => {
         clearTimeout(timer);
-        timer = setTimeout(fn, ms);
+        timer = setTimeout(fn, ms,...params);
     };
 };
 
@@ -364,6 +374,10 @@ export async function enc(str: string) {
     return buf2x(await subtle.digest('sha-256', d))
 }
 
+export function goBack(root = '/posts') {
+    if (sessionStorage.hasBack) history.go(-1)
+    else return goto('/posts', {replaceState: true})
+}
 
 export const time = (value: number) => {
     const d = new Date(value)
@@ -448,5 +462,28 @@ export const getColor = (a: number) => {
 }
 
 export const getPain = (src: string) => {
-   return  src?convert(marked.parse(src)):''
+    return src ? convert(marked.parse(src)) : ''
+}
+export const rndAr = (a: string[]) => {
+    return a[Math.floor(Math.random() * a.length)]
+}
+
+export function randNm() {
+    const b = [
+        '大卫·', '史密斯·', '雷斯', '胖子',
+        '尼古拉斯·', '马克思', '呆萌', '唐纳德·',
+        '奥斯卡', '扶她', '秀吉', '钢板', '泥人', '光头', '乔布斯·',
+        '胸毛', '电动', '芭比', '阿里', '漏气', '疯子',
+        '路痴', '花痴', '忧郁', '金刚', '红烧', '油炸', '清蒸', '笨蛋', '可爱'
+    ]
+    const c = [
+        '二狗', '小猫', '爱坤', '小鸭', '小猪', '大佬', '班长',
+        '师傅', '八戒', '大妈', '大爷', '二狗',
+        '蛋蛋', '星星', '妖精', '老师', '狗狗', '喵喵',
+        '奶奶', '子龙', '蒙德', '玄烨', '玄奘', '斯基', '全蛋', '佩恩',
+        '奥特曼', '同志', '怪兽', '泰龙',
+        '彦祖', '斯坦森', '蛤蛤', '童鞋', '皮卡丘', '少女', '辣子鸡',
+        '佩奇', '宝宝', '葫芦娃', '艾莉'
+    ]
+    return localStorage.nm = rndAr(b) + rndAr(c)
 }

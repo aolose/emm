@@ -150,8 +150,10 @@ const apis: APIRoutes = {
             const tag = await req.json() as Tag
             if (tag.name) {
                 const t = ts.find(a => a.name === tag.name)
-                if (t) Object.assign(t, tag)
-                else ts.unshift(DBProxy(Tag,tag))
+                if (t) {
+                    Object.assign(t, filter(tag,['banner','desc'],false))
+                }
+                else ts.unshift(DBProxy(Tag, tag))
                 tags.set([...ts])
             }
         }),
@@ -187,7 +189,7 @@ const apis: APIRoutes = {
         })
     },
     posts: {
-        post: auth([], (req,pms) => {
+        post: auth([], (req, pms) => {
             // todo
             return pageBuilder(req, Post,
                 ['createAt desc']
@@ -204,7 +206,28 @@ const apis: APIRoutes = {
             }
         })
     },
+    comment:{
+        post:()=>{
+            return ''
+        }
+    },
+    comments:{
+        get:()=>{
+            return []
+        }
+    },
     post: {
+        get: auth([], async (req, pms) => {
+            const slug = req.url.replace(/.*?\?/,'')
+            if (slug) {
+                const p = db.get(model(Post, {slug}))
+                // todo pms check
+                if (p) {
+                    return filter(p, ['desc', 'content', 'createAt', 'tag', 'title'],false)
+                }
+            }
+            return resp('post not found', 404)
+        }),
         delete: auth(Admin, async (req) => {
             const i = new Uint8Array(await req.arrayBuffer())
             return db.delByPk(Post, [...i]).changes

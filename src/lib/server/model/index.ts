@@ -158,16 +158,18 @@ export class Comment {
     id = INT
     @noNull
     name = TEXT
+    avatar = INT
     @noNull
     say = TEXT
     publish = INT
     reply = INT
     state = INT // -1 skip 0 - wait review  1 - review ok 2 - review no pass
-    token = INT
+    token = TEXT
     pass = true
     createAt = INT
     modify = INT
     userId = INT
+
 }
 
 export class System {

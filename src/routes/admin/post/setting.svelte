@@ -31,7 +31,7 @@
     const pickPic = () => {
         setting.set(0)
         selectFile(1,'image/*').then(a => {
-            post = {...post, banner: a[0].id}
+            post = {...post, banner: a[0].id+''}
         }).finally(() => setting.set(1))
     }
     const rmPic = () => {
@@ -148,7 +148,7 @@
     display: flex;
     flex-direction: column;
     max-height: 90%;
-    background: var(--bg2);
+    background: var(--bg1);
     width: 400px;
     box-shadow: rgba(0, 0, 0, .2) 0px 3px 10px;
   }
