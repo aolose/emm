@@ -122,20 +122,21 @@ export class DB {
         return this.db.prepare(sql).all(...p) as T[]
     }
 
-    save<T extends Model>(a: Obj<T>, create?: boolean,skipSave?:boolean) {
+    save(a: Obj<Model>, create?: boolean,skipSave?:boolean) {
         const now = Date.now()
-        const o = a as Obj<T> & dbHooks
+        const o = a as Obj<Model> & dbHooks
+        let changeSave = true
         if (!skipSave&&o.onSave) {
-            o.onSave(this, now)
+            changeSave = !o.onSave(this, now)
         }
         const table = o.constructor.name
-        setKey(o, 'save', now)
+        if(changeSave)setKey(a, 'save', now)
         const pk = getPrimaryKey(table) as keyof typeof o & string
         const kv = val(o[pk])
         let sql: string
         let values: unknown[]
         if (!kv || create) {
-            setKey(o, 'createAt', now);
+            setKey(a, 'createAt', now);
             [sql, values] = insert(o);
         } else [sql, values] = update(o);
         const r = this.db.prepare(sql).run(...values);

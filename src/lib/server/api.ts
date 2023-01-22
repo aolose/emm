@@ -223,7 +223,11 @@ const apis: APIRoutes = {
                 const p = db.get(model(Post, {slug}))
                 // todo pms check
                 if (p) {
-                    return filter(p, ['desc', 'content', 'createAt', 'tag', 'title'],false)
+                    return filter(p, [
+                        'banner','comment','desc',
+                        'content', 'createAt',
+                        'tag', 'title'
+                    ],false)
                 }
             }
             return resp('post not found', 404)
