@@ -213,7 +213,7 @@
     display: block;
     margin-top: 20px;
     border: none;
-    background: var(--bg1) center no-repeat;
+    background: var(--bg2) center no-repeat;
     width: 100%;
     outline: none;
     padding: 10px;

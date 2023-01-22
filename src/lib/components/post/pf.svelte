@@ -65,7 +65,7 @@
 <style lang="scss">
   .s {
     margin: 40px auto 10px;
-    color: #ccccd9;
+    color: #272e44;
     width: 240px;
 
     * {

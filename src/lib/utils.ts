@@ -277,6 +277,7 @@ export const delay = (fn: (...params:never[]) => void, ms = 0) => {
 };
 
 export const filter = <T extends Model>(o: Obj<T>, keys: (keyof T)[], nullAble = true) => {
+    if(!o)return o
     const hasKey = keys && keys.length
     Object.keys(o).forEach(_ => {
         const k = _ as keyof T
@@ -345,6 +346,7 @@ export function file2Md(f: fView[] | File[]) {
 }
 
 export function diffObj<T extends object>(origin: T, change: T) {
+    if(!change||!origin)return change
     const d = {} as T
     let ch = 0
     const s = new Set(Object.keys(origin))

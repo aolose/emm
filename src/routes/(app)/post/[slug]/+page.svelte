@@ -24,7 +24,7 @@
     <meta property='og:description' content={d.desc}/>
     <meta property='og:url' content={d.slug}/>
     <meta property='article:published_time' content={time(d.createAt)}/>
-    <meta property='article:tag' content={d.tags}/>
+    <meta property='article:tag' content={d.tag}/>
     <meta property='og:image' content={`/res/_${d.banner}`}/>
     <meta property='og:image:width' content='600'/>
     <meta property='og:image:height' content='400'/>
@@ -51,9 +51,9 @@
                     <div class='ss'></div>
                     <PF/>
                     <div class='tg'>
-                        {#if d.tags}
-                            <label>#</label>
-                            <Tag t={d.tags}/>
+                        {#if d.tag}
+                            <label class="icon i-tags"></label>
+                            <Tag t={d.tag}/>
                         {/if}
                     </div>
                     <!--                    <CmList id={d.aid} act='1'/>-->
@@ -73,8 +73,16 @@
       background-position: 100% 0;
     }
   }
-
+  .i-tags{
+    color: #2b4d77;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+  }
   .tg {
+    padding:  0 20px;
     display: flex;
     flex-wrap: wrap;
   }
@@ -89,7 +97,7 @@
     min-height: 500px;
     border-radius: 4px;
     overflow: hidden;
-    background: var(--bg0);
+    background: var(--bg2);
     padding: var(--artP);
     box-shadow: rgba(0, 0, 0, .2) 0 10px 30px -10px;
     @include s() {
@@ -154,7 +162,7 @@
   .h {
     padding: 30px;
     color: #f4f6f8;
-    opacity: .8;
+    opacity: .7;
     display: flex;
     flex-direction: column;
     align-items: center;

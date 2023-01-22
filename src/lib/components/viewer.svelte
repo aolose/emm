@@ -35,9 +35,11 @@
 </script>
 {#if title || content}
     <div class="a" class:p={preview} transition:fade>
-        <div class="t">
-            <h1>{title || ''}</h1>
-        </div>
+        {#if preview}
+            <div class="t">
+                <h1>{title || ''}</h1>
+            </div>
+        {/if}
         <div class="c" bind:this={el}>
             {#if !preview}
                 {@html v}
@@ -54,10 +56,14 @@
     flex-direction: column;
 
     :global {
+      p{
+        color: #95a3b7;
+        line-height: 2;
+      }
       img {
         max-width: 100%;
         border-radius: 4px;
-        margin: 10px;
+        margin: 10px 0;
       }
     }
   }

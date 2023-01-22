@@ -9,7 +9,7 @@
 <style lang="scss">
   i {
     font-style: normal;
-    background: var(--bg1);
+    background: var(--bg2);
     color: transparent;
     margin-right: 5px;
     width: 18px;
