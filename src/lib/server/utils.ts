@@ -215,6 +215,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
         if (pk) p[pk] = o[pk]
         const ch = model(C, p)
         db.save(ch, create)
+        create=false
         ori = {...Object.assign(o, ch)}
     }, 100)
     if (load) {
@@ -235,7 +236,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
                 o = Object.assign(r, o)
             }
         }
-        save()
+        save(create)
     }
     return new Proxy(o, {
         get(target, p: string, receiver: T) {
@@ -243,7 +244,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
             return hasOwnProperty(target, p) ? val(v) : v;
         },
         set(target, p: string, newValue: value, receiver: T): boolean {
-            save()
+            save(create)
             return Reflect.set(target, p, newValue, receiver);
         }
     }) as T;
