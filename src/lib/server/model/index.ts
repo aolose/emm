@@ -1,7 +1,7 @@
 import {NULL} from '../enum'
 import {noNull, primary, unique} from './decorations'
-import {DBProxy, model, setNull, uniqSlug} from "$lib/server/utils";
-import {slugGen} from "$lib/utils";
+import {DBProxy, model, setNull, uniqSlug, val} from "$lib/server/utils";
+import {diffObj, filter, slugGen} from "$lib/utils";
 import type {DB} from "$lib/server/db/sqlite3";
 import {tags} from "$lib/store";
 import {get} from "svelte/store";
@@ -66,9 +66,14 @@ export class Post {
     _p = 0
 
     onSave(db: DB, now: number) {
-        const {id, title_d, title, content_d, content} = this
+        const {id, title_d, title, content_d,content} = this
         const oo = id ? db.get(model(this.constructor as FunctionConstructor, {id})) : {}
         const ori = oo as Post
+        const df = diffObj(
+            filter({...ori} as Post,['content_d','content','title','title_d'],false),
+            filter({...this},['content_d','content','title','title_d'],false),
+        ) as Post
+        console.log('df',df)
         if (this._p) {
             if (ori?.publish) {
                 this.modify = now
@@ -108,7 +113,7 @@ export class Post {
             const _id = id + ''
             tgs.forEach(t => {
                 const {name} = t
-                const ps = new Set(t.post.split(','))
+                const ps = new Set(t.post?.split(',')||[])
                 let ch = 0
                 if (as.has(name)) {
                     if (!ps.has(_id)) {
@@ -124,12 +129,13 @@ export class Post {
                     }
                     ds.delete(name)
                 }
-                if (ch) t.post = [...ps].join()
+                if (ch) t.post = [...ps].filter(a=>!!a).join()
             })
             if (as.size) {
                 tags.update(u => u.concat([...as].map(a => DBProxy(Tag, {name: a, post: _id}))))
             }
         }
+        return !df
     }
 }
 
