@@ -6,6 +6,7 @@
     import Nav from "../pg.svelte"
     import Ph from './hd.svelte'
     import UpDownScroll from "../upDownScroll.svelte";
+    import {expand} from "$lib/store";
 
     let a = 0
 
@@ -19,7 +20,7 @@
     }
 
     let sc, oh = 0, ih = 0
-    export let name
+    export let name=''
     export let d = {}
     $:cur = d.cur
     $:total = d.total
@@ -29,7 +30,7 @@
 <UpDownScroll bind:down={a}/>
 <svelte:window on:sveltekit:navigation-end={scTop}/>
 <Canvas type={1}/>
-<div class="o">
+<div class="o" class:e={$expand}>
     <Ph bind:shrink={a}><slot></slot></Ph>
     <div class="t" bind:this={sc} class:v={a} bind:offsetHeight={oh}>
         <Ctx>
@@ -42,7 +43,7 @@
     </div>
     <div class="n" class:v={ih>oh&&!a}>
         <div class="nn">
-            <Nav total={total} cur={cur} url={'/'+name} length="2" tm="1"/>
+            <Nav total={total} cur={cur} go={'/'+name} length="2" tm="1"/>
         </div>
     </div>
 </div>
@@ -80,6 +81,10 @@
     bottom: 0;
     left: 0;
     right: 0;
+    transition: .3s ease-in-out;
+    &.e{
+      padding-top: 40px;
+    }
   }
 
   .n {

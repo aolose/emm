@@ -78,6 +78,7 @@
                 ctx.clearRect(0, 0, w, h)
                 const k = 2
                 const p = n / k / 20
+                const c = '#ecf0f6'
                 switch (type) {
                     case 1:
                         ctx.strokeStyle = '#2a518a'
@@ -104,7 +105,6 @@
                     default:
                         drawCurve(m, n)
                         ctx.lineTo(w, h)
-                        const c = '#0b1017'
                         ctx.fillStyle=c
                         ctx.fill()
                         ctx.strokeStyle = c

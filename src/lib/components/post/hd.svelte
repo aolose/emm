@@ -21,7 +21,6 @@
     position: relative;
 
     h1 {
-      font-weight: 400;
       transition: .3s ease-in-out;
       margin: 0;
       font-size: 34px;
@@ -33,6 +32,11 @@
 
       &:first-letter {
         color: #fff;
+      }
+      :global {
+        a{
+          color: inherit;
+        }
       }
     }
   }

@@ -322,7 +322,7 @@
     bottom: 0;
     right: 0;
     left: 0;
-    background: rgba(18, 22, 28, 0.76);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(1px);
     display: flex;
     justify-content: center;
@@ -332,9 +332,10 @@
   .b {
     width: 600px;
     height: 600px;
-    background: var(--bg2);
+    background: var(--bg0);
     display: flex;
     flex-direction: column;
+    box-shadow: rgba(0,0,0,.5) 0 10px 50px;
   }
 
   .ls {

@@ -1,12 +1,13 @@
 <script>
     import {act} from '$lib/use';
-    import {slide} from "svelte/transition";
+    import {slidLeft} from "$lib/transition";
+
     export let exact = true
     export let href
 </script>
 
 <a class="k"
-   transition:slide|local
+   transition:slidLeft|local
    use:act={exact}
    href={href}>
     <slot/>
@@ -21,14 +22,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 20px 0;
+    margin:  0 20px;
     &:hover {
-      color: #fff;
+      color: #6fa1da;
     }
   }
   :global .k{
     &.act {
-      color: #6fa1da;
+      color: rgba(255, 255, 255, 0.8);
     }
   }
 </style>
