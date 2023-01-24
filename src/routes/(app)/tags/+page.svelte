@@ -20,7 +20,7 @@
             {#each d as tag,i}
                 <a
                         on:mouseenter={e=>bubbles(e.target)}
-                        href={`/tag/${tag}/1`}
+                        href={`/tag/${tag}`}
                         style={`background:${getColor(i)}`}
                 >
                     <span>{tag}
