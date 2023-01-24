@@ -1,5 +1,5 @@
 @import url(./font/icon.css);
-
+@import url(./font/fas.css);
 @font-face {
 	font-family: 'hp';
 	font-weight: 300;
@@ -18,9 +18,9 @@ a {
 	--blue: #2596e3;
 	--yellow: yellow;
 	--pink: #f11b86;
-	--bg0: #11161f;
-	--bg1: #141a25;
-	--bg2: #101520;
+	--bg0: #0e1118;
+	--bg1: #131720;
+	--bg2: #0e121a;
 }
 
 * {
