@@ -42,14 +42,14 @@ export const sqlVal = (values: unknown[]) =>
         return a;
     });
 
-export function noNullKeyValues(o:Obj<Model>) {
+export function noNullKeyValues(o: Obj<Model>) {
     const C = o.constructor as Class<Model>
     const ks = new Set<string>(Object.keys(new C() as object) as (keyof Model)[])
     const keys = [] as string[];
     const values = [] as unknown[];
     const {TEXT, INT, DATE} = NULL;
     Object.entries(o).forEach(([k, v]) => {
-        if (k[0] === '_'&&!ks.has(k[0])) return;
+        if (k[0] === '_' && !ks.has(k[0])) return;
         if (v !== undefined && v !== null) {
             const t = v.constructor.name;
             switch (t) {
@@ -81,10 +81,10 @@ function now() {
 
 export const Log = {
     debug(label: string, ...params: unknown[]) {
-        if (is_dev) console.log(now(), label, ...params);
+        if (is_dev) console.log(now(),'\x1b[36m', label, '\x1b[0m',...params);
     },
     info(label: string, ...params: unknown[]) {
-        console.log(now(), label, ...params);
+        console.log(now(), '\x1b[30m', label, '\x1b[0m', ...params);
     },
     warn(label: string, ...params: unknown[]) {
         console.warn(now(), label, ...params);
@@ -215,7 +215,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
         if (pk) p[pk] = o[pk]
         const ch = model(C, p)
         db.save(ch, create)
-        create=false
+        create = false
         ori = {...Object.assign(o, ch)}
     }, 100)
     if (load) {
@@ -259,22 +259,7 @@ export const combineResult = (id: number, pk: ArrayBuffer) => {
     return nbf.buffer;
 };
 
-export const countMap = new Map<string, number>()
-
-export const cacheCount = (o: Class<Model>, num?: number) => {
-    const nm = o.name
-    if (num !== undefined) {
-        countMap.set(nm, num)
-        return
-    }
-    let n = countMap.get(nm)
-    if (n === undefined) {
-        n = db.count(o)
-        countMap.set(nm, n)
-        setTimeout(() => countMap.delete(nm), 1e4)
-    }
-    return n;
-}
+const countMap = new Map<string, number>()
 
 export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: object = {}) => {
     const a = new M() as Obj<T>
@@ -310,20 +295,30 @@ export const saveFile = (name: string | number, dir: string, buf: Buffer) => {
     fs.writeFileSync(p, buf, {flag: 'w'});
 }
 
+const cacheCount = (model: Class<Model>, where?: [string, ...unknown[]]) => {
+    const k = `${model.name}-${(where?.join() || '')}`
+    const c = countMap.get(k)
+    if (c !== null) return c
+    else {
+        const c = db.count(model, where)
+        countMap.set(k, c)
+        setTimeout(() => countMap.delete(k), 6e4) // cache 1min
+        return c
+    }
+}
+
 export const pageBuilder = async <T extends Model>(
-    req: Request,
+    page: number,
+    size: number,
     model: Class<T>,
     orders: string[],
     keys: (keyof T)[] = [],
     where?: [string, ...unknown[]]
 ) => {
-    const r = new Uint8Array(await req.arrayBuffer())
-    const p = r[0]
-    const s = r[1]
-    const c = cacheCount(Res) as number
+    const c = cacheCount(model, where) as number
     return {
-        total: Math.floor((c + s - 1) / s),
-        items: arrFilter(db.page(model, p, s, orders, where), keys, false)
+        total: Math.floor((c + size - 1) / size),
+        items: arrFilter(db.page(model, page, size, orders, where), keys, false)
     }
 }
 
