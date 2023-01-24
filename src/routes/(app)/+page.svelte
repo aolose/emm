@@ -35,7 +35,7 @@
         {/if}
     </div>
     <div class="mu">
-        <a href="/posts" transition:slidLeft|local>Articles -></a>
+        <a href="/posts" transition:slidLeft|local>Posts -></a>
     </div>
 </div>
 <style lang="scss">
@@ -51,7 +51,7 @@
   a {
     text-align: left;
     display: block;
-    font-size: 18px;
+    font-size: 20px;
     font-family: 'Architects Daughter', -apple-system,
     BlinkMacSystemFont, PingFang SC, Helvetica Neue, STHeiti,
     Microsoft Yahei, Tahoma, Simsun, sans-serif;;
@@ -59,12 +59,10 @@
     opacity: .8;
     white-space: nowrap;
     overflow: hidden;
-    color: #fff;
+    color: #000;
     transition: .3s ease-in-out;
-
     &:hover {
       opacity: 1;
-      color: #ffffff;
     }
   }
 

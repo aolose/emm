@@ -1,12 +1,13 @@
 <script>
     import Nav from '$lib/components/nav.svelte'
+    import {expand} from "$lib/store";
     let b = ''
 </script>
 <div class="b" style={b}>
     <div class="nv ">
         <Nav/>
     </div>
-    <div class="bg">
+    <div class="g" class:ex={$expand}>
         <slot>
         </slot>
     </div>
@@ -61,8 +62,8 @@
     right: 0;
     left: 0;
     top: 0;
-    z-index: 5;
-    position: absolute;
+    z-index: 99;
+    position: fixed;
   }
 
   .b{
@@ -76,12 +77,15 @@
     background-size: cover;
   }
 
-  .bg {
+  .g {
     position: absolute;
     left: 0;
     right: 0;
-    top: -1px;
-    bottom: -1px;
-    padding: 1px;
+    top: 0;
+    bottom: 0;
+    transition: .3s ease-in-out;
+    &.ex{
+      padding-top: 60px;
+    }
   }
 </style>
