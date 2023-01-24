@@ -93,7 +93,7 @@
 <style lang="scss">
   h1 {
     width: 100%;
-    background: #19222d;
+    background: var(--bg1);
     pointer-events: none;
     top: 0;
     padding: 0 20px;

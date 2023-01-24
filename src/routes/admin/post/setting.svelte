@@ -121,7 +121,7 @@
     bottom: 0;
     right: 0;
     left: 0;
-    background: rgba(18, 22, 28, 0.76);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(1px);
     display: flex;
     justify-content: center;

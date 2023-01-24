@@ -51,7 +51,7 @@
 <style lang="scss">
   .r {
     transition: .3s ease-in-out;
-    background: #17202e;
+    background: var(--bg1);
     flex-wrap: wrap;
     display: flex;
     font-size: 13px;
@@ -136,7 +136,7 @@
   }
 
   .r5 {
-    background: #131822;
+    background: var(--bg2);
     width: 100%;
     button {
       position: absolute;

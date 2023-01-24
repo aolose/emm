@@ -77,9 +77,9 @@
                     {#if r.country}
                         <div class="icon i-geo"><span>{r.country}</span></div>
                     {/if}
-                    {#if r.header}
+                    {#if r.headers}
                         <div class="icon i-comment">
-                            <pre>{r.header}</pre>
+                            <pre>{r.headers}</pre>
                         </div>
                     {/if}
                 </div>
@@ -104,7 +104,7 @@
     margin: 10px;
     overflow: hidden;
     border-radius: 2px;
-    background: #2a3344;
+    background: var(--bg0);
 
     button {
       opacity: .5;
@@ -117,7 +117,7 @@
   }
 
   .act {
-    background: #324264;
+    background: #0f1c38;
 
     .m {
       color: #94abc0;
@@ -130,7 +130,7 @@
     }
 
     .r {
-      background: #162736;
+      background: #070e1e;
     }
   }
 
@@ -181,7 +181,7 @@
 
   .r {
     border-top: 1px solid rgba(0, 0, 0, 0.2);
-    background: #282d38;
+    background: #1d2125;
     width: 100%;
     align-items: center;
     height: 30px;
@@ -218,7 +218,7 @@
   h1 {
     flex: 1;
     padding: 0 10px;
-    color: #39667e;
+    color: #627079;
     font-weight: 400;
     font-size: 14px;
   }

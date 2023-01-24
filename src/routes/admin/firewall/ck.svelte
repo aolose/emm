@@ -2,7 +2,7 @@
     export const ck = ()=>value=!value
     export let value = false
 </script>
-<div class="a" class:c={value}>
+<div class="a" class:c={value} on:click={ck}>
     {value ? '✓' : ''}
 </div>
 <span  on:click={ck}><slot></slot></span>

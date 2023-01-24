@@ -27,7 +27,7 @@
     }
 
     function page(n = 1) {
-        getPost(new Uint8Array([n, 10])).then(p => {
+        getPost({page:n,size:10}).then(p => {
             const {total, items = []} = p
             if (items) posts.set(items)
             pages = total
