@@ -133,6 +133,8 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
 export const originPost = writable({} as curPost)
 export const editPost = writable({} as curPost)
 export const tags = writable([] as Tag[])
+export const publishedPost=writable(new Set<number>())
+export const publishedTags = writable([] as Tag[])
 export const patchedTag = writable({
     ver:0,
     tags:[] as string[]
@@ -155,4 +157,5 @@ editPost.subscribe(p => {
 })
 
 export const msg = writable('');
-export const bg = writable('')
+
+export const expand = writable(0)
