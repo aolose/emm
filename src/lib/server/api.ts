@@ -27,7 +27,7 @@ import fs from "fs";
 import {genToken, getPermissions} from "$lib/server/token";
 import {addRule, blockIp, delRule, filterLog, fw2log, logCache} from "$lib/server/firewall";
 import {loadGeoDb} from "$lib/server/ipLite";
-import {tags} from "$lib/store";
+import {publishedPost, tags} from "$lib/store";
 import {get} from "svelte/store";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
@@ -82,7 +82,10 @@ const apis: APIRoutes = {
             return
         }),
         post: auth(Admin, async (req) => {
-            return pageBuilder(req, FWRule,
+            const r = new Uint8Array(await req.arrayBuffer())
+            const p = r[0]
+            const s = r[1]
+            return pageBuilder(p, s, FWRule,
                 ['createAt desc'],
                 ['id', 'path', 'headers', 'ip', 'mark',
                     'country', 'log', 'active', 'noAccess']
@@ -151,9 +154,8 @@ const apis: APIRoutes = {
             if (tag.name) {
                 const t = ts.find(a => a.name === tag.name)
                 if (t) {
-                    Object.assign(t, filter(tag,['banner','desc'],false))
-                }
-                else ts.unshift(DBProxy(Tag, tag))
+                    Object.assign(t, filter(tag, ['banner', 'desc'], false))
+                } else ts.unshift(DBProxy(Tag, tag))
                 tags.set([...ts])
             }
         }),
@@ -178,6 +180,17 @@ const apis: APIRoutes = {
         }),
     },
     tags: {
+        get: async () => {
+            const ps = get(publishedPost)
+            console.log('ps', ps)
+            const ts = get(tags).filter(a => {
+                const p = (a.post || '').split(',').filter(a => ps.has(+a))
+                if (p.length) {
+                    return true
+                }
+            })
+            return ts.map(a => a.name).join()
+        },
         post: auth(Admin, async req => {
             const ver = +(await req.text())
             const r = tagPatcher(ver)
@@ -189,10 +202,35 @@ const apis: APIRoutes = {
         })
     },
     posts: {
-        post: auth([], (req, pms) => {
-            // todo
-            return pageBuilder(req, Post,
-                ['createAt desc']
+        get: auth([], async req => {
+            // todo pms
+            const params = new URL(req.url).searchParams
+            const page = +(params.get('page') || 1)
+            const size = +(params.get('size') || 10)
+            const tag = params.get('tag')
+            let where: [string, ...unknown[]] = ['published=? ', 1]
+            if (tag) {
+                const tg = get(tags).find(a => a.name === tag)
+                const ps = (tg?.post?.split(',') || [])
+                if (ps.length) {
+                    where = [`${where[0]} and id in (${ps.map(() => '?').join()})`, 1, ...ps]
+                }
+            }
+            return pageBuilder(page, size, Post,
+                ['createAt desc'], [
+                    'banner', 'desc',
+                    'content', 'createAt',
+                    'tag', 'title', 'slug'
+                ],
+                where
+            )
+        }),
+        post: auth(Admin, async (req, pms) => {
+            const {
+                page, size
+            } = await req.json()
+            return pageBuilder(page, size, Post,
+                ['createAt desc'], undefined,
             )
         })
     },
@@ -206,28 +244,28 @@ const apis: APIRoutes = {
             }
         })
     },
-    comment:{
-        post:()=>{
+    comment: {
+        post: () => {
             return ''
         }
     },
-    comments:{
-        get:()=>{
+    comments: {
+        get: () => {
             return []
         }
     },
     post: {
         get: auth([], async (req, pms) => {
-            const slug = req.url.replace(/.*?\?/,'')
+            const slug = req.url.replace(/.*?\?/, '')
             if (slug) {
                 const p = db.get(model(Post, {slug}))
                 // todo pms check
                 if (p) {
                     return filter(p, [
-                        'banner','comment','desc',
+                        'banner', 'comment', 'desc',
                         'content', 'createAt',
                         'tag', 'title'
-                    ],false)
+                    ], false)
                 }
             }
             return resp('post not found', 404)
@@ -257,19 +295,19 @@ const apis: APIRoutes = {
             return changes
         }),
         post: auth(Admin, async (req) => {
-            const params = []
-            const where = []
+            let where:[string, ...unknown[]]|undefined
             let type = req.headers.get('filetype')
             if (type) {
                 type = type.replace(/\*/g, '%')
-                where.push('type like ?')
-                params.push(type)
+                where=['type like ?', type]
             }
-            if (where.length) params.unshift(where.join('and'))
-            return pageBuilder(req, Res,
+            const r = new Uint8Array(await req.arrayBuffer())
+            const p = r[0]
+            const s = r[1]
+            return pageBuilder(p, s, Res,
                 ['save desc'],
                 ['id', 'name', 'size', 'type', 'thumb'],
-                params as [string, ...unknown[]]
+                where
             )
         })
     },
