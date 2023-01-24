@@ -4,6 +4,7 @@
     import Viewer from '$lib/components/viewer.svelte'
     import PF from '$lib/components/post/pf.svelte'
     import Tag from '$lib/components/post/tag.svelte';
+    import {expand} from "$lib/store";
     // import CmList from '$lib/components/post/cmList.svelte'
     export let data
     const d = data.d
@@ -32,10 +33,10 @@
 
 {#if d}
     <div class={'bk icon i-close'} on:click={()=>goBack()}></div>
-    <div class='co'>
-        <div class='bg' style={sly}>
-            <div class='ft' style={style}></div>
-        </div>
+    <div class='bg' style={sly}>
+        <div class='ft' style={style}></div>
+    </div>
+    <div class='co' class:ex={$expand}>
         <Ctx>
             <div class='v'>
                 <div class='h'>
@@ -155,8 +156,8 @@
     left: 0;
     right: 0;
     position: absolute;
-    padding: var(--artC);
     overflow: auto;
+    transition: .3s ease-in-out;
   }
 
   .h {
@@ -206,30 +207,28 @@
   }
 
   .bk {
+    position: fixed;
     font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 36px;
     width: 36px;
-    z-index: 10;
     opacity: .8;
     cursor: pointer;
     color: #6fa1da;
     top: 15px;
     right: 15px;
-    position: absolute;
-
+    z-index: 100;
     &:hover {
       opacity: 1;
     }
   }
   .bg{
-    opacity: .5;
     z-index: 0;
     pointer-events: none;
     display: block;
-    position: fixed;
+    position: absolute;
     left: 0;
     right: 0;
     top: 0;
