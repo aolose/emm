@@ -1,6 +1,6 @@
 import {req} from './req';
 import {contentType, dataType, encryptIv, encTypeIndex, getIndexType} from './enum';
-import type {ApiData, ApiBodyData, fView, Model, Obj, Timer} from './types';
+import type {ApiData, ApiBodyData, fView, Model, Obj, Timer, reqOption} from './types';
 import pinyin from 'tiny-pinyin'
 import {marked} from "marked";
 import {convert} from 'html-to-text'
@@ -220,8 +220,8 @@ export const data2Buf = (data: ApiBodyData): ArrayBuffer | undefined => {
 
 export const randNum = () => Math.floor(Date.now() * Math.random());
 
-export const fetchOpt = async (o?: object | string | number, encrypted = false) => {
-    const headers = new Headers();
+export const fetchOpt = async (o?: object | string | number, encrypted = false, cfg?: reqOption) => {
+    const headers = cfg?.headers || new Headers();
     const num = randNum();
     let [tp, data] = parseBody(o);
     if (encrypted && data !== undefined) {
@@ -268,16 +268,16 @@ export const encryptHeader = (req: { headers: Headers }) => req.headers.get(encr
 export const hasOwnProperty = (target: object, p: string) =>
     Object.prototype.hasOwnProperty.call(target, p);
 
-export const delay = (fn: (...params:never[]) => void, ms = 0) => {
+export const delay = (fn: (...params: never[]) => void, ms = 0) => {
     let timer: number;
-    return (...params:unknown[]) => {
+    return (...params: unknown[]) => {
         clearTimeout(timer);
-        timer = setTimeout(fn, ms,...params);
+        timer = setTimeout(fn, ms, ...params);
     };
 };
 
 export const filter = <T extends Model>(o: Obj<T>, keys: (keyof T)[], nullAble = true) => {
-    if(!o)return o
+    if (!o) return o
     const hasKey = keys && keys.length
     Object.keys(o).forEach(_ => {
         const k = _ as keyof T
@@ -346,7 +346,7 @@ export function file2Md(f: fView[] | File[]) {
 }
 
 export function diffObj<T extends object>(origin: T, change: T) {
-    if(!change||!origin)return change
+    if (!change || !origin) return change
     const d = {} as T
     let ch = 0
     const s = new Set(Object.keys(origin))
@@ -488,4 +488,108 @@ export function randNm() {
         '佩奇', '宝宝', '葫芦娃', '艾莉'
     ]
     return localStorage.nm = rndAr(b) + rndAr(c)
+}
+
+type  Btn = HTMLElement & { ani: boolean, cv?: HTMLCanvasElement }
+
+export function bubbles(btn: Btn, click?: () => void) {
+    type Bs = {
+        x: number
+        y: number
+        r: number,
+        s: number,
+        v: number
+        q: number
+        i: number
+    }
+
+    const p = btn.offsetParent;
+    if (!p) return;
+    if (btn.ani) return;
+    btn.ani = true;
+    const sl = getComputedStyle(btn);
+    if (sl.position !== 'absolute' && sl.position !== 'relative') {
+        btn.style.position = 'relative';
+    }
+    let cv = btn.cv;
+    const w = btn.offsetWidth;
+    const h = btn.offsetHeight;
+    if (!btn.cv) {
+        const t = btn.offsetTop - h / 2;
+        const l = btn.offsetLeft - w / 2 + 8;
+        cv = btn.cv = document.createElement('canvas');
+        const s = cv.style;
+        s.width = w * 2 + 'px';
+        s.height = h * 2 + 'px';
+        s.position = 'absolute';
+        s.left = l + 'px';
+        s.top = t + 'px';
+        s.cursor = 'point';
+        s.pointerEvents = 'none';
+        if (click) cv.onclick = e => {
+            e.stopPropagation();
+            e.preventDefault();
+            click()
+        };
+        cv.width = w * 2;
+        cv.height = h * 2;
+    }
+    if(cv)p.appendChild(cv);
+    const ctx = cv?.getContext('2d');
+    const bs: Bs[] = [];
+    const max = 6;
+
+    function create(x: number, i: number) {
+        const idx = i % 2;
+        bs.push({
+            x: [1.5 * w, 0.5 * w][idx],
+            y: [0.5 * h, 1.5 * h][idx],
+            r: 5,
+            s: 0,
+            v: 2 + Math.random() * 2,
+            q: (0.5 - Math.random()) * Math.PI,
+            i: i
+        });
+    }
+
+    function draw(o: Bs) {
+        if (!ctx) return
+        ctx.beginPath();
+        const i = [1, -1][o.i % 2];
+        const x = o.s * Math.cos(o.q);
+        const y = o.s * Math.sin(o.q);
+        ctx.arc(o.x + x * i, o.y - y * i, o.r, 0, Math.PI * 2);
+        ctx.fillStyle = sl.backgroundColor;
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function next(o: Bs) {
+        if (!ctx || !cv) return
+        o.r *= 0.9;
+        o.v *= 0.95;
+        o.s += o.v;
+        if ((o.r * o.v <= 0.08) && o.i === max) {
+            ctx.clearRect(0, 0, cv.width, cv.height);
+            if (p) p.removeChild(cv);
+            delete btn.cv;
+            btn.ani = false;
+        } else draw(o);
+    }
+
+    const run = (fn: (a: number, b: number) => boolean | void, m = 0, i = 0, t = 1) => {
+        if (!m || i <= m * t) {
+            if (!m || i % t === 0) {
+                if (fn(0, i / t)) return;
+            }
+            requestAnimationFrame(() => run(fn, m, i + 1, t));
+        }
+    };
+    run(create, max, 0, 2);
+    run(() => {
+        if (!cv || !ctx) return;
+        if (!document.body.contains(cv)) return;
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        bs.forEach(next);
+    });
 }
