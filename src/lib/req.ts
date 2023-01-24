@@ -123,7 +123,7 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
     if (enc) await syncShareKey();
     const opt = {
         method: reqMethod[cfg?.method || 0],
-        ...(await fetchOpt(params, enc))
+        ...(await fetchOpt(params, enc, cfg))
     };
     isLoadFn = !!cfg?.fetch;
     const ft = cfg?.fetch || fetch;
@@ -270,9 +270,9 @@ export const api = (url: ApiName, cfg?: reqOption) => {
         return req(url, params, {...c, ...cfg})
     }
 }
-export const useApi = (url: ApiName, getParams?: (event: LoadEvent) => reqParams, cfg?: reqOption): Load =>
+export const useApi = (url: ApiName, getParams?: (event: LoadEvent, cfg: reqOption) => reqParams, cfg?: reqOption): Load =>
     async function (event) {
         const {fetch} = event;
         (cfg = cfg || {}).fetch = fetch;
-        return {d: await req(url, getParams?.(event), cfg)};
+        return {d: await req(url, getParams?.(event, cfg), cfg)};
     };
