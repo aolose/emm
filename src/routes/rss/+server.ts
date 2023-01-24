@@ -1,10 +1,12 @@
 import { Post } from '$lib/server/model';
 import { db, sys } from '$lib/server';
 import type { RequestHandler } from '@sveltejs/kit';
+import {model} from "$lib/server/utils";
+import {getPain, time} from "$lib/utils";
 
-export const GET: RequestHandler = async () => {
-	const data = db.all(new Post());
-	const body = render(data);
+export const GET: RequestHandler = async ({request,url}) => {
+	const data = db.all(model(Post,{published:1}));
+	const body = render(url.origin,data);
 	const headers = {
 		'Cache-Control': `max-age=0, s-max-age=${600}`,
 		'Content-Type': 'application/xml'
@@ -14,21 +16,21 @@ export const GET: RequestHandler = async () => {
 	});
 };
 
-const render = (articles: Post[]) => `<?xml version="1.0" encoding="UTF-8" ?>
+const render = (base:string,posts: Post[]) => `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<atom:link href="${sys.blogUrl}/rss" rel="self" type="application/rss+xml" />
-<title>${sys.blogName} Posts</title>
-<link>${sys.blogUrl}</link>
-<description>${sys.blogBio}</description>
-${articles
+<atom:link href="${sys.blogUrl||base}/rss" rel="self" type="application/rss+xml" />
+<title>${sys.blogName||''}</title>
+<link>${sys.blogUrl||base}</link>
+<description>${sys.blogBio||''}</description>
+${posts
 	.map(
 		(post) => `<item>
-<guid>${sys.blogUrl}/post/${post.slug}</guid>
+<guid>${sys.blogUrl||base}/post/${post.slug}</guid>
 <title>${post.title}</title>
-<link>${sys.blogUrl}/post/${post.slug}</link>
-<description>${post.desc}</description>
-<pubDate>${new Date(post.publish).toUTCString()}</pubDate>
+<link>${sys.blogUrl||base}/post/${post.slug}</link>
+<description>${getPain(post.desc||post.content).substring(0,140)}</description>
+<pubDate>${time(post.publish)}</pubDate>
 </item>`
 	)
 	.join('')}
