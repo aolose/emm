@@ -1,7 +1,10 @@
-import type {Writable} from "svelte/store";
+import type {Readable} from "svelte/store";
 import type {DiffFn, PatchFn, PatchPool, version} from "$lib/types";
 
-export function Patcher<T extends object>(patch: PatchFn<T>, diff: DiffFn<T>, store: Writable<T>, expire = 1e5 * 36 * 24) {
+export function Patcher<T extends object>(
+    patch: PatchFn<T>,
+    diff: DiffFn<T>,
+    store: Readable<T>, expire = 1e5 * 36 * 24) {
     let version = 1
     let latest = 0
     const patchPool: PatchPool<T> = new Map()
