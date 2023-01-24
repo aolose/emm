@@ -45,9 +45,11 @@
         if (editor && value !== editor.value())
             editor.value(value)
         const s = JSON.stringify(toolbar)
-        if (editor && ts !== s) {
-            ts = s
-            changeTools()
+        if (editor) {
+            if(ts !== s){
+                ts = s
+                changeTools()
+            }
         }
     }
 
@@ -56,8 +58,10 @@
         const Easy = eModule.default
         editor = new Easy({
             element: e,
+            autoDownloadFontAwesome:false,
             spellChecker: false,
             uploadImage: true,
+            previewRender:()=>'',
             syncSideBySidePreviewScroll: false,
             toolbar: tools,
             imageUploadFunction: (f) => {
@@ -89,7 +93,6 @@
         });
     })
 </script>
-
 <div class="e">
     <textarea class="d" bind:this={e}></textarea>
 </div>

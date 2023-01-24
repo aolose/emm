@@ -230,10 +230,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 }
 
 .CodeMirror-scroll {
-  overflow: scroll !important;
-  margin-bottom: -50px;
-  margin-right: -50px;
-  padding-bottom: 50px;
+  overflow: auto;
   height: 100%;
   outline: 0;
   z-index: 0
@@ -245,9 +242,11 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 
 .CodeMirror-gutter-filler, .CodeMirror-hscrollbar, .CodeMirror-scrollbar-filler, .CodeMirror-vscrollbar {
   position: absolute;
-  z-index: 6;
-  display: none;
-  outline: 0
+  z-index: -1;
+  display: none!important;
+  outline: 0;
+  pointer-events: none;
+  opacity: 0;
 }
 
 .CodeMirror-vscrollbar {
@@ -454,7 +453,6 @@ span.CodeMirror-selectedtext {
   .CodeMirror {
     box-sizing: border-box;
     height: auto;
-    padding: 10px;
     font: inherit;
     z-index: 0;
     flex: 1;
@@ -503,7 +501,7 @@ span.CodeMirror-selectedtext {
 
 .editor-toolbar {
   user-select: none;
-  padding: 9px 8%;
+  padding: 9px 7%;
 }
 
 .editor-toolbar.fullscreen {
