@@ -33,6 +33,7 @@ export type reqOption = {
     delayKey?: number | string;
     fetch?: typeof fetch;
     method?: method;
+    headers?:Headers;
     encrypt?: boolean;
     before?(data: unknown, url?: string): [unknown, string | undefined, Headers?];
     done?(result: unknown): void;
