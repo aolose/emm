@@ -1,5 +1,5 @@
 import better from 'better-sqlite3';
-import {noNullKeyValues, setKey, sqlVal, val} from '../utils';
+import {Log, noNullKeyValues, setKey, sqlVal, val} from '../utils';
 import * as models from '../model';
 import {getConstraint, getPrimaryKey, pkMap, primaryKey} from '../model/decorations';
 import type {Class, dbHooks, Model, Obj} from "$lib/types";
@@ -102,8 +102,14 @@ export class DB {
         return this.select(false, o, where, values) as T[];
     }
 
-    count(o: Class<Model>): number {
-        return this.db.prepare(`select count(*) as c from ${o.name}`).get().c as number
+    count(o: Class<Model>, where?: [string, ...unknown[]]): number {
+        let sql = `select count(*) as c from ${o.name}`
+        let params
+        if (where && where.length > 1) {
+            sql = `${sql} where ${where[0]}`
+            params = where.slice(1)
+        }
+        return this.db.prepare(sql).get(params).c as number
     }
 
     page<T extends Model>(
@@ -116,21 +122,26 @@ export class DB {
         const s = `select * from ${o.name}`
         const d = order.length ? ` order by ${order.join()}` : ''
         const l = ` limit ${size * (page - 1)},${size}`
-        let sql = s + d + l
-        if (where?.length) sql = `${sql} where ${where}`
-        const p =  where?.slice(1)|| []
+        let w = ''
+        let p = [] as unknown[]
+        if (where && where.length > 1) {
+            w = ` where ${where[0]}`
+            p = where?.slice(1)
+        }
+        const sql = s +w+ d + l
+        Log.debug('sql',sql)
         return this.db.prepare(sql).all(...p) as T[]
     }
 
-    save(a: Obj<Model>, create?: boolean,skipSave?:boolean) {
+    save(a: Obj<Model>, create?: boolean, skipSave?: boolean) {
         const now = Date.now()
         const o = a as Obj<Model> & dbHooks
         let changeSave = true
-        if (!skipSave&&o.onSave) {
+        if (!skipSave && o.onSave) {
             changeSave = !o.onSave(this, now)
         }
         const table = o.constructor.name
-        if(changeSave)setKey(a, 'save', now)
+        if (changeSave) setKey(a, 'save', now)
         const pk = getPrimaryKey(table) as keyof typeof o & string
         const kv = val(o[pk])
         let sql: string
