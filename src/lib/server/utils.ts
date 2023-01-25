@@ -1,8 +1,8 @@
-import {NULL, permission, token_statue} from './enum';
+import {NULL, permission} from './enum';
 import {contentType, dataType, encryptIv, encTypeIndex, geTypeIndex} from '../enum';
 import cookie from 'cookie'
 import type {CookieSerializeOptions} from 'cookie'
-import type {Api, ApiData, ApiName, Class, Model, Obj} from '../types';
+import type {Api, ApiData, ApiName, Class, Model, Obj, TokenInfo} from '../types';
 import apis from './api';
 import {
     arrFilter,
@@ -24,9 +24,9 @@ import {db, server, sys} from './index';
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import {Res} from "$lib/server/model";
 import type {RequestEvent} from "@sveltejs/kit";
-import {getPermissions} from "$lib/server/token";
+import {clientMap} from "$lib/server/cache";
+import {Client} from "$lib/server/client";
 
 export const is_dev = process.env.NODE_ENV !== 'production';
 
@@ -81,7 +81,7 @@ function now() {
 
 export const Log = {
     debug(label: string, ...params: unknown[]) {
-        if (is_dev) console.log(now(),'\x1b[36m', label, '\x1b[0m',...params);
+        if (is_dev) console.log(now(), '\x1b[36m', label, '\x1b[0m', ...params);
     },
     info(label: string, ...params: unknown[]) {
         console.log(now(), '\x1b[30m', label, '\x1b[0m', ...params);
@@ -402,12 +402,15 @@ const setCookie = (resp: Response, key: string, value: string) => {
     resp.headers.append('set-cookie', c)
 }
 
-export const getTokens = (req: Request) => {
-    return (getCookie(req, 'token') || '').split(',')
+export const getClient = (req: Request) => {
+    const c = getCookie(req, 'token')
+    if (c) return clientMap.get(c)
 }
 
-export const setTokens = (resp: Response, tokens: string[]) => {
-    setCookie(resp, 'token', tokens.join(','))
+export const setToken = (req: Request, resp: Response, token: TokenInfo) => {
+    const client = getClient(req) || new Client()
+    client.addToken(token)
+    setCookie(resp, 'token', client.uuid)
 }
 
 export function checkRedirect(statue: number, path: string, req: Request) {
@@ -416,9 +419,8 @@ export function checkRedirect(statue: number, path: string, req: Request) {
     const login = '/login'
     const config = '/config';
     if (statue > 1) {
-        const tks = getTokens(req)
-        const pms = getPermissions(tks)
-        needLogin = pms.get(permission.Admin) !== token_statue.ok
+        const client = getClient(req)
+        needLogin = !client?.ok(permission.Admin)
     }
     if (needLogin && !skipLogin) {
         if (path !== login) return login

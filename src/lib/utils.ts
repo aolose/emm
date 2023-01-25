@@ -218,7 +218,21 @@ export const data2Buf = (data: ApiBodyData): ArrayBuffer | undefined => {
     }
 };
 
-export const randNum = () => Math.floor(Date.now() * Math.random());
+export const randNum = (n?: number) => Math.floor(Date.now() * ((n || 0) + Math.random()));
+export const randStr = (str: string) => {
+    const m = str.length
+    let l = m
+    let w = ''
+    const s = new Set()
+
+    while (l--) {
+        let a = Math.floor(Math.random() * m)
+        while (s.has(a)) a = (a + 1) % m;
+        s.add(a)
+        w += str[a]
+    }
+    return w
+}
 
 export const fetchOpt = async (o?: object | string | number, encrypted = false, cfg?: reqOption) => {
     const headers = cfg?.headers || new Headers();
@@ -534,7 +548,7 @@ export function bubbles(btn: Btn, click?: () => void) {
         cv.width = w * 2;
         cv.height = h * 2;
     }
-    if(cv)p.appendChild(cv);
+    if (cv) p.appendChild(cv);
     const ctx = cv?.getContext('2d');
     const bs: Bs[] = [];
     const max = 6;
@@ -592,4 +606,14 @@ export function bubbles(btn: Btn, click?: () => void) {
         ctx.clearRect(0, 0, cv.width, cv.height);
         bs.forEach(next);
     });
+}
+
+export const equalSet = (a:Set<unknown>,b:Set<unknown>)=> {
+   if(a.size===b.size){
+       for(const c of a){
+           if(!b.has(c))return false
+       }
+       return  true
+   }
+   return false
 }

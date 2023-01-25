@@ -7,7 +7,7 @@ import type {
 } from "$lib/types";
 
 import {randNum} from "$lib/utils";
-import type {Tag, Token} from "$lib/server/model";
+import type {Require} from "$lib/server/model";
 
 const user = writable({
     token: 'test'
@@ -132,14 +132,12 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
 
 export const originPost = writable({} as curPost)
 export const editPost = writable({} as curPost)
-export const tags = writable([] as Tag[])
-export const publishedPost=writable(new Set<number>())
-export const publishedTags = writable([] as Tag[])
+
 export const patchedTag = writable({
     ver:0,
     tags:[] as string[]
 })
-export const tokens = writable([] as Token[])
+export const tokens = writable([] as Require[])
 export const posts = writable([] as curPost[])
 export const setting = writable(0)
 export const saveNow = writable(0)

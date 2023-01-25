@@ -3,7 +3,7 @@ import {noNull, primary, unique} from './decorations'
 import {DBProxy, model, setNull, uniqSlug, val} from "$lib/server/utils";
 import {diffObj, filter, slugGen} from "$lib/utils";
 import type {DB} from "$lib/server/db/sqlite3";
-import {publishedPost, tags} from "$lib/store";
+import {publishedPost, tags} from "$lib/server/store";
 import {get} from "svelte/store";
 import {diffTags} from "$lib/tagPatchFn";
 
@@ -142,24 +142,17 @@ export class Post {
     }
 }
 
-export class Token {
+export class Require {
     @primary
     id = INT
     @noNull
     @unique
     name = TEXT
     @noNull
-    @unique
-    code = TEXT
-    @noNull
     type = INT // enum.type
-    features = TEXT // enum.features
-    @noNull
-    expire = INT
-    targetIds = TEXT
+    value = TEXT
     remark = TEXT
     createAt = INT
-
 }
 
 export class Comment {

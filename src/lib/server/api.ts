@@ -5,51 +5,45 @@ import {
     checkStatue,
     combineResult, DBProxy,
     getReqJson,
-    getTokens,
+    getClient,
     md5,
     mkdir,
     model,
     pageBuilder,
     resp,
-    saveFile, setTokens, skipLogin,
+    saveFile, setToken, skipLogin,
     sysStatue,
     uniqSlug, val
 } from './utils';
 import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
-import {FwLog, FWRule, Post, Res, Tag} from "$lib/server/model";
+import {FwLog, FWRule, Post, Res, Tag, Require} from "$lib/server/model";
 import {diffObj, enc, filter} from "$lib/utils";
-import {NULL, permission, token_statue} from "$lib/server/enum";
-import {tagPatcher} from "$lib/server/cache";
+import {NULL, permission} from "$lib/server/enum";
 import path from "path";
 import fs from "fs";
-import {genToken, getPermissions} from "$lib/server/token";
+import {genToken} from "$lib/server/token";
 import {addRule, blockIp, delRule, filterLog, fw2log, logCache} from "$lib/server/firewall";
 import {loadGeoDb} from "$lib/server/ipLite";
-import {publishedPost, tags} from "$lib/store";
+import {publishedPost, tags, tagPatcher} from "$lib/server/store";
 import {get} from "svelte/store";
+import {codeTokens} from "$lib/server/cache";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
     if (!sysStatue) return resp('system uninitialized', 403)
     const requires = new Set(([] as permission[]).concat(ps))
-    const tokens = getTokens(req)
-    const pms = getPermissions(tokens)
+    const client = getClient(req)
     if (skipLogin) requires.delete(Admin)
-    for (const p of requires) {
-        const s = pms.get(p)
-        let err = ''
-        if (s === undefined) err = 'invalid token'
-        else switch (s) {
-            case token_statue.expire:
-                err = 'token expire'
-                break
-            case token_statue.unknown:
-                err = 'unknown token'
+    if (requires.size) {
+        if (!client) return resp('empty token', 403)
+        for (const p of requires) {
+            const s = client.ok(p)
+            if (s) continue
+            else return resp('invalid token', 403)
         }
-        if (err) return resp(err, 403)
     }
-    return fn(req, pms);
+    return fn(req);
 };
 
 // todo: link flag to session
@@ -57,6 +51,36 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 let curPostFlag = [0, 0]
 const {Admin} = permission
 const apis: APIRoutes = {
+    code: {
+        // todo: too many times block?
+        post: auth(Admin, async (req) => {
+            const code = await req.text()
+            const tk = codeTokens.get(code)
+            if (tk) {
+                const client = getClient(req)
+                if (client?.has(tk)) return ''
+                const n = Date.now()
+                const {expire = 0, times = 0} = tk
+                if (expire < 0 || expire > n) {
+                    tk.times = times - 1
+                    if (times === 1) codeTokens.delete(code)
+                    if (times) {
+                        const re = resp('')
+                        setToken(req, re, tk)
+                        return re
+                    }
+                }
+                codeTokens.delete(code)
+            }
+        })
+    },
+    require: {
+        post: auth(Admin, async (req) => {
+            const token = model(Require, await req.json())
+            db.save(token)
+            return token.id
+        }),
+    },
     log: {
         async post(req) {
             const t = (await req.json()) as FWRule & { type: number, page: number, size: number, t: number }
@@ -107,7 +131,7 @@ const apis: APIRoutes = {
             const [u, p, v] = await getReqJson(req)
             if (await enc(sys.admUsr + v) === u && await enc(sys.admPwd + v) === p) {
                 const res = resp('')
-                setTokens(res, [genToken(Admin)])
+                setToken(req, res, genToken(Admin))
                 q[0] = 0
                 sv()
                 return res
@@ -202,7 +226,7 @@ const apis: APIRoutes = {
         })
     },
     posts: {
-        get: auth([], async req => {
+        get: async req => {
             // todo pms
             const params = new URL(req.url).searchParams
             const page = +(params.get('page') || 1)
@@ -224,8 +248,8 @@ const apis: APIRoutes = {
                 ],
                 where
             )
-        }),
-        post: auth(Admin, async (req, pms) => {
+        },
+        post: auth(Admin, async (req) => {
             const {
                 page, size
             } = await req.json()
@@ -255,7 +279,7 @@ const apis: APIRoutes = {
         }
     },
     post: {
-        get: auth([], async (req, pms) => {
+        get: async (req) => {
             const slug = req.url.replace(/.*?\?/, '')
             if (slug) {
                 const p = db.get(model(Post, {slug}))
@@ -269,7 +293,7 @@ const apis: APIRoutes = {
                 }
             }
             return resp('post not found', 404)
-        }),
+        },
         delete: auth(Admin, async (req) => {
             const i = new Uint8Array(await req.arrayBuffer())
             return db.delByPk(Post, [...i]).changes
@@ -295,11 +319,11 @@ const apis: APIRoutes = {
             return changes
         }),
         post: auth(Admin, async (req) => {
-            let where:[string, ...unknown[]]|undefined
+            let where: [string, ...unknown[]] | undefined
             let type = req.headers.get('filetype')
             if (type) {
                 type = type.replace(/\*/g, '%')
-                where=['type like ?', type]
+                where = ['type like ?', type]
             }
             const r = new Uint8Array(await req.arrayBuffer())
             const p = r[0]
@@ -368,7 +392,7 @@ const apis: APIRoutes = {
                 sys.admPwd = await enc(pwd);
                 const res = resp('')
                 checkStatue()
-                setTokens(res, [genToken(Admin)])
+                setToken(req, res, genToken(Admin))
                 return res;
             } else {
                 return resp('username or password is empty', 500)

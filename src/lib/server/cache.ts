@@ -1,7 +1,8 @@
-import {derived, writable} from "svelte/store";
-import {diffTags, patchTags} from "$lib/tagPatchFn";
-import {Patcher} from "$lib/server/patch";
-import {tags} from "$lib/store";
+import type {Require} from "$lib/server/model";
+import type {Client} from "$lib/server/client";
+import type {TokenInfo} from "$lib/types";
+export const requireMap = new Map<number,Require>()
 
-export const tagPatcher = Patcher(patchTags, diffTags,
-    derived(tags, ts => new Set<string>([...ts].map(t => t.name))))
+export const clientMap = new Map<string,Client>()
+
+export const codeTokens = new Map<string,TokenInfo>

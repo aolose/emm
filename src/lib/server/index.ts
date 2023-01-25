@@ -1,9 +1,10 @@
 import {DB} from './db/sqlite3';
 import {runJobs} from './db/jobs';
-import {DBProxy, val} from './utils';
-import {System, Tag} from './model';
-import {publishedPost, tags} from "$lib/store";
+import {DBProxy, model} from './utils';
+import {Require, System, Tag} from './model';
+import {publishedPost, tags} from "$lib/server/store";
 import {loadGeoDb} from "$lib/server/ipLite";
+import {requireMap} from "$lib/server/cache";
 
 export let sys: System;
 runJobs();
@@ -33,6 +34,8 @@ export const server = {
         publishedPost.set(new Set(
             db.db.prepare('select id from Post where published =?')
                 .all(1).map(a => +a.id)))
-        // todo
+        db.all(model(Require)).forEach(r=>{
+            requireMap.set(r.id,DBProxy(Require,r,false))
+        })
     }
 };

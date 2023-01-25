@@ -6,12 +6,6 @@ export const NULL = {
 
 export enum permission {
 	Admin,
-	Article, // for pwd article
+	Post, // for pwd article
 	Comment // for comment owner
-}
-
-export enum token_statue{
-	ok,
-	expire,
-	unknown
 }

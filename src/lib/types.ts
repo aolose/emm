@@ -3,12 +3,11 @@ import type {apiPath} from './server/api'
 import type {Post} from "./server/model";
 import type {method} from "$lib/enum";
 import type {DB} from "$lib/server/db/sqlite3";
-import type {permission, token_statue} from "$lib/server/enum";
+import type {permission} from "$lib/server/enum";
 
 export type MethodNumber = 0 | 1 | 2 | 3
 export type Class<T> = new (...args: unknown[]) => T;
-export type Permissions = Map<permission,token_statue>
-export type RespHandle = (req: Request, pms?: Permissions) => ApiData | Promise<ApiData>;
+export type RespHandle = (req: Request) => ApiData | Promise<ApiData>;
 
 export interface dbHooks {
     onSave?: (db: DB, now?: number) => boolean | void
@@ -20,7 +19,7 @@ export type Model = (
     models.Comment | models.ShortPost |
     models.User | models.Post |
     models.Res | models.FWRule |
-    models.FwLog | models.Token
+    models.FwLog | models.Require
     )
 
 export type Obj<T extends Model> = {
@@ -108,3 +107,10 @@ export type version = number
 export type PatchPool<T> = Map<version, DatePatch<T>>
 export type PatchFn<T> = (data: T, add?: T, del?: T) => T
 export type DiffFn<T> = (old: T, cur: T) => ({ add: T, del: T })
+export type TokenInfo = {
+    expire:number
+    code?:string
+    times?:number
+    type:permission,
+    reqs?:Set<number>
+}
