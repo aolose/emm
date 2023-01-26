@@ -54,7 +54,6 @@
     display: flex;
     height: 100%;
     flex-direction: column;
-    background: var(--bg1);
     :global {
       p{
         color: #95a3b7;
@@ -73,6 +72,7 @@
   }
 
   .p {
+    background: var(--bg1);
     padding: 10px 0 60px;
     overflow: hidden;
 

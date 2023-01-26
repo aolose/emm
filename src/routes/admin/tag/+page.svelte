@@ -68,7 +68,7 @@
         <div class="r h" class:o={ok}>
             <span>Tags</span>
             <s></s>
-            <input placeholder="Enter tag name" bind:value={name}/>
+            <input placeholder="tag name" bind:value={name}/>
             <button class="icon i-add" on:click={add}></button>
         </div>
         <div class="ls">

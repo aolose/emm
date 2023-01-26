@@ -2,14 +2,14 @@
     import Menu from './sideMenu.svelte';
     import Confirm from '$lib/components/confirm.svelte'
     import {onMount} from "svelte";
-    import {status} from "$lib/store";
+    import {allowCodeLogin, status} from "$lib/store";
     import {goto} from "$app/navigation";
 
     export let data
     const {d} = data
     onMount(() => {
-        console.log(d)
-        status.set(+d)
+        allowCodeLogin.set(d[1])
+        status.set(+d[0])
         status.subscribe(s => {
             if (!s) goto('/login', {replaceState: true})
         })

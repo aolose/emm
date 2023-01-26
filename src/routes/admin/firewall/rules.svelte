@@ -100,6 +100,9 @@
     <Pg {total} {go}/>
 </div>
 <style lang="scss">
+  .i-comment{
+    background: rgba(0,0,0,.1);
+  }
   .u {
     margin: 10px;
     overflow: hidden;

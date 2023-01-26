@@ -130,6 +130,7 @@ const up = (info: fInfo, cb?: (f: fView) => void) => {
     return v;
 };
 export const status = writable(0)
+export const allowCodeLogin = writable(0)
 export const originPost = writable({} as curPost)
 export const editPost = writable({} as curPost)
 
