@@ -105,9 +105,11 @@
         }
     }
 </script>
-
 <div class="a">
-    <Step value={step} info={steps}/>
+    <div class="b">
+        <div class="o">Configure</div>
+        <Step value={step} info={steps}/>
+    </div>
     <form on:submit={submit}>
         {#if step === 0}
             <div class="f" class:act={db} transition:fade>
@@ -195,11 +197,37 @@
 </div>
 
 <style lang="scss">
+  :global{
+    *{
+      //font-family: 'Architects Daughter', -apple-system;
+    }
+  }
+  .o{
+    background: url("$lib/components/img/fav.png") left center no-repeat;
+    background-size: contain;
+    height: 60px;
+    width: 300px;
+    margin-bottom: 30px;
+    padding-left: 70px;
+    font-family: 'Architects Daughter', -apple-system;
+    color: #fff;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+  }
+  .b{
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    background: var(--bg1);
+  }
   a {
     line-height: 2;
     color: var(--darkgrey);
     margin-left: 10px;
-
     &:hover {
       color: #6c7a93;
       text-decoration: underline;
@@ -217,13 +245,17 @@
   }
 
   h1 {
-    top: 50px;
-    right: 50px;
+    left: 0;
+    right: 0;
+    top: 0;
+    background: var(--bg0);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+    padding: 20px 0;
     position: absolute;
     font-weight: 200;
-    font-size: 24px;
-    text-align: left;
-    color: #6c7a93;
+    font-size: 20px;
+    color: #525967;
   }
 
   .h {
@@ -329,7 +361,7 @@
     align-items: center;
     flex-direction: column;
     justify-content: center;
-    background: var(--bg1);
+    background: var(--bg0);
   }
 
   input {
