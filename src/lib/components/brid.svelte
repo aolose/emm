@@ -29,6 +29,7 @@
 <style lang="scss">
   .mg {
     color: #fff;
+    text-shadow: var(--bg2) 0 0 2px;
     font-size: 24px;
     text-align: center;
     left: -100%;

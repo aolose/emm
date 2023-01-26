@@ -5,6 +5,7 @@
     import PF from '$lib/components/post/pf.svelte'
     import Tag from '$lib/components/post/tag.svelte';
     import {expand} from "$lib/store";
+    import {imageViewer} from '$lib/use'
     // import CmList from '$lib/components/post/cmList.svelte'
     export let data
     const d = data.d
@@ -46,7 +47,7 @@
                     <span>{time(d.createAt)}</span>
                 </div>
                 <div class='art'>
-                    <div class='ct'>
+                    <div class='ct' use:imageViewer>
                         <Viewer ctx={d}/>
                     </div>
                     <div class='ss'></div>
@@ -163,7 +164,7 @@
   .h {
     padding: 30px;
     color: #f4f6f8;
-    opacity: .7;
+    opacity: .8;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -175,11 +176,11 @@
     }
 
     * {
-      text-shadow: rgba(0, 0, 0, 0.15) 1px 1px 1px;
+      text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
     }
 
     p {
-      opacity: .5;
+      opacity: .6;
       color: #f8f8f8;
       margin: 10px 0;
       font-size: 14px;

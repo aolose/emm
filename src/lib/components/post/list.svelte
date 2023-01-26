@@ -70,6 +70,9 @@
     transition: .3s ease-in-out;
     transform: translate3d(0, 0, 0);
     clip-path: inset(80px 0 0 0);
+    @include s(){
+      top: 60px;
+    }
   }
 
 
@@ -83,11 +86,13 @@
     right: 0;
     transition: .3s ease-in-out;
     &.e{
-      padding-top: 40px;
+      padding-top: 30px;
     }
   }
 
   .n {
+    display: flex;
+    align-items: center;
     transition: .3s ease-in-out;
     height: 60px;
     position: absolute;

@@ -458,15 +458,15 @@ export const upDownScroller = (fn: (a: number) => void) => {
 
 
 const colors = [
-    '#9CAFB7',
-    '#E6B89C',
+    '#667c85',
+    '#a47e67',
     '#274C77',
-    '#EAD2AC',
+    '#9d8d72',
     '#6096BA',
-    '#B7B7A4',
+    '#8c8c7e',
     '#8B8C89',
     '#014F86',
-    '#89B0AE',
+    '#577573',
     '#2C7DA0',
     '#A5A58D',
     '#5C677D',

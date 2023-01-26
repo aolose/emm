@@ -41,7 +41,7 @@
     top: 0;
     bottom: 0;
     z-index: 10;
-    background: linear-gradient(rgba(0, 0, 0, .1), rgba(0, 0, 0, .4));
+    background: linear-gradient(rgba(0, 0, 0, .0),  rgba(6, 9 ,25, .7));
     border-radius: inherit;
     display: flex;
     align-items: center;
@@ -140,11 +140,11 @@
   }
 
   .t {
-    top: 3px;
-    right: 3px;
+    top: 20px;
+    right: 10px;
     color: #fff;
     text-shadow: rgba(0, 0, 0, 0.39) 1px 1px 3px;
-    font-size: 10px;
+    font-size: 12px;
     padding: 0 10px;
     border-radius: 10px 10px 0 0;
     height: 20px;
@@ -173,7 +173,7 @@
     bottom: 0;
     border-radius: inherit;
     padding: inherit;
-    background: linear-gradient(transparent, transparentize(#000, .5));
+    background:  linear-gradient(177deg, rgba(30, 48, 63, 0.2), rgba(6, 9 ,25, .7));
   }
 
 </style>

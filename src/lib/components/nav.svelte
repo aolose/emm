@@ -1,13 +1,25 @@
 <script>
     import Link from './link.svelte'
     import {expand} from "$lib/store";
+    import {page} from "$app/stores";
+    import {onMount} from "svelte";
+    let type
+    onMount(() => page.subscribe(pg => {
+        const p = pg.url.pathname
+        if (p === '/') type = 1
+        else if (p.startsWith('/post/')) type = 0
+        else type=2
+    }))
 </script>
 <div class="e" on:click={()=>expand.update(a=>1-a)} class:act={$expand}>
     <i class="e0"></i>
     <i class="e1"></i>
     <i class="e2"></i>
 </div>
-<nav class:act={$expand}>
+<nav class:act={$expand}
+     class:n={type===1}
+     class:m={type===2}
+>
     <div class="a">
         {#if $expand}
             <Link href="/">Home</Link>
@@ -30,6 +42,19 @@
     left: 0;
     right: 0;
     background: rgba(9, 12, 17, 0.9);
+
+    &.m {
+      background: linear-gradient(
+                      90deg,
+                      rgba(9, 12, 17, 0.9),
+                      rgba(9, 12, 17, 0.5)
+      );
+    }
+
+    &.n {
+      background: none;
+    }
+
     span {
       color: inherit;
       font-size: 26px;
@@ -87,6 +112,7 @@
   .act.e {
     opacity: 1;
     color: rgba(250, 250, 250, 1);
+
     .e0 {
       transform: translate3d(1px, 3px, 0) rotate(34deg) scaleX(.6);
     }

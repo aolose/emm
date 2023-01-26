@@ -81,24 +81,24 @@
                 const c = '#ecf0f6'
                 switch (type) {
                     case 1:
-                        ctx.strokeStyle = '#2a518a'
+                        ctx.strokeStyle = '#2a628a'
                         drawCurve(m - k + 15, n - p - 1)
                         ctx.stroke()
-                        ctx.strokeStyle = '#464f5d'
+                        ctx.strokeStyle = '#263b5d'
                         drawCurve(m - k + 5, n - p - 10)
                         ctx.stroke()
-                        ctx.strokeStyle = '#121623'
+                        ctx.strokeStyle = '#202b3b'
                         drawCurve(m - k - 4, n - p - 30)
                         ctx.stroke()
                         return
                     case 2:
-                        ctx.strokeStyle = '#503585'
+                        ctx.strokeStyle = '#793f66'
                         drawCurve(m - k + 13, n - p - 1)
                         ctx.stroke()
-                        ctx.strokeStyle = '#334e52'
+                        ctx.strokeStyle = '#443352'
                         drawCurve(m - k + 8, n - p - 10)
                         ctx.stroke()
-                        ctx.strokeStyle = '#121623'
+                        ctx.strokeStyle = '#1b2649'
                         drawCurve(m - k - 3, n - p - 30)
                         ctx.stroke()
                         return

@@ -85,7 +85,7 @@
     bottom: 0;
     transition: .3s ease-in-out;
     &.ex{
-      padding-top: 60px;
+      padding-top: 30px;
     }
   }
 </style>
