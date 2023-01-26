@@ -50,11 +50,11 @@
     }
 
     * {
-      color: #666;
+      color: #3b4556;
     }
     *::-webkit-scrollbar-thumb {
       border-radius: 10px;
-      background-color: transparentize(#1d395d,.4)
+      background-color: transparentize(#222f48,.4)
     }
   }
 

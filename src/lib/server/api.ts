@@ -13,7 +13,7 @@ import {
     resp,
     saveFile, setToken, skipLogin,
     sysStatue,
-    uniqSlug, val
+    uniqSlug, val, delCookie
 } from './utils';
 import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
@@ -51,6 +51,19 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 let curPostFlag = [0, 0]
 const {Admin} = permission
 const apis: APIRoutes = {
+    logout:{
+        get:()=>{
+            const res = resp('')
+            delCookie(res,'token')
+            return res
+        }
+    },
+    statue:{
+        get:(req)=>{
+            if(skipLogin)return 1
+            return  getClient(req)?.ok(permission.Admin)?1:0
+        }
+    },
     code: {
         // todo: too many times block?
         post: auth(Admin, async (req) => {

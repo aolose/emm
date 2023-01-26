@@ -390,7 +390,7 @@ const ckCfg = {
     path: '/'
 } as CookieSerializeOptions
 
-const delCookie = (resp: Response, key: string) => {
+export const delCookie = (resp: Response, key: string) => {
     resp.headers.append('set-cookie', cookie.serialize(key, '', {
         ...ckCfg,
         expires: new Date(0)
