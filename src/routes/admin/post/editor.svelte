@@ -9,7 +9,7 @@
     import {fade} from "svelte/transition";
     import {method} from "$lib/enum";
     import {patchTags} from "$lib/tagPatchFn";
-
+    export let close
     let title = ''
     let draft = ''
     let cid = 0
@@ -164,9 +164,12 @@
     <div class="a" transition:fade>
         <div class="t">
             <input bind:value={title}/>
+            <button class="icon i-close" on:click={close}></button>
         </div>
         <div class="e">
-            <Editor bind:value={draft} toolbar={tools}/>
+            {#key  $editPost._ || $editPost.id}
+                <Editor bind:value={draft} toolbar={tools}/>
+            {/key}
         </div>
     </div>
 {/if}
@@ -176,6 +179,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    background: var(--bg2);
   }
 
   .e {
@@ -186,10 +190,17 @@
     display: flex;
     align-items: center;
     align-content: normal;
-    padding: 0 8%;
-
+    padding: 10px 8%;
+    input{
+      padding-right: 30px;
+      margin: 0;
+    }
     button {
       font-size: 30px;
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
     }
   }
 
@@ -203,7 +214,7 @@
     cursor: pointer;
 
     &:hover {
-      color: #999;
+      color: #c8d3ee;
     }
   }
 
@@ -211,7 +222,7 @@
     font-size: 40px;
     flex: 1;
     margin: 20px 20px 10px 0;
-    padding: 0 10px;
+    padding: 0;
     border: 0;
     resize: none;
     color: #556175;

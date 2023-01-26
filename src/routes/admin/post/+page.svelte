@@ -16,6 +16,11 @@
     let tmpMark = 1
 
     function sel(p) {
+        if(!p){
+            originPost.set({})
+            editPost.set({})
+            return
+        }
         const o = {...p}
         if (!o.id) {
             o._ = tmpMark++
@@ -32,6 +37,10 @@
             if (items) posts.set(items)
             pages = total
         })
+    }
+
+    function close() {
+        sel()
     }
 
     onMount(() => {
@@ -56,7 +65,7 @@
             </div>
         </div>
         <div class="b">
-            <Editor/>
+            <Editor close={close}/>
         </div>
         <div class="c">
             <Viewer preview={true}/>
@@ -73,6 +82,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
+    background: var(--bg2);
   }
 
   .m {
@@ -91,7 +101,6 @@
   .b {
     width: 50%;
     max-width: 1000px;
-    background: var(--bg2);
   }
 
   .ls {
