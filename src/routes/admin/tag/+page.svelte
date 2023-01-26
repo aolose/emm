@@ -19,6 +19,7 @@
     }
 
     function add() {
+        if(!ok)return
         ss({name})()
         name = ''
     }
@@ -86,6 +87,7 @@
     width: 100%;
     height: 100%;
     display: flex;
+    background: var(--bg3);
   }
 
   s {
@@ -96,7 +98,7 @@
     padding: 20px 30px;
     align-items: center;
     justify-content: center;
-
+    border-bottom: 1px solid var(--bg0);
     input {
       background: var(--bg0);
       margin-right: 10px;
