@@ -35,7 +35,7 @@
     <div class="t" bind:this={sc} class:v={a} bind:offsetHeight={oh}>
         <Ctx>
             <div class="c" bind:offsetHeight={ih}>
-                {#each ls as p,i (p.updated)}
+                {#each ls as p,i (p.slug)}
                     <Item p={p} n={i}/>
                 {/each}
             </div>
