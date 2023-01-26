@@ -48,8 +48,6 @@
     {pv}{pr}
 </p>
 <style lang="scss">
-  @import "./font/font.css";
-
   p {
     font-size: inherit;
     font-family: 'Architects Daughter', -apple-system,
