@@ -50,7 +50,7 @@
     }
 
     * {
-      color: #3b4556;
+      color: #808fa9;
     }
     *::-webkit-scrollbar-thumb {
       border-radius: 10px;

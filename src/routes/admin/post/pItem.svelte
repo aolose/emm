@@ -33,6 +33,7 @@
 </div>
 
 <style lang="scss">
+
   .v {
     position: absolute;
     right: 10%;
@@ -80,6 +81,7 @@
     transition: 0.3s ease-in-out;
 
     h3 {
+      color: #667085;
       height: 56px;
       padding-right: 80px;
       line-height: 3;

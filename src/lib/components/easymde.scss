@@ -554,6 +554,9 @@ span.CodeMirror-selectedtext {
   cursor: pointer
 }
 
+.editor-toolbar button i{
+  color: inherit;
+}
 .editor-toolbar button {
   font-size: 20px;
   color: var(--darkgrey);
