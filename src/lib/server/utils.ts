@@ -420,7 +420,7 @@ export function checkRedirect(statue: number, path: string, req: Request) {
     const config = '/config';
     if (statue > 1) {
         const client = getClient(req)
-        needLogin = !client?.ok(permission.Admin)
+        needLogin = !client?.ok(permission.Full)
     }
     if (needLogin && !skipLogin) {
         if (path !== login) return login

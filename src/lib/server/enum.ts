@@ -5,7 +5,7 @@ export const NULL = {
 };
 
 export enum permission {
-	Admin,
+	Full,
 	Post, // for pwd article
-	Comment // for comment owner
+	Read, // for try
 }

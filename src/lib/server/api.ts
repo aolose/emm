@@ -3,22 +3,27 @@ import {db, server, sys} from './index';
 import {genPubKey} from './crypto';
 import {
     checkStatue,
-    combineResult, DBProxy,
-    getReqJson,
+    combineResult,
+    DBProxy,
+    delCookie,
     getClient,
+    getReqJson,
     md5,
     mkdir,
     model,
     pageBuilder,
     resp,
-    saveFile, setToken, skipLogin,
+    saveFile,
+    setToken,
+    skipLogin,
     sysStatue,
-    uniqSlug, val, delCookie
+    uniqSlug,
+    val
 } from './utils';
 import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
-import {FwLog, FWRule, Post, Res, Tag, Require} from "$lib/server/model";
+import {FwLog, FWRule, Post, Require, Res, Tag} from "$lib/server/model";
 import {diffObj, enc, filter} from "$lib/utils";
 import {NULL, permission} from "$lib/server/enum";
 import path from "path";
@@ -26,21 +31,24 @@ import fs from "fs";
 import {genToken} from "$lib/server/token";
 import {addRule, blockIp, delRule, filterLog, fw2log, logCache} from "$lib/server/firewall";
 import {loadGeoDb} from "$lib/server/ipLite";
-import {publishedPost, tags, tagPatcher} from "$lib/server/store";
+import {publishedPost, tagPatcher, tags} from "$lib/server/store";
 import {get} from "svelte/store";
 import {codeTokens} from "$lib/server/cache";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
     if (!sysStatue) return resp('system uninitialized', 403)
-    const requires = new Set(([] as permission[]).concat(ps))
-    const client = getClient(req)
-    if (skipLogin) requires.delete(Admin)
-    if (requires.size) {
-        if (!client) return resp('empty token', 403)
-        for (const p of requires) {
-            const s = client.ok(p)
-            if (s) continue
-            else return resp('invalid token', 403)
+    if(!skipLogin){
+        const requires = new Set(([] as permission[]).concat(ps))
+        const client = getClient(req)
+        if (requires.size) {
+            if (!client) return resp('empty token', 403)
+            if (!client.ok(Full)) {
+                for (const p of requires) {
+                    const s = client.ok(p)
+                    if (s) continue
+                    else return resp('invalid token', 403)
+                }
+            }
         }
     }
     return fn(req);
@@ -49,53 +57,61 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 // todo: link flag to session
 // need a clientMap
 let curPostFlag = [0, 0]
-const {Admin} = permission
+const {Full, Read} = permission
 const apis: APIRoutes = {
-    logout:{
-        get:()=>{
+    logout: {
+        get: () => {
             const res = resp('')
-            delCookie(res,'token')
+            delCookie(res, 'token')
             return res
         }
     },
-    statue:{
-        get:(req)=>{
-            if(skipLogin)return 1
-            return  getClient(req)?.ok(permission.Admin)?1:0
+    statue: {
+        get: (req) => {
+            let s = 0
+            if (skipLogin) s = 1
+            else {
+                const c = getClient(req)
+                if (c) {
+                    if (c.ok(permission.Full) || c.ok(permission.Read)) s = 1
+                }
+            }
+            return `${s}${sys.codeLogin}`
         }
     },
     code: {
-        // todo: too many times block?
-        post: auth(Admin, async (req) => {
+        post: async (req) => {
             const code = await req.text()
             const tk = codeTokens.get(code)
             if (tk) {
                 const client = getClient(req)
                 if (client?.has(tk)) return ''
+
                 const n = Date.now()
                 const {expire = 0, times = 0} = tk
                 if (expire < 0 || expire > n) {
                     tk.times = times - 1
                     if (times === 1) codeTokens.delete(code)
                     if (times) {
-                        const re = resp('')
+                        const re = resp(tk.type)
                         setToken(req, re, tk)
                         return re
                     }
                 }
                 codeTokens.delete(code)
             }
-        })
+            return resp('invalid code', 403)
+        }
     },
     require: {
-        post: auth(Admin, async (req) => {
+        post: auth(Full, async (req) => {
             const token = model(Require, await req.json())
             db.save(token)
             return token.id
         }),
     },
     log: {
-        async post(req) {
+        post: auth(Read, async (req) => {
             const t = (await req.json()) as FWRule & { type: number, page: number, size: number, t: number }
             const lgs = t.type ? db.all(model(FwLog)).map(fw2log) : logCache
             const total = Math.floor((lgs.length + t.size - 1) / t.size)
@@ -103,22 +119,22 @@ const apis: APIRoutes = {
             if (t) {
                 return {total, data: d}
             }
-        }
+        })
     },
     rule: {
-        post: auth(Admin, async req => {
+        post: auth(Full, async req => {
             const r = model(FWRule, await req.json())
             addRule(r as FWRule)
             return r.id
         })
     },
     rules: {
-        delete: auth(Admin, async req => {
+        delete: auth(Full, async req => {
             const ids = (await req.text()).split(',').filter(a => a).map(v => +v)
             delRule(ids)
             return
         }),
-        post: auth(Admin, async (req) => {
+        post: auth(Read, async (req) => {
             const r = new Uint8Array(await req.arrayBuffer())
             const p = r[0]
             const s = r[1]
@@ -144,7 +160,7 @@ const apis: APIRoutes = {
             const [u, p, v] = await getReqJson(req)
             if (await enc(sys.admUsr + v) === u && await enc(sys.admPwd + v) === p) {
                 const res = resp('')
-                setToken(req, res, genToken(Admin))
+                setToken(req, res, genToken(Full))
                 q[0] = 0
                 sv()
                 return res
@@ -180,12 +196,12 @@ const apis: APIRoutes = {
         }
     },
     tagLS: {
-        post: auth(Admin, async req => {
+        post: auth(Read, async req => {
             return get(tags)
         })
     },
     tag: {
-        post: auth(Admin, async req => {
+        post: auth(Full, async req => {
             const ts = get(tags)
             const tag = await req.json() as Tag
             if (tag.name) {
@@ -196,7 +212,7 @@ const apis: APIRoutes = {
                 tags.set([...ts])
             }
         }),
-        delete: auth(Admin, async req => {
+        delete: auth(Full, async req => {
             const name = await req.text()
             const t = get(tags).find(t => t.name === name)
             if (t) {
@@ -228,7 +244,7 @@ const apis: APIRoutes = {
             })
             return ts.map(a => a.name).join()
         },
-        post: auth(Admin, async req => {
+        post: auth(Read, async req => {
             const ver = +(await req.text())
             const r = tagPatcher(ver)
             let d = r[0] + ''
@@ -262,7 +278,7 @@ const apis: APIRoutes = {
                 where
             )
         },
-        post: auth(Admin, async (req) => {
+        post: auth(Read, async (req) => {
             const {
                 page, size
             } = await req.json()
@@ -272,7 +288,7 @@ const apis: APIRoutes = {
         })
     },
     slug: {
-        post: auth(Admin, async req => {
+        post: auth(Full, async req => {
             const s = await req.text()
             const mt = s.match(/(\d*?),(.*)/)
             if (mt) {
@@ -307,11 +323,11 @@ const apis: APIRoutes = {
             }
             return resp('post not found', 404)
         },
-        delete: auth(Admin, async (req) => {
+        delete: auth(Full, async (req) => {
             const i = new Uint8Array(await req.arrayBuffer())
             return db.delByPk(Post, [...i]).changes
         }),
-        post: auth(Admin, async (req) => {
+        post: auth(Full, async (req) => {
             const [flag, id] = curPostFlag
             const o = model(Post, await getReqJson(req)) as curPost
             if (!o.id) {
@@ -326,12 +342,12 @@ const apis: APIRoutes = {
         })
     },
     res: {
-        delete: auth(Admin, async (req) => {
+        delete: auth(Full, async (req) => {
             const r = new Uint8Array(await req.arrayBuffer())
             const {changes} = db.delByPk(Res, [...r])
             return changes
         }),
-        post: auth(Admin, async (req) => {
+        post: auth(Read, async (req) => {
             let where: [string, ...unknown[]] | undefined
             let type = req.headers.get('filetype')
             if (type) {
@@ -349,7 +365,7 @@ const apis: APIRoutes = {
         })
     },
     up: {
-        post: auth(Admin, async (req) => {
+        post: auth(Full, async (req) => {
             const d = await req.formData();
             const f = d.get('file') as Blob;
             const n = d.get('name') as string;
@@ -405,7 +421,7 @@ const apis: APIRoutes = {
                 sys.admPwd = await enc(pwd);
                 const res = resp('')
                 checkStatue()
-                setToken(req, res, genToken(Admin))
+                setToken(req, res, genToken(Full))
                 return res;
             } else {
                 return resp('username or password is empty', 500)
@@ -414,7 +430,7 @@ const apis: APIRoutes = {
     },
     setUp: {
         // todo auth need
-        post: auth(Admin, async (req) => {
+        post: auth(Full, async (req) => {
             const p = await req.text()
             if (!p) return resp('invalid directory', 500)
             const [a, b] = p.split(',')
@@ -430,7 +446,7 @@ const apis: APIRoutes = {
         })
     },
     setGeo: {
-        post: auth(Admin, async req => {
+        post: auth(Full, async req => {
             const p = await req.text()
             if (!p) {
                 sys.ipLiteToken = ''
@@ -444,13 +460,6 @@ const apis: APIRoutes = {
             return ''
 
         })
-    },
-    test: {
-        get() {
-            return {
-                test: 1
-            };
-        }
     }
 }
 

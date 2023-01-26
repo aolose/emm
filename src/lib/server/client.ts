@@ -21,7 +21,7 @@ export class Client {
         const {type, reqs} = tk
         const t = this.tokens.get(type)
         if (t) {
-            if (type === permission.Admin) {
+            if (type === permission.Full) {
                 return true
             }
             if (reqs) {
@@ -40,7 +40,7 @@ export class Client {
     addToken(tk: TokenInfo) {
         this.clear()
         const {expire, reqs, type} = tk
-        if (type === permission.Admin) {
+        if (type === permission.Full) {
             for (const cli of clientMap.values()) {
                 cli.rmPermission(type)
             }
@@ -72,8 +72,8 @@ export class Client {
         const n = Date.now()
         let keep = 0
         for (const [k, v] of this.tokens) {
-            if (k === permission.Admin) {
-                if (v > -1 && v < n) this.tokens.delete(permission.Admin)
+            if (k === permission.Full) {
+                if (v > -1 && v < n) this.tokens.delete(permission.Full)
                 else keep = 1
             } else {
                 const m = v as Map<number, number>
