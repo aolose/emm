@@ -3,11 +3,11 @@
     import LD from '$lib/components/loading.svelte'
     import {fade} from 'svelte/transition'
     import Tm from "$lib/components/typeMsg.svelte";
-    import {onDestroy} from "svelte";
+    import {onDestroy, onMount} from "svelte";
     import {req} from "$lib/req";
     import {goto} from "$app/navigation";
     import {enc, randNum} from "$lib/utils";
-    import {msg} from "$lib/store";
+    import {msg, status} from "$lib/store";
 
     let wt = 0
     let w = 0
@@ -20,21 +20,24 @@
             wt = wt - 1
         }
     }, 1e3)
+    onMount(() => status.subscribe(a => {
+        if (a) goto('/admin', {replaceState: true})
+    }))
     onDestroy(() => clearInterval(t))
 
     async function login() {
         if (!usr || !pwd) return
         w = 1
         const v = randNum()
-        const u = await enc(await enc(usr)+v)
-        const p = await enc(await enc(pwd)+v)
+        const u = await enc(await enc(usr) + v)
+        const p = await enc(await enc(pwd) + v)
         req('login', [u, p, v]).then(() => {
-            goto('/admin')
-        }).catch(({data})=> {
+            status.set(1)
+        }).catch(({data}) => {
             if (data) setMsg(`Please try again in ${data / 1e3} seconds.`)
             else setMsg('wrong user name or password')
         }).finally(() => {
-            w=0
+            w = 0
         })
     }
 
@@ -79,7 +82,8 @@
     }
 </script>
 
-<div class="bg" transition:fade>
+<div class="g" transition:fade>
+    <div class="bg"></div>
     <div class="cc">
         <div class="bx">
             <LD act={w}/>
@@ -155,7 +159,7 @@
     width: 200px;
     transform: translate3d(50px, 0, 0);
     text-align: center;
-    bottom: 328px;
+    bottom: 150%;
     position: absolute;
     font-size: 20px;
   }
@@ -185,13 +189,19 @@
     pointer-events: none;
   }
 
-  .bg {
+  .g,.bg {
     width: 100%;
     height: 100%;
-    background: var(--bg1) url("$lib/components/img/bg.jpg") bottom center;
-    background-size: cover;
+    background:  var(--bg3);
   }
-
+  .bg{
+    background: url("$lib/components/img/bg.jpg") bottom center;
+    background-size: cover;
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: .4;
+  }
   label {
     font-size: 15px;
     pointer-events: none;
@@ -215,14 +225,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     background: transparentize(#1c202a, 0.1);
   }
 
   .bx {
-    padding: 20px 0;
-    width: 300px;
-    min-height: 210px;
+    padding: 30px;
+    width: 340px;
+    height: 260px;
     background: var(--bg0);
     box-shadow: rgba(0, 0, 0, .3) 0 20px 40px -10px;
   }
@@ -265,13 +275,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 20px auto 0;
+    margin: 30px auto 0;
     cursor: pointer;
     transition: .3s ease-in-out;
     border: 1px solid currentColor;
     color: #67a2d2;
     width: 80%;
-    height: 30px;
+    height: 40px;
     border-radius: 3px;
 
     &:hover {
