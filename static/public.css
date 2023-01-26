@@ -1,5 +1,6 @@
 @import url(./font/icon.css);
 @import url(./font/fas.css);
+@import url(./font/font.css);
 @font-face {
 	font-family: 'hp';
 	font-weight: 300;
@@ -21,6 +22,7 @@ a {
 	--bg0: #0e1118;
 	--bg1: #131720;
 	--bg2: #0e121a;
+	--bg3: #0d1017;
 }
 
 * {
@@ -74,7 +76,7 @@ button{
 	cursor: pointer;
 }
 span {
-	color: rgba(134, 143, 150, 0.5);
+	color: rgba(127, 146, 161, 0.75);
 }
 
 *::-webkit-scrollbar {
@@ -87,7 +89,7 @@ span {
 }
 
 *::-webkit-scrollbar-thumb {
-	background-color: rgba(255, 255, 255, 0.1);
+	background-color: rgba(111, 156, 238, 0.1);
 	border-radius: 30px;
 }
 

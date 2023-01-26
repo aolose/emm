@@ -1,26 +1,33 @@
 <script lang="ts">
     import {act} from '$lib/use';
-    import Avatar from '$lib/components/avatar.svelte';
+    import {req} from "../../lib/req";
+    import {method} from "../../lib/enum";
+    import {status} from "../../lib/store";
+
+    function logout(){
+        req('logout',undefined,{method:method.GET}).then(()=>{
+            status.set(0)
+        })
+    }
 </script>
 
 <div class="m">
-    <div class="o">
-        <i></i>
-        <i></i>
-        <i></i>
-    </div>
+    <a class="o" href="/"></a>
     <div class="u">
         <s></s>
         <a use:act href="/admin" class="icon i-home"></a>
         <a use:act href="/admin/post" class="icon i-post"></a>
         <a use:act href="/admin/tag" class="icon i-comment"></a>
         <a use:act href="/admin/firewall" class="icon i-safe"></a>
+        <a use:act class="icon i-rq"></a>
         <a use:act class="icon i-sys"></a>
         <s></s>
         <s></s>
     </div>
     <div class="v">
-        <Avatar/>
+        <button
+                on:click={logout}
+                class="icon i-exit"></button>
     </div>
 </div>
 
@@ -28,8 +35,16 @@
   .v {
     height: 30px;
     width: 80%;
-    margin: 20px auto;
-    padding-top: 80%;
+    padding-bottom: 70px;
+    button{
+      margin:  0 auto;
+      transform: rotateY(180deg);
+      &:hover {
+        color: #fff;
+        background: var(--blue);
+        border-radius: 5px;
+      }
+    }
   }
 
   .u {
@@ -45,6 +60,7 @@
         &:hover {
           color: #fff;
           background: var(--blue);
+          border-radius: 5px;
         }
       }
     }
@@ -56,7 +72,7 @@
 
   .icon {
     margin: 20px 0;
-    color: #999;
+    color: #7c8ea2;
     font-weight: 200;
     display: block;
     text-align: center;
@@ -75,27 +91,11 @@
   }
 
   .o {
-    cursor: pointer;
-    margin: 30px auto 10px;
-    width: 60px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    &:hover {
-      i {
-        background: var(--green);
-      }
-    }
-
-    i {
-      transition: 0.2s ease-in-out;
-      margin: 2px 0;
-      width: 16px;
-      height: 1px;
-      background: #666;
-    }
+    width: 40px;
+    height: 40px;
+    background: url("$lib/components/img/fav.png") center no-repeat;
+    background-size: contain;
+    margin: 20px auto 0;
   }
 
   i {

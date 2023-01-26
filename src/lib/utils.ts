@@ -5,6 +5,7 @@ import pinyin from 'tiny-pinyin'
 import {marked} from "marked";
 import {convert} from 'html-to-text'
 import {goto} from "$app/navigation";
+import type {reqParams} from "./types";
 
 const {subtle} = crypto;
 let genKey: CryptoKeyPair;
@@ -245,20 +246,20 @@ export const fetchOpt = async (o?: object | string | number, encrypted = false, 
         if (buf) data = shareKey && (await encrypt(buf, num, shareKey));
     }
     headers.set(contentType, tp);
-
-    return {
-        body: data as BodyInit,
+    const r = {
         headers
-    };
+    } as { body?: BodyInit }
+    if (data) r.body = data as BodyInit
+    return r
 };
 
-export const body2query = (body: BodyInit) => {
-    const t = Object.prototype.toString.call([]).replace(/\[object |]/g, '')
-    if (t === 'object') {
-        return Object.entries(body).map(([a, b]) => `${a}=${encodeURI(b)}`).join('?')
+export const body2query = (params: reqParams) => {
+    const t = Object.prototype.toString.call(params).replace(/\[object |]/g, '')
+    if (t === 'Object') {
+        return Object.entries(params as object).map(([a, b]) => `${a}=${encodeURI(b)}`).join('&')
     }
-    if (typeof body === 'object') return JSON.stringify(body)
-    return body
+    if (typeof params === 'object') return JSON.stringify(params)
+    return params
 }
 
 export const ivGen = (num: number) => {
@@ -608,12 +609,12 @@ export function bubbles(btn: Btn, click?: () => void) {
     });
 }
 
-export const equalSet = (a:Set<unknown>,b:Set<unknown>)=> {
-   if(a.size===b.size){
-       for(const c of a){
-           if(!b.has(c))return false
-       }
-       return  true
-   }
-   return false
+export const equalSet = (a: Set<unknown>, b: Set<unknown>) => {
+    if (a.size === b.size) {
+        for (const c of a) {
+            if (!b.has(c)) return false
+        }
+        return true
+    }
+    return false
 }

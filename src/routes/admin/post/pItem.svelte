@@ -6,7 +6,7 @@
     export let p = {}
 
     $:isPublish = p.published
-    $:hasDraft = p.save > (p.modify || 0)
+    $:hasDraft = p.save > (p.modify || p.publish || 0)
     $:title = p.title || p.title_d
     $:title_d = title === p.title_d ? '' : p.title_d
     $:desc = (p.content_d || p.content || '').substring(0, 128)

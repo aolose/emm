@@ -52,7 +52,7 @@
   }
 
   span, p, i {
-    background: var(--bg0);
+    background: var(--bg1);
     color: var(--darkgrey);
     transition: .3s ease-in-out;
   }
@@ -64,10 +64,12 @@
     font-size: 30px;
     align-items: center;
     justify-content: center;
+    font-family: 'Architects Daughter', -apple-system;
   }
 
   p {
     font-size: 18px;
+    font-family: 'Architects Daughter', -apple-system;
     top: 55%;
     transform: translateY(-50%);
     position: absolute;

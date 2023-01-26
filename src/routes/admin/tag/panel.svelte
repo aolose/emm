@@ -150,6 +150,8 @@
     justify-content: space-between;
     height: 75px;
     padding: 0 20px;
+    background: var(--bg0);
+    border-bottom: 1px solid var(--bg1);
     .i-close {
       color: #485c6c;
       font-size: 20px;
