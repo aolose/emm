@@ -120,19 +120,21 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
         if (u) uu = u;
     }
     const enc = browser && cfg?.encrypt;
+
+    if (cfg?.method === method.GET && params) {
+        uu += `?${body2query(params)}`
+        params = undefined
+    }
     if (enc) await syncShareKey();
     const opt = {
         method: reqMethod[cfg?.method || 0],
         ...(await fetchOpt(params, enc, cfg))
     };
+
     isLoadFn = !!cfg?.fetch;
     const ft = cfg?.fetch || fetch;
-    let fullUrl = `/api/${uu}`;
-    if (cfg?.method === method.GET && opt.body) {
-        fullUrl += `?${body2query(opt.body)}`
-        delete (opt as { body?: BodyInit }).body
-    }
-    return ft(fullUrl, opt).then(async (r) => {
+
+    return ft(`/api/${uu}`, opt).then(async (r) => {
         let fal = false
         if (r.status >= 400) {
             fal = true
