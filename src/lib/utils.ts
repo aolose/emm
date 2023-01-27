@@ -618,3 +618,18 @@ export const equalSet = (a: Set<unknown>, b: Set<unknown>) => {
     }
     return false
 }
+
+export const sort = <T extends object>(target: T[], key?: (keyof T)[] | keyof T , desc = 0) => {
+    target.sort((a, b) => {
+        let s = 0
+        if (!key) s = a > b ? 1 : a === b ? 0 : -1
+        else for (const k of ([] as (keyof T)[]).concat(key)) {
+            const v0 = a[k]
+            const v1 = b[k]
+            if (v0 === v1) continue
+            s = v0 > v1 ? 1 : -1
+        }
+        return desc ? 1 - s : s
+    })
+    return target
+}

@@ -1,4 +1,4 @@
-import type {APIRoutes, curPost, Obj} from '../types';
+import type {APIRoutes, curPost, Obj, TokenInfo} from '../types';
 import {db, server, sys} from './index';
 import {genPubKey} from './crypto';
 import {
@@ -24,20 +24,21 @@ import type {RespHandle} from '$lib/types';
 import sharp from 'sharp';
 import {Buffer} from "buffer";
 import {FwLog, FWRule, Post, Require, Res, Tag} from "$lib/server/model";
-import {diffObj, enc, filter} from "$lib/utils";
+import {diffObj, enc, filter, sort} from "$lib/utils";
 import {NULL, permission} from "$lib/server/enum";
 import path from "path";
 import fs from "fs";
 import {genToken} from "$lib/server/token";
 import {addRule, blockIp, delRule, filterLog, fw2log, logCache} from "$lib/server/firewall";
 import {loadGeoDb} from "$lib/server/ipLite";
-import {publishedPost, tagPatcher, tags} from "$lib/server/store";
+import {codePatcher, publishedPost, tagPatcher, tags} from "$lib/server/store";
 import {get} from "svelte/store";
 import {codeTokens} from "$lib/server/cache";
+import {versionStrPatch} from "$lib/setStrPatchFn";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
     if (!sysStatue) return resp('system uninitialized', 403)
-    if(!skipLogin){
+    if (!skipLogin) {
         const requires = new Set(([] as permission[]).concat(ps))
         const client = getClient(req)
         if (requires.size) {
@@ -80,6 +81,22 @@ const apis: APIRoutes = {
         }
     },
     code: {
+        delete: auth(Full, async req => {
+            const code = await req.text()
+            if (code) return +codeTokens.delete(code)
+        }),
+        get: auth(Full, (req) => {
+            const ver = +(req.url.replace(/.?\?/, '') || 0)
+            const r = codePatcher(ver)
+            const re = {version:r[0]} as {data?:TokenInfo[],patch?:string}
+            const d = r[1]
+            const e = r[2]
+            if(d&&d.size){
+                re.data = [...d].map(a=>codeTokens.get(a) as TokenInfo)
+            }
+            if(r.length===3)re.patch = e?.size?[...e].join():''
+            return re
+        }),
         post: async (req) => {
             const code = await req.text()
             const tk = codeTokens.get(code)
@@ -109,6 +126,27 @@ const apis: APIRoutes = {
             db.save(token)
             return token.id
         }),
+        get: auth(Read, async (req) => {
+            const params = new URL(req.url).searchParams
+            const page = +(params.get('page') || 1)
+            const name = params.get('name')
+            const type = params.get('type')
+            const where: string[] = []
+            const pm: unknown[] = []
+            if (name) {
+                where.push('name like ?')
+                pm.push(`%${name}%`)
+            }
+            if (type !== null) {
+                where.push('type = ?')
+                pm.push(+type)
+            }
+            const wh = where.length ?
+                [where.join(' and '), ...pm] as [string, ...unknown[]] : undefined
+            return pageBuilder(page, 10, Require,
+                ['createAt desc'], [], wh
+            )
+        })
     },
     log: {
         post: auth(Read, async (req) => {
@@ -247,11 +285,7 @@ const apis: APIRoutes = {
         post: auth(Read, async req => {
             const ver = +(await req.text())
             const r = tagPatcher(ver)
-            let d = r[0] + ''
-            if (r.length === 2) {
-                d = [d, [...r[1]].join()].join(' ')
-            } else d = [d, r[1] ? [...r[1]].join() : '', r[2] ? [...r[2]].join() : ''].join(' ')
-            return d
+            return versionStrPatch(r)
         })
     },
     posts: {

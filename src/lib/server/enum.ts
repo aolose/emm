@@ -9,3 +9,8 @@ export enum permission {
 	Post, // for pwd article
 	Read, // for try
 }
+
+export enum requireType {
+	Post,
+	Comment
+}

@@ -1,8 +1,8 @@
 import {NULL, permission} from './enum';
-import {contentType, dataType, encryptIv, encTypeIndex, geTypeIndex} from '../enum';
+import {contentType, dataType, encryptIv, encTypeIndex, geTypeIndex, method} from '../enum';
 import cookie from 'cookie'
 import type {CookieSerializeOptions} from 'cookie'
-import type {Api, ApiData, ApiName, Class, Model, Obj, TokenInfo} from '../types';
+import type {Api, ApiData, ApiName, ArgumentTypes, Class, func, Model, Obj, TokenInfo} from '../types';
 import apis from './api';
 import {
     arrFilter,
@@ -311,7 +311,7 @@ export const pageBuilder = async <T extends Model>(
     page: number,
     size: number,
     model: Class<T>,
-    orders: string[],
+    orders: string[] = [],
     keys: (keyof T)[] = [],
     where?: [string, ...unknown[]]
 ) => {
@@ -438,3 +438,17 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 
 
 export const skipLogin = true
+export const addHook = <T extends object>(o: T, method: keyof T | (keyof T)[], fn: func) => {
+    ([] as (keyof T)[]).concat(method).forEach(name => {
+        const ori = o[name] as (...params: unknown[]) => unknown
+        if (typeof ori === 'function') {
+            type args = ArgumentTypes<typeof ori>
+            (o[name] as func) = function (...params: args) {
+                const r = ori.call(o, ...params)
+                fn(...params)
+                return r
+            }
+        }
+    })
+    return o
+}

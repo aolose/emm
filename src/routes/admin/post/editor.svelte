@@ -8,7 +8,8 @@
     import {browser} from "$app/environment";
     import {fade} from "svelte/transition";
     import {method} from "$lib/enum";
-    import {patchTags} from "$lib/tagPatchFn";
+    import {applyStrPatch, patchStrSet} from "$lib/setStrPatchFn.js";
+
     export let close
     let title = ''
     let draft = ''
@@ -56,7 +57,7 @@
         name: "delete",
         action: () => {
             confirm('sure to delete?').then((ok) => {
-                if(!ok)return;
+                if (!ok) return;
                 req('post', new Uint8Array([cid]), {method: method.DELETE}).then(a => {
                     if (a) {
                         posts.update(u => {
@@ -85,19 +86,10 @@
     const loadTag = () => {
         const {ver, tags} = get(patchedTag)
         req('tags', +ver).then(d => {
-            const ds = d.split(' ')
-            const [a, b, c] = ds
-            const da = b ? b.split(',') : []
-            const dl = c ? c.split(',') : []
-            let data
-            if (ds.length === 2) {
-                data = da
-            } else {
-                data = [...patchTags(new Set(tags), new Set(da), new Set(dl))]
-            }
+            const [v, da] = applyStrPatch(new Set(tags), `${d}`)
             patchedTag.set({
-                ver: +a,
-                tags: data
+                ver: v,
+                tags: da
             })
         })
     }
@@ -167,7 +159,7 @@
             <button class="icon i-close" on:click={close}></button>
         </div>
         <div class="e">
-            {#key  $editPost._ || $editPost.id}
+            {#key $editPost._ || $editPost.id}
                 <Editor bind:value={draft} toolbar={tools}/>
             {/key}
         </div>
@@ -191,10 +183,12 @@
     align-items: center;
     align-content: normal;
     padding: 10px 8%;
-    input{
+
+    input {
       padding-right: 30px;
       margin: 0;
     }
+
     button {
       font-size: 30px;
       position: absolute;

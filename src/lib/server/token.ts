@@ -10,13 +10,21 @@ const expires = [
     h * 24 * 30, // post
 ]
 
-export const genToken = (type: permission, times?: number) => {
+export const genToken = (type: permission, cfg: {
+    code?: boolean,
+    times?: number,
+    expires?: number,
+    reqs?: Set<number>
+} = {}) => {
     const now = Date.now()
-    const token: TokenInfo = {expire: now + expires[type], type}
-    if (times) {
-        token.times = times
-        const code = randStr(randNum(1e4).toString(32))
-        codeTokens.set(code, token)
+    const token: TokenInfo = {
+        createAt: now,
+        expire: cfg.expires || now + expires[type],
+        type
+    }
+    if (cfg.code) {
+        const cd = randStr(randNum(1e4).toString(32))
+        codeTokens.set(cd, token)
     }
     return token
 }

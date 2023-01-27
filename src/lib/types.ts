@@ -19,7 +19,7 @@ export type Model = (
     models.Comment | models.ShortPost |
     models.User | models.Post |
     models.Res | models.FWRule |
-    models.FwLog | models.Require
+    models.FwLog | models.Require|models.RequireMap
     )
 
 export type Obj<T extends Model> = {
@@ -112,5 +112,8 @@ export type TokenInfo = {
     code?:string
     times?:number
     type:permission,
-    reqs?:Set<number>
+    reqs?:Set<number>,
+    createAt:number
 }
+export type func = (...params:unknown[])=>void
+export  type ArgumentTypes<F extends func> = F extends (...args: infer A) => any ? A : never;

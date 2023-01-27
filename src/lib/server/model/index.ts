@@ -5,7 +5,7 @@ import {diffObj, filter, slugGen} from "$lib/utils";
 import type {DB} from "$lib/server/db/sqlite3";
 import {publishedPost, tags} from "$lib/server/store";
 import {get} from "svelte/store";
-import {diffTags} from "$lib/tagPatchFn";
+import {diffStrSet} from "$lib/setStrPatchFn";
 
 const {INT, TEXT} = NULL
 
@@ -57,14 +57,14 @@ export class Post {
     content = TEXT
     title_d = TEXT
     content_d = TEXT
-    token = TEXT
     createAt = INT
     publish = INT
     modify = INT
     save = INT
     userId = INT
     _p = 0
-
+    // reqId
+    _r:number[]|undefined
     onSave(db: DB, now: number) {
         const {id, title_d, title, content_d, content} = this
         const oo = id ? db.get(model(this.constructor as FunctionConstructor, {id})) : {}
@@ -108,7 +108,7 @@ export class Post {
             let ds = new Set<string>()
             if (ori.tag) {
                 const old = ori.tag.split(',')
-                const {add, del} = diffTags(new Set(old), new Set(cur))
+                const {add, del} = diffStrSet(new Set(old), new Set(cur))
                 as = new Set([...as, ...add as Set<string>])
                 ds = new Set([...del as Set<string>])
             }
@@ -150,10 +150,18 @@ export class Require {
     name = TEXT
     @noNull
     type = INT // enum.type
-    value = TEXT
     remark = TEXT
     createAt = INT
 }
+
+export class RequireMap {
+    @primary
+    id = INT
+    reqId = INT
+    targetId = INT
+    type = INT
+}
+
 
 export class Comment {
     @primary
