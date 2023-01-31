@@ -4,11 +4,6 @@ export const NULL = {
 	DATE: new Date(0)
 };
 
-export enum permission {
-	Full,
-	Post, // for pwd article
-	Read, // for try
-}
 
 export enum requireType {
 	Post,

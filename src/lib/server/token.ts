@@ -1,7 +1,7 @@
 import type {TokenInfo} from "$lib/types";
 import {randNum, randStr} from "$lib/utils";
 import {codeTokens} from "$lib/server/cache";
-import type {permission} from "$lib/server/enum";
+import type {permission} from "$lib/enum";
 
 
 const h = 1e3 * 60

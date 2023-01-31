@@ -1,7 +1,7 @@
 import {randomUUID} from "crypto";
 import type {TokenInfo} from "$lib/types";
 import {clientMap} from "$lib/server/cache";
-import {permission} from "$lib/server/enum";
+import {permission} from "$lib/enum";
 
 export class Client {
     constructor() {
@@ -21,7 +21,7 @@ export class Client {
         const {type, reqs} = tk
         const t = this.tokens.get(type)
         if (t) {
-            if (type === permission.Full) {
+            if (type === permission.Admin) {
                 return true
             }
             if (reqs) {
@@ -40,7 +40,7 @@ export class Client {
     addToken(tk: TokenInfo) {
         this.clear()
         const {expire, reqs, type} = tk
-        if (type === permission.Full) {
+        if (type === permission.Admin) {
             for (const cli of clientMap.values()) {
                 cli.rmPermission(type)
             }
@@ -72,8 +72,8 @@ export class Client {
         const n = Date.now()
         let keep = 0
         for (const [k, v] of this.tokens) {
-            if (k === permission.Full) {
-                if (v > -1 && v < n) this.tokens.delete(permission.Full)
+            if (k === permission.Admin) {
+                if (v > -1 && v < n) this.tokens.delete(permission.Admin)
                 else keep = 1
             } else {
                 const m = v as Map<number, number>

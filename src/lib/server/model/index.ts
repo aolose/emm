@@ -6,6 +6,7 @@ import type {DB} from "$lib/server/db/sqlite3";
 import {publishedPost, tags} from "$lib/server/store";
 import {get} from "svelte/store";
 import {diffStrSet} from "$lib/setStrPatchFn";
+import type { Obj } from "$lib/types";
 
 const {INT, TEXT} = NULL
 
@@ -152,6 +153,7 @@ export class Require {
     type = INT // enum.type
     remark = TEXT
     createAt = INT
+    _posts?:Obj<Post>[]
 }
 
 export class RequireMap {

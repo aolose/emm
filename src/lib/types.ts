@@ -3,7 +3,7 @@ import type {apiPath} from './server/api'
 import type {Post} from "./server/model";
 import type {method} from "$lib/enum";
 import type {DB} from "$lib/server/db/sqlite3";
-import type {permission} from "$lib/server/enum";
+import type {permission} from "$lib/enum";
 
 export type MethodNumber = 0 | 1 | 2 | 3
 export type Class<T> = new (...args: unknown[]) => T;

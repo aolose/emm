@@ -8,7 +8,7 @@
     import {browser} from "$app/environment";
     import {fade} from "svelte/transition";
     import {method} from "$lib/enum";
-    import {applyStrPatch, patchStrSet} from "$lib/setStrPatchFn.js";
+    import {applyStrPatch} from "$lib/setStrPatchFn";
 
     export let close
     let title = ''
