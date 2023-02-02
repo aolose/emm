@@ -3,7 +3,7 @@ import type {apiPath} from './server/api'
 import type {Post} from "./server/model";
 import type {method} from "$lib/enum";
 import type {DB} from "$lib/server/db/sqlite3";
-import type {permission} from "$lib/enum";
+import type { TokenInfo } from "./server/model";
 
 export type MethodNumber = 0 | 1 | 2 | 3
 export type Class<T> = new (...args: unknown[]) => T;
@@ -18,7 +18,7 @@ export type Model = (
     models.System | models.Tag |
     models.Comment | models.ShortPost |
     models.User | models.Post |
-    models.Res | models.FWRule |
+    models.Res | models.FWRule |TokenInfo|
     models.FwLog | models.Require|models.RequireMap
     )
 
@@ -107,13 +107,5 @@ export type version = number
 export type PatchPool<T> = Map<version, DatePatch<T>>
 export type PatchFn<T> = (data: T, add?: T, del?: T) => T
 export type DiffFn<T> = (old: T, cur: T) => ({ add: T, del: T })
-export type TokenInfo = {
-    expire:number
-    code?:string
-    times?:number
-    type:permission,
-    reqs?:Set<number>,
-    createAt:number
-}
 export type func = (...params:unknown[])=>void
 export  type ArgumentTypes<F extends func> = F extends (...args: infer A) => any ? A : never;

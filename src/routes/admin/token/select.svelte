@@ -54,7 +54,7 @@
     border: 1px solid rgba(140, 181, 236, 0.1);
     align-items: center;
     background: var(--bg3);
-    height: 34px;
+    height: 40px;
     padding: 0 10px;
     i{
       border: 5px transparent solid;
@@ -66,6 +66,7 @@
   }
 
   .b {
+    z-index: 100;
     position: absolute;
     top: 100%;
     left: 0;

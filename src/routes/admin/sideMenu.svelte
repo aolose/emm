@@ -17,7 +17,7 @@
         <s></s>
         <a use:act href="/admin" class="icon i-home"></a>
         <a use:act href="/admin/post" class="icon i-post"></a>
-        <a use:act href="/admin/tag" class="icon i-comment"></a>
+        <a use:act href="/admin/tag" class="icon i-tag"></a>
         <a use:act href="/admin/firewall" class="icon i-safe"></a>
         <a use:act href="/admin/token" class="icon i-rq"></a>
         <a use:act class="icon i-sys"></a>

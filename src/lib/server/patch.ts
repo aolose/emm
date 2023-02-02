@@ -1,6 +1,5 @@
 import type {Readable} from "svelte/store";
 import type {DiffFn, PatchFn, PatchPool, version} from "$lib/types";
-import {patchStrSet} from "$lib/setStrPatchFn";
 
 export function Patcher<T extends object>(
     patch: PatchFn<T>,

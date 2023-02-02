@@ -3,16 +3,42 @@
   import { permission, pmsName } from "$lib/enum";
   import { slide } from "svelte/transition";
   import Ld from "$lib/components/loading.svelte";
+  import { slidLeft } from "$lib/transition";
+  import List from "./list.svelte";
+  import Se from "./selected.svelte";
+  import { req } from "$lib/req";
+  import { confirm } from "$lib/store";
+  import { fade } from "svelte/transition";
+  import Date from "$lib/components/date.svelte";
+  import Ck from "$lib/components/check.svelte";
 
   let show = 0;
   let ok;
   let cancel;
   let t = 0;
-  let d = {};
+  let d = { _posts: [] };
   let l = 0;
+  let sec;
+  let fine = 0;
+  $:{
+    if (t) {
+      // todo
+    } else {
+      d.name = (d.name || "").replace(/^\s+|\s+$/g, "");
+      fine = d.name && /\d+/g.test(d.type);
+    }
+    if(d&&d.times)d.times=Math.min(Math.max(-1,Math.floor(d.times)),999)
+  }
 
   function save(d) {
+    l = 1;
+    return req("require", d).finally(() => l = 0);
+  }
 
+  function ed() {
+    sec(d._posts).then(a => {
+      if (a) d._posts = a;
+    });
   }
 
   const pms = [
@@ -20,16 +46,27 @@
     [permission.Read, pmsName.Read],
     [permission.Admin, pmsName.Admin]
   ];
-  export const add = (type, data = {}) => {
+  export const edit = (type, data = {}) => {
     t = type;
     show = 1;
-    d = { ...data };
+    d = { ...data, expire: 1700798400000 };
     return new Promise((rs) => {
       ok = () => {
-        save(d).then((id) => {
+        const o = { ...d };
+        if (!type) {
+          if (o.type === permission.Post) o._postIds = (d._posts || []).map(a => a.id).join();
+          delete o._posts;
+        }
+        save(o).then(o => {
+          if (o) {
+            const [id, ca] = o.split(" ");
+            d.id = id;
+            d.createAt = +ca;
+          }
           show = 0;
-          d.id = id;
           rs(d);
+        }).catch(a => {
+          confirm(a.data, "", "ok");
         });
       };
       cancel = () => {
@@ -38,39 +75,85 @@
       };
     });
   };
+  let hasExp = 0;
 </script>
-
-<div class="m">
-  <div class="a">
-    <div class="t">
-      <span>{['token data',
-        'ticket'][t]}</span>
-      <button class="icon i-close"></button>
-    </div>
-    <div class="b">
-      {#if !t}
-        <div class="r"><span>name</span><input bind:value={d.name} /></div>
+{#if show}
+  <div class="m" transition:fade>
+    <div class="a">
+      <div class="t">
+      <span>{['permission',
+        'create ticket'][t]}</span>
+        <button class="icon i-close" on:click={cancel}></button>
+      </div>
+      <div class="b">
+        {#if !t}
+          <div class="r"><span>name</span><input bind:value={d.name} /></div>
+        {/if}
         <div class="r">
-          <span>permission</span>
-          <Select bind:value={d.permission} items={pms} />
+          <span>type</span>
+          <Select bind:value={d.type} items={pms} />
         </div>
-        {#if d.permission === permission.Post}
+        {#if (t&&/\d/.test(d.type)) || d.type === permission.Post}
           <div class="r" transition:slide>
-            <span>posts</span>
+            <span>{t ? 'permission' : 'posts'}</span>
+            <Se type={t} bind:items={d._posts} inline />
+            <button class="icon i-ed" on:click={ed}></button>
           </div>
         {/if}
-      {:else }
-
-      {/if}
+        {#if t}
+          <div class="r">
+            <span><Ck name="expire" bind:value={hasExp} /></span>
+            {#if hasExp}
+              <Date bind:value={d.expire} />
+              {:else }
+              <input value={-1} readonly/>
+            {/if}
+          </div>
+          <div class="r">
+            <span>times</span>
+            <input bind:value={d.times} type="number" step="1" min="-1" max="999">
+          </div>
+        {/if}
+      </div>
+      <div class="n">
+        {#if fine}
+          <button transition:slidLeft on:click={ok}>submit</button>
+        {/if}
+        <button on:click={cancel}>cancel</button>
+      </div>
+      <Ld act={l} />
+      <List permission={d.type} type={t} bind:select={sec} />
     </div>
-    <div class="n">
-      <button>create</button>
-      <button>cancel</button>
-    </div>
-    <Ld act={l} />
   </div>
-</div>
+{/if}
 <style lang="scss">
+  [type="number"] {
+    height: 40px;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+
+  .i-ed {
+    position: absolute;
+    left: 100%;
+    top: 7px;
+    margin-left: 5px;
+    padding: 5px;
+    border: 1px solid #1c340a;
+    border-radius: 4px;
+    color: #52718f;
+    background: var(--bg1);
+    transition: .2s;
+
+    &:hover {
+      color: #869bb4;
+    }
+  }
+
   .m {
     display: flex;
     align-items: center;
@@ -84,7 +167,7 @@
   }
 
   .a {
-    border: 1px solid rgba(34, 156, 249,.03);
+    border: 1px solid rgba(40, 156, 249, .03);
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -151,13 +234,24 @@
 
   .r {
     display: flex;
-    align-items: center;
     margin: 20px auto;
     width: 70%;
 
-    span {
+    &:global {
+      .a{
+        margin: 0;
+      }
+      i {
+        top: 2px;
+        background: var(--bg3);
+        border: 1px solid rgba(140, 181, 236, 0.1);
+      }
+    }
+
+    &>span {
       color: #455564;
-      width: 100px;
+      line-height: 40px;
+      width: 90px;
       text-align: right;
       padding-right: 20px;
     }

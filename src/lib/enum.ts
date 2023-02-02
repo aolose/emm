@@ -30,5 +30,5 @@ export enum permission {
 export enum pmsName {
   Admin = "fully control",
   Read = "read data",
-  Post = "specified posts"
+  Post = "read posts",
 }

@@ -4,21 +4,21 @@ import type {Patcher} from "$lib/server/patch";
 type patchFn<T extends object> = ReturnType<typeof Patcher<T>>
 type patch<T extends object> = ReturnType<patchFn<T>>
 
-export const diffStrSet: DiffFn<Set<string>> = (old, cur) => {
-    const add = new Set<string>()
-    const del = new Set<string>()
+export const diffStrSet: DiffFn<Set<string|number>> = (old, cur) => {
+    const add:typeof old = new Set()
+    const del:typeof old = new Set()
     for (const o of cur) if (!old.has(o)) add.add(o)
     for (const o of old) if (!cur.has(o)) del.add(o)
     return {add, del}
 }
 
-export const patchStrSet: PatchFn<Set<string>> = (data, add, del) => {
+export const patchStrSet: PatchFn<Set<string|number>> = (data, add, del) => {
     const d = new Set(data)
     if (del) for (const s of del) d.delete(s)
     if (add) for (const s of add) d.add(s)
     return d
 }
-export const versionStrPatch = (patch: patch<Set<string>>) => {
+export const versionStrPatch = (patch: patch<Set<string|number>>) => {
     let d = patch[0] + ''
     if (patch.length === 2) {
         d = [d, [...patch[1]].join()].join(' ')
@@ -26,7 +26,7 @@ export const versionStrPatch = (patch: patch<Set<string>>) => {
     return d
 }
 
-export const applyStrPatch = <T extends object>(current: Set<string>, patch: string,) => {
+export const applyStrPatch = (current: Set<string>, patch: string,) => {
     const ds = patch.split(' ')
     const [a, b, c] = ds
     const da = b ? b.split(',') : []
