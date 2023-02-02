@@ -1,4 +1,4 @@
-import type { APIRoutes, curPost, Obj, TokenInfo } from "../types";
+import type { APIRoutes, curPost, Obj } from "../types";
 import { db, server, sys } from "./index";
 import { genPubKey } from "./crypto";
 import {
@@ -23,7 +23,7 @@ import {
 import type { RespHandle } from "$lib/types";
 import sharp from "sharp";
 import { Buffer } from "buffer";
-import { FwLog, FWRule, Post, Require, Res, Tag } from "$lib/server/model";
+import { FwLog, FWRule, Post, Require, Res, Tag, TokenInfo } from "$lib/server/model";
 import { diffObj, enc, filter, sort } from "$lib/utils";
 import { permission } from "$lib/enum";
 import path from "path";
@@ -31,7 +31,7 @@ import fs from "fs";
 import { genToken } from "$lib/server/token";
 import { addRule, blockIp, delRule, filterLog, fw2log, logCache } from "$lib/server/firewall";
 import { loadGeoDb } from "$lib/server/ipLite";
-import { codePatcher, publishedPost, tagPatcher, tags } from "$lib/server/store";
+import { publishedPost, tagPatcher, tags } from "$lib/server/store";
 import { get } from "svelte/store";
 import { codeTokens, reqPostCache } from "$lib/server/cache";
 import { versionStrPatch } from "$lib/setStrPatchFn";
@@ -87,16 +87,10 @@ const apis: APIRoutes = {
       if (code) return +codeTokens.delete(code);
     }),
     get: auth(Admin, (req) => {
-      const ver = +(req.url.replace(/.?\?/, "") || 0);
-      const r = codePatcher(ver);
-      const re = { version: r[0] } as { data?: TokenInfo[], patch?: string };
-      const d = r[1];
-      const e = r[2];
-      if (d && d.size) {
-        re.data = [...d].map(a => codeTokens.get(a) as TokenInfo);
-      }
-      if (r.length === 3) re.patch = e?.size ? [...e].join() : "";
-      return re;
+      const page = +(new URL(req.url).searchParams.get("page") || 1);
+      return pageBuilder(page,
+        10, TokenInfo,
+        ["createAt desc"]);
     }),
     post: async (req) => {
       const code = await req.text();
@@ -104,7 +98,6 @@ const apis: APIRoutes = {
       if (tk) {
         const client = getClient(req);
         if (client?.has(tk)) return "";
-
         const n = Date.now();
         const { expire = 0, times = 0 } = tk;
         if (expire < 0 || expire > n) {
@@ -112,7 +105,7 @@ const apis: APIRoutes = {
           if (times === 1) codeTokens.delete(code);
           if (times) {
             const re = resp(tk.type);
-            setToken(req, re, tk);
+            setToken(req, re, tk as TokenInfo);
             return re;
           }
         }
@@ -123,9 +116,21 @@ const apis: APIRoutes = {
   },
   require: {
     post: auth(Admin, async (req) => {
-      const token = model(Require, await req.json());
-      db.save(token);
-      return token.id;
+      const token = model(Require, await req.json()) as Require;
+      const { _postIds = "" } = token;
+      const ids = _postIds.split(",").map(a => +a);
+      const id = token.id;
+      try {
+        db.save(token);
+        reqPostCache.setPosts(token.id, ids);
+      } catch (e) {
+        if (e instanceof Error) {
+          if (e.message.startsWith("UNIQUE constraint")) {
+            return resp("name already exist", 500);
+          }
+        }
+      }
+      return id ? "" : `${token.id} ${token.createAt}`;
     }),
     get: auth(Read, async (req) => {
       const params = new URL(req.url).searchParams;
@@ -142,34 +147,35 @@ const apis: APIRoutes = {
         where.push("type = ?");
         pm.push(+type);
       }
-      const after = (ls: Require[]) => {
-          let ids: Set<number>=new Set()
-          const mr = new Map<number,Require>()
-          for(const r of ls){
-            const ds = reqPostCache.get({reqId:r.id}).map(a=>a.targetId)
-            if(ds.length){
-              ids=new Set([...ids,...ds])
-
-              mr.set(r.id,r)
-              r._posts=[]
-            }
-
+      const after = type === null ? (ls: Require[]) => {
+        let ids: Set<number> = new Set();
+        const mr = new Map<number, Require>();
+        for (const r of ls) {
+          const ds = reqPostCache.get({ reqId: r.id }).map(a => a.targetId);
+          if (ds.length) {
+            ids = new Set([...ids, ...ds]);
+            mr.set(r.id, r);
+            r._posts = [];
           }
-          if(ids.size){
-              const vs = [...ids]
-              const where =`id in (${vs.map(()=>'?').join()})`
-              db.all(model(Post),where,...vs).forEach(a=>{
-                reqPostCache.get({postId:a.id}).forEach(n=>{
-                  mr.get(n.reqId)?._posts?.push({id:a.id,title:a.title||a.title_d,slug:a.slug})
-                })
-              })
-          }
-          return ls
-      };
+
+        }
+        if (ids.size) {
+          const vs = [...ids];
+          const where = `id in (${vs.map(() => "?").join()})`;
+          db.all(model(Post), where, ...vs).forEach(a => {
+            reqPostCache.get({ postId: a.id }).forEach(n => {
+              mr.get(n.reqId)?._posts?.push({ id: a.id, title: a.title || a.title_d, slug: a.slug });
+            });
+          });
+        }
+        return ls;
+      } : undefined;
       const wh = where.length ?
         [where.join(" and "), ...pm] as [string, ...unknown[]] : undefined;
       return pageBuilder(page, 10, Require,
-        ["createAt desc"], [], wh, after);
+        ["createAt desc"],
+        type === null ? [] : ["id", "name"]
+        , wh, after);
     })
   },
   log: {
@@ -213,7 +219,6 @@ const apis: APIRoutes = {
       const tryTimes = 3;
       const base = 1e4;
       const ip = req.headers.get("x-forwarded-for") || "";
-      console.log(ip);
       const [q, sv] = blockIp("lg", ip);
       if (q[1]) {
         sv();
@@ -297,7 +302,6 @@ const apis: APIRoutes = {
   tags: {
     get: async () => {
       const ps = get(publishedPost);
-      console.log("ps", ps);
       const ts = get(tags).filter(a => {
         const p = (a.post || "").split(",").filter(a => ps.has(+a));
         if (p.length) {
@@ -340,8 +344,13 @@ const apis: APIRoutes = {
       const {
         page, size
       } = await req.json();
+      let where: [string, ...unknown[]] | undefined;
+      if (!getClient(req)?.ok(Admin)) {
+        where = ["published=? ", 1];
+      }
+
       return pageBuilder(page, size, Post,
-        ["createAt desc"], undefined
+        ["createAt desc"], undefined, where
       );
     })
   },
