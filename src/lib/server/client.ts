@@ -1,7 +1,8 @@
 import {randomUUID} from "crypto";
-import type {TokenInfo} from "$lib/types";
 import {clientMap} from "$lib/server/cache";
 import {permission} from "$lib/enum";
+import type { TokenInfo } from "$lib/server/model";
+import type { Obj } from "$lib/types";
 
 export class Client {
     constructor() {
@@ -16,16 +17,17 @@ export class Client {
     uuid = ''
     tokens: Map<permission, Map<number, number> | number>
 
-    has(tk: TokenInfo) {
+    has(tk: Obj<TokenInfo>) {
         this.clear()
-        const {type, reqs} = tk
+        const {type, _reqs} = tk
+        if(type===undefined)return false
         const t = this.tokens.get(type)
         if (t) {
             if (type === permission.Admin) {
                 return true
             }
-            if (reqs) {
-                for (const r of reqs) {
+            if (_reqs) {
+                for (const r of _reqs) {
                     const v = (t as Map<number, number>).get(r)
                     if (v !== r) {
                         if (r === -1 || !v || v < r) return false
@@ -39,7 +41,7 @@ export class Client {
 
     addToken(tk: TokenInfo) {
         this.clear()
-        const {expire, reqs, type} = tk
+        const {expire, _reqs, type} = tk
         if (type === permission.Admin) {
             for (const cli of clientMap.values()) {
                 cli.rmPermission(type)
@@ -47,9 +49,9 @@ export class Client {
             this.tokens.set(type, expire)
         } else {
             let ct = this.tokens.get(tk.type)
-            if (!ct && reqs?.size) {
+            if (!ct && _reqs?.size) {
                 this.tokens.set(type, ct = new Map())
-                for (const c of reqs) {
+                for (const c of _reqs) {
                     const e = ct.get(c) || 0
                     if (e !== -1) ct.set(c, Math.max(expire, e))
                 }

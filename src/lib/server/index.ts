@@ -1,10 +1,10 @@
 import {DB} from './db/sqlite3';
 import {runJobs} from './db/jobs';
 import {DBProxy, model} from './utils';
-import {Require, System, Tag} from './model';
+import { Require, System, Tag } from "./model";
 import {publishedPost, tags} from "$lib/server/store";
 import {loadGeoDb} from "$lib/server/ipLite";
-import {reqPostCache, requireMap} from "$lib/server/cache";
+import { loadCodeTokens, reqPostCache, requireMap } from "$lib/server/cache";
 
 export let sys: System;
 runJobs();
@@ -37,6 +37,7 @@ export const server = {
         db.all(model(Require)).forEach(r=>{
             requireMap.set(r.id,DBProxy(Require,r,false))
         })
+        loadCodeTokens()
         reqPostCache.load()
     }
 };
