@@ -2,7 +2,7 @@ import { NULL } from "./enum";
 import { contentType, dataType, encryptIv, encTypeIndex, geTypeIndex, permission } from "../enum";
 import cookie from "cookie";
 import type { CookieSerializeOptions } from "cookie";
-import type { Api, ApiData, ApiName, ArgumentTypes, Class, func, Model, Obj, TokenInfo } from "../types";
+import type { Api, ApiData, ApiName, Class, Model, Obj } from "../types";
 import apis from "./api";
 import {
   arrFilter,
@@ -27,6 +27,7 @@ import path from "path";
 import type { RequestEvent } from "@sveltejs/kit";
 import { clientMap } from "$lib/server/cache";
 import { Client } from "$lib/server/client";
+import type { TokenInfo } from "$lib/server/model";
 
 export const is_dev = process.env.NODE_ENV !== "production";
 
@@ -214,7 +215,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
     if (!p) return;
     if (pk) p[pk] = o[pk];
     const ch = model(C, p);
-    db.save(ch, create);
+    db.save(ch, {create});
     create = false;
     ori = { ...Object.assign(o, ch) };
   }, 100);
@@ -298,7 +299,7 @@ export const saveFile = (name: string | number, dir: string, buf: Buffer) => {
 const cacheCount = (model: Class<Model>, where?: [string, ...unknown[]]) => {
   const k = `${model.name}-${(where?.join() || "")}`;
   const c = countMap.get(k);
-  if (c !== null) return c;
+  if (c !== null&&c!==undefined) return c;
   else {
     const c = db.count(model, where);
     countMap.set(k, c);
@@ -366,7 +367,6 @@ const chk = () => {
 };
 export const checkStatue = () => {
   sysStatue = chk();
-  console.log(sysStatue);
   return sysStatue;
 };
 
