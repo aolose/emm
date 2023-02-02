@@ -1,8 +1,9 @@
 import better from "better-sqlite3";
 import { Log, noNullKeyValues, setKey, sqlVal, val } from "../utils";
 import * as models from "../model";
-import { getConstraint, getPrimaryKey, pkMap, primaryKey } from "../model/decorations";
+import { getConstraint, getPrimaryKey, pkMap, primaryKey, unique } from "../model/decorations";
 import type { Class, dbHooks, Model, Obj } from "$lib/types";
+import { randNum } from "$lib/utils";
 
 const tables = Object.values(models);
 const INTEGER = "INTEGER";
@@ -11,6 +12,22 @@ const TEXT = "TEXT";
 // model
 type M = typeof tables[number];
 
+export function getColumnType(v: unknown) {
+  let type = "BLOB";
+  const name = v?.constructor?.name;
+  switch (name) {
+    case "Number":
+    case "Boolean":
+    case "Date":
+      type = INTEGER;
+      break;
+    case "String":
+      type = TEXT;
+      break;
+  }
+  return type;
+}
+
 function createTable(Model: M) {
   const fields = [];
   const t = new Model();
@@ -18,18 +35,7 @@ function createTable(Model: M) {
   const pk = [];
   for (const [k, v] of e) {
     if (typeof v === "function" || k[0] === "_") continue;
-    let type = "BLOB";
-    const name = v?.constructor?.name;
-    switch (name) {
-      case "Number":
-      case "Boolean":
-      case "Date":
-        type = INTEGER;
-        break;
-      case "String":
-        type = TEXT;
-        break;
-    }
+    const type = getColumnType(v);
     const s = [...getConstraint(t, k)];
     const pi = s.indexOf(primaryKey);
     if (pi !== -1) {
@@ -104,12 +110,12 @@ export class DB {
 
   count(o: Class<Model>, where?: [string, ...unknown[]]): number {
     let sql = `select count(*) as c from ${o.name}`;
-    let params;
+    let params: unknown[] = [];
     if (where && where.length > 1) {
       sql = `${sql} where ${where[0]}`;
       params = where.slice(1);
     }
-    return this.db.prepare(sql).get(params).c as number;
+    return this.db.prepare(sql).get(...params).c as number;
   }
 
   page<T extends Model>(
@@ -135,7 +141,10 @@ export class DB {
     return after ? after(r) : r;
   }
 
-  save(a: Obj<Model>, create?: boolean, skipSave?: boolean) {
+  save(a: Obj<Model>, opt: {
+    create?: boolean, skipSave?: boolean, search?: boolean
+  } = {}) {
+    const { create, skipSave, search } = opt;
     const now = Date.now();
     const o = a as Obj<Model> & dbHooks;
     let changeSave = true;
@@ -148,7 +157,7 @@ export class DB {
     const kv = val(o[pk]);
     let sql: string;
     let values: unknown[];
-    if (!kv || create) {
+    if ((!kv || create) && !search) {
       setKey(a, "createAt", now);
       [sql, values] = insert(o);
     } else [sql, values] = update(o);
@@ -178,16 +187,66 @@ export class DB {
   }
 
   createTables() {
-    const names = [] as string[];
-    const exist = this.tables();
+    type columnInfo = {
+      name: string,
+      type: string,
+      unique: 0 | 1,
+      notnull: 0 | 1,
+      pk: 0 | 1
+    }
+    const exist = new Set(this.tables());
+    let migration = 0;
     for (const s of tables) {
       const name = s.name;
-      if (exist.indexOf(name) === -1) {
+      if (exist.has(name)) {
+        const info = {} as { [key: string]: columnInfo };
+        this.db.pragma(`table_info(${name})`).forEach((a: columnInfo) => info[a.name] = a);
+        const idxInf = this.db.pragma(`index_list(${name})`);
+        if (idxInf.length) {
+          idxInf.forEach((a: { name: string, unique: boolean }) => {
+            if (a && a.unique) {
+              const i = this.db.pragma(`index_info(${a.name})`)[0] as columnInfo;
+              info[i.name].unique = 1;
+            }
+          });
+        }
+        const o = new s();
+        const same: string[] = [];
+        for (const [k, v] of Object.entries(o)) {
+          if (typeof v === "function" || k.startsWith("_")) continue;
+          const cons = getConstraint(o, k);
+          const type = getColumnType(v);
+          const inf = info[k];
+          if (inf) {
+            const unique = +cons.has("UNIQUE");
+            const notnull = +cons.has("NOT Null");
+            const pk = +cons.has(primaryKey);
+            if (inf.type === type
+              && (!notnull || inf.notnull === notnull)
+              && (!unique || inf.unique === unique)
+              && (!pk || inf.pk === pk)
+            ) {
+              same.push(k);
+            } else {
+              migration = 1;
+            }
+          } else migration = 1;
+        }
+        if (migration) {
+          const nm = name + "_" + randNum();
+          const column = same.join();
+          const ru = [
+            `ALTER TABLE ${name} RENAME TO ${nm}`,
+            createTable(s)
+          ];
+          if (column) ru.push(`INSERT INTO ${name} (${column}) SELECT ${column} FROM  ${nm}`);
+          ru.push(`DROP TABLE ${nm}`);
+          this.db.exec(ru.join(";"));
+        }
+      } else {
         this.db.exec(createTable(s));
-        names.push(name);
       }
     }
-    return names;
   }
 
   dropTables() {
