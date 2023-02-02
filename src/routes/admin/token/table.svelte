@@ -1,23 +1,65 @@
 <script>
   export let items = [];
+  let allSet = new Set();
   export let cols = [];
+  export let sel = new Set();
+  let st = 0
+  $:{
+    allSet = new Set(items.map(a => {
+      return a.id
+    }));
+    let hs=0
+    let lf=0
+    for(const o of items){
+      if(sel.has(o.id))hs=1
+      else lf=1
+    }
+    st=0
+    if(hs){
+      if(lf)st=1
+      else st=2
+    }
+  }
 </script>
 
 <table>
   <thead>
   <tr>
-    {#each cols as { name }}
-      <th>{name}</th>
+    {#each cols as { name = '', check }}
+      <th>
+        {name}
+        {#if check}
+          <div class="k"
+               on:click={()=>{
+                 if(st===2)sel=new Set([...sel].filter(a=>!allSet.has(a)))
+                 else sel=new Set([...sel,...allSet])
+               }}
+               class:act={st}>{['','-','✓'][st]}
+          </div>
+        {/if}
+      </th>
     {/each}
   </tr>
   </thead>
   <tbody>
   {#each items as row}
     <tr>
-      {#each cols as { key, cell }}
+      {#each cols as { key, cell, check, btn }}
         <td>
           <div>
-            {cell ? cell(row) : row[key]}
+            {#if cell}{cell(row)}{/if}
+            {#if key}{row[key]}{/if}
+            {#if check}
+              <div class="k" class:act={sel.has(row.id)} on:click={()=>{
+                if(sel.has(row.id))sel.delete(row.id)
+                else sel.add(row.id)
+                sel=new Set([...sel])
+              }}>✓
+              </div>
+            {/if}
+            {#if btn}
+              <button class="icon i-ed" on:click={()=>btn(row)}></button>
+            {/if}
           </div>
         </td>
       {/each}
@@ -27,6 +69,19 @@
 </table>
 
 <style lang="scss">
+  .k{
+    width: 18px;
+    height: 18px;
+    background: var(--bg2);
+    border-radius: 4px;
+    border: #1c334a 1px solid;
+    margin:  0 auto;
+    color: transparent;
+    cursor: pointer;
+    &.act{
+      color: #7189a1;
+    }
+  }
   table {
     font-size: 14px;
     width: 100%;
@@ -55,7 +110,8 @@
 
   }
 
-  td {
+  td,th {
+    padding:  0 10px;
     div {
       height: 40px;
       display: flex;
