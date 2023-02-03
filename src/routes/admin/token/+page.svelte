@@ -37,7 +37,7 @@
 
   function edi(v) {
     edit(ta, v).then(a => {
-      if(!a)return
+      if (!a) return;
       const d = items.find(n => n.id === a.id);
       if (d) Object.assign(d, a);
       else items.unshift(a);
@@ -58,10 +58,10 @@
       { check: true },
       { name: "code", key: "code" },
       { name: "type", cell: ({ type }) => pmsName[permission[type]] },
-      { name: "expire", cell: ({ expire }) => time(expire) },
+      { name: "expire", cell: ({ expire }) => !expire ? "∞" : time(expire) },
       { name: "create at", cell: ({ createAt }) => time(createAt) },
-      { name: "times", cell: ({ times }) => times === -1 ? "forever" : times },
-      {del:1,detail:1}
+      { name: "times", cell: ({ times }) => (times === -1 || !times) ? "∞" : times },
+      { del: 1, detail: 1 }
     ]
   ][ta];
   let ids = new Set();
@@ -111,6 +111,7 @@
 
   .v {
     border-radius: 4px;
+
     button {
       text-align: center;
       width: 100px;
@@ -120,12 +121,14 @@
       color: #5f768f;
       padding: 5px;
       border: currentColor 1px solid;
-      border-right-width:0 ;
-      &+button{
-        border-right-width:1px;
+      border-right-width: 0;
+
+      & + button {
+        border-right-width: 1px;
         border-left: 0;
         border-radius: 0 4px 4px 0;
       }
+
       &:hover {
         opacity: 1;
       }

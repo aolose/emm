@@ -42,7 +42,7 @@
     }
     req(q, o, c).then(p => {
       const { total: t, items: i = [] } = p;
-      if (i) items = i;
+      if (i) items =  i;
       total = t;
     }).finally(() => {
       ld = 0;
@@ -53,7 +53,9 @@
     return () => {
       const x = !s.find(a => a.id === it.id);
       if (x) {
-        s = s.concat({ id: it.id, title: it.title || it.title_d || it.name });
+        const o = { id: it.id, title: it.title || it.title_d || it.name }
+        if(type)o.type=permission
+        s = s.concat(o);
       } else {
         s = s.filter(a => a.id !== it.id);
       }

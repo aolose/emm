@@ -9,7 +9,7 @@
   import { req } from "$lib/req";
   import { confirm } from "$lib/store";
   import { fade } from "svelte/transition";
-  import Date from "$lib/components/date.svelte";
+  import DateInput from "$lib/components/date.svelte";
   import Ck from "$lib/components/check.svelte";
 
   let show = 0;
@@ -17,22 +17,39 @@
   let cancel;
   let t = 0;
   let d = { _posts: [] };
+  let tk = {};
   let l = 0;
   let sec;
   let fine = 0;
+  let hasExp = 0;
   $:{
     if (t) {
+      const hasPer = /\d/.test(d.type);
+      if (hasPer) d._posts = d._posts?.filter(a => a.type === d.type) || [];
+      fine = hasPer && d._posts?.length;
+      if (fine) {
+        tk = {
+          type: d.type,
+          times: +d.times || -1,
+          reqs: d._posts.map(a => a.id).join()
+        };
+        if (hasExp) tk.expire = d.expire;
+      }
       // todo
     } else {
       d.name = (d.name || "").replace(/^\s+|\s+$/g, "");
       fine = d.name && /\d+/g.test(d.type);
     }
-    if(d&&d.times)d.times=Math.min(Math.max(-1,Math.floor(d.times)),999)
+    if (d && d.times) d.times = Math.min(Math.max(-1, Math.floor(d.times)), 999);
   }
 
-  function save(d) {
+  function save(d, type) {
     l = 1;
-    return req("require", d).finally(() => l = 0);
+    if (type) {
+      return req("genCode", tk).finally(() => l = 0);
+    } else {
+      return req("require", d).finally(() => l = 0);
+    }
   }
 
   function ed() {
@@ -49,7 +66,7 @@
   export const edit = (type, data = {}) => {
     t = type;
     show = 1;
-    d = { ...data, expire: 1700798400000 };
+    d = { ...data };
     return new Promise((rs) => {
       ok = () => {
         const o = { ...d };
@@ -57,16 +74,18 @@
           if (o.type === permission.Post) o._postIds = (d._posts || []).map(a => a.id).join();
           delete o._posts;
         }
-        save(o).then(o => {
+        save(o, type).then(o => {
           if (o) {
-            const [id, ca] = o.split(" ");
-            d.id = id;
-            d.createAt = +ca;
+            if (!type) {
+              const [id, ca] = o.split(" ");
+              d.id = id;
+              d.createAt = +ca;
+            }
           }
           show = 0;
-          rs(d);
+          rs(type ? o : d);
         }).catch(a => {
-          confirm(a.data, "", "ok");
+          confirm(a.message || a.data, "", "ok");
         });
       };
       cancel = () => {
@@ -75,7 +94,7 @@
       };
     });
   };
-  let hasExp = 0;
+
 </script>
 {#if show}
   <div class="m" transition:fade>
@@ -93,7 +112,7 @@
           <span>type</span>
           <Select bind:value={d.type} items={pms} />
         </div>
-        {#if (t&&/\d/.test(d.type)) || d.type === permission.Post}
+        {#if (t && /\d/.test(d.type)) || d.type === permission.Post}
           <div class="r" transition:slide>
             <span>{t ? 'permission' : 'posts'}</span>
             <Se type={t} bind:items={d._posts} inline />
@@ -104,9 +123,9 @@
           <div class="r">
             <span><Ck name="expire" bind:value={hasExp} /></span>
             {#if hasExp}
-              <Date bind:value={d.expire} />
-              {:else }
-              <input value={-1} readonly/>
+              <DateInput bind:value={d.expire} min={Date.now()} />
+            {:else }
+              <input value={-1} readonly />
             {/if}
           </div>
           <div class="r">
@@ -238,9 +257,10 @@
     width: 70%;
 
     &:global {
-      .a{
+      .a {
         margin: 0;
       }
+
       i {
         top: 2px;
         background: var(--bg3);
@@ -248,7 +268,7 @@
       }
     }
 
-    &>span {
+    & > span {
       color: #455564;
       line-height: 40px;
       width: 90px;

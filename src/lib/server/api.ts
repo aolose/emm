@@ -81,6 +81,22 @@ const apis: APIRoutes = {
       return `${s}${sys.codeLogin}`;
     }
   },
+  genCode: {
+    post: auth(Admin, async (req) => {
+      const {
+        expire,
+        type,
+        times,
+        reqs
+      } = await req.json();
+      return genToken(type, {
+        expire,
+        times,
+        code: true,
+        _reqs: new Set(reqs.split(",").map((a: string) => +a))
+      });
+    })
+  },
   code: {
     delete: auth(Admin, async req => {
       const code = await req.text();
@@ -102,6 +118,7 @@ const apis: APIRoutes = {
         const { expire = 0, times = 0 } = tk;
         if (expire < 0 || expire > n) {
           tk.times = times - 1;
+          tk.used = (tk.used || 0) + 1;
           if (times === 1) codeTokens.delete(code);
           if (times) {
             const re = resp(tk.type);

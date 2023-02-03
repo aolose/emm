@@ -44,9 +44,9 @@ export const codeTokens = addHook(
   new Map<string, Obj<TokenInfo>>(),
   ["set", "delete"],
   (name, ...params) => {
-    const tk = (params as TokenInfo[])[0] as TokenInfo;
+    const tk = (params as TokenInfo[])[1] as TokenInfo;
     if (name === "set") {
-      if (!saveDb) db.save(tk);
+      if (saveDb) db.save(tk);
     } else if (name === "delete") {
       if (tk.id) db.delByPk(TokenInfo, [tk.id]);
     }

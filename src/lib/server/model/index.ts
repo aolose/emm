@@ -258,6 +258,7 @@ export class TokenInfo {
   expire = INT;
   code? = TEXT;
   times? = INT;
+  used? = INT;
   type = INT;
   value? = TEXT;
   set _reqs(reqs:Set<number> | undefined){

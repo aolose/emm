@@ -2,6 +2,7 @@
   import { slidLeft } from "$lib/transition";
 
   export let value = 0;
+  export let min = 0;
   export let time = "mm:hh:ss";
   const pad = {
     year: 4,
@@ -11,7 +12,7 @@
     minute: 2,
     second: 2
   };
-  let finish=0
+  let finish = 0;
 
   let year = 1970;
   let month = 0;
@@ -21,14 +22,13 @@
   let second = 0;
   let bfValue = -1;
   const ns = {};
-  let tm=-1
+  let tm = -1;
   const setValue = () => {
     Object.values(ns).forEach(n => n.setValue());
-    clearTimeout(tm)
-    tm = setTimeout(()=>{
-      console.log(year, month, day, hour, minute, second);
-      value = new Date(year, month, day, hour, minute, second).getTime()
-    },30)
+    clearTimeout(tm);
+    tm = setTimeout(() => {
+      value = new Date(year, month, day, hour, minute, second).getTime();
+    }, 30);
   };
   const readValue = () => {
     const d = new Date(value);
@@ -45,7 +45,7 @@
     if (_mi !== minute) minute = _mi;
     if (_s !== second) second = _s;
     if (!time) {
-      hour=minute=second=0
+      hour = minute = second = 0;
     } else {
       time.split(":").forEach(a => {
         if (a.startsWith("m")) {
@@ -111,7 +111,7 @@
             second = va;
             break;
         }
-      }
+      };
       node.getValue = () => {
         switch (val) {
           case "year":
@@ -167,7 +167,7 @@
       node.onblur = setValue;
       node.maxlength = mx;
       ns[val] = node;
-      node.getValue()
+      node.getValue();
     };
     fn(node, val);
     return {
@@ -175,6 +175,8 @@
     };
   };
   $:{
+    if(!value)value=new Date(1970,0,1).getDate()
+    if(min&&value<min)value=min
     if (bfValue !== value) {
       bfValue === value;
       readValue();
@@ -214,6 +216,7 @@
     border: 1px solid rgba(140, 181, 236, 0.1);
     background: var(--bg3);
     height: 40px;
+
     &:first-child {
       width: 45px;
     }
