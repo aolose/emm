@@ -9,50 +9,56 @@ import { codes } from "$lib/server/store";
 import type { ArgumentTypes, func } from "../types";
 import { diffStrSet } from "$lib/setStrPatchFn";
 
-const addHook = <T extends object>(o: T, method: keyof T | (keyof T)[], fn: func) => {
-  ([] as (keyof T)[]).concat(method).forEach(name => {
-    const ori = o[name] as (...params: unknown[]) => unknown;
-    if (typeof ori === "function") {
-      type args = ArgumentTypes<typeof ori>
-      (o[name] as func) = function(...params: args) {
-        const r = ori.call(o, ...params);
-        fn(name, ...params);
-        return r;
-      };
-    }
-  });
-  return o;
-};
 
 export const requireMap = new Map<number, Require>();
 
 export const clientMap = new Map<string, Client>();
-let saveDb = 0;
 
-export function loadCodeTokens() {
-  saveDb = 0;
-  codeTokens.clear();
-  db.all(model(TokenInfo)).forEach(a => {
-    if (a.code) {
-      codeTokens.set(a.code, model(TokenInfo, a));
-    }
-  });
-  saveDb = 1;
-}
+export const codeTokens = (() => {
+  const o = new Map<string, Obj<TokenInfo>>();
 
-export const codeTokens = addHook(
-  new Map<string, Obj<TokenInfo>>(),
-  ["set", "delete"],
-  (name, ...params) => {
-    const tk = (params as TokenInfo[])[1] as TokenInfo;
-    if (name === "set") {
-      if (saveDb) db.save(tk);
-    } else if (name === "delete") {
-      if (tk.id) db.delByPk(TokenInfo, [tk.id]);
+  return {
+    load() {
+      const n = Date.now();
+      const ids: number[] = [];
+      db.all(model(TokenInfo)).forEach(a => {
+        if (+a.expire > 0 && a.expire < n) ids.push(a.id);
+        else if (a.code) {
+          codeTokens.add(a.code, model(TokenInfo, a));
+        }
+      });
+      if (ids.length) db.delByPk(TokenInfo, ids);
+    },
+    add(code: string, token: Obj<TokenInfo>) {
+      o.set(code, token);
+      db.save(token);
+      return token;
+    },
+    has(code: string) {
+      return o.has(code);
+    },
+    get(code: string) {
+      return o.get(code);
+    },
+    delete(filter: { code?: string, id?: number[] }) {
+      const { code, id } = filter;
+      const codes: string[] = [];
+      const ids: number[] = [];
+      if (code) codes.push(code);
+      if (id) {
+        ids.push(...id);
+        for (const [k, v] of o) {
+          if (ids.includes(v.id as number)) {
+            codes.push(k);
+          }
+        }
+      }
+      codes.forEach(c => o.delete(c));
+      return db.delByPk(TokenInfo, ids).changes;
     }
-    codes.set(new Set(codeTokens.keys()));
-  }
-);
+  };
+})();
+
 
 export const reqPostCache = (() => {
   let c: RequireMap[] = [];
@@ -107,11 +113,10 @@ export const reqPostCache = (() => {
         }
         return true;
       });
-      let n = 0;
       if (ks.length) {
-        n = db.delByPk(RequireMap, ks).changes;
+        db.delByPk(RequireMap, ks);
       }
-      return n;
+      return ks;
     }
   };
 })();

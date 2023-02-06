@@ -107,5 +107,5 @@ export type version = number
 export type PatchPool<T> = Map<version, DatePatch<T>>
 export type PatchFn<T> = (data: T, add?: T, del?: T) => T
 export type DiffFn<T> = (old: T, cur: T) => ({ add: T, del: T })
-export type func = (...params:unknown[])=>void
-export  type ArgumentTypes<F extends func> = F extends (...args: infer A) => any ? A : never;
+export type func<T> =(this:T,...params:unknown[])=>unknown
+export  type ArgumentTypes<F extends func<F>> = F extends (...args: infer A) => any ? A : never;

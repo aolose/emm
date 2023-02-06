@@ -8,6 +8,8 @@
   import Table from "./table.svelte";
   import Panel from "./panel.svelte";
   import Pg from "$lib/components/pg.svelte";
+  import { slidLeft } from "$lib/transition";
+  import { confirm } from "$lib/store";
 
   let ta = 0;
   let page = 1;
@@ -22,7 +24,14 @@
     items = [];
     page = n;
     req(["require", "code"][ta], { page }, { method: method.GET })
-      .then(d => ({ total, items } = d))
+      .then(d => {
+        ({ total, items } = d);
+        if (ta) {
+          items.forEach(a => {
+            a._reqs?.forEach(o => o.type = a.type);
+          });
+        }
+      })
       .finally(() => loading = 0);
   };
 
@@ -45,14 +54,26 @@
     });
   }
 
-  let cols = [];
+  function del() {
+    confirm("sure to delete?").then((ok) => {
+      if (!ok) return;
+      req(["require", "code"][ta], [...ids].join(), { method: method.DELETE }).then(a => {
+        items = items.filter(a => !ids.has(a.id));
+        if (!items.length) go(page === 1 ? 1 : page - 1);
+        ids=new Set();
+      });
+    });
+  }
+
+  let cols;
+  const btnClick = a => edi(a);
   $:cols = [
     [
       { check: true },
       { name: "name", key: "name" },
       { name: "type", cell: ({ type }) => pmsName[permission[type]] },
       { name: "create at", cell: ({ createAt }) => time(createAt) },
-      { name: "edit", btn: a => edi(a) }
+      { name: "edit", btn: btnClick, detail: "_post" }
     ],
     [
       { check: true },
@@ -61,12 +82,14 @@
       { name: "expire", cell: ({ expire }) => !expire ? "∞" : time(expire) },
       { name: "create at", cell: ({ createAt }) => time(createAt) },
       { name: "times", cell: ({ times }) => (times === -1 || !times) ? "∞" : times },
-      { del: 1, detail: 1 }
+      { detail: "_reqs", btn: btnClick }
     ]
   ][ta];
   let ids = new Set();
+  $:siz = ids.size;
   const act = (n) => () => {
     if (ta !== n) {
+      ids=new Set()
       ta = n;
       go();
     }
@@ -76,17 +99,19 @@
   <div class="a">
     <div class="t">
       <div class="v">
-        <button class:act={ta===0} on:click={act(0)}>token data</button>
+        <button class:act={ta===0} on:click={act(0)}>permissions</button>
         <button class:act={ta===1} on:click={act(1)}>tickets</button>
       </div>
       <div class="o">
         <button class="icon i-add" on:click={add}></button>
-        <button class="icon i-del"></button>
+        {#if siz}
+          <button class="icon i-del" on:click={del} transition:slidLeft>{siz}</button>
+        {/if}
       </div>
     </div>
     <div class="ls">
       <Table
-        bind:items={items}
+        items={items}
         cols={cols}
         bind:sel={ids}
       />
@@ -103,6 +128,10 @@
     justify-content: space-between;
     display: flex;
     padding: 12px 20px;
+
+    button {
+      padding: 0 10px;
+    }
   }
 
   .v, .o {

@@ -114,6 +114,9 @@ export const val = (a: unknown) => {
 
 export const resp = (body: ApiData, code = 200) => {
   const [tp, data] = parseBody(body);
+  if(code>=500){
+    console.error(body)
+  }
   return new Response(data as BodyInit, {
     status: code,
     headers: new Headers({
@@ -262,13 +265,13 @@ export const combineResult = (id: number, pk: ArrayBuffer) => {
 
 const countMap = new Map<string, number>();
 
-export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: object = {}) => {
+export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: object = {},...keepKeys:(keyof T)[]) => {
   const a = new M() as Obj<T>;
   Object.keys(a).forEach((k) => {
     const o = k as keyof T;
     if (typeof a[o] !== "function") delete a[o];
   });
-  return filter(Object.assign(a, o), Object.keys(o) as (keyof T)[]);
+  return filter(Object.assign(a, o), [...Object.keys(o) as (keyof T)[],...keepKeys]);
 };
 
 export const md5 = (buf: Buffer | string) => {

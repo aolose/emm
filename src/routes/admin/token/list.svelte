@@ -13,20 +13,28 @@
   let total = 1;
   let items = [];
   let ld = 0;
-  let h = 0;
+  let hide = 0;
   let ok;
   let cancel;
+  let init = 0;
   let clear = () => s = [];
   export const select = (d) => {
-    h = 1;
+    hide = 1;
     s = [...d || []];
-    go();
     return new Promise((r) => {
       ok = () => r([...s]);
       cancel = () => r();
-    }).finally(() => h = 0);
+    }).finally(() => {
+      hide = 0
+    });
   };
 
+  $:{
+    if (hide) if (!init){
+      init = 1;
+      go();
+    }
+  }
 
   function go(n = 1) {
     page = n;
@@ -42,7 +50,7 @@
     }
     req(q, o, c).then(p => {
       const { total: t, items: i = [] } = p;
-      if (i) items =  i;
+      if (i) items = i;
       total = t;
     }).finally(() => {
       ld = 0;
@@ -53,8 +61,8 @@
     return () => {
       const x = !s.find(a => a.id === it.id);
       if (x) {
-        const o = { id: it.id, title: it.title || it.title_d || it.name }
-        if(type)o.type=permission
+        const o = { id: it.id, title: it.title || it.title_d || it.name };
+        if (type) o.type = permission;
         s = s.concat(o);
       } else {
         s = s.filter(a => a.id !== it.id);
@@ -62,7 +70,8 @@
     };
   }
 </script>
-{#if h}
+
+{#if hide}
   <div class="a" transition:fade>
     <div class="t">
       <span>{type ? 'select permission' : 'select posts'}</span>

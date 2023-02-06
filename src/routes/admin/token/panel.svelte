@@ -16,27 +16,30 @@
   let ok;
   let cancel;
   let t = 0;
-  let d = { _posts: [] };
+  let d = { _posts: [], _reqs: [] };
   let tk = {};
   let l = 0;
   let sec;
   let fine = 0;
   let hasExp = 0;
+  let editMod = false;
   $:{
     if (t) {
+      delete d._posts;
       const hasPer = /\d/.test(d.type);
-      if (hasPer) d._posts = d._posts?.filter(a => a.type === d.type) || [];
-      fine = hasPer && d._posts?.length;
+      if (hasPer) d._reqs = d._reqs?.filter(a => a.type === d.type) || [];
+      fine = hasPer && d._reqs?.length;
       if (fine) {
         tk = {
           type: d.type,
           times: +d.times || -1,
-          reqs: d._posts.map(a => a.id).join()
+          reqs: d._reqs.map(a => a.id).join()
         };
         if (hasExp) tk.expire = d.expire;
       }
       // todo
     } else {
+      delete d._reqs;
       d.name = (d.name || "").replace(/^\s+|\s+$/g, "");
       fine = d.name && /\d+/g.test(d.type);
     }
@@ -53,8 +56,11 @@
   }
 
   function ed() {
-    sec(d._posts).then(a => {
-      if (a) d._posts = a;
+    sec(t ? d._reqs : d._posts).then(a => {
+      if (a) {
+        if (t) d._reqs = a;
+        else d._posts = a;
+      }
     });
   }
 
@@ -63,10 +69,11 @@
     [permission.Read, pmsName.Read],
     [permission.Admin, pmsName.Admin]
   ];
-  export const edit = (type, data = {}) => {
+  export const edit = (type, data) => {
+    editMod = !!data;
     t = type;
     show = 1;
-    d = { ...data };
+    d = { ...(data || {}) };
     return new Promise((rs) => {
       ok = () => {
         const o = { ...d };
@@ -80,6 +87,8 @@
               const [id, ca] = o.split(" ");
               d.id = id;
               d.createAt = +ca;
+            }else {
+              o._reqs=d._reqs
             }
           }
           show = 0;
@@ -101,21 +110,27 @@
     <div class="a">
       <div class="t">
       <span>{['permission',
-        'create ticket'][t]}</span>
+        'ticket'][t]}</span>
         <button class="icon i-close" on:click={cancel}></button>
       </div>
       <div class="b">
         {#if !t}
           <div class="r"><span>name</span><input bind:value={d.name} /></div>
         {/if}
-        <div class="r">
-          <span>type</span>
-          <Select bind:value={d.type} items={pms} />
-        </div>
+        {#if !editMod || t}
+          <div class="r">
+            <span>type</span>
+            <Select bind:value={d.type} items={pms} />
+          </div>
+        {/if}
         {#if (t && /\d/.test(d.type)) || d.type === permission.Post}
           <div class="r" transition:slide>
             <span>{t ? 'permission' : 'posts'}</span>
-            <Se type={t} bind:items={d._posts} inline />
+            {#if t}
+              <Se type={t} bind:items={d._reqs} inline />
+            {:else}
+              <Se type={t} bind:items={d._posts} inline />
+            {/if}
             <button class="icon i-ed" on:click={ed}></button>
           </div>
         {/if}

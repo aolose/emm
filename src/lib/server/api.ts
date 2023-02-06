@@ -89,49 +89,96 @@ const apis: APIRoutes = {
         times,
         reqs
       } = await req.json();
-      return genToken(type, {
+      const tk= genToken(type, {
         expire,
         times,
         code: true,
         _reqs: new Set(reqs.split(",").map((a: string) => +a))
       });
+      const t = {...tk}
+      delete t.value
+      return t
     })
   },
   code: {
     delete: auth(Admin, async req => {
-      const code = await req.text();
-      if (code) return +codeTokens.delete(code);
+      return codeTokens.delete({
+        id: (await req.text()).split(",").map(a => +a)
+      });
     }),
     get: auth(Admin, (req) => {
       const page = +(new URL(req.url).searchParams.get("page") || 1);
       return pageBuilder(page,
         10, TokenInfo,
-        ["createAt desc"]);
+        ["createAt desc"], undefined, undefined,
+        c => {
+          type reqs = number | {
+            id: number,
+            name?: string
+          }
+          type Tk = {
+            value?: string, _reqs?: reqs[]
+          }
+          const b = c as Tk[];
+          const tk = new Set<Tk>();
+          const rq = new Set<number>();
+          const n = new Map<number, Require>();
+          b.forEach(a => {
+            if (a.value) {
+              a._reqs = a.value.split(",").map(n => {
+                rq.add(+n);
+                return +n;
+              });
+              tk.add(a);
+              delete a.value;
+            }
+          });
+          if (rq.size) {
+            db.all(model(Require), `id in (${[...rq].map(() => "?").join()})`, ...rq)
+              .forEach(k => n.set(k.id, k));
+            for (const t of tk) {
+              t._reqs?.forEach((a, i, c) => {
+                c[i] = {
+                  id: a as number,
+                  name: n.get(a as number)?.name
+                };
+              });
+            }
+          }
+          return b as TokenInfo[];
+        });
     }),
     post: async (req) => {
       const code = await req.text();
-      const tk = codeTokens.get(code);
-      if (tk) {
-        const client = getClient(req);
-        if (client?.has(tk)) return "";
-        const n = Date.now();
-        const { expire = 0, times = 0 } = tk;
-        if (expire < 0 || expire > n) {
-          tk.times = times - 1;
-          tk.used = (tk.used || 0) + 1;
-          if (times === 1) codeTokens.delete(code);
-          if (times) {
-            const re = resp(tk.type);
-            setToken(req, re, tk as TokenInfo);
-            return re;
+      if (code) {
+        const tk = codeTokens.get(code);
+        if (tk) {
+          const client = getClient(req);
+          if (client?.has(tk)) return "";
+          const n = Date.now();
+          const { expire = 0, times = 0 } = tk;
+          if (expire < 0 || expire > n) {
+            tk.times = times - 1;
+            tk.used = (tk.used || 0) + 1;
+            if (times === 1) codeTokens.delete({ code });
+            if (times) {
+              const re = resp(tk.type);
+              setToken(req, re, tk as TokenInfo);
+              return re;
+            }
           }
+          codeTokens.delete({ code });
         }
-        codeTokens.delete(code);
       }
       return resp("invalid code", 403);
     }
   },
   require: {
+    delete: auth(Admin, async req => {
+      const ids = (await req.text()).split(",").map(a => +a);
+      const ks = new Set(reqPostCache.rm({ postId: ids }));
+      return db.delByPk(Require, ids.filter(a => !ks.has(a))).changes + ks.size;
+    }),
     post: auth(Admin, async (req) => {
       const token = model(Require, await req.json()) as Require;
       const { _postIds = "" } = token;

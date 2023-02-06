@@ -4,7 +4,7 @@ import {DBProxy, model} from './utils';
 import { Require, System, Tag } from "./model";
 import {publishedPost, tags} from "$lib/server/store";
 import {loadGeoDb} from "$lib/server/ipLite";
-import { loadCodeTokens, reqPostCache, requireMap } from "$lib/server/cache";
+import { codeTokens, reqPostCache, requireMap } from "$lib/server/cache";
 
 export let sys: System;
 runJobs();
@@ -37,7 +37,7 @@ export const server = {
         db.all(model(Require)).forEach(r=>{
             requireMap.set(r.id,DBProxy(Require,r,false))
         })
-        loadCodeTokens()
+        codeTokens.load()
         reqPostCache.load()
     }
 };

@@ -9,7 +9,7 @@
 <div class="v" class:i={inline}>
   {#each items as p}
     <div title={`ID: ${p.id}`} class="p" on:click|stopPropagation={del(p)}>
-      <span>{p.title}</span>
+      <span>{p.title||p.name}</span>
       <button class="icon i-close"></button>
     </div>
   {/each}

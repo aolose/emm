@@ -1,8 +1,8 @@
 <script lang="ts">
     import {act} from '$lib/use';
-    import {req} from "../../lib/req";
-    import {method} from "../../lib/enum";
-    import {status} from "../../lib/store";
+    import {req} from "$lib/req";
+    import {method} from "$lib/enum";
+    import {status} from "$lib/store";
 
     function logout(){
         req('logout',undefined,{method:method.GET}).then(()=>{
@@ -20,7 +20,7 @@
         <a use:act href="/admin/tag" class="icon i-tag"></a>
         <a use:act href="/admin/firewall" class="icon i-safe"></a>
         <a use:act href="/admin/token" class="icon i-rq"></a>
-        <a use:act class="icon i-sys"></a>
+        <a use:act href="/admin/setting" class="icon i-sys"></a>
         <s></s>
         <s></s>
     </div>
@@ -91,11 +91,11 @@
   }
 
   .o {
-    width: 40px;
-    height: 40px;
+    width: 24px;
+    height: 24px;
     background: url("$lib/components/img/fav.png") center no-repeat;
     background-size: contain;
-    margin: 20px auto 0;
+    margin: 36px auto 0;
   }
 
   i {

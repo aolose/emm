@@ -261,12 +261,14 @@ export class TokenInfo {
   used? = INT;
   type = INT;
   value? = TEXT;
-  set _reqs(reqs:Set<number> | undefined){
-      if(reqs===undefined)this.value=undefined
-      else this.value=[...reqs].join()
+
+  set _reqs(reqs: Set<number> | undefined) {
+    if (reqs === undefined) this.value = TEXT;
+    else this.value = [...reqs].join();
   }
+
   get _reqs(): Set<number> | undefined {
-    return this.value!==undefined ? new Set((this.value).split(",").map(a => +a).filter(a => a)) : undefined;
+    return this.value ? new Set((this.value).split(",").map(a => +a).filter(a => a)) : undefined;
   }
 
   createAt = INT;

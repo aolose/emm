@@ -1,6 +1,6 @@
 <script>
   export let items = [];
-  let allSet = new Set();
+  let allSet;
   export let cols = [];
   export let sel = new Set();
   let st = 0

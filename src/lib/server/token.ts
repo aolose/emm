@@ -24,11 +24,11 @@ export const genToken = (type: permission, cfg: {
     expire: cfg.expire || now + expires[type],
     type,
     _reqs: cfg._reqs
-  });
+  }, "value");
   if (cfg.code) {
     const cd = randStr(randNum(1e4).toString(36));
     token.code = cd;
-    codeTokens.set(cd, token);
+    codeTokens.add(cd, token);
   }
   return token as TokenInfo;
 };
