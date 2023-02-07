@@ -227,7 +227,7 @@ export const throwDbProxyError = <T extends Model>(o: T): Promise<T> => {
   });
 };
 export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = true): T => {
-  const error: Writable<Error | number> = writable(-1);
+  const error: Writable<Error | number> = writable(0);
   type key = keyof T
   type value = T[key]
   const pk = getPrimaryKey(C.name) as keyof T;
@@ -242,11 +242,11 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
     const ch = model(C, p);
     try {
       db.save(ch, { create });
+      error.set(0);
     } catch (e) {
       error.set(e as Error);
+      changes={} as T
       return;
-    } finally {
-      error.set(0);
     }
     create = false;
     ori = { ...Object.assign(o, changes, ch) };

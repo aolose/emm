@@ -5,8 +5,6 @@
   import { req } from "$lib/req";
   import { onMount } from "svelte";
   import { method } from "$lib/enum";
-  import { diffObj } from "$lib/utils";
-  import { confirm } from "$lib/store";
 
   let ls = [];
   let name = "";
@@ -32,21 +30,12 @@
       if (sel === n) sel = {};
       else t = sel = n;
       setTag(t).then(d => {
+        const t = ls.find(a => a.id === d.id);
+        if (t) {
+          Object.assign(t, d);
+          ls = [...ls];
+        } else ls = [d, ...ls];
         sel = {};
-        if (d) {
-          const c = ls.find(a => a.id === n.id);
-          const o = c ? diffObj(n, d) : d;
-          if (o && d.id === n.id) {
-            o.id = d.id;
-            return req("tag", o).then(() => {
-              if (c) Object.assign(n, o);
-              else ls.unshift(d);
-              ls = [...ls];
-            });
-          }
-        }
-      }).catch(e=>{
-        confirm(e.data,'','ok')
       });
     };
   }

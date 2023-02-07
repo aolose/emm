@@ -1,16 +1,26 @@
 <script>
-  import { selectFile } from "$lib/store";
+  import { confirm, selectFile } from "$lib/store";
   import { fade } from "svelte/transition";
+  import { diffObj } from "$lib/utils";
+  import { req } from "$lib/req";
 
   let ok;
   let cancel;
   let show = false;
   export const setTag = a => {
+    const n = {...a}
     d = { ...a };
     show = !!a;
     return new Promise(r => {
       ok = () => {
-        r(d);
+        const o = n.id ? diffObj(n, d) : d;
+        if (o && d.id === n.id) {
+          o.id = d.id;
+           req("tag", o).then(c=>{
+             if (c) Object.assign(d, c);
+             r(d)
+           }).catch(e=>confirm(e.data,'','ok'));
+        }
       };
       cancel = () => r();
     }).finally(() => {
