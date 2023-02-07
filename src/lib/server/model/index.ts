@@ -7,6 +7,7 @@ import { publishedPost, tags } from "$lib/server/store";
 import { get } from "svelte/store";
 import { diffStrSet } from "$lib/setStrPatchFn";
 import type { Obj } from "$lib/types";
+import { tagPostCache } from "$lib/server/cache";
 
 const { INT, TEXT } = NULL;
 
@@ -37,12 +38,20 @@ export class ShortPost {
 
 export class Tag {
   @primary
+  id = INT;
+  @unique
   name = TEXT;
   desc = TEXT;
   createAt = INT;
-  post = TEXT;
   userId = INT;
   banner = TEXT;
+}
+
+export class PostTag {
+  @primary
+  id = INT;
+  postId = INT;
+  tagId = INT;
 }
 
 export class Post {
@@ -51,7 +60,7 @@ export class Post {
   banner = INT;
   slug = TEXT;
   desc = TEXT;
-  tag = TEXT;
+  _tag = TEXT;
   published = 0;
   comment = 1;
   title = TEXT;
@@ -104,41 +113,9 @@ export class Post {
       a.delete(id);
       return new Set([...a]);
     });
-    if (this.tag !== undefined && id) {
-      const cur = this.tag?.split(",") || [];
-      let as = new Set<string>(cur.filter(a => !!a));
-      let ds = new Set<string>();
-      if (ori.tag) {
-        const old = ori.tag.split(",");
-        const { add, del } = diffStrSet(new Set(old), new Set(cur));
-        as = new Set([...as, ...add as Set<string>]);
-        ds = new Set([...del as Set<string>]);
-      }
-      const tgs = get(tags).filter(a => !!a);
-      const _id = id + "";
-      tgs.forEach(t => {
-        const { name } = t;
-        const ps = new Set(t.post?.split(",") || []);
-        let ch = 0;
-        if (as.has(name)) {
-          if (!ps.has(_id)) {
-            ps.add(_id);
-            ch = 1;
-          }
-          as.delete(name);
-        }
-        if (ds.has(name)) {
-          if (ps.has(_id)) {
-            ps.delete(_id);
-            ch = 1;
-          }
-          ds.delete(name);
-        }
-        if (ch) t.post = [...ps].filter(a => !!a).join();
-      });
-      if (as.size) {
-        tags.update(u => u.concat([...as].map(a => DBProxy(Tag, { name: a, post: _id }))));
-      }
+    if (this._tag && id) {
+      const tags = this._tag.split(",").filter(a => a);
+      tagPostCache.setTags(id, tags);
     }
     return !df;
   }

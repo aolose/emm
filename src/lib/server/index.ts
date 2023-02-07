@@ -4,7 +4,7 @@ import {DBProxy, model} from './utils';
 import { Require, System, Tag } from "./model";
 import {publishedPost, tags} from "$lib/server/store";
 import {loadGeoDb} from "$lib/server/ipLite";
-import { codeTokens, reqPostCache, requireMap } from "$lib/server/cache";
+import { codeTokens, reqPostCache, requireMap, tagPostCache } from "$lib/server/cache";
 
 export let sys: System;
 runJobs();
@@ -31,6 +31,7 @@ export const server = {
     sync() {
         const ts = db.db.prepare('select * from Tag order by createAt desc').all()
         tags.set(ts.map(a => DBProxy(Tag, a, false)))
+        tagPostCache.load()
         publishedPost.set(new Set(
             db.db.prepare('select id from Post where published =?')
                 .all(1).map(a => +a.id)))

@@ -95,7 +95,7 @@
                 <div class="r">
                     <h3>Tags</h3>
                     <div class="t">
-                        <Tags tags={$patchedTag.tags} bind:value={post.tag}/>
+                        <Tags tags={$patchedTag.tags} bind:value={post._tag}/>
                     </div>
                 </div>
                 <div class="r">

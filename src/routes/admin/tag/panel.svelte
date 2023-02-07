@@ -1,65 +1,65 @@
 <script>
-    import {selectFile} from "$lib/store";
-    import {fade} from "svelte/transition";
+  import { selectFile } from "$lib/store";
+  import { fade } from "svelte/transition";
 
-    let ok
-    let cancel
-    let show = false
-    export const setTag = a => {
-        d = {...a}
-        show = !!a
-        return new Promise(r => {
-            ok = () => {
-                r(d)
-            }
-            cancel = () => r()
-        }).finally(() => {
-            show = false
-        })
-    }
-    let d = {}
+  let ok;
+  let cancel;
+  let show = false;
+  export const setTag = a => {
+    d = { ...a };
+    show = !!a;
+    return new Promise(r => {
+      ok = () => {
+        r(d);
+      };
+      cancel = () => r();
+    }).finally(() => {
+      show = false;
+    });
+  };
+  let d = {};
 
-    function sel() {
-        selectFile(1, 'image/*').then(a => {
-            const id = a?.[0]?.id
-            if(id)d.banner=''+id
-        })
-    }
+  function sel() {
+    selectFile(1, "image/*").then(a => {
+      const id = a?.[0]?.id;
+      if (id) d.banner = "" + id;
+    });
+  }
 
 </script>
 {#if show}
-    <div class="b" transition:fade>
-        <div class="t">
-            <button class="icon i-close" on:click={cancel}></button>
-            <button class="s" on:click={ok}>save</button>
-        </div>
-        <div class="c">
-            <div class="r">
-                <span>name</span>
-                <p>{d.name}</p>
-            </div>
-            <div class="r">
-                <span>desc</span>
-                <div class="x">
-                    <p>{d.desc || ''}</p>
-                    <textarea bind:value={d.desc}></textarea>
-                </div>
-            </div>
-            <div class="r">
-                <span>banner</span>
-                <div class="p icon"
-                     on:click={sel}
-                     class:i-pic={!d.banner}
-                     style:background-image={d.banner?`url(/res/_${d.banner})`:''}>
-                    {#if d.banner}
-                        <button
-                                on:click|stopPropagation={()=>d.banner=null}
-                                class="icon i-close"></button>
-                    {/if}
-                </div>
-            </div>
-        </div>
+  <div class="b" transition:fade>
+    <div class="t">
+      <button class="icon i-close" on:click={cancel}></button>
+      <button class="s" on:click={ok}>save</button>
     </div>
+    <div class="c">
+      <div class="r">
+        <span>name</span>
+        <input bind:value={d.name} />
+      </div>
+      <div class="r">
+        <span>desc</span>
+        <div class="x">
+          <p>{d.desc || ''}</p>
+          <textarea bind:value={d.desc}></textarea>
+        </div>
+      </div>
+      <div class="r">
+        <span>banner</span>
+        <div class="p icon"
+             on:click={sel}
+             class:i-pic={!d.banner}
+             style:background-image={d.banner?`url(/res/_${d.banner})`:''}>
+          {#if d.banner}
+            <button
+              on:click|stopPropagation={()=>d.banner=null}
+              class="icon i-close"></button>
+          {/if}
+        </div>
+      </div>
+    </div>
+  </div>
 {/if}
 <style lang="scss">
   .b {
@@ -121,9 +121,11 @@
     transition: .2s;
     background: center no-repeat;
     background-size: contain;
-    &:hover{
+
+    &:hover {
       color: #6c7a93;
     }
+
     button {
       color: #6c7a93;
       position: absolute;
@@ -139,7 +141,8 @@
         color: #ffffff;
       }
     }
-    .i-close{
+
+    .i-close {
       text-shadow: #000 1px 1px;
     }
   }
@@ -151,10 +154,12 @@
     height: 75px;
     padding: 0 20px;
     border-bottom: 1px solid var(--bg1);
+
     .i-close {
       color: #485c6c;
       font-size: 20px;
-      &:hover{
+
+      &:hover {
         color: #7987a2;
       }
     }
@@ -168,7 +173,8 @@
     padding: 5px 20px;
     border: 1px solid currentColor;
     transition: .2s;
-    &:hover{
+
+    &:hover {
       color: #7a91bb;
     }
   }

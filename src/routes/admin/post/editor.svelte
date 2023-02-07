@@ -113,7 +113,7 @@
         const k = id(p)
         if (isPublish) v._p = isPublish
         const r = await (now ? save : delaySave)(v) || {}
-        if (v.tag) await loadTag()
+        if (v._tag) await loadTag()
         originPost.update(u => {
             if (k === id(u)) {
                 return {...u, ...o, ...r}

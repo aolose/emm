@@ -7,7 +7,7 @@ import {
   DBProxy,
   delCookie,
   getClient,
-  getReqJson,
+  getReqJson, throwDbProxyError,
   md5,
   mkdir,
   model,
@@ -17,8 +17,7 @@ import {
   setToken,
   skipLogin,
   sysStatue,
-  uniqSlug,
-  val
+  uniqSlug
 } from "./utils";
 import type { RespHandle } from "$lib/types";
 import sharp from "sharp";
@@ -33,7 +32,7 @@ import { addRule, blockIp, delRule, filterLog, fw2log, logCache } from "$lib/ser
 import { loadGeoDb } from "$lib/server/ipLite";
 import { publishedPost, tagPatcher, tags } from "$lib/server/store";
 import { get } from "svelte/store";
-import { codeTokens, reqPostCache } from "$lib/server/cache";
+import { codeTokens, patchPostTags, reqPostCache, tagPostCache } from "$lib/server/cache";
 import { versionStrPatch } from "$lib/setStrPatchFn";
 import { NULL } from "$lib/server/enum";
 
@@ -89,15 +88,15 @@ const apis: APIRoutes = {
         times,
         reqs
       } = await req.json();
-      const tk= genToken(type, {
+      const tk = genToken(type, {
         expire,
         times,
         code: true,
         _reqs: new Set(reqs.split(",").map((a: string) => +a))
       });
-      const t = {...tk}
-      delete t.value
-      return t
+      const t = { ...tk };
+      delete t.value;
+      return t;
     })
   },
   code: {
@@ -334,45 +333,39 @@ const apis: APIRoutes = {
   tag: {
     post: auth(Admin, async req => {
       const ts = get(tags);
+      let t: Tag | undefined;
       const tag = await req.json() as Tag;
-      if (tag.name) {
-        const t = ts.find(a => a.name === tag.name);
-        if (t) {
-          Object.assign(t, filter(tag, ["banner", "desc"], false));
-        } else ts.unshift(DBProxy(Tag, tag));
-        tags.set([...ts]);
+      if (tag.id) {
+        t = ts.find(a => a.id === tag.id);
       }
+      try {
+        if (t) {
+          await throwDbProxyError(Object.assign(t, filter(tag, ["banner", "desc"], false)));
+        } else ts.unshift(await throwDbProxyError(DBProxy(Tag, tag)));
+      } catch (e) {
+        if (e instanceof Error) {
+          let msg = e.message;
+          if (msg.includes("UNIQUE constraint")) msg = "tag name exist";
+          return resp(msg, 500);
+        }
+      }
+      tags.set([...ts]);
     }),
     delete: auth(Admin, async req => {
-      const name = await req.text();
-      const t = get(tags).find(t => t.name === name);
+      const id = +await req.text();
+      if (!id) return;
+      const t = get(tags).find(t => t.id === id);
       if (t) {
-        const ids = (val(t.post) as string || "").split(",");
-        if (ids.length) {
-          const e = new Array(ids.length).fill("?").join(",");
-          const p = db.all(model(Post), `id in (${e})`, ...ids);
-          p.forEach(a => {
-            const ts = new Set(a.tag?.split(","));
-            ts.delete(name);
-            const t = ts.size ? [...ts].join() : null;
-            db.db.prepare("update post set tag=? where id=?").run(t, a.id);
-          });
-        }
-        db.delByPk(Tag, ids);
-        tags.update(tt => tt.filter(a => a.name && a.name !== name));
+        tagPostCache.delete([], t.id);
+        db.del(t);
+        tags.update(tt => tt.filter(a => a.id !== id));
       }
     })
   },
   tags: {
     get: async () => {
       const ps = get(publishedPost);
-      const ts = get(tags).filter(a => {
-        const p = (a.post || "").split(",").filter(a => ps.has(+a));
-        if (p.length) {
-          return true;
-        }
-      });
-      return ts.map(a => a.name).join();
+      return tagPostCache.getTags([...ps]).map(a => a.name).join();
     },
     post: auth(Read, async req => {
       const ver = +(await req.text());
@@ -390,7 +383,7 @@ const apis: APIRoutes = {
       let where: [string, ...unknown[]] = ["published=? ", 1];
       if (tag) {
         const tg = get(tags).find(a => a.name === tag);
-        const ps = (tg?.post?.split(",") || []);
+        const ps = tg ? tagPostCache.getPostIds(tg.id) : [];
         if (ps.length) {
           where = [`${where[0]} and id in (${ps.map(() => "?").join()})`, 1, ...ps];
         }
@@ -399,9 +392,10 @@ const apis: APIRoutes = {
         ["createAt desc"], [
           "banner", "desc",
           "content", "createAt",
-          "tag", "title", "slug"
+          "_tag", "title", "slug"
         ],
-        where
+        where,
+        patchPostTags
       );
     },
     post: auth(Read, async (req) => {
@@ -414,7 +408,7 @@ const apis: APIRoutes = {
       }
 
       return pageBuilder(page, size, Post,
-        ["createAt desc"], undefined, where
+        ["createAt desc"], undefined, where, patchPostTags
       );
     })
   },
@@ -448,7 +442,7 @@ const apis: APIRoutes = {
           return filter(p, [
             "banner", "comment", "desc",
             "content", "createAt",
-            "tag", "title"
+            "_tag", "title"
           ], false);
         }
       }

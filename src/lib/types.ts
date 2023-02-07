@@ -3,7 +3,6 @@ import type {apiPath} from './server/api'
 import type {Post} from "./server/model";
 import type {method} from "$lib/enum";
 import type {DB} from "$lib/server/db/sqlite3";
-import type { TokenInfo } from "./server/model";
 
 export type MethodNumber = 0 | 1 | 2 | 3
 export type Class<T> = new (...args: unknown[]) => T;
@@ -17,8 +16,8 @@ export interface dbHooks {
 export type Model = (
     models.System | models.Tag |
     models.Comment | models.ShortPost |
-    models.User | models.Post |
-    models.Res | models.FWRule |TokenInfo|
+    models.User | models.Post |models.PostTag|
+    models.Res | models.FWRule |models.TokenInfo|
     models.FwLog | models.Require|models.RequireMap
     )
 

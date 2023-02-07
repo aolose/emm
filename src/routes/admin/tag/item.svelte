@@ -5,9 +5,9 @@
     export let sel = false
     export let  ck
     export let del
-    function de(name){
+    function de(id){
         return ()=>confirm('sure to delete the tag?').then(a=>{
-            if(a)del(name)
+            if(a)del(id)
         })
     }
 </script>
@@ -17,7 +17,7 @@
     {/if}
     <div class="t">
         <h4>{d.name}</h4>
-        <button on:click={de(d.name)} class="icon i-del"></button>
+        <button on:click={de(d.id)} class="icon i-del"></button>
     </div>
     {#if d.desc}<p>{d.desc}</p>{/if}
 </div>

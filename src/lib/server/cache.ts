@@ -1,18 +1,94 @@
 import type { Require } from "$lib/server/model";
 import type { Client } from "$lib/server/client";
-import { RequireMap, TokenInfo } from "$lib/server/model";
-import { model } from "$lib/server/utils";
+import { Post, PostTag, RequireMap, Tag, TokenInfo } from "$lib/server/model";
+import { DBProxy, model } from "$lib/server/utils";
 import { db } from "$lib/server/index";
 import { requireType } from "$lib/server/enum";
 import type { DiffFn, Obj } from "$lib/types";
-import { codes } from "$lib/server/store";
-import type { ArgumentTypes, func } from "../types";
+import { codes, tags } from "$lib/server/store";
 import { diffStrSet } from "$lib/setStrPatchFn";
+import { get } from "svelte/store";
 
 
 export const requireMap = new Map<number, Require>();
 
 export const clientMap = new Map<string, Client>();
+
+export const tagPostCache = (() => {
+  let tps: PostTag[] = [];
+  return {
+    load() {
+      tps = db.all(model(PostTag));
+    },
+    delete(postId?: number | number[], tagId?: number | number[]) {
+      const ids = new Set<number>();
+      const pSet = new Set(([] as number[]).concat(postId || []));
+      const tSet = new Set(([] as number[]).concat(postId || []));
+      tps.forEach(({ postId, tagId, id }) => {
+        if ((!pSet.size || pSet.has(postId)) || (!tSet.size || tSet.has(tagId))) {
+          ids.add(id);
+        }
+      });
+      tps = tps.filter(a => !ids.has(a.id));
+      db.delByPk(PostTag, [...ids]);
+    },
+    setTags(postId: number, tagStr: string[]) {
+      const pTags = this.getTags(postId);
+      const ts = new Set(tagStr);
+      const ids: number[] = [];
+      pTags.forEach(a => {
+        if (ts.has(a.name)) {
+          ts.delete(a.name);
+        } else {
+          ids.push(a.id);
+        }
+      });
+      if (ts.size) {
+        const add: string[] = [];
+        get(tags).forEach(t => {
+          if (ts.has(t.name)) {
+            tps.push(DBProxy(PostTag, { postId, tagId: t.id }));
+            ts.delete(t.name);
+          }
+        });
+      }
+      if (ts.size) {
+        for (const t of ts) {
+          const nt = DBProxy(Tag, { name: t });
+          tags.update(ts => ts.concat(nt));
+          tps.push(DBProxy(PostTag, { postId, tagId: nt.id }));
+        }
+      }
+      if (ids.length) {
+        this.delete(postId, ids);
+      }
+    },
+    setPosts(tagId: number, postId: number[]) {
+      const pSet = new Set(this.getPostIds(tagId));
+      postId.forEach(p => {
+        if (pSet.has(p)) pSet.delete(p);
+        else {
+          tps.push(DBProxy(PostTag, { postId: p, tagId }));
+        }
+        if (pSet.size) {
+          this.delete([...pSet], tagId);
+        }
+      });
+
+    },
+    getTags(postId: number | number[]) {
+      const ids: Set<number> = new Set();
+      const pSet = new Set(([] as number[]).concat(postId));
+      tps.forEach(a => {
+        if (pSet.has(a.postId)) ids.add(a.tagId);
+      });
+      return get(tags).filter(a => ids.has(a.id));
+    },
+    getPostIds(tagId: number) {
+      return tps.filter(a => a.tagId === tagId).map(a => a.postId);
+    }
+  };
+})();
 
 export const codeTokens = (() => {
   const o = new Map<string, Obj<TokenInfo>>();
@@ -120,3 +196,9 @@ export const reqPostCache = (() => {
     }
   };
 })();
+
+export const patchPostTags = (ps: Post[]) => ps.map(a => {
+  const tags = tagPostCache.getTags(a.id);
+  if (tags.length) a._tag = tags.map(n => n.name).join();
+  return a;
+});

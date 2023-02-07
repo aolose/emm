@@ -26,7 +26,7 @@
     <meta property='og:description' content={d.desc}/>
     <meta property='og:url' content={d.slug}/>
     <meta property='article:published_time' content={time(d.createAt)}/>
-    <meta property='article:tag' content={d.tag}/>
+    <meta property='article:tag' content={d._tag}/>
     <meta property='og:image' content={`/res/_${d.banner}`}/>
     <meta property='og:image:width' content='600'/>
     <meta property='og:image:height' content='400'/>
@@ -53,9 +53,9 @@
                     <div class='ss'></div>
                     <PF/>
                     <div class='tg'>
-                        {#if d.tag}
+                        {#if d._tag}
                             <label class="icon i-tags"></label>
-                            <Tag t={d.tag}/>
+                            <Tag t={d._tag}/>
                         {/if}
                     </div>
                     <!--                    <CmList id={d.aid} act='1'/>-->
