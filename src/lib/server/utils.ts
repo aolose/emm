@@ -28,6 +28,8 @@ import type { RequestEvent } from "@sveltejs/kit";
 import { clientMap } from "$lib/server/cache";
 import { Client } from "$lib/server/client";
 import type { TokenInfo } from "$lib/server/model";
+import { writable } from "svelte/store";
+import type { Unsubscriber, Writable } from "svelte/types/runtime/store";
 
 export const is_dev = process.env.NODE_ENV !== "production";
 
@@ -114,8 +116,8 @@ export const val = (a: unknown) => {
 
 export const resp = (body: ApiData, code = 200) => {
   const [tp, data] = parseBody(body);
-  if(code>=500){
-    console.error(body)
+  if (code >= 500) {
+    console.error(body);
   }
   return new Response(data as BodyInit, {
     status: code,
@@ -205,22 +207,50 @@ export const apiHandle = async (event: RequestEvent): Promise<Response> => {
   return resp("", 405);
 };
 
-
+const dBProxyErrs = new WeakMap<Model, Writable<Error | number>>();
+export const throwDbProxyError = <T extends Model>(o: T): Promise<T> => {
+  const err = dBProxyErrs.get(o);
+  let un: Unsubscriber | undefined;
+  return new Promise<T>((r, fail) => {
+    if (!err) {
+      r(o);
+    } else {
+      err.set(-1)
+      un = err.subscribe(n => {
+        if (n) {
+          if (n instanceof Error) fail(n);
+        } else r(o);
+      });
+    }
+  }).finally(() => {
+    if (un) un();
+  });
+};
 export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = true): T => {
+  const error: Writable<Error | number> = writable(-1);
   type key = keyof T
   type value = T[key]
   const pk = getPrimaryKey(C.name) as keyof T;
   let o = model(C, init);
   let ori = {} as Obj<T>;
+  let changes = {} as T;
   let create = false;
   const save = delay(() => {
-    const p = diffObj(ori, o);
+    const p = diffObj(ori, { ...o, ...changes });
     if (!p) return;
     if (pk) p[pk] = o[pk];
     const ch = model(C, p);
-    db.save(ch, {create});
+    try {
+      db.save(ch, { create });
+    } catch (e) {
+      error.set(e as Error);
+      return;
+    } finally {
+      error.set(0);
+    }
     create = false;
-    ori = { ...Object.assign(o, ch) };
+    ori = { ...Object.assign(o, changes, ch) };
+    changes = {} as T;
   }, 100);
   if (load) {
     const k = o[pk];
@@ -240,18 +270,21 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
         o = Object.assign(r, o);
       }
     }
-    save(create);
+    save();
   }
-  return new Proxy(o, {
+  const px = new Proxy(o, {
     get(target, p: string, receiver: T) {
       const v = Reflect.get(target, p, receiver);
       return hasOwnProperty(target, p) ? val(v) : v;
     },
     set(target, p: string, newValue: value, receiver: T): boolean {
-      save(create);
-      return Reflect.set(target, p, newValue, receiver);
+      changes[p as keyof T] = newValue;
+      save();
+      return true;
     }
   }) as T;
+  dBProxyErrs.set(px, error);
+  return px;
 };
 
 export const combineResult = (id: number, pk: ArrayBuffer) => {
@@ -265,13 +298,13 @@ export const combineResult = (id: number, pk: ArrayBuffer) => {
 
 const countMap = new Map<string, number>();
 
-export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: object = {},...keepKeys:(keyof T)[]) => {
+export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: object = {}, ...keepKeys: (keyof T)[]) => {
   const a = new M() as Obj<T>;
   Object.keys(a).forEach((k) => {
     const o = k as keyof T;
     if (typeof a[o] !== "function") delete a[o];
   });
-  return filter(Object.assign(a, o), [...Object.keys(o) as (keyof T)[],...keepKeys]);
+  return filter(Object.assign(a, o), [...Object.keys(o) as (keyof T)[], ...keepKeys]);
 };
 
 export const md5 = (buf: Buffer | string) => {
@@ -302,7 +335,7 @@ export const saveFile = (name: string | number, dir: string, buf: Buffer) => {
 const cacheCount = (model: Class<Model>, where?: [string, ...unknown[]]) => {
   const k = `${model.name}-${(where?.join() || "")}`;
   const c = countMap.get(k);
-  if (c !== null&&c!==undefined) return c;
+  if (c !== null && c !== undefined) return c;
   else {
     const c = db.count(model, where);
     countMap.set(k, c);
