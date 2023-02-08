@@ -5,7 +5,7 @@
     import UpDownScroll from "$lib/components/UpDownScroll.svelte";
     let a =0
     export let data
-    const d = data.d.split(',')
+    const d = data.d.split(',').filter(a=>a)
 </script>
 
 <svelte:head>
@@ -26,6 +26,9 @@
                     <span>{tag}
                     </span></a>
             {/each}
+            {#if !d.length}
+                <p>No tags found.</p>
+            {/if}
         </div>
     </div>
 
