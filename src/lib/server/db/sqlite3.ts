@@ -1,5 +1,5 @@
 import better from "better-sqlite3";
-import { Log, noNullKeyValues, setKey, sqlVal, val } from "../utils";
+import { Log, noNullKeyValues, setKey, sqlFields, sqlVal, val } from "../utils";
 import * as models from "../model";
 import { getConstraint, getPrimaryKey, pkMap, primaryKey, unique } from "../model/decorations";
 import type { Class, dbHooks, Model, Obj } from "$lib/types";
@@ -62,7 +62,7 @@ function insert(obj: Obj<Model>): [string, unknown[]] {
   const table = obj.constructor.name;
   const [k, m] = noNullKeyValues(obj);
   const v = sqlVal(m);
-  const q = new Array(k.length).fill("?").join();
+  const q = sqlFields(k.length);
   return [`insert into ${table} (${k.join()}) values (${q})`, v];
 }
 
@@ -174,7 +174,7 @@ export class DB {
 
   delByPk<T extends Model>(c: Class<T>, pks: unknown[]) {
     const pk = pkMap[c.name] as string;
-    const sql = `delete from ${c.name} where ${pk} in (${pks.map(a => "?").join()})`;
+    const sql = `delete from ${c.name} where ${pk} in (${sqlFields(pks.length)})`;
     return this.db.prepare(sql).run(...pks);
   }
 

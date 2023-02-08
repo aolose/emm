@@ -1,13 +1,11 @@
 import { NULL } from "../enum";
 import { noNull, primary, unique } from "./decorations";
-import { DBProxy, model, setNull, uniqSlug, val } from "$lib/server/utils";
+import { model, setNull, uniqSlug, val } from "$lib/server/utils";
 import { diffObj, filter, slugGen } from "$lib/utils";
 import type { DB } from "$lib/server/db/sqlite3";
 import { publishedPost, tags } from "$lib/server/store";
-import { get } from "svelte/store";
-import { diffStrSet } from "$lib/setStrPatchFn";
 import type { Obj } from "$lib/types";
-import { tagPostCache } from "$lib/server/cache";
+import { reqPostCache, tagPostCache } from "$lib/server/cache";
 
 const { INT, TEXT } = NULL;
 
@@ -45,6 +43,7 @@ export class Tag {
   createAt = INT;
   userId = INT;
   banner = TEXT;
+  _posts?:string|{id:number,title:string}[]
 }
 
 export class PostTag {
@@ -73,6 +72,7 @@ export class Post {
   save = INT;
   userId = INT;
   _p = 0;
+  _reqs?: string | { id: number, name: string }[];
   // reqId
   _r: number[] | undefined;
 
@@ -84,6 +84,10 @@ export class Post {
       filter({ ...ori } as Post, ["content_d", "content", "title", "title_d"], false),
       filter({ ...this }, ["content_d", "content", "title", "title_d"], false)
     ) as Post;
+    if(typeof this._reqs==='string'){
+      const ids = this._reqs.split(',').filter(a=>/\d+/g.test(a)).map(a=>+a)
+      reqPostCache.setReqs(id,ids)
+    }
     if (this._p) {
       if (ori?.publish) {
         this.modify = now;

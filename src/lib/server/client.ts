@@ -17,7 +17,7 @@ export class Client {
     uuid = ''
     tokens: Map<permission, Map<number, number> | number>
 
-    has(tk: Obj<TokenInfo>) {
+    has(tk: {type:permission,_reqs?:number[]}|Obj<TokenInfo>) {
         this.clear()
         const {type, _reqs} = tk
         if(type===undefined)return false

@@ -1,117 +1,126 @@
 <script>
-    import CheckBox from '$lib/components/check.svelte'
-    import Tags from '$lib/components/tags.svelte'
-    import {onMount} from "svelte";
-    import {editPost, saveNow, selectFile, setting, tokens, patchedTag} from "$lib/store";
-    import {fade} from "svelte/transition";
-    import {api} from "$lib/req";
-    import {get} from "svelte/store";
+  import CheckBox from "$lib/components/check.svelte";
+  import Tags from "$lib/components/tags.svelte";
+  import { onMount } from "svelte";
+  import { editPost, saveNow, selectFile, setting, patchedTag } from "$lib/store";
+  import { fade } from "svelte/transition";
+  import { api } from "$lib/req";
+  import { get } from "svelte/store";
+  import List from "$lib/components/post/rList.svelte";
+  import Sel from "$lib/components/post/rSelect.svelte";
+  import { permission } from "$lib/enum";
 
-    let tk = []
-    let post = {}
-    const getSlug = api('slug')
-    let slugInfo = ''
-    let t = -1
-    const checkSlug = () => {
-        clearTimeout(t)
-        slugInfo = 'checking...'
-        const slug = post.slug
-        if (slug) getSlug([post.id || '', post.slug].join()).then(s => {
-            if (get(setting) && post.slug === slug) {
-                if (s) {
-                    t = setTimeout(() => slugInfo = '', 5e3)
-                    slugInfo = 'slug auto modified!'
-                    post.slug = s
-                } else {
-                    slugInfo = ''
-                }
-            }
-        })
-    }
-    const pickPic = () => {
-        setting.set(0)
-        selectFile(1,'image/*').then(a => {
-            post = {...post, banner: a[0].id+''}
-        }).finally(() => setting.set(1))
-    }
-    const rmPic = () => {
-        post.banner = null
-        post = {...post}
-    }
-    const ok = () => {
-        saveNow.set(1)
-        setting.set(0)
-        editPost.update(p => ({...p, ...post}))
-    }
-    const cancel = () => {
-        setting.set(0)
-    }
-
-    onMount(() => {
-        const f0 = editPost.subscribe(p => post = {...p})
-        const f2 = tokens.subscribe(t => tk = t.map(a => a.name))
-        return () => {
-            f0()
-            f2()
+  let setPms;
+  let post = {};
+  const getSlug = api("slug");
+  let slugInfo = "";
+  let t = -1;
+  const checkSlug = () => {
+    clearTimeout(t);
+    slugInfo = "checking...";
+    const slug = post.slug;
+    if (slug) getSlug([post.id || "", post.slug].join()).then(s => {
+      if (get(setting) && post.slug === slug) {
+        if (s) {
+          t = setTimeout(() => slugInfo = "", 5e3);
+          slugInfo = "slug auto modified!";
+          post.slug = s;
+        } else {
+          slugInfo = "";
         }
-    })
+      }
+    });
+  };
+  const pickPic = () => {
+    setting.set(0);
+    selectFile(1, "image/*").then(a => {
+      post = { ...post, banner: a[0].id + "" };
+    }).finally(() => setting.set(1));
+  };
+
+  const selReq = () => {
+    setPms(post._reqs).then(a => {
+      if (a) post._reqs = a;
+    });
+  };
+
+  const rmPic = () => {
+    post.banner = null;
+    post = { ...post };
+  };
+  const ok = () => {
+    saveNow.set(1);
+    setting.set(0);
+    editPost.update(p => ({ ...p, ...post }));
+  };
+  const cancel = () => {
+    setting.set(0);
+  };
+
+  onMount(() => {
+    const f0 = editPost.subscribe(p => post = { ...p });
+    return () => {
+      f0();
+    };
+  });
 
 </script>
 {#if $setting}
-    <div class="m" transition:fade>
-        <div class="a">
-            <div class="h">
-                <button class="icon i-ok" on:click={ok}>
-                    <span>save</span>
-                </button>
-                <span>Setting</span>
-                <button class="icon i-close" on:click={cancel}>
-                    <span>cancel</span>
-                </button>
-            </div>
-            <div class="f">
-                <div class="r">
-                    <h3>Slug<span>{slugInfo}</span></h3>
-                    <input bind:value={post.slug} on:blur={checkSlug}/>
-                </div>
-                <div class="r">
-                    <h3>Description</h3>
-                    <textarea bind:value={post.desc}></textarea>
-                </div>
-                <div class="r">
-                    <h3>Banner</h3>
-                    <div
-                            class:act={post.banner}
-                            style:background-image={post.banner?`url(/res/_${post.banner})`:''}
-                            class="p icon i-pic"
-                            on:click={pickPic}>
-                        {#if post.banner}
-                            <button
-                                    on:click|stopPropagation={rmPic}
-                                    class="icon i-close" transition:fade></button>
-                        {/if}
-                    </div>
-                </div>
-                <div class="r">
-                    <h3>Tags</h3>
-                    <div class="t">
-                        <Tags tags={$patchedTag.tags} bind:value={post._tag}/>
-                    </div>
-                </div>
-                <div class="r">
-                    <h3>Tokens</h3>
-                    <div class="t">
-                        <Tags tags={tk}/>
-                    </div>
-                </div>
-                <div class="r">
-                    <CheckBox name="allow comment"/>
-                    <CheckBox name="need approval"/>
-                </div>
-            </div>
+  <div class="m" transition:fade>
+    <div class="a">
+      <div class="h">
+        <button class="icon i-ok" on:click={ok}>
+          <span>save</span>
+        </button>
+        <span>Setting</span>
+        <button class="icon i-close" on:click={cancel}>
+          <span>cancel</span>
+        </button>
+      </div>
+      <div class="f">
+        <div class="r">
+          <h3>Slug<span>{slugInfo}</span></h3>
+          <input bind:value={post.slug} on:blur={checkSlug} />
         </div>
-
+        <div class="r">
+          <h3>Description</h3>
+          <textarea bind:value={post.desc}></textarea>
+        </div>
+        <div class="r">
+          <h3>Banner</h3>
+          <div
+            class:act={post.banner}
+            style:background-image={post.banner?`url(/res/_${post.banner})`:''}
+            class="p icon i-pic"
+            on:click={pickPic}>
+            {#if post.banner}
+              <button
+                on:click|stopPropagation={rmPic}
+                class="icon i-close" transition:fade></button>
+            {/if}
+          </div>
+        </div>
+        <div class="r">
+          <h3>Tags</h3>
+          <div class="t">
+            <Tags tags={$patchedTag.tags} bind:value={post._tag} />
+          </div>
+        </div>
+        <div class="r">
+          <h3>Tokens</h3>
+          <div class="n">
+            <Sel bind:items={post._reqs} inline={1} />
+            <button on:click={selReq} class="icon i-ed"></button>
+          </div>
+        </div>
+        <div class="r">
+          <CheckBox name="allow comment" />
+          <CheckBox name="need approval" />
+        </div>
+      </div>
+      <List type={1} permission={permission.Post} bind:select={setPms} />
     </div>
+  </div>
 {/if}
 <style lang="scss">
   .m {
@@ -192,6 +201,34 @@
 
   .r {
     padding: 20px;
+
+    :global {
+      .v {
+        background: var(--bg2) center no-repeat;
+        width: 100%;
+        outline: none;
+        padding: 10px!important;
+        box-shadow: inset 0 0 3px rgb(0 0 0 / 20%);
+        border-radius: 3px;
+        border: none!important;
+        min-height: 50px!important;
+      }
+    }
+  }
+
+  .n {
+    min-height: 50px;
+    display: flex;
+    width: 100%;
+    margin-top: 20px;
+    button {
+      width: 40px;
+      background: var(--bg3);
+      border-left: 1px solid var(--bg1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   h3 {

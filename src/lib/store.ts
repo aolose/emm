@@ -138,7 +138,6 @@ export const patchedTag = writable({
     ver:0,
     tags:[] as string[]
 })
-export const tokens = writable([] as Require[])
 export const posts = writable([] as curPost[])
 export const setting = writable(0)
 export const saveNow = writable(0)

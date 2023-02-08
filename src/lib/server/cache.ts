@@ -1,14 +1,14 @@
 import type { Require } from "$lib/server/model";
-import type { Client } from "$lib/server/client";
 import { Post, PostTag, RequireMap, Tag, TokenInfo } from "$lib/server/model";
+import type { Client } from "$lib/server/client";
 import { DBProxy, model } from "$lib/server/utils";
 import { db } from "$lib/server/index";
 import { requireType } from "$lib/server/enum";
-import type { DiffFn, Obj } from "$lib/types";
-import { codes, tags } from "$lib/server/store";
+import type { DiffFn, Model, Obj } from "$lib/types";
+import { tags } from "$lib/server/store";
 import { diffStrSet } from "$lib/setStrPatchFn";
 import { get } from "svelte/store";
-
+import { permission } from "$lib/enum";
 
 export const requireMap = new Map<number, Require>();
 
@@ -168,7 +168,7 @@ export const reqPostCache = (() => {
         c = c.concat(n);
       }
     },
-    get(rq: { postId?: number, reqId?: number }) {
+    get(rq: { postId?: number, reqId?: number } = {}) {
       const { postId, reqId } = rq;
       return c.filter(a => {
         if ((postId && postId !== a.targetId) || (reqId && reqId !== a.reqId)) {
@@ -177,7 +177,7 @@ export const reqPostCache = (() => {
         return true;
       });
     },
-    rm(rq: { postId?: number | number[], reqId?: number | number[] }) {
+    rm(rq: { postId?: number | number[], reqId?: number | number[] } = {}) {
       const { postId, reqId } = rq;
       const pSet = new Set(([] as number[]).concat(postId || []));
       const rSet = new Set(([] as number[]).concat(reqId || []));
@@ -196,9 +196,34 @@ export const reqPostCache = (() => {
     }
   };
 })();
-
+type pagePatch<T> = (m: T[]) => T[]
+export const combine = <T extends Model>(...fns: pagePatch<T>[]) => (items: T[]) => {
+  fns.forEach(fn => items = fn(items));
+  return items;
+};
 export const patchPostTags = (ps: Post[]) => ps.map(a => {
   const tags = tagPostCache.getTags(a.id);
   if (tags.length) a._tag = tags.map(n => n.name).join();
   return a;
 });
+export const patchPostReqs = (ps: Post[]) => ps.map(a => {
+  a._reqs = reqPostCache.get({ postId: a.id }).map(n => ({
+    id: n.reqId,
+    name: requireMap.get(n.reqId)?.name || ""
+  }));
+  return a;
+});
+
+
+export const noAccessPosts = (cli?: Client) => {
+  const posts = new Set(reqPostCache.get().map(a => a.targetId).filter(a=>+a));
+  if (cli) {
+    cli.clear();
+    const p = cli.tokens.get(permission.Post);
+    if (p instanceof Map) for (const [k] of p) {
+      posts.delete(k);
+    }
+  }
+  const s = posts.size;
+  return s ? [...posts] : undefined;
+};

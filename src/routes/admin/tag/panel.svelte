@@ -3,23 +3,36 @@
   import { fade } from "svelte/transition";
   import { diffObj } from "$lib/utils";
   import { req } from "$lib/req";
+  import Pls from "$lib/components/post/rSelect.svelte";
+  import List from "$lib/components/post/rList.svelte";
 
   let ok;
   let cancel;
   let show = false;
+  let edit;
+  let opened = 0;
+
+  function setPost() {
+    opened = 1;
+    edit(d._posts).then(a => {
+      if (a !== undefined) d._posts = a;
+    }).finally(() => opened = 0);
+  }
+
   export const setTag = a => {
-    const n = {...a}
+    const n = { ...a };
     d = { ...a };
     show = !!a;
+    if(opened)setPost()
     return new Promise(r => {
       ok = () => {
         const o = n.id ? diffObj(n, d) : d;
         if (o && d.id === n.id) {
           o.id = d.id;
-           req("tag", o).then(c=>{
-             if (c) Object.assign(d, c);
-             r(d)
-           }).catch(e=>confirm(e.data,'','ok'));
+          req("tag", o).then(c => {
+            if (c) Object.assign(d, c);
+            r(d);
+          }).catch(e => confirm(e.data, "", "ok"));
         }
       };
       cancel = () => r();
@@ -68,7 +81,15 @@
           {/if}
         </div>
       </div>
+      <div class="r">
+        <span>posts</span>
+        <Pls bind:items={d._posts} inline={1} />
+        <button
+          on:click={setPost}
+          class="icon i-ed"></button>
+      </div>
     </div>
+    <List type={0} bind:select={edit} />
   </div>
 {/if}
 <style lang="scss">
@@ -77,14 +98,22 @@
     max-width: 600px;
     height: 100%;
     background: var(--bg2);
+
+    :global {
+      .a {
+        .t {
+          height: 75px;
+        }
+      }
+    }
   }
 
-  input, .x {
+  input, .x, textarea, .i-ed, .p {
     flex-grow: 1;
+    border: 1px solid rgba(140, 181, 236, 0.1);
   }
 
   .x {
-    border: 1px solid rgba(119, 129, 138, 0.3);
     max-height: 400px;
 
     p, textarea {
@@ -119,9 +148,7 @@
   }
 
   .p {
-    flex: 1;
     height: 200px;
-    border: 1px solid rgba(119, 129, 138, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -189,6 +216,22 @@
     }
   }
 
+  .i-ed {
+    flex-grow: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    border-left: 0;
+    background: var(--bg2);
+    color: #6c7a93;
+    font-size: 18px;
+
+    &:hover {
+      background: var(--bg1);
+    }
+  }
+
   .r {
     span {
       line-height: 30px;
@@ -198,5 +241,12 @@
     display: flex;
     flex-wrap: wrap;
     padding: 10px 50px;
+
+    &:global {
+      .v {
+        min-height: 50px !important;
+        padding: 10px !important;
+      }
+    }
   }
 </style>

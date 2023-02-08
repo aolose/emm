@@ -4,8 +4,8 @@
   import { slide } from "svelte/transition";
   import Ld from "$lib/components/loading.svelte";
   import { slidLeft } from "$lib/transition";
-  import List from "./list.svelte";
-  import Se from "./selected.svelte";
+  import List from "$lib/components/post/rList.svelte";
+  import Se from "$lib/components/post/rSelect.svelte";
   import { req } from "$lib/req";
   import { confirm } from "$lib/store";
   import { fade } from "svelte/transition";

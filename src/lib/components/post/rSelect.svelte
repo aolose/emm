@@ -6,7 +6,7 @@
   };
 </script>
 <div class="v" class:i={inline}>
-  {#each items as p}
+  {#each (items||[]) as p}
     <div title={`ID: ${p.id}`} class="p" on:click|stopPropagation={del(p)}>
       <span>{p.title || p.name}</span>
       <button class="icon i-close"></button>

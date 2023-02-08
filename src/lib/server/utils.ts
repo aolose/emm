@@ -116,8 +116,8 @@ export const val = (a: unknown) => {
 
 export const resp = (body: ApiData, code = 200) => {
   const [tp, data] = parseBody(body);
-  if (code >= 500) {
-    console.error(body);
+  if (code >= 400) {
+    Log.debug('error',code,data)
   }
   return new Response(data as BodyInit, {
     status: code,
@@ -413,7 +413,7 @@ export const getClientAddr = (event: RequestEvent) => {
     try {
       addr = event.getClientAddress();
     } catch (e) {
-      console.log(e?.toString());
+      console.error(e);
     }
   }
   return addr || "";
@@ -481,3 +481,4 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 
 
 export const skipLogin = true;
+export const sqlFields = (n:number)=>',?'.repeat(n).slice(1)

@@ -12,7 +12,7 @@ import { dataType, method, reqMethod } from "./enum";
 import { browser } from "$app/environment";
 import type { ApiName, cacheRecord, MethodNumber, reqCache, reqData, reqOption, reqParams } from "./types";
 import type { Load, LoadEvent } from "@sveltejs/kit";
-import { hooks } from "$lib/reqHooks";
+import { hooks } from "$lib/apiHooks";
 
 const cacheData = ".d";
 const cacheKey = ".k";

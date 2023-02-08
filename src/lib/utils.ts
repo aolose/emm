@@ -370,13 +370,23 @@ export function file2Md(f: fView[] | File[]) {
   return s.join("\n");
 }
 
+const equal = (a: unknown, b: unknown) => {
+  const ta = typeof a;
+  const tb = typeof b;
+  if (ta === tb) {
+    if (ta === "object") return JSON.stringify(a) === JSON.stringify(b);
+    return a === b;
+  }
+  return false;
+};
+
 export function diffObj<T extends object>(origin: T, change: T) {
   if (!change || !origin) return change;
   const d = {} as T;
   let ch = 0;
   const s = new Set(Object.keys(origin));
   for (const [a, b] of Object.entries(change)) {
-    if (origin[a as keyof T] !== b && b !== undefined) {
+    if (!equal(origin[a as keyof T], b) && b !== undefined) {
       d[a as keyof T] = b;
       ch = 1;
       s.delete(a);
@@ -642,4 +652,13 @@ export const sort = <T extends object>(target: T[], key?: (keyof T)[] | keyof T,
     return desc ? 1 - s : s;
   });
   return target;
+};
+
+export const modelArr2Str = <T extends Model>(m: T, key: keyof T,rfKey?:keyof T) => {
+  const arr = m[key];
+  if (Array.isArray(arr)) return {
+    ...m,
+    [key]: arr.map(a => a[rfKey||key]).join()
+  };
+  return m;
 };

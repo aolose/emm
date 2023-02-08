@@ -33,7 +33,7 @@ export const server = {
         tags.set(ts.map(a => DBProxy(Tag, a, false)))
         tagPostCache.load()
         publishedPost.set(new Set(
-            db.db.prepare('select id from Post where published =?')
+            db.db.prepare('select id from Post where published=?')
                 .all(1).map(a => +a.id)))
         db.all(model(Require)).forEach(r=>{
             requireMap.set(r.id,DBProxy(Require,r,false))

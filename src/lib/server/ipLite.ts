@@ -72,7 +72,7 @@ async function update() {
 
                 } catch (e) {
                     resolve(0)
-                    console.log(e?.toString())
+                    console.log(e)
                 }
             })
         })
