@@ -1,5 +1,5 @@
 <script>
-  import S from "./selected.svelte";
+  import S from "./rSelect.svelte";
   import Ld from "$lib/components/loading.svelte";
   import Pg from "$lib/components/pg.svelte";
   import { fade } from "svelte/transition";

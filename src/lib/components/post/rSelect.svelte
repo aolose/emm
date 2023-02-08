@@ -1,6 +1,5 @@
 <script>
   export let items = [];
-  export let type;
   export let inline = 0;
   const del = p => () => {
     items = items.filter(a => a.id !== p.id);
@@ -9,7 +8,7 @@
 <div class="v" class:i={inline}>
   {#each items as p}
     <div title={`ID: ${p.id}`} class="p" on:click|stopPropagation={del(p)}>
-      <span>{p.title||p.name}</span>
+      <span>{p.title || p.name}</span>
       <button class="icon i-close"></button>
     </div>
   {/each}
@@ -39,25 +38,22 @@
   .p {
     display: flex;
     align-items: center;
-    height: 25px;
-    border-radius: 4px;
-    background: var(--bg1);
+    height: 28px;
+    background: #20263c;
     margin: 3px 2px;
 
-    button {
-      height: 100%;
-      padding: 0 3px;
-      border-left: 1px solid #000;
-      font-size: 13px;
-
-      &:hover {
-        background: #1c334a;
-      }
+    span {
+      padding: 5px 10px;
     }
 
-    span {
-      font-size: 13px;
-      padding: 2px 10px;
+    button {
+      padding: 5px;
+      border-left: 1px solid #171b2a;
+      color: #627184;
+
+      &:hover {
+        color: #8aa3ab;
+      }
     }
   }
 </style>
