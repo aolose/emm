@@ -38,8 +38,19 @@ export type reqOption = {
     fail?(result: unknown,req:Response): void;
 };
 
-export type CliObj<T extends Model> = Obj<T> & { _: number }
 
+export type apiHook = {
+    before?: (param:reqParams) => reqParams|void,
+    after?: (result: unknown) => unknown,
+}
+export type apiHooks = {
+    [key: ApiName]: {
+        get?:apiHook,
+        post?:apiHook,
+        delete?:apiHook,
+        patch?:apiHook,
+    }
+}
 export type ApiBodyData = ArrayBuffer | string | number | undefined;
 export type ApiData = ApiBodyData | object;
 export type ApiName = typeof apiPath[number];
