@@ -17,7 +17,7 @@ import {
   setToken,
   skipLogin,
   sysStatue,
-  uniqSlug
+  uniqSlug, sqlFields
 } from "./utils";
 import type { RespHandle } from "$lib/types";
 import sharp from "sharp";
@@ -32,7 +32,15 @@ import { addRule, blockIp, delRule, filterLog, fw2log, logCache } from "$lib/ser
 import { loadGeoDb } from "$lib/server/ipLite";
 import { publishedPost, tagPatcher, tags } from "$lib/server/store";
 import { get } from "svelte/store";
-import { codeTokens, patchPostTags, reqPostCache, tagPostCache } from "$lib/server/cache";
+import {
+  codeTokens,
+  combine,
+  noAccessPosts,
+  patchPostReqs,
+  patchPostTags,
+  reqPostCache,
+  tagPostCache
+} from "$lib/server/cache";
 import { versionStrPatch } from "$lib/setStrPatchFn";
 import { NULL } from "$lib/server/enum";
 
@@ -133,7 +141,7 @@ const apis: APIRoutes = {
             }
           });
           if (rq.size) {
-            db.all(model(Require), `id in (${[...rq].map(() => "?").join()})`, ...rq)
+            db.all(model(Require), `id in (${sqlFields(rq.size)})`, ...rq)
               .forEach(k => n.set(k.id, k));
             for (const t of tk) {
               t._reqs?.forEach((a, i, c) => {
@@ -224,7 +232,7 @@ const apis: APIRoutes = {
         }
         if (ids.size) {
           const vs = [...ids];
-          const where = `id in (${vs.map(() => "?").join()})`;
+          const where = `id in (${sqlFields(vs.length)})`;
           db.all(model(Post), where, ...vs).forEach(a => {
             reqPostCache.get({ postId: a.id }).forEach(n => {
               mr.get(n.reqId)?._posts?.push({ id: a.id, title: a.title || a.title_d, slug: a.slug });
@@ -327,7 +335,20 @@ const apis: APIRoutes = {
   },
   tagLS: {
     post: auth(Read, async req => {
-      return get(tags);
+      const ts = get(tags);
+      return ts.map(t => {
+        const ps = tagPostCache.getPostIds(t.id);
+        if (ps.length) {
+          return {
+            ...t,
+            _posts: db.all(model(Post), `id in (${sqlFields(ps.length)})`, ps).map(a => ({
+              id: a.id,
+              title: a.title || a.title
+            }))
+          };
+        }
+        return filter(t, [], false);
+      });
     })
   },
   tag: {
@@ -338,16 +359,21 @@ const apis: APIRoutes = {
       if (tag.id) {
         t = ts.find(a => a.id === tag.id);
       }
+      const { _posts } = tag;
       try {
         if (t) {
           await throwDbProxyError(Object.assign(t, filter(tag, ["banner", "desc"], false)));
-        } else ts.unshift(await throwDbProxyError(DBProxy(Tag, tag)));
+        } else ts.unshift(await throwDbProxyError(t = DBProxy(Tag, tag)));
       } catch (e) {
         if (e instanceof Error) {
           let msg = e.message;
           if (msg.includes("UNIQUE constraint")) msg = "tag name exist";
           return resp(msg, 500);
         }
+      }
+      if (t && typeof _posts === "string") {
+        const ids = _posts.split(",").map(a => +a).filter(a => a);
+        tagPostCache.setPosts(t.id, ids);
       }
       tags.set([...ts]);
     }),
@@ -363,9 +389,16 @@ const apis: APIRoutes = {
     })
   },
   tags: {
-    get: async () => {
+    get: async req => {
       const ps = get(publishedPost);
-      return tagPostCache.getTags([...ps]).map(a => a.name).join();
+      const ids = new Set(noAccessPosts(getClient(req)) || []);
+      return tagPostCache.getTags([...ps]).filter(a => {
+        const ia = new Set(tagPostCache.getPostIds(a.id));
+        for (const i of ia) {
+          if (ids.has(i)) ia.delete(i);
+        }
+        return ia.size;
+      }).map(a => a.name).join();
     },
     post: auth(Read, async req => {
       const ver = +(await req.text());
@@ -375,18 +408,25 @@ const apis: APIRoutes = {
   },
   posts: {
     get: async req => {
-      // todo pms
       const params = new URL(req.url).searchParams;
       const page = +(params.get("page") || 1);
       const size = +(params.get("size") || 10);
       const tag = params.get("tag");
-      let where: [string, ...unknown[]] = ["published=? ", 1];
+      const where: string[] = ["published=?"];
+      const values: unknown[] = [1];
+
       if (tag) {
         const tg = get(tags).find(a => a.name === tag);
         const ps = tg ? tagPostCache.getPostIds(tg.id) : [];
         if (ps.length) {
-          where = [`${where[0]} and id in (${ps.map(() => "?").join()})`, 1, ...ps];
+          where.push(`id in (${sqlFields(ps.length)})`);
+          values.push(...ps);
         }
+      }
+      const disableIds = noAccessPosts(getClient(req));
+      if (disableIds) {
+        where.push(`id not in (${sqlFields(disableIds.length)})`);
+        values.push(...disableIds);
       }
       return pageBuilder(page, size, Post,
         ["createAt desc"], [
@@ -394,7 +434,7 @@ const apis: APIRoutes = {
           "content", "createAt",
           "_tag", "title", "slug"
         ],
-        where,
+        [where.join(" and "), ...values],
         patchPostTags
       );
     },
@@ -408,7 +448,8 @@ const apis: APIRoutes = {
       }
 
       return pageBuilder(page, size, Post,
-        ["createAt desc"], undefined, where, patchPostTags
+        ["createAt desc"], undefined, where,
+        combine(patchPostTags, patchPostReqs)
       );
     })
   },
@@ -439,7 +480,14 @@ const apis: APIRoutes = {
         const p = db.get(model(Post, { slug }));
         // todo pms check
         if (p) {
-          return filter(p, [
+          const rp = reqPostCache.get({postId:p.id}).map(a=>a.reqId)
+          if(rp.length){
+            const cli = getClient(req)
+            if(!cli||!cli.has({type:permission.Post,_reqs:rp})){
+              return  resp('You do not have permission to view this post',403)
+            }
+          }
+          return filter(patchPostTags([p])[0], [
             "banner", "comment", "desc",
             "content", "createAt",
             "_tag", "title"

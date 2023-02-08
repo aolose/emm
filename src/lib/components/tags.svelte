@@ -149,7 +149,7 @@
   }
 
   .b {
-    background: #212f3b;
+    background: #20263c;
 
     span {
       padding: 5px 10px;
