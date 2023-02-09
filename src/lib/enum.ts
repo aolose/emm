@@ -32,3 +32,10 @@ export enum pmsName {
   Read = "read data",
   Post = "read posts",
 }
+
+
+export enum commentStatus {
+  Pending,
+  Approve,
+  Reject,
+}

@@ -13,6 +13,18 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.i-comment:before {
+  content: "\e689";
+}
+
+.i-status:before {
+  content: "\e63c";
+}
+
+.i-read:before {
+  content: "\e870";
+}
+
 .i-rq:before {
   content: "\e701";
 }
@@ -159,10 +171,6 @@
 
 .i-home:before {
   content: "\e7a7";
-}
-
-.i-comment:before {
-  content: "\e7b2";
 }
 
 .i-pub:before {

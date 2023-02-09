@@ -493,9 +493,19 @@ const colors = [
   "#4281A4"
 ];
 
-export const getColor = (a: number) => {
+export const getColor = (a: number|string, opacity=1) => {
+  if(typeof a==='string'){
+    a=a.split('').reduce((a,b)=>a+b.charCodeAt(0),0)
+  }
   a = Math.floor(a);
-  return colors[a % colors.length];
+  const c =  colors[a % colors.length];
+  if(opacity<1){
+    const r = parseInt(c.slice(1,3),16)
+    const g = parseInt(c.slice(3,5),16)
+    const b = parseInt(c.slice(5,7),16)
+    return  `rgba(${r},${g},${b},${opacity})`
+  }
+  return c
 };
 
 export const getPain = (src: string) => {

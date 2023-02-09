@@ -1,5 +1,5 @@
 <script>
-  import Select from "./select.svelte";
+  import Select from "$lib/components/select.svelte";
   import { permission, pmsName } from "$lib/enum";
   import { slide } from "svelte/transition";
   import Ld from "$lib/components/loading.svelte";

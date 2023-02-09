@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import Nav from '$lib/components/nav.svelte'
   const error = $page.error
+  const status = $page.status
   let b = ''
 </script>
 
@@ -12,7 +13,7 @@
   <div class="g">
     <i/>
     <h1>Oops!</h1>
-    <h3>Error {error.status}</h3>
+    <h3>error {error.status||status}</h3>
     <p>{error.message}</p>
   </div>
 </div>
