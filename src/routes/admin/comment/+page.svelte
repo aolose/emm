@@ -1,6 +1,6 @@
 <script>
   import Select from "$lib/components/select.svelte";
-  import { commentStatus } from "$lib/enum";
+  import { cmStatus } from "$lib/enum";
   import Item from "./item.svelte";
   import Pg from "$lib/components/pg.svelte";
 
@@ -15,9 +15,9 @@
   ];
   const cmStatus = [
     [-1, "All"],
-    [commentStatus.Pending, "Pending"],
-    [commentStatus.Approve, "Approve"],
-    [commentStatus.Reject, "Reject"]
+    [cmStatus.Pending, "Pending"],
+    [cmStatus.Approve, "Approve"],
+    [cmStatus.Reject, "Reject"]
   ];
 
   const ls = [

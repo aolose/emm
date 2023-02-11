@@ -34,7 +34,7 @@ export enum pmsName {
 }
 
 
-export enum commentStatus {
+export enum cmStatus {
   Pending,
   Approve,
   Reject,

@@ -43,7 +43,7 @@ export class Tag {
   createAt = INT;
   userId = INT;
   banner = TEXT;
-  _posts?:string|{id:number,title:string}[]
+  _posts?: string | { id: number, title: string }[];
 }
 
 export class PostTag {
@@ -84,9 +84,9 @@ export class Post {
       filter({ ...ori } as Post, ["content_d", "content", "title", "title_d"], false),
       filter({ ...this }, ["content_d", "content", "title", "title_d"], false)
     ) as Post;
-    if(typeof this._reqs==='string'){
-      const ids = this._reqs.split(',').filter(a=>/\d+/g.test(a)).map(a=>+a)
-      reqPostCache.setReqs(id,ids)
+    if (typeof this._reqs === "string") {
+      const ids = this._reqs.split(",").filter(a => /\d+/g.test(a)).map(a => +a);
+      reqPostCache.setReqs(id, ids);
     }
     if (this._p) {
       if (ori?.publish) {
@@ -151,21 +151,34 @@ export class RequireMap {
 export class Comment {
   @primary
   id = INT;
+  ip = TEXT;
   @noNull
-  name = TEXT;
-  avatar = INT;
+  _name = TEXT;
+  _avatar = INT;
   @noNull
-  say = TEXT;
-  publish = INT;
+  content = TEXT;
   reply = INT;
-  state = INT; // -1 skip 0 - wait review  1 - review ok 2 - review no pass
-  token = TEXT;
-  pass = true;
+  state = INT;
   createAt = INT;
-  modify = INT;
+  save = INT;
+  @noNull
+  postId = INT;
   userId = INT;
-
+  isAdm = INT;
+  _own?: 1 | 2;
+  _post?: { title: string, slug: string };
 }
+
+export class CmUser {
+  @primary
+  id = INT;
+  avatar = INT;
+  del=INT
+  name = TEXT;
+  token = TEXT;
+  exp = INT;
+}
+
 
 export class System {
   @primary
@@ -184,7 +197,7 @@ export class System {
   keywords = TEXT;
   comment = false; // use comment
   noSpam = false; // check spam comment
-  commentReview = false; // check comment
+  cmCheck = false; // check comment
   analysis = false; // use analysis
   pageScript = TEXT;
   pageCss = TEXT;
@@ -196,7 +209,7 @@ export class User {
   id = INT;
   @noNull
   name = TEXT;
-  avatar = TEXT;
+  avatar = INT;
   @noNull
   pwd = TEXT;
   birth = INT;

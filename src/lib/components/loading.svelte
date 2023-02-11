@@ -1,27 +1,27 @@
 <script>
-    import {fade} from "svelte/transition";
-    import {onDestroy} from "svelte";
-    export let tm=0
-     export let act = 0
-    let s = 0
-    let v = 1
-    const t = setInterval(function () {
-        s = s + v
-        if (s === 0 || s === 3) v = -v;
-    }, 1e3)
-    onDestroy(() => {
-        return () => clearInterval(t)
-    })
-    export let text = "loading"
+  import { fade } from "svelte/transition";
+  import { onDestroy } from "svelte";
+
+  export let act = 0;
+  let s = 0;
+  let v = 1;
+  const t = setInterval(function() {
+    s = s + v;
+    if (s === 0 || s === 3) v = -v;
+  }, 1e3);
+  onDestroy(() => {
+    return () => clearInterval(t);
+  });
+  export let text = "loading";
 </script>
 {#if act}
     <span
-            transition:fade
-            class="load" class:lt={tm}>
+      transition:fade
+      class="load">
      <i></i>
     <span class="a">
         {text}
-        <span class="b">{'.'.repeat(s)}</span>
+      <span class="b">{'.'.repeat(s)}</span>
     </span>
 </span>
 {/if}
@@ -47,7 +47,7 @@
     width: 30px;
     height: 30px;
     background: url("./img/ld.svg") no-repeat center;
-    background-size: 80% auto;
+    background-size: 60% auto;
     animation: rd .8s linear infinite;
   }
 
@@ -61,21 +61,14 @@
     right: 0;
     bottom: 0;
     top: 0;
-    background: transparentize(rgb(18,22,34), .2);
+    background: transparentize(rgb(17, 21, 30), .2);
     backdrop-filter: blur(1px);
     border-radius: inherit;
     z-index: 100;
   }
-  .lt{
-    background: transparentize(rgb(250,250,250), .2);
-    i{
-      background-image: url("./img/ld1.svg");
-    }
-    span{
-      color: #999;
-    }
-  }
-  span{
-    color: #2d9bc5;
+
+
+  span {
+    color: #4c6996;
   }
 </style>

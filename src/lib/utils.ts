@@ -511,7 +511,7 @@ export const getColor = (a: number|string, opacity=1) => {
 export const getPain = (src: string) => {
   return src ? convert(marked.parse(src)) : "";
 };
-export const rndAr = (a: string[]) => {
+export const rndAr = <T extends string|number>(a: T[]) => {
   return a[Math.floor(Math.random() * a.length)];
 };
 
@@ -532,7 +532,7 @@ export function randNm() {
     "彦祖", "斯坦森", "蛤蛤", "童鞋", "皮卡丘", "少女", "辣子鸡",
     "佩奇", "宝宝", "葫芦娃", "艾莉"
   ];
-  return localStorage.nm = rndAr(b) + rndAr(c);
+  return localStorage.nm =`${rndAr(b)}${rndAr(c)}`;
 }
 
 type  Btn = HTMLElement & { ani: boolean, cv?: HTMLCanvasElement }

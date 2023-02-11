@@ -6,7 +6,8 @@
     import Tag from '$lib/components/post/tag.svelte';
     import {expand} from "$lib/store";
     import {imageViewer} from '$lib/use'
-    // import CmList from '$lib/components/post/cmList.svelte'
+    import Ls from '$lib/components/comment/ls.svelte'
+    import Cm from '$lib/components/comment/cm.svelte'
     export let data
     const d = data.d
     let sly = ''
@@ -59,12 +60,15 @@
                         {/if}
                     </div>
                     <!--                    <CmList id={d.aid} act='1'/>-->
+                    <div class="cm">
+                        <Ls/>
+                        <Cm/>
+                    </div>
                 </div>
             </div>
         </Ctx>
     </div>
 {/if}
-
 <style lang='scss'>
   @import '../../../../lib/break';
   @keyframes bg {

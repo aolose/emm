@@ -7,7 +7,8 @@ import {
   DBProxy,
   delCookie,
   getClient,
-  getReqJson, throwDbProxyError,
+  getCookie,
+  getReqJson,
   md5,
   mkdir,
   model,
@@ -16,14 +17,16 @@ import {
   saveFile,
   setToken,
   skipLogin,
+  sqlFields,
   sysStatue,
-  uniqSlug, sqlFields
+  throwDbProxyError,
+  uniqSlug
 } from "./utils";
 import type { RespHandle } from "$lib/types";
 import sharp from "sharp";
 import { Buffer } from "buffer";
-import { FwLog, FWRule, Post, Require, Res, Tag, TokenInfo } from "$lib/server/model";
-import { diffObj, enc, filter, sort } from "$lib/utils";
+import { CmUser, Comment, FwLog, FWRule, Post, Require, Res, Tag, TokenInfo } from "$lib/server/model";
+import { diffObj, enc, filter } from "$lib/utils";
 import { permission } from "$lib/enum";
 import path from "path";
 import fs from "fs";
@@ -43,6 +46,7 @@ import {
 } from "$lib/server/cache";
 import { versionStrPatch } from "$lib/setStrPatchFn";
 import { NULL } from "$lib/server/enum";
+import { cmManager } from "$lib/server/comment";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
   if (!sysStatue) return resp("system uninitialized", 403);
@@ -68,6 +72,14 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 let curPostFlag = [0, 0];
 const { Admin, Read } = permission;
 const apis: APIRoutes = {
+  cmLs: {
+    get: cmManager.list
+  },
+  cm: {
+    get: cmManager.get,
+    post: cmManager.set,
+    delete: cmManager.del
+  },
   logout: {
     get: () => {
       const res = resp("");
@@ -480,11 +492,11 @@ const apis: APIRoutes = {
         const p = db.get(model(Post, { slug }));
         // todo pms check
         if (p) {
-          const rp = reqPostCache.get({postId:p.id}).map(a=>a.reqId)
-          if(rp.length){
-            const cli = getClient(req)
-            if(!cli||!cli.has({type:permission.Post,_reqs:rp})){
-              return  resp('You do not have permission to view this post',403)
+          const rp = reqPostCache.get({ postId: p.id }).map(a => a.reqId);
+          if (rp.length) {
+            const cli = getClient(req);
+            if (!cli || !cli.has({ type: permission.Post, _reqs: rp })) {
+              return resp("You do not have permission to view this post", 403);
             }
           }
           return filter(patchPostTags([p])[0], [

@@ -1,7 +1,7 @@
 import type { Require } from "$lib/server/model";
-import { Post, PostTag, RequireMap, Tag, TokenInfo } from "$lib/server/model";
+import { CmUser, Comment, Post, PostTag, RequireMap, Tag, TokenInfo } from "$lib/server/model";
 import type { Client } from "$lib/server/client";
-import { DBProxy, model } from "$lib/server/utils";
+import { DBProxy, model, } from "$lib/server/utils";
 import { db } from "$lib/server/index";
 import { requireType } from "$lib/server/enum";
 import type { DiffFn, Model, Obj } from "$lib/types";
@@ -216,7 +216,7 @@ export const patchPostReqs = (ps: Post[]) => ps.map(a => {
 
 
 export const noAccessPosts = (cli?: Client) => {
-  const posts = new Set(reqPostCache.get().map(a => a.targetId).filter(a=>+a));
+  const posts = new Set(reqPostCache.get().map(a => a.targetId).filter(a => +a));
   if (cli) {
     cli.clear();
     const p = cli.tokens.get(permission.Post);

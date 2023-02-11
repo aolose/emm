@@ -420,7 +420,7 @@ export const getClientAddr = (event: RequestEvent) => {
 };
 
 
-const getCookie = (req: Request, key: string) => {
+export const getCookie = (req: Request, key: string) => {
   const c = req.headers.get("cookie");
   if (c) {
     const ck = cookie.parse(c);
@@ -440,9 +440,10 @@ export const delCookie = (resp: Response, key: string) => {
   }));
 };
 
-const setCookie = (resp: Response, key: string, value: string) => {
-  const c = cookie.serialize(key, value, ckCfg);
-  resp.headers.append("set-cookie", c);
+export const setCookie = (resp: Response, key: string, value: string,expires?:number) => {
+  const cf = {...ckCfg}
+  if(expires)cf.expires = new Date(expires)
+  resp.headers.append("set-cookie", cookie.serialize(key, value, cf));
 };
 
 export const getClient = (req: Request) => {
