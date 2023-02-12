@@ -38,16 +38,16 @@ export const cmManager = (() => {
   return {
     list: async (req: Request) => {
       const params = new URL(req.url).searchParams;
-      const pid = +(params.get("id") || 0);
+      const slug = params.get("slug");
       const page = +(params.get("page") || 1);
-      const p = pid && db.get(model(Post, { id: pid }));
+      const p = slug && db.get(model(Post, { slug }));
       const isAdmin = getClient(req)?.ok(permission.Admin);
       if (!p && !isAdmin) return errMsg("post not exist", true);
       const where: string[] = [];
       const values: unknown[] = [];
-      if (pid) {
+      if (p) {
         where.push("postId=?");
-        values.push(pid);
+        values.push(p.id);
       }
       const ks: (keyof Comment)[] = [];
       if (!isAdmin) {
@@ -70,7 +70,7 @@ export const cmManager = (() => {
             const u = getUser(a.userId) as CmUser;
             a._avatar = u.avatar;
             a._name = u.name;
-            if (!pid) {
+            if (!slug) {
               let p = postCache.get(a.postId);
               if (!p) {
                 const v = db.get(model(Post, { id: a.postId }));

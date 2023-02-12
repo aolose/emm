@@ -1,5 +1,6 @@
 <script>
 export let d ={}
+export let user={}
 </script>
 <div>
 

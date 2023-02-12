@@ -283,7 +283,9 @@ export const api = (url: ApiName, cfg?: reqOption) => {
 };
 export const useApi = (url: ApiName, getParams?: (event: LoadEvent, cfg: reqOption) => reqParams, cfg?: reqOption): Load =>
   async function(event) {
-    const { fetch } = event;
+    const { fetch,params } = event;
     (cfg = cfg || {}).fetch = fetch;
-    return { d: await req(url, getParams?.(event, cfg), cfg) };
+    return {
+      p:params,
+      d: await req(url, getParams?.(event, cfg), cfg) };
   };

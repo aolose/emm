@@ -6,6 +6,7 @@
   import { fly, fade } from "svelte/transition";
 
   export let postId = -1;
+  export let user={}
   let sh = 0;
   let av = 0;
   let cm;
@@ -19,7 +20,7 @@
 
   function rn() {
     nm = randNm();
-    av = localStorage.av = rndAr(avLs) + 1;
+    av = localStorage.av = rndAr(avLs);
   }
 
   function se() {

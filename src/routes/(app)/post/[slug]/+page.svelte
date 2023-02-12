@@ -10,8 +10,10 @@
     import Cm from '$lib/components/comment/cm.svelte'
     export let data
     const d = data.d
+    const p=data.p
     let sly = ''
     let style
+    let user={}
     $:{
         if (d.createAt) style = ` background: linear-gradient(rgba(0,0,0,.7),${getColor(d.createAt / 3600)});`
         if (d.banner) {
@@ -59,10 +61,11 @@
                             <Tag t={d._tag}/>
                         {/if}
                     </div>
-                    <!--                    <CmList id={d.aid} act='1'/>-->
+                    <h1>
+                    </h1>
                     <div class="cm">
-                        <Ls/>
-                        <Cm/>
+                        <Ls slug={p.slug} bind:user/>
+                        <Cm bind:user/>
                     </div>
                 </div>
             </div>
