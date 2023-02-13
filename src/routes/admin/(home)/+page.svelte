@@ -16,6 +16,7 @@
     let tmpMark = 1
 
     function sel(p) {
+        console.log(p)
         if(!p){
             originPost.set({})
             editPost.set({})

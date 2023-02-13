@@ -672,3 +672,14 @@ export const modelArr2Str = <T extends Model>(m: T, key: keyof T,rfKey?:keyof T)
   };
   return m;
 };
+
+export const watch = (...args:unknown[])=>{
+  let keys = JSON.stringify(args)
+  return (fn:()=>void,...args:unknown[])=>{
+    const nk = JSON.stringify(args)
+    if(keys!==nk){
+      keys=nk
+      fn()
+    }
+  }
+}

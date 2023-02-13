@@ -3,9 +3,8 @@
     import Editor from '$lib/components/editor.svelte'
     import {confirm, editPost, originPost, patchedTag, posts, saveNow, setting} from "$lib/store";
     import {api, req} from "$lib/req";
-    import {diffObj} from "$lib/utils";
+    import {diffObj, watch} from "$lib/utils";
     import {get} from "svelte/store";
-    import {browser} from "$app/environment";
     import {fade} from "svelte/transition";
     import {method} from "$lib/enum";
     import {applyStrPatch} from "$lib/setStrPatchFn";
@@ -14,6 +13,7 @@
     let title = ''
     let draft = ''
     let cid = 0
+    const ctxWatch = watch(draft,title)
     const tSet = {
         name: "setting",
         action: () => {
@@ -73,14 +73,13 @@
         title: "delete",
     }
     let tools = []
-    $:{
-        if (browser) editPost.update(p => {
+    $:{ctxWatch(()=>{
+         editPost.update(p => {
             return {
                 ...p, content_d: draft, title_d: title
             }
         })
-    }
-
+    },draft,title)}
     const delaySave = api('post', {delay: 3e3})
     const save = api('post')
     const loadTag = () => {
@@ -94,7 +93,7 @@
         })
     }
     let saving = 0
-    const id = a => a.id || a._
+    const id = a => a._ || a.id
     const autoSave = async (p, isPublish) => {
         if (saving) return
         const now = get(saveNow)
@@ -108,21 +107,21 @@
         const v = {...o, _}
         if (p.id) {
             v.id = p.id
-            delete v._
         }
         const k = id(p)
         if (isPublish) v._p = isPublish
-        const r = await (now ? save : delaySave)(v) || {}
+        const r = await (now ? save : delaySave)({...v}) || {}
+        const n = {...ori, ...p, ...r}
         if (v._tag) await loadTag()
         originPost.update(u => {
             if (k === id(u)) {
-                return {...u, ...o, ...r}
+                return n
             }
             return u
         })
         editPost.update(u => {
             if (k === id(u)) {
-                return {...u, ...o, ...r}
+                return n
             }
             return u
         })

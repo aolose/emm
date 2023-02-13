@@ -3,6 +3,7 @@ import {clientMap} from "$lib/server/cache";
 import {permission} from "$lib/enum";
 import type { TokenInfo } from "$lib/server/model";
 import type { Obj } from "$lib/types";
+import {debugMode} from "$lib/server/utils";
 
 export class Client {
     constructor() {
@@ -65,6 +66,7 @@ export class Client {
 
     ok(p: permission) {
         this.clear()
+        if(debugMode)return true
         const ct = this.tokens.get(p)
         if (!ct) return false
         return true

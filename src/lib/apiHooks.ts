@@ -1,19 +1,22 @@
-import type { apiHooks, Model } from "$lib/types";
-import type { Post, Tag } from "$lib/server/model";
-import { modelArr2Str } from "$lib/utils";
+import type {apiHooks, Model} from "$lib/types";
+import type {Post, Tag} from "$lib/server/model";
+import {modelArr2Str} from "$lib/utils";
 
 /**
  * add global hook for browser side requests
  */
 export const hooks: apiHooks = {
-  tag: {
+    tag: {
+        post: {
+            before: o => modelArr2Str(o, "_posts")
+        }
+    },
     post: {
-      before: o => modelArr2Str(o as Tag, "_posts")
+        post: {
+            before: (o: Post & { _?: number }) => {
+                if (o.id && o._) delete o._
+                modelArr2Str(o, "_reqs")
+            }
+        }
     }
-  },
-  post: {
-    post: {
-      before: o => modelArr2Str(o as Post, "_reqs")
-    }
-  }
 };

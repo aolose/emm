@@ -3,7 +3,7 @@ import type {apiPath} from './server/api'
 import type {Post} from "./server/model";
 import type {method} from "$lib/enum";
 import type {DB} from "$lib/server/db/sqlite3";
-import { CmUser } from "./server/model";
+import {CmUser} from "./server/model";
 
 export type MethodNumber = 0 | 1 | 2 | 3
 export type Class<T> = new (...args: unknown[]) => T;
@@ -16,10 +16,10 @@ export interface dbHooks {
 
 export type Model = (
     models.System | models.Tag |
-    models.Comment | models.ShortPost |models.CmUser|
-    models.User | models.Post |models.PostTag|
-    models.Res | models.FWRule |models.TokenInfo|
-    models.FwLog | models.Require|models.RequireMap
+    models.Comment | models.ShortPost | models.CmUser |
+    models.User | models.Post | models.PostTag |
+    models.Res | models.FWRule | models.TokenInfo |
+    models.FwLog | models.Require | models.RequireMap
     )
 
 export type Obj<T extends Model> = {
@@ -32,24 +32,24 @@ export type reqOption = {
     delayKey?: number | string;
     fetch?: typeof fetch;
     method?: method;
-    headers?:Headers;
+    headers?: Headers;
     encrypt?: boolean;
     before?(data: unknown, url?: string): [unknown, string | undefined, Headers?];
     done?(result: unknown): void;
-    fail?(result: unknown,req:Response): void;
+    fail?(result: unknown, req: Response): void;
 };
 
 
 export type apiHook = {
-    before?: (param:reqParams) => reqParams|void,
-    after?: (result: unknown) => unknown,
+    before?: (param: never) => reqParams | void,
+    after?: (result: never) => unknown,
 }
 export type apiHooks = {
     [key: ApiName]: {
-        get?:apiHook,
-        post?:apiHook,
-        delete?:apiHook,
-        patch?:apiHook,
+        get?: apiHook,
+        post?: apiHook,
+        delete?: apiHook,
+        patch?: apiHook,
     }
 }
 export type ApiBodyData = ArrayBuffer | string | number | undefined;
@@ -118,5 +118,5 @@ export type version = number
 export type PatchPool<T> = Map<version, DatePatch<T>>
 export type PatchFn<T> = (data: T, add?: T, del?: T) => T
 export type DiffFn<T> = (old: T, cur: T) => ({ add: T, del: T })
-export type func<T> =(this:T,...params:unknown[])=>unknown
+export type func<T> = (this: T, ...params: unknown[]) => unknown
 export  type ArgumentTypes<F extends func<F>> = F extends (...args: infer A) => any ? A : never;

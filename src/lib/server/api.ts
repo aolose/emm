@@ -16,7 +16,7 @@ import {
   resp,
   saveFile,
   setToken,
-  skipLogin,
+  debugMode,
   sqlFields,
   sysStatue,
   throwDbProxyError,
@@ -50,7 +50,7 @@ import { cmManager } from "$lib/server/comment";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
   if (!sysStatue) return resp("system uninitialized", 403);
-  if (!skipLogin) {
+  if (!debugMode) {
     const requires = new Set(([] as permission[]).concat(ps));
     const client = getClient(req);
     if (requires.size) {
@@ -90,7 +90,7 @@ const apis: APIRoutes = {
   statue: {
     get: (req) => {
       let s = 0;
-      if (skipLogin) s = 1;
+      if (debugMode) s = 1;
       else {
         const c = getClient(req);
         if (c) {
@@ -490,7 +490,6 @@ const apis: APIRoutes = {
       const slug = req.url.replace(/.*?\?/, "");
       if (slug) {
         const p = db.get(model(Post, { slug }));
-        // todo pms check
         if (p) {
           const rp = reqPostCache.get({ postId: p.id }).map(a => a.reqId);
           if (rp.length) {

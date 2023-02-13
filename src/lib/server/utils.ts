@@ -448,6 +448,10 @@ export const setCookie = (resp: Response, key: string, value: string,expires?:nu
 
 export const getClient = (req: Request) => {
   const c = getCookie(req, "token");
+  if(debugMode)if(!c){
+    const cli = new Client()
+    return  cli
+  }
   if (c) return clientMap.get(c);
 };
 
@@ -466,7 +470,7 @@ export function checkRedirect(statue: number, path: string, req: Request) {
     const client = getClient(req);
     needLogin = !client?.ok(permission.Admin);
   }
-  if (needLogin && !skipLogin) {
+  if (needLogin && !debugMode) {
     if (path !== login) return login;
     return "";
   }
@@ -481,5 +485,5 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 }
 
 
-export const skipLogin = true;
+export const debugMode = true;
 export const sqlFields = (n:number)=>',?'.repeat(n).slice(1)
