@@ -161,11 +161,11 @@ export class Comment {
   state = INT;
   createAt = INT;
   save = INT;
-  @noNull
   postId = INT;
   userId = INT;
   isAdm = INT;
   _own?: 1 | 2;
+  _slug?:string
   _post?: { title: string, slug: string };
 }
 

@@ -32,7 +32,7 @@
     <i />
   </div>
   {#if h}
-    <div class="b" transition:slide>
+    <div class="b" transition:slide={{duration:100}}>
       {#each items as [k, v]}
         <div class:e={k===value} on:click|stopPropagation={s(k)}>{v}</div>
       {/each}

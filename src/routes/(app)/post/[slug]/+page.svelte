@@ -6,14 +6,14 @@
     import Tag from '$lib/components/post/tag.svelte';
     import {expand} from "$lib/store";
     import {imageViewer} from '$lib/use'
-    import Ls from '$lib/components/comment/ls.svelte'
-    import Cm from '$lib/components/comment/cm.svelte'
+    import Comment from '$lib/components/comment/index.svelte'
+
     export let data
     const d = data.d
-    const p=data.p
+    const p = data.p
     let sly = ''
     let style
-    let user={}
+    let user = {}
     $:{
         if (d.createAt) style = ` background: linear-gradient(rgba(0,0,0,.7),${getColor(d.createAt / 3600)});`
         if (d.banner) {
@@ -64,8 +64,7 @@
                     <h1>
                     </h1>
                     <div class="cm">
-                        <Ls slug={p.slug} bind:user/>
-                        <Cm bind:user/>
+                        <Comment slug={p.slug}/>
                     </div>
                 </div>
             </div>
@@ -74,6 +73,7 @@
 {/if}
 <style lang='scss'>
   @import '../../../../lib/break';
+
   @keyframes bg {
     0% {
       background-position: 0 100%;
@@ -82,7 +82,8 @@
       background-position: 100% 0;
     }
   }
-  .i-tags{
+
+  .i-tags {
     color: #2b4d77;
     font-size: 18px;
     display: flex;
@@ -90,8 +91,9 @@
     justify-content: center;
     margin-right: 5px;
   }
+
   .tg {
-    padding:  0 20px;
+    padding: 0 20px;
     display: flex;
     flex-wrap: wrap;
   }
@@ -106,7 +108,7 @@
     min-height: 500px;
     border-radius: 4px;
     overflow: hidden;
-    background: var(--bg2);
+    background: var(--bg1);
     padding: var(--artP);
     box-shadow: rgba(0, 0, 0, .2) 0 10px 30px -10px;
     @include s() {
@@ -228,11 +230,13 @@
     top: 15px;
     right: 15px;
     z-index: 100;
+
     &:hover {
       opacity: 1;
     }
   }
-  .bg{
+
+  .bg {
     z-index: 0;
     pointer-events: none;
     display: block;
@@ -245,6 +249,7 @@
     background-size: cover;
     animation: bg 120s linear infinite alternate-reverse;
   }
+
   .ft {
     width: 100%;
     height: 100%;

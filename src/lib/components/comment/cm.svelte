@@ -1,108 +1,128 @@
 <script>
-  import Ava from "$lib/components/post/ava.svelte";
-  import { onMount } from "svelte";
-  import { randNm, rndAr } from "$lib/utils";
-  import Ld from "$lib/components/loading.svelte";
-  import { fly, fade } from "svelte/transition";
+    import Ava from "$lib/components/post/ava.svelte";
+    import {onMount} from "svelte";
+    import {getErr, randNm, rndAr} from "$lib/utils";
+    import Ld from "$lib/components/loading.svelte";
+    import {fly, fade} from "svelte/transition";
+    import {req} from "$lib/req";
 
-  export let postId = -1;
-  export let user={}
-  let sh = 0;
-  let av = 0;
-  let cm;
-  let nm;
-  let dis;
-  let ed = 0;
-  let ld = 0;
-  let msg = [];
-  const limit = 512
-  const avLs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    export let slug
+    export let reply
+    export let done
+    export let user = {}
+    let sh = 0;
+    let av = 0;
+    let cm;
+    let nm;
+    let dis;
+    let ed = 0;
+    let ld = 0;
+    let msg = [];
+    const limit = 512
+    const avLs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
-  function rn() {
-    nm = randNm();
-    av = localStorage.av = rndAr(avLs);
-  }
+    function rn() {
+        nm = randNm();
+        av = localStorage.av = rndAr(avLs);
+    }
 
-  function se() {
-    ed = 1;
-  }
+    function se() {
+        ed = 1;
+    }
 
-  async function cmt() {
-    ld = 1;
+    async function cmt() {
+        ld = 1;
+        const o = {
+            _slug: slug,
+            _name: nm,
+            _avatar: av,
+            content: cm,
+            reply
+        }
+        req('cm', o).then(a => {
+            user.name = o._name
+            user.avatar = o._avatar
+            done && done({...o, ...a})
+        }).catch(e => {
+            msg = [0, getErr(e)]
+        }).finally(() => {
+            ld = 0
+        })
+        // ld = 0;
+    }
 
-    // ld = 0;
-  }
-
-  onMount(() => {
-    localStorage.av = av = +av || +localStorage.av || (rndAr(avLs));
-    nm = nm || localStorage.nm || randNm();
-    av = +av || +localStorage.av || 1;
-  });
-  $:{
-    cm=(cm||'').replace(/\n+/g,'\n').slice(0,512)
-    dis = !nm?.length || !cm?.length;
-  }
+    onMount(() => {
+        localStorage.av = av = +av || +localStorage.av || (rndAr(avLs));
+        nm = nm || localStorage.nm || randNm();
+        av = +av || +localStorage.av || 1;
+    });
+    $:{
+        cm = (cm || '').replace(/\n+/g, '\n').slice(0, 512)
+        dis = !nm?.length || !cm?.length;
+    }
 </script>
 <div class="c">
-  {#if msg.length === 2}
-    <div class="tp"
-         class:su={msg[0]}
-         class:fa={!msg[0]}
-         transition:fly={{ y: 50, duration: 500 }}>
-      {msg[1]}
-    </div>
-  {/if}
-  {#if sh}
-    <div class="as" transition:fade>
-      {#each avLs as a}
-        <Ava idx={a}
-             size={40}
-             cls={'av'+(a===av?' act':'')}
-             click={()=>{
+    {#if msg.length === 2}
+        <div class="tp"
+             class:su={msg[0]}
+             class:fa={!msg[0]}
+             transition:fly={{ y: 50, duration: 500 }}>
+            {msg[1]}
+        </div>
+    {/if}
+    {#if sh}
+        <div class="as" transition:fade>
+            {#each avLs as a}
+                <Ava idx={a}
+                     size={40}
+                     cls={'av'+(a===av?' act':'')}
+                     click={()=>{
                 av=a
                 sh=0
             }}
-        />
-      {/each}
+                />
+            {/each}
+        </div>
+    {/if}
+    <div class="o">
+        <div class="nf">
+            <Ava idx={av} size="34" click={()=>sh=1}/>
+            {#if ed}
+                <input bind:value={nm} placeholder="name"
+                       on:blur={()=>ed=0}/>
+            {:else }
+                <span class="n">{nm}</span>
+                <button class="icon i-refresh" on:click={rn}></button>
+                <button class="icon i-ed" on:click={se}></button>
+            {/if}
+            <div class="s"></div>
+        </div>
+        <button class="icon i-pub"
+                class:dis={dis}
+                on:click={cmt}>
+        </button>
     </div>
-  {/if}
-  <div class="o">
-    <div class="nf">
-      <Ava idx={av} size="34" click={()=>sh=1} />
-      {#if ed}
-        <input bind:value={nm} placeholder="name"
-               on:blur={()=>ed=0} />
-      {:else }
-        <span class="n">{nm}</span>
-        <button class="icon i-refresh" on:click={rn}></button>
-        <button class="icon i-ed" on:click={se}></button>
-      {/if}
-      <div class="s"></div>
+    <div class="sd">
+        <div class="v">{cm}</div>
+        <textarea placeholder="write something~" bind:value={cm}></textarea>
+        <span class="t">{cm?.length || 0} / {limit}</span>
     </div>
-    <button class="icon i-pub"
-            class:dis={dis}
-            on:click={cmt}>
-    </button>
-  </div>
-  <div class="sd">
-    <div class="v">{cm}</div>
-    <textarea placeholder="write something~" bind:value={cm}></textarea>
-    <span class="t">{cm?.length||0} / {limit}</span>
-  </div>
-  <Ld act={ld} text="submitting" />
+    <Ld act={ld} text="submitting"/>
 </div>
 <style lang="scss">
-  .t{
+  .t {
     position: absolute;
     right: 15px;
     bottom: 10px;
     font-size: 13px;
     color: #2e4a65;
   }
-  .dis{
+
+  .dis {
     cursor: not-allowed;
     opacity: .5;
   }
+
   input, .n {
     display: flex;
     align-items: center;
@@ -117,16 +137,19 @@
     width: 130px;
     margin-left: 10px;
   }
-  input{
+
+  input {
     border: none;
     background: var(--bg1);
   }
-  .sd{
+
+  .sd {
     border-top: 1px solid #0d1926;
     background: var(--bg0);
     padding-bottom: 1px;
   }
-  .i-pub{
+
+  .i-pub {
     background: #1a2641;
     color: #fff;
     font-size: 18px;
@@ -134,6 +157,7 @@
     height: 30px;
     border-radius: 4px;
   }
+
   .nf {
     display: flex;
     align-items: center;
@@ -150,7 +174,7 @@
     border-radius: 4px;
     border: 1px solid #0c161f;
     background: var(--bg3);
-    box-shadow: inset rgba(0,0,0,.3) 0 0 5px;
+    box-shadow: inset rgba(0, 0, 0, .3) 0 0 5px;
   }
 
   .tp {
@@ -175,7 +199,7 @@
   }
 
   .fa {
-    background-color: transparentize(#ff6200, .3)
+    background-color: transparentize(#ff0044, .8)
   }
 
   .as {
@@ -200,6 +224,7 @@
         background-size: auto 80%;
         margin: 3px;
         border-radius: 6px;
+
         &.act, &:hover {
           background-color: #070c17;
         }

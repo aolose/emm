@@ -2,8 +2,9 @@ import { delCookie, getClient, getCookie, model, pageBuilder, resp, sqlFields } 
 import { CmUser, Comment, Post } from "$lib/server/model";
 import { db, sys } from "$lib/server/index";
 import { randomUUID } from "crypto";
-import { filter } from "$lib/utils";
+import {diffObj, filter} from "$lib/utils";
 import { cmStatus, permission } from "$lib/enum";
+import type {Obj} from "$lib/types";
 
 export const cmManager = (() => {
   const expire = 1e3 * 3600 * 24; // d
@@ -16,6 +17,7 @@ export const cmManager = (() => {
     if (us) {
       userCache.set(us.id, { avatar: us.avatar, name: us.name });
     }
+    return  us
   };
   const errMsg = (msg = "", keepToken = false) => {
     const r = resp(msg, 403);
@@ -68,8 +70,11 @@ export const cmManager = (() => {
           const postCache = new Map<number, { title: string, slug: string }>();
           arr.forEach(a => {
             const u = getUser(a.userId) as CmUser;
-            a._avatar = u.avatar;
-            a._name = u.name;
+            if(a.save===a.createAt)delete  (a as Obj<Comment>).save;
+            if(u){
+              a._avatar = u.avatar;
+              a._name = u.name;
+            }
             if (!slug) {
               let p = postCache.get(a.postId);
               if (!p) {
@@ -149,6 +154,7 @@ export const cmManager = (() => {
       const isAdm = getClient(req)?.ok(permission.Admin);
       if (isAdm) {
         cm.userId = 0;
+        cm._avatar=0
         cm.isAdm = 1;
       } else {
         if (cm.isAdm) return errMsg("forbidden");
@@ -163,8 +169,15 @@ export const cmManager = (() => {
           if (cm.id) return errMsg("no permission", true);
           user.token = randomUUID();
         }
-        const p = cm.postId && db.get(model(Post, { id: cm.postId }));
-        if (!p || !p.published) return errMsg("post not exist", true);
+      }
+      const rp = cm.reply && db.get(model(Comment,{id:cm.reply}))
+      const fp = {} as Obj<Post>
+      if(rp)fp.id=rp.postId
+      if(cm._slug)fp.slug=cm._slug
+      const p =  (fp.slug||fp.id)&& db.get(model(Post, fp));
+      if (!p || !p.published) return errMsg("post not exist", true);
+      cm.postId=p.id
+      if(!isAdm){
         if (cm._avatar) user.avatar = cm._avatar;
         if (cm._name) user.name = cm._name;
         cm.userId = user.id;
@@ -172,7 +185,15 @@ export const cmManager = (() => {
         user.del = -1;
         db.save(user);
       }
+
+      const o = {id:cm.id} as Obj<Comment>
       db.save(cm);
+      if(o.id)o.save=cm.save
+      else {
+        o.createAt=cm.createAt
+        o.id=cm.id
+      }
+      return o
     }
   };
 })();

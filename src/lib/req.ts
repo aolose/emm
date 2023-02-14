@@ -74,6 +74,7 @@ const loadCacheFromStorage = () => {
         } else ch = 1;
       });
     } catch (e) {
+      console.error(e)
       // ignore
     }
   }
