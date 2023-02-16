@@ -41,13 +41,13 @@
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(9, 12, 17, 0.9);
+    background: rgba(15 ,19 ,25, 0.9);
 
     &.m {
       background: linear-gradient(
                       90deg,
-                      rgba(9, 12, 17, 0.9),
-                      rgba(9, 12, 17, 0.5)
+                      rgba(15 ,19 ,25,  1),
+                      rgba(15 ,19 ,25, 0.4)
       );
     }
 

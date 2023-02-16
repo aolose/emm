@@ -84,8 +84,15 @@
     top: 0;
     bottom: 0;
     transition: .3s ease-in-out;
-    &.ex{
-      padding-top: 30px;
+    &.ex {
+      :global{
+        .ctx{
+          padding-top: 30px;
+          @include s() {
+            padding-top: 0;
+          }
+        }
+      }
     }
   }
 </style>

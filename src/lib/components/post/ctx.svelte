@@ -17,11 +17,8 @@
     align-content: baseline;
     transition: .3s ease-in-out;
     transform: translate3d(0,0,0);
-    &.ex{
-      transform: translate3d(0,60px,0);
-    }
     @include s(){
-      width: 98%;
+      width: 100%;
     }
   }
 </style>

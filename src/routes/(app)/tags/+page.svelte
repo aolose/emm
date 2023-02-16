@@ -3,6 +3,7 @@
     import Canvas from '$lib/components/ctx.svelte'
     import {bubbles, getColor} from "$lib/utils";
     import UpDownScroll from "$lib/components/UpDownScroll.svelte";
+    import {expand} from "$lib/store";
     let a =0
     export let data
     const d = data.d.split(',').filter(a=>a)
@@ -13,7 +14,7 @@
 </svelte:head>
 <UpDownScroll bind:down={a}/>
 <Canvas type={2}/>
-<div class="o">
+<div class="o" class:e={$expand}>
     <Ph bind:shrink={a}>Tags</Ph>
     <div class="v" class:s={a}>
         <div class="ls">
@@ -37,11 +38,14 @@
   @import "../../../lib/break";
 
   .o {
+    transition: .3s ease-in-out;
     display: flex;
     flex-direction: column;
     height: 100%;
   }
-
+  .e{
+    transform: translate3d(0,30px,0);
+  }
   .cc {
     padding: 60px 0 20px;
     position: relative;
@@ -93,12 +97,12 @@
   .v {
     position: absolute;
     top: 30px;
-    bottom: 10px;
+    bottom: 100px;
     left: 50%;
-    width: 90%;
+    width: 100%;
     transform: translate3d(-50%, 0, 0);
     overflow: auto;
-    padding: 100px 0 0;
+    padding: 100px 5% 0;
     transition: .3s ease-in-out;
     clip-path: inset(80px 0px 10px 0 round 8px);
   }

@@ -37,38 +37,41 @@
 
 {#if d}
     <div class={'bk icon i-close'} on:click={()=>goBack()}></div>
-    <div class='bg' style={sly}>
-        <div class='ft' style={style}></div>
-    </div>
-    <div class='co' class:ex={$expand}>
-        <Ctx>
-            <div class='v'>
-                <div class='h'>
-                    <h1>{d.title}</h1>
-                    {#if d.desc}<p>{d.desc}</p>{/if}
-                    <p>xxxxxx</p>
-                    <span>{time(d.createAt)}</span>
+    <div class="pg">
+        <div class='bg' style={sly}>
+            <div class='ft' style={style}></div>
+            <div class="fc"></div>
+        </div>
+        <div class='co' class:ex={$expand}>
+            <Ctx>
+                <div class='v'>
+                    <div class='h'>
+                        <h1>{d.title}</h1>
+                        {#if d.desc}<p>{d.desc}</p>{/if}
+                        <p>xxxxxx</p>
+                        <span>{time(d.createAt)}</span>
+                    </div>
+                    <div class='art'>
+                        <div class='ct' use:imageViewer>
+                            <Viewer ctx={d}/>
+                        </div>
+                        <div class='ss'></div>
+                        <PF/>
+                        <div class='tg'>
+                            {#if d._tag}
+                                <label class="icon i-tags"></label>
+                                <Tag t={d._tag}/>
+                            {/if}
+                        </div>
+                        <h1>
+                        </h1>
+                        <div class="cm">
+                            <Comment slug={p.slug}/>
+                        </div>
+                    </div>
                 </div>
-                <div class='art'>
-                    <div class='ct' use:imageViewer>
-                        <Viewer ctx={d}/>
-                    </div>
-                    <div class='ss'></div>
-                    <PF/>
-                    <div class='tg'>
-                        {#if d._tag}
-                            <label class="icon i-tags"></label>
-                            <Tag t={d._tag}/>
-                        {/if}
-                    </div>
-                    <h1>
-                    </h1>
-                    <div class="cm">
-                        <Comment slug={p.slug}/>
-                    </div>
-                </div>
-            </div>
-        </Ctx>
+            </Ctx>
+        </div>
     </div>
 {/if}
 <style lang='scss'>
@@ -168,6 +171,16 @@
     position: absolute;
     overflow: auto;
     transition: .3s ease-in-out;
+    @include s() {
+      overflow: visible;
+      bottom: inherit;
+      position: relative;
+      &:global{
+        .ctx{
+          padding: 0!important;
+        }
+      }
+    }
   }
 
   .h {
@@ -181,6 +194,11 @@
     margin: 30px auto 0;
     text-align: center;
     @include s() {
+      height: 250px;
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
       margin: 0 auto;
     }
 
@@ -202,8 +220,8 @@
       display: block;
       text-align: right;
       font-size: 12px;
-      color: #eee;
-      opacity: .5;
+      color: #69789b;
+      font-style: italic;
     }
   }
 
@@ -244,17 +262,43 @@
     left: 0;
     right: 0;
     top: 0;
-    bottom: 0;
+    height: 50%;
+    max-height: 100%;
+    min-height: 400px;
+    //bottom: 0;
     background: url('../../../../lib/components/img/1.jpg') center no-repeat;
     background-size: cover;
     animation: bg 120s linear infinite alternate-reverse;
+    @include s() {
+      position: relative;
+      border-bottom: none;
+      min-height: 0;
+      height: 300px;
+    }
+  }
+
+  .ft, .fc {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
   }
 
   .ft {
-    width: 100%;
-    height: 100%;
     opacity: .5;
-    filter: brightness(.5);
+  }
+
+  .pg {
+    background: var(--bg2);
+    height: 100%;
+    overflow: auto;
+  }
+  .fc {
+    background: linear-gradient(0, var(--bg2), transparent);
+    @include s(){
+      background: linear-gradient(0, var(--bg1), transparent);
+    }
   }
 
   @supports (mix-blend-mode: multiply) {
@@ -270,5 +314,8 @@
     max-width: 100%;
     width: 800px;
     margin: 20px auto 10px;
+    @include s() {
+      margin: 0;
+    }
   }
 </style>
