@@ -7,7 +7,6 @@ import {
     DBProxy,
     delCookie,
     getClient,
-    getCookie,
     getReqJson,
     md5,
     mkdir,

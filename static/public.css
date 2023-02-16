@@ -54,7 +54,7 @@ html {
 }
 
 body {
-	background: var(--bg0);
+	background: var(--bg1);
 	margin: 0;
 	height: 100%;
 	overflow: hidden;
