@@ -201,7 +201,7 @@
   }
 
   .a {
-    border: 1px solid rgba(40, 156, 249, .03);
+    border: 1px solid var(--bg7);
     border-radius: 10px;
     display: flex;
     flex-direction: column;

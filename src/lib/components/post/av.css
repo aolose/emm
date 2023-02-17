@@ -48,3 +48,6 @@
 .av11 {
     background-image: url("./icon/11.png");
 }
+.viewer-backdrop{
+    backdrop-filter: blur(2px);
+}

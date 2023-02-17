@@ -145,7 +145,6 @@
 
   .sd {
     border-top: 1px solid #0d1926;
-    background: var(--bg0);
     padding-bottom: 1px;
   }
 
@@ -172,9 +171,9 @@
   .c {
     margin-top: 20px;
     border-radius: 4px;
-    border: 1px solid #0c161f;
-    background: var(--bg3);
-    box-shadow: inset rgba(0, 0, 0, .3) 0 0 5px;
+    border: 1px solid var(--bg1);
+    background: var(--bg2);
+    box-shadow: inset rgba(0, 0, 0, .2) 0 0 5px;
   }
 
   .tp {

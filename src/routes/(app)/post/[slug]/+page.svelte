@@ -1,82 +1,84 @@
 <script>
-    import {getColor, goBack, time} from '$lib/utils'
-    import Ctx from '$lib/components/post/ctx.svelte'
-    import Viewer from '$lib/components/viewer.svelte'
-    import PF from '$lib/components/post/pf.svelte'
-    import Tag from '$lib/components/post/tag.svelte';
-    import {expand} from "$lib/store";
-    import {imageViewer} from '$lib/use'
-    import Comment from '$lib/components/comment/index.svelte'
+  import { getColor, goBack, time } from "$lib/utils";
+  import Ctx from "$lib/components/post/ctx.svelte";
+  import Viewer from "$lib/components/viewer.svelte";
+  import PF from "$lib/components/post/pf.svelte";
+  import Tag from "$lib/components/post/tag.svelte";
+  import { expand } from "$lib/store";
+  import { imageViewer } from "$lib/use";
+  import Comment from "$lib/components/comment/index.svelte";
 
-    export let data
-    const d = data.d
-    const p = data.p
-    let sly = ''
-    let style
-    let user = {}
-    $:{
-        if (d.createAt) style = ` background: linear-gradient(rgba(0,0,0,.7),${getColor(d.createAt / 3600)});`
-        if (d.banner) {
-            sly = `background-image:url(/res/${d.banner})`
-        }
+  export let data;
+  const d = data.d;
+  const p = data.p;
+  let sly = "";
+  let style;
+  let user = {};
+  $:{
+    if (d.createAt) style = ` background: linear-gradient(rgba(0,0,0,.7),${getColor(d.createAt / 3600)});`;
+    if (d.banner) {
+      sly = `background-image:url(/res/${d.banner})`;
     }
+  }
 </script>
 <svelte:head>
-    <title>{d.title}</title>
-    <meta property='description' content={d.desc}/>
-    <meta property='og:type' content='article'/>
-    <meta property='og:title' content={d.title}/>
-    <meta property='og:description' content={d.desc}/>
-    <meta property='og:url' content={d.slug}/>
-    <meta property='article:published_time' content={time(d.createAt)}/>
-    <meta property='article:tag' content={d._tag}/>
-    <meta property='og:image' content={`/res/_${d.banner}`}/>
-    <meta property='og:image:width' content='600'/>
-    <meta property='og:image:height' content='400'/>
+  <title>{d.title}</title>
+  <meta property="description" content={d.desc} />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content={d.title} />
+  <meta property="og:description" content={d.desc} />
+  <meta property="og:url" content={d.slug} />
+  <meta property="article:published_time" content={time(d.createAt)} />
+  <meta property="article:tag" content={d._tag} />
+  <meta property="og:image" content={`/res/_${d.banner}`} />
+  <meta property="og:image:width" content="600" />
+  <meta property="og:image:height" content="400" />
 </svelte:head>
 
 {#if d}
-    <div class={'bk icon i-close'} on:click={()=>goBack()}></div>
-    <div class="pg">
-        <div class='bg' style={sly}>
-            <div class='ft' style={style}></div>
-            <div class="fc"></div>
-        </div>
-        <div class='co' class:ex={$expand}>
-            <Ctx>
-                <div class='v'>
-                    <div class='h'>
-                        <h1>{d.title}</h1>
-                        {#if d.desc}<p>{d.desc}</p>{/if}
-                        <p>xxxxxx</p>
-                        <span>{time(d.createAt)}</span>
-                    </div>
-                    <div class='art'>
-                        <div class='ct' use:imageViewer>
-                            <Viewer ctx={d}/>
-                        </div>
-                        <div class='ss'></div>
-                        <PF/>
-                        <div class='tg'>
-                            {#if d._tag}
-                                <label class="icon i-tags"></label>
-                                <Tag t={d._tag}/>
-                            {/if}
-                        </div>
-                        <h1>
-                        </h1>
-                        <div class="cm">
-                            <Comment slug={p.slug}/>
-                        </div>
-                    </div>
-                </div>
-            </Ctx>
-        </div>
+  <div class={'bk icon i-close'} on:click={()=>goBack()}></div>
+  <div class="pg">
+    <div class="bg" style={sly}>
+      <div class="ft" style={style}></div>
+      <div class="fc"></div>
     </div>
+    <div class="co" class:ex={$expand}>
+      <Ctx>
+        <div class="v">
+          <div class="h">
+            <h1>{d.title}</h1>
+            {#if d.desc}<p>{d.desc}</p>{/if}
+            <p>xxxxxx</p>
+            <span>{time(d.createAt)}</span>
+          </div>
+          <div class="art">
+            <div class="ct" use:imageViewer>
+              <Viewer ctx={d} />
+            </div>
+            <div class="ss"></div>
+            <PF />
+            <div class="tg">
+              {#if d._tag}
+                <label class="icon i-tags"></label>
+                <Tag t={d._tag} />
+              {/if}
+            </div>
+            <h1>
+            </h1>
+            <div class="cm">
+              <Comment slug={p.slug} />
+            </div>
+          </div>
+        </div>
+      </Ctx>
+    </div>
+  </div>
 {/if}
-<style lang='scss'>
+<style lang="scss">
   @import '../../../../lib/break';
 
+  $bg: var(--bg6);
+  $bg2: var(--bg7);
   @keyframes bg {
     0% {
       background-position: 0 0;
@@ -111,7 +113,7 @@
     min-height: 500px;
     border-radius: 4px;
     overflow: hidden;
-    background: var(--bg1);
+    background: $bg;
     padding: var(--artP);
     box-shadow: rgba(0, 0, 0, .2) 0 10px 30px -10px;
     @include s() {
@@ -175,9 +177,9 @@
       overflow: visible;
       bottom: inherit;
       position: relative;
-      &:global{
-        .ctx{
-          padding: 0!important;
+      &:global {
+        .ctx {
+          padding: 0 !important;
         }
       }
     }
@@ -290,14 +292,15 @@
   }
 
   .pg {
-    background: var(--bg2);
+    background: $bg2;
     height: 100%;
     overflow: auto;
   }
+
   .fc {
-    background: linear-gradient(0, var(--bg2), transparent);
-    @include s(){
-      background: linear-gradient(0, var(--bg1), transparent);
+    background: linear-gradient(0, $bg2, transparent);
+    @include s() {
+      background: linear-gradient(0, $bg, transparent);
     }
   }
 
