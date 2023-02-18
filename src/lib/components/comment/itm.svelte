@@ -1,6 +1,7 @@
 <script>
     import Ava from '$lib/components/post/ava.svelte'
     import {time, getColor} from "$lib/utils";
+    import { slide } from "svelte/transition";
     let page = 1
     let total = 1
     export let d = {}
@@ -10,7 +11,7 @@
     const name = isAdm ? 'admin' : own ? user.name : d._name
     const avatar = isAdm ? -1 : own ? user.avatar : d._avatar
 </script>
-<div class="a">
+<div class="a" transition:slide>
     <div class="b">
         <Ava size="36" idx={avatar}/>
         <p style={`color:${isAdm?'#ff5722':getColor(name)}`}>{name}</p>
@@ -58,7 +59,7 @@
   }
 
   .c {
-    border: 1px solid var(--bg4);
+    border: 1px solid var(--bg5);
     flex: 1;
     display: flex;
     flex-direction: column;

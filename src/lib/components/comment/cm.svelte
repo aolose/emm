@@ -171,9 +171,8 @@
   .c {
     margin-top: 20px;
     border-radius: 4px;
-    border: 1px solid var(--bg1);
+    border: 1px solid var(--bg5);
     background: var(--bg2);
-    box-shadow: inset rgba(0, 0, 0, .2) 0 0 5px;
   }
 
   .tp {
