@@ -1,43 +1,44 @@
 <script>
-    import Ava from '$lib/components/post/ava.svelte'
-    import {time, getColor} from "$lib/utils";
-    import { slide } from "svelte/transition";
-    let page = 1
-    let total = 1
-    export let d = {}
-    export let user = {}
-    const own = d._own
-    const isAdm = d.isAdm
-    const name = isAdm ? 'admin' : own ? user.name : d._name
-    const avatar = isAdm ? -1 : own ? user.avatar : d._avatar
+  import Ava from "$lib/components/post/ava.svelte";
+  import { time, getColor } from "$lib/utils";
+  import { slide } from "svelte/transition";
+
+  let page = 1;
+  let total = 1;
+  export let d = {};
+  export let user = {};
+  const own = d._own;
+  const isAdm = d.isAdm;
+  const name = d._name;
+  const avatar = d._avatar;
 </script>
 <div class="a" transition:slide>
-    <div class="b">
-        <Ava size="36" idx={avatar}/>
-        <p style={`color:${isAdm?'#ff5722':getColor(name)}`}>{name}</p>
+  <div class="b">
+    <Ava size="36" idx={avatar} />
+    <p style={`color:${isAdm?'#ff5722':getColor(name)}`}>{name}</p>
+  </div>
+  <div class="c">
+    <p>{d.content}
+      sadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasd
+    </p>
+    <div class="n">
+      <div class="u">
+        <button class="icon i-reply"></button>
+        {#if d._own === 1}
+          <button class="icon i-ed"></button>
+        {/if}
+        {#if d._own}
+          <button class="icon i-del"></button>
+        {/if}
+      </div>
+      <div class="t">
+        <span>{time(d.createAt)}</span>
+        {#if d.save}
+          <span class="e">last edit at {time(d.save)}</span>
+        {/if}
+      </div>
     </div>
-    <div class="c">
-        <p>{d.content}
-            sadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasd
-        </p>
-        <div class="n">
-            <div class="u">
-                <button class="icon i-reply"></button>
-                {#if d._own === 1}
-                    <button class="icon i-ed"></button>
-                {/if}
-                {#if d._own}
-                    <button class="icon i-del"></button>
-                {/if}
-            </div>
-            <div class="t">
-                <span>{time(d.createAt)}</span>
-                {#if d.save}
-                    <span class="e">last edit at {time(d.save)}</span>
-                {/if}
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
 <style lang="scss">
   .a {
