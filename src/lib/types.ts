@@ -41,7 +41,7 @@ export type reqOption = {
 
 
 export type apiHook = {
-    before?: (param: unknown|never) => reqParams | void,
+    before?: (param: reqParams) => reqParams | void,
     after?: (result: never) => unknown,
 }
 export type apiHooks = {

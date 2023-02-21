@@ -1,7 +1,6 @@
 <script>
     import Ava from "$lib/components/post/ava.svelte";
-    import {onMount} from "svelte";
-    import {getErr, randNm, rndAr} from "$lib/utils";
+    import {getErr} from "$lib/utils";
     import Ld from "$lib/components/loading.svelte";
     import {fly, fade} from "svelte/transition";
     import {req} from "$lib/req";
@@ -10,21 +9,20 @@
     export let reply
     export let done
     export let user = {}
+    export let cur = {}
     let sh = 0;
-    let av = 0;
     let cm;
-    let nm;
     let dis;
     let ed = 0;
     let ld = 0;
     let msg = [];
-    const limit = 512
-    const avLs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-
-    function rn() {
-        nm = randNm();
-        av = localStorage.av = rndAr(avLs);
+    $:{
+        if (msg.length) {
+            setTimeout(() => msg = [], 2e3)
+        }
     }
+    export let av = []
+    const limit = 512
 
     function se() {
         ed = 1;
@@ -34,15 +32,19 @@
         ld = 1;
         const o = {
             _slug: slug,
-            _name: nm,
-            _avatar: av,
+            _name: cur.name,
+            _avatar: cur.avatar,
             content: cm,
-            reply
         }
+        if (reply?.cm) o.reply = reply.cm
+        if (reply?.topic) o.topic = reply.topic
         req('cm', o).then(a => {
-            user.name = o._name
-            user.avatar = o._avatar
-            done && done({...o, ...a})
+            user.set(o._name, o._avatar)
+            const v = {...o, ...a, own: 1}
+            if (o.reply) v._reply = reply.name
+            done && done(v)
+            msg = [1, 'post success!']
+            cm = ''
         }).catch(e => {
             msg = [0, getErr(e)]
         }).finally(() => {
@@ -51,17 +53,12 @@
         // ld = 0;
     }
 
-    onMount(() => {
-        localStorage.av = av = +av || +localStorage.av || (rndAr(avLs));
-        nm = nm || localStorage.nm || randNm();
-        av = +av || +localStorage.av || 1;
-    });
     $:{
         cm = (cm || '').replace(/\n+/g, '\n').slice(0, 512)
-        dis = !nm?.length || !cm?.length;
+        dis = !cur.name?.length || !cm?.length;
     }
 </script>
-<div class="c">
+<div class="c" class:m={reply}>
     {#if msg.length === 2}
         <div class="tp"
              class:su={msg[0]}
@@ -70,14 +67,14 @@
             {msg[1]}
         </div>
     {/if}
-    {#if sh}
+    {#if !reply && sh}
         <div class="as" transition:fade>
-            {#each avLs as a}
+            {#each av as a}
                 <Ava idx={a}
                      size={40}
-                     cls={'av'+(a===av?' act':'')}
+                     cls={'av'+(a===cur.avatar?' act':'')}
                      click={()=>{
-                av=a
+                cur.avatar=a
                 sh=0
             }}
                 />
@@ -86,14 +83,18 @@
     {/if}
     <div class="o">
         <div class="nf">
-            <Ava idx={av} size="34" click={()=>sh=1}/>
-            {#if ed}
-                <input bind:value={nm} placeholder="name"
-                       on:blur={()=>ed=0}/>
+            {#if !reply}
+                <Ava idx={cur.avatar} size="34" click={()=>sh=1}/>
+                {#if ed}
+                    <input bind:value={cur.name} placeholder="name"
+                           on:blur={()=>ed=0}/>
+                {:else }
+                    <span class="n">{cur.name}</span>
+                    <button class="icon i-refresh" on:click={cur.refresh}></button>
+                    <button class="icon i-ed" on:click={se}></button>
+                {/if}
             {:else }
-                <span class="n">{nm}</span>
-                <button class="icon i-refresh" on:click={rn}></button>
-                <button class="icon i-ed" on:click={se}></button>
+                <p>reply @{reply.name}</p>
             {/if}
             <div class="s"></div>
         </div>
@@ -161,6 +162,11 @@
     display: flex;
     align-items: center;
     flex: 1;
+
+    p {
+      font-size: 13px;
+      color: var(--darkgrey);
+    }
   }
 
   .n {
@@ -262,5 +268,40 @@
     bottom: 10px;
     position: absolute;
     height: auto;
+  }
+
+  .m {
+    margin: 0;
+    height: auto;
+
+    .i-pub {
+      width: auto;
+      color: #1c93ff;
+      background: none;
+      height: 20px;
+      margin-top: 5px;
+    }
+
+    .o {
+      padding: 5px 10px;
+    }
+
+    .sd {
+      border: none;
+    }
+
+    .v, textarea {
+      padding: 0 10px;
+    }
+
+    .t {
+      right: 10px;
+      bottom: 5px;
+      font-size: 12px;
+    }
+
+    .v {
+      min-height: 50px;
+    }
   }
 </style>

@@ -4,29 +4,29 @@
     export let go;
     export let tm;
     export let length = 4;
+    let first, isF, f, n, last, pg
     const setPage = n => () => {
         go(n)
         page = n
     }
-    $: first = page === 1;
-    $: last = page === total;
-    let pg;
-    $: isF = typeof go === 'function';
-
     $: {
-        pg = [];
+        last = page === total;
+        first = page === 1;
+        isF = typeof go === 'function';
+        let g = [];
         if (2 < total) {
-            if (page < total && page > 1) pg = [page];
-            for (let i = 1; i <= length && pg.length < length; i++) {
+            if (page < total && page > 1) g = [page];
+            for (let i = 1; i <= length && g.length < length; i++) {
                 const pr = page - i;
                 const nx = page + i;
-                if (pr > 1) pg = [pr, ...pg];
-                if (nx < total) pg = [...pg, nx];
+                if (pr > 1) g = [pr, ...g];
+                if (nx < total) g = [...g, nx];
             }
         }
+        f = g[0] > 2 ? '...' : '';
+        n = g[g.length - 1] < total - 1 ? '...' : '';
+        pg = [...g]
     }
-    $: f = pg[0] > 2 ? '...' : '';
-    $: n = pg[pg.length - 1] < total - 1 ? '...' : '';
 </script>
 
 <nav class:lt={tm}>
@@ -54,6 +54,9 @@
 </nav>
 
 <style lang="scss">
+  :root{
+    --act:var(--bg0)
+  }
   nav {
     align-items: center;
     justify-content: center;
@@ -64,7 +67,7 @@
     }
 
     .act {
-      background: var(--bg0);
+      background: var(--act);
     }
 
     .nv {

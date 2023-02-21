@@ -1,49 +1,173 @@
 <script>
-  import Ava from "$lib/components/post/ava.svelte";
-  import { time, getColor } from "$lib/utils";
-  import { slide } from "svelte/transition";
+    import Ava from "$lib/components/post/ava.svelte";
+    import {time} from "$lib/utils";
+    import {slide} from "svelte/transition";
+    import Cm from './cm.svelte'
+    import Pg from '$lib/components/pg.svelte'
+    import {req} from "$lib/req";
+    import {method} from "$lib/enum";
 
-  let page = 1;
-  let total = 1;
-  export let d = {};
-  export let user = {};
-  const own = d._own;
-  const isAdm = d.isAdm;
-  const name = d._name;
-  const avatar = d._avatar;
+    export let d = {};
+    export let user = {};
+
+    export let cur = {}
+    export let topic
+    const own = d._own;
+    const isAdm = d.isAdm;
+    $:name = own === 1 && user.name || d._name;
+    $:avatar = own === 1 && user.avatar || d._avatar;
+    let page = 1;
+    export let done
+
+    function reply() {
+        if (cur.reply === d.id) {
+            cur.set(0, 0)
+        } else {
+            cur.set(topic || d.id, d.id)
+        }
+    }
+
+    function ok(a) {
+        d._cms = {
+            items: (d._cms?.items || []).concat(a),
+            total: d.total || 1
+        }
+        cur.set(0, 0)
+    }
+
+    function go(n) {
+        page = n
+        req('cmLs', {
+            page,
+            topic: d.id
+        }, {method: method.GET}).then(a => {
+            d._cms = a
+        })
+    }
 </script>
-<div class="a" transition:slide>
-  <div class="b">
-    <Ava size="36" idx={avatar} />
-    <p style={`color:${isAdm?'#ff5722':getColor(name)}`}>{name}</p>
-  </div>
-  <div class="c">
-    <p>{d.content}
-      sadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasdsadsadwasd
-    </p>
-    <div class="n">
-      <div class="u">
-        <button class="icon i-reply"></button>
-        {#if d._own === 1}
-          <button class="icon i-ed"></button>
-        {/if}
-        {#if d._own}
-          <button class="icon i-del"></button>
-        {/if}
-      </div>
-      <div class="t">
-        <span>{time(d.createAt)}</span>
-        {#if d.save}
-          <span class="e">last edit at {time(d.save)}</span>
-        {/if}
-      </div>
+<div class="a" class:m={topic} transition:slide>
+    {#if !topic}
+        <div class="b">
+            <div class="v">
+                <Ava size={topic?16:32} idx={avatar}/>
+            </div>
+            <p style={`color:${isAdm?'#ff5722':''}`}>{name}</p>
+        </div>
+    {/if}
+    <div class="c">
+        <p>
+            {#if topic}
+                <label>
+                    <span style={`color:${isAdm?'#ff5722':''}`}>{name}: </span>
+                </label>
+            {/if}
+            {#if d._reply}<span>@{d._reply}</span>{/if}
+            {d.content}
+        </p>
+        <div class="n">
+            <div class="u">
+                <button class="icon i-reply" on:click={reply}></button>
+                {#if own === 1}
+                    <button class="icon i-ed"></button>
+                {/if}
+                {#if own}
+                    <button class="icon i-del"></button>
+                {/if}
+            </div>
+            <div class="t">
+                <span>{time(d.createAt)}</span>
+                {#if d.save}
+                    <span class="e">last edit at {time(d.save)}</span>
+                {/if}
+            </div>
+        </div>
     </div>
-  </div>
+    {#if (topic ? cur.topic === topic : cur.topic === d.id) && cur.reply === d.id}
+        <div class="r" transition:slide>
+            <Cm {user} {cur} done={done||ok} reply={{
+           topic:topic||d.id,
+           cm:d.id,
+           name:name
+       }}/>
+        </div>
+    {/if}
+    {#if !topic}
+        <div class="ls">
+            {#each (d._cms?.items || []) as i}
+                <svelte:self d={i} {cur} {user} done={ok} topic={d.id}/>
+            {/each}
+            {#if d._cms?.total > 1}
+                <div class="p">
+                    <Pg {page} total={d._cms?.total||1} {go}/>
+                </div>
+            {/if}
+        </div>
+    {/if}
 </div>
 <style lang="scss">
+  .p{
+    display: flex;
+    justify-content: flex-end;
+  }
+  .ls {
+    width: 100%;
+    padding-left: 80px;
+  }
+
+  .r {
+    width: 100%;
+    padding-left: 80px;
+  }
+
   .a {
     display: flex;
+    flex-wrap: wrap;
     margin-bottom: 15px;
+  }
+
+  .m {
+    margin: 10px 0;
+    border-radius: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--bg5);
+    flex-direction: column;
+
+    .r {
+      padding-left: 0;
+    }
+
+    .n {
+      button {
+        padding: 0;
+      }
+    }
+
+    .c {
+      border: none;
+      background: none;
+      p {
+        color: #8396af;
+        display: flex;
+        padding: 0 5px;
+        font-size: 13px;
+        line-height: 2;
+        &>span{
+          padding:  0 5px;
+          color: var(--darkgrey-h);
+        }
+      }
+    }
+  }
+
+  label {
+    display: inline-flex;
+    align-items: center;
+
+    span {
+      font-size: inherit;
+      line-height: inherit;
+      padding-left: 5px;
+    }
   }
 
   .b {
@@ -54,6 +178,7 @@
     align-items: center;
 
     p {
+      margin-top: 5px;
       word-break: break-all;
       font-size: 12px;
     }
@@ -61,6 +186,7 @@
 
   .c {
     border: 1px solid var(--bg5);
+    border-radius: 4px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -98,8 +224,9 @@
 
     button {
       margin-right: 5px;
-      padding: 5px;
+      padding: 5px 0;
       opacity: .5;
+      left: -5px;
 
       &:hover {
         opacity: 1;

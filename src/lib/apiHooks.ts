@@ -1,5 +1,5 @@
-import type {apiHooks, Model} from "$lib/types";
-import type {Post, Tag} from "$lib/server/model";
+import type {apiHooks, Obj} from "$lib/types";
+import type {Post, Tag,Comment} from "$lib/server/model";
 import {modelArr2Str} from "$lib/utils";
 
 /**
@@ -8,15 +8,25 @@ import {modelArr2Str} from "$lib/utils";
 export const hooks: apiHooks = {
     tag: {
         post: {
-            before: o => modelArr2Str(o, "_posts")
+            before: o => modelArr2Str(o as Tag, "_posts")
         }
     },
     post: {
         post: {
-            before: (o: Post & { _?: number }) => {
+            before: v => {
+                const o = v as Post & { _?: number }
                 if (o.id && o._) delete o._
                 modelArr2Str(o, "_reqs")
             }
         }
+    },
+    cm:{
+        post:{
+            before:v=>{
+                const o = v as Obj<Comment>
+                if(o.topic===o.reply)delete  o.reply;
+            }
+        }
     }
+
 };

@@ -294,23 +294,20 @@ export const delay = (fn: (...params: never[]) => void, ms = 0) => {
 
 export const filter = <T extends Model>(o: Obj<T>, keys: (keyof T)[], nullAble = true) => {
     if (!o) return o;
-    const delK = new Set<keyof T>();
+    const limit = new Set(keys)
     const objKeys = new Set<keyof T>(Object.keys(o) as (keyof T)[]);
-    if (keys.length) keys.forEach(a => {
-        if (!objKeys.has(a)) {
-            delK.add(a);
-        }
-    });
     for (const k of objKeys) {
-        if (!delK.has(k)) {
-            const v = o[k];
-            if (nullAble || v !== undefined && v !== null) {
-                continue;
+        if (limit.size) {
+            if (!limit.has(k)) {
+                delete o[k]
             }
         }
-        delete o[k];
+        const v = o[k];
+        if (nullAble || v !== undefined && v !== null) {
+            continue;
+        }
+        delete o[k]
     }
-
     return o;
 };
 
@@ -495,11 +492,16 @@ const colors = [
 ];
 
 export const getColor = (a: number | string, opacity = 1) => {
+    const d = colors.length
     if (typeof a === 'string') {
-        a = a.split('').reduce((a, b) => a + b.charCodeAt(0), 0)
+        let e = 0
+        let l = a.length
+        while (l--) e += (a.codePointAt(l)||0) % d
+        a = e
     }
     a = Math.floor(a);
-    const c = colors[a % colors.length];
+    console.log(a)
+    const c = colors[a % d];
     if (opacity < 1) {
         const r = parseInt(c.slice(1, 3), 16)
         const g = parseInt(c.slice(3, 5), 16)
@@ -688,7 +690,9 @@ export const watch = (...args: unknown[]) => {
 export const getErr = (e: Error | { data: { message: string } | string }) => {
     if ('data' in e) {
         const d = e.data
-        if ('message' in (d as object)) return (d as { message: string }).message
+        if (typeof d === 'object') {
+            if ('message' in (d as object)) return (d as { message: string }).message
+        }
         return d as string
     }
     return e.message
