@@ -197,7 +197,8 @@
     top: 0;
     bottom: 0;
     right: 0;
-    background: transparentize(#0d1017, .3);
+    backdrop-filter: blur(2px);
+    background: rgba(100,100,150,.1);
   }
 
   .a {
