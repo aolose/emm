@@ -6,18 +6,16 @@
     import Ck from '$lib/components/check.svelte'
     import {onMount} from "svelte";
     import {req} from "$lib/req";
+    import Loading from '$lib/components/loading.svelte'
+    import {watch} from "$lib/utils";
 
     let status = -1;
     let read = -1;
     let total = 1;
     let page = 1;
     let allowCm = 0;
+    let ld = 0
     let _al = 0
-    const cmRead = [
-        [-1, "All"],
-        [1, "Read"],
-        [0, "UnRead"]
-    ];
     const cStatus = [
         [-1, "All"],
         [cmStatus.Pending, "Pending"],
@@ -25,29 +23,28 @@
         [cmStatus.Reject, "Reject"]
     ];
 
-    const ls = [
-        {
-            content: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-            reply: "ssdasds", "av": 0,
-            name: "abcd2",
-            time: Date.now(),
-            ip: '10.0.0.1',
-            status: 0,
-            _post: {
-                slug: 'xxxxx',
-                title: 'adsad'
-            }
-        }
-    ];
+    const ftWatch = watch(status)
+    let ls = [];
 
     function go(n = 1) {
         page = n;
+        ld = 1
+        req('cmLs', {page, status, read}, {method: method.GET}).then(({total: t, items}) => {
+            total = t
+            ls = items
+        }).finally(()=>{
+            ld=0
+        })
     }
 
     onMount(() => {
         req('alCm', undefined, {method: method.GET}).then(a => _al = allowCm = +a)
+        go()
     })
     $:{
+        ftWatch(() => {
+            go()
+        }, status)
         if (_al !== allowCm) {
             _al = allowCm
             req('alCm', _al)
@@ -60,35 +57,35 @@
             <h1>Comments</h1>
             <div class="b">
                 <div>
-                    <span class="icon i-read"></span>
-                    <Select bind:value={read} items={cmRead}/>
-                </div>
-                <div>
                     <span class="icon i-status"></span>
                     <Select bind:value={status} items={cStatus}/>
                 </div>
             </div>
             <button class="icon i-refresh"></button>
         </div>
-        <div class="ls">
-            {#each ls as c }
-                <div class="r">
-                    <Item d={c}/>
+        <div class="e">
+            <div class="ls">
+                <div>
+                    {#each ls as c }
+                        <div class="r">
+                            <Item d={c}/>
+                        </div>
+                    {/each}
                 </div>
-            {/each}
-        </div>
-        <div class="p">
-            <div>
-                <Ck bind:value={allowCm} name="Allow guest comments"/>
             </div>
-            <Pg {page} {total} {go}/>
+            <div class="p">
+                <div>
+                    <Ck bind:value={allowCm} name="Allow guest comments"/>
+                </div>
+                <Pg {page} {total} {go}/>
+            </div>
+            <Loading act={ld}/>
         </div>
     </div>
-
-
 </div>
 <style lang="scss">
   .x {
+    height: 100%;
     background: var(--bg2);
   }
 
@@ -96,15 +93,23 @@
     padding: 5px;
     margin-left: 20px;
   }
-
-  .ls {
-    flex: 1;
+  .e{
+    display: flex;
+    flex-direction: column;
   }
-
-  .x {
-    height: 100%;
+  .ls, .e {
+   flex-grow: 1;
   }
-
+  .ls{
+    &>div{
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      overflow: auto;
+    }
+  }
   .a {
     padding-bottom: 20px;
     display: flex;

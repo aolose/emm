@@ -7,6 +7,9 @@
     import Ld from "$lib/components/loading.svelte";
     import {method} from "$lib/enum";
     import {randNm, rndAr} from "$lib/utils";
+    import {msg} from "./msg";
+    import {fly} from "svelte/transition";
+
     let page = 1;
     let total = 1;
     let ld = 0;
@@ -16,9 +19,13 @@
         reply: 0,
         name: '',
         avatar: '',
-        set(topic, reply) {
-            cur.topic = topic
-            cur.reply = reply
+
+        set(o = {}) {
+            Object.keys(o).forEach(k => {
+                if (Object.hasOwn(cur, k)) {
+                    cur[k] = o[k]
+                }
+            })
         },
         refresh() {
             cur.name = randNm()
@@ -42,6 +49,11 @@
         cur.name = localStorage.nm || randNm()
         cur.avatar = localStorage.av || rndAr(avLs)
         go();
+        msg.subscribe(m => {
+            if (m.length) {
+                setTimeout(() => msg.set([]), 2e3)
+            }
+        })
     });
     let ls = [];
     const user = {
@@ -68,7 +80,16 @@
         ls = ls.filter(a => a !== i)
     }
     export let slug = ''
+
 </script>
+{#if $msg.length === 2}
+    <div class="tp"
+         class:su={$msg[0]}
+         class:fa={!$msg[0]}
+         transition:fly={{ y: -50, duration: 500 }}>
+        {$msg[1]}
+    </div>
+{/if}
 <div class="a">
     {#each ls as i}
         <Itm d={i} {cur} {user} remove={rm(i)}/>
@@ -81,9 +102,37 @@
     <Ld act={ld}/>
 </div>
 <Cm av={avLs} {slug} {cur} {user} done={done}/>
-<style>
-    .p {
-        display: flex;
-        justify-content: center;
-    }
+<style lang="scss">
+  .p {
+    display:flex;
+    justify-content:center;
+
+  }
+  .tp {
+    text-align:center;
+    min-width: 200px;
+    max-width: 90%;
+    position:fixed;
+    z-index: 99;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, .25) 0 3px 10px -4px;
+    padding: 10px;
+    top: 60px;
+    min-height: 30px;
+    transform: translateX(-50%);
+    left: 50%;
+    color: #fff;
+    backdrop-filter: blur(2px);
+
+  }
+
+  .su {
+    background-color: transparentize(#16b005, .3)
+
+  }
+
+  .fa {
+    background-color: transparentize(#ff0044, .8)
+
+  }
 </style>

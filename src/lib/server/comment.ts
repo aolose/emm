@@ -1,4 +1,14 @@
-import {delCookie, getClient, getCookie, model, pageBuilder, resp, setCookie, sqlFields} from "$lib/server/utils";
+import {
+    delCookie,
+    getClient,
+    getCookie,
+    getIp,
+    model,
+    pageBuilder,
+    resp,
+    setCookie,
+    sqlFields
+} from "$lib/server/utils";
 import {CmUser, Comment, Post} from "$lib/server/model";
 import {db, sys} from "$lib/server/index";
 import {randomUUID} from "crypto";
@@ -70,7 +80,7 @@ export const cmManager = (() => {
                 if (a.save === a.createAt) delete (a as Obj<Comment>).save
                 return patchUserInfo(a)
             }) as Comment[], [
-            'content', 'createAt', 'save', '_name', '_avatar', '_name', '_reply', 'id','_own'
+            'content', 'createAt', 'save', '_name', '_avatar', '_name', '_reply', 'id', '_own'
         ])
         return {total, items}
     }
@@ -119,7 +129,7 @@ export const cmManager = (() => {
             }
             const w = where.length ? [where.join(" and "), ...values] as [string, ...unknown[]] : undefined;
             return pageBuilder(page,
-                5, Comment,
+                slug ? 5 : 10, Comment,
                 ["createAt desc"],
                 ks, w, arr => {
                     const postCache = new Map<number, { title: string, slug: string }>();
@@ -208,6 +218,7 @@ export const cmManager = (() => {
             const n = Date.now();
             const tk = getTk(req);
             const cm = model(Comment, await req.json());
+            cm.content = cm.content?.slice(0, 512)
             const user = model(CmUser, {token: tk}) as CmUser;
             const isAdm = getClient(req)?.ok(permission.Admin);
             if (!isAdm && cm.isAdm) return errMsg("forbidden");
@@ -262,6 +273,7 @@ export const cmManager = (() => {
                     userCache.set(user.id, {name: user.name, avatar: user.avatar});
                 }
             }
+            cm.ip = getIp(req) || ''
             db.save(cm);
             const o = {id: cm.id} as Obj<Comment>;
             if (o.id) {

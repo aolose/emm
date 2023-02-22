@@ -23,9 +23,12 @@
 
     function reply() {
         if (cur.reply === d.id) {
-            cur.set(0, 0)
+            cur.set({reply: 0})
         } else {
-            cur.set(topic || d.id, d.id)
+            cur.set({
+                topic: topic || d.id,
+                reply: d.id
+            })
         }
     }
 
@@ -34,13 +37,13 @@
             items: (d._cms?.items || []).concat(a),
             total: d.total || 1
         }
-        cur.set(0, 0)
+        cur.set({reply: 0})
     }
 
     function del(id) {
         return () => {
             confirm('sure to delete?').then((a) => {
-                if(a)req('cm', id, {method: method.DELETE}).then((err) => {
+                if (a) req('cm', id, {method: method.DELETE}).then((err) => {
                     if (!err) {
                         remove && remove(id)
                     }
@@ -172,7 +175,7 @@
   .m {
     margin: 10px 0;
     border-radius: 4px;
-    background: var(--bg2);
+    background: var(--bg);
     border: 1px solid var(--bg5);
     flex-direction: column;
 
@@ -212,7 +215,7 @@
     span {
       font-size: inherit;
       line-height: inherit;
-      padding:0 5px;
+      padding: 0 5px;
     }
   }
 
@@ -236,7 +239,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: var(--bg2);
+    background: var(--bg);
 
     p {
       flex-grow: 1;
@@ -256,7 +259,8 @@
     opacity: .6;
     flex: 1;
     align-items: center;
-    span{
+
+    span {
       padding-left: 10px;
     }
   }

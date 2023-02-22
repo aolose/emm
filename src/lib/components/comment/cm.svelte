@@ -2,8 +2,9 @@
     import Ava from "$lib/components/post/ava.svelte";
     import {getErr} from "$lib/utils";
     import Ld from "$lib/components/loading.svelte";
-    import {fly, fade} from "svelte/transition";
+    import {fade} from "svelte/transition";
     import {req} from "$lib/req";
+    import {msg} from "./msg";
 
     export let slug
     export let reply
@@ -16,11 +17,9 @@
     let dis;
     let ed = 0;
     let ld = 0;
-    let msg = [];
     $:{
-        if (msg.length) {
-            setTimeout(() => msg = [], 2e3)
-        }
+
+        if (cur.name?.length > 10) cur.set({name: cur.name.slice(0, 10)})
     }
     export let av = []
     const limit = 512
@@ -44,10 +43,10 @@
             const v = {...o, ...a, _own: 1}
             if (o.reply) v._reply = reply.name
             done && done(v)
-            msg = [1, 'post success!']
+            msg.set([1, 'post success!'])
             cm = ''
         }).catch(e => {
-            msg = [0, getErr(e)]
+            msg.set([0, getErr(e)])
         }).finally(() => {
             ld = 0
         })
@@ -56,7 +55,7 @@
 
     function edi() {
         req('cm', {id: edit.id, content: cm}).then(a => {
-            msg=[1,'update success']
+            msg.set([1, 'update success'])
             edit.done({
                 ...a,
                 content: cm
@@ -65,19 +64,11 @@
     }
 
     $:{
-        cm = (cm || '').replace(/\n+/g, '\n').slice(0, 512)
+        cm = (cm || '').replace(/\n+/g, '\n').slice(0, limit)
         dis = !cur.name?.length || !cm?.length;
     }
 </script>
 <div class="c" class:m={reply} class:ed={edit}>
-    {#if msg.length === 2}
-        <div class="tp"
-             class:su={msg[0]}
-             class:fa={!msg[0]}
-             transition:fly={{ y: 50, duration: 500 }}>
-            {msg[1]}
-        </div>
-    {/if}
     {#if !reply && !edit && sh}
         <div class="as" transition:fade>
             {#each av as a}
@@ -132,6 +123,9 @@
     <Ld act={ld} text="submitting"/>
 </div>
 <style lang="scss">
+  :root{
+    --bg:rgba(0,0,0,.15)
+  }
   .ft {
     display: flex;
     justify-content: space-between;
@@ -209,32 +203,7 @@
     margin-top: 20px;
     border-radius: 4px;
     border: 1px solid var(--bg5);
-    background: var(--bg2);
-  }
-
-  .tp {
-    text-align: center;
-    min-width: 200px;
-    max-width: 90%;
-    position: absolute;
-    z-index: 99;
-    border-radius: 6px;
-    box-shadow: rgba(0, 0, 0, .25) 0 3px 10px -4px;
-    padding: 10px;
-    bottom: 110%;
-    min-height: 30px;
-    transform: translateX(-50%);
-    left: 50%;
-    color: #fff;
-    backdrop-filter: blur(2px);
-  }
-
-  .su {
-    background-color: transparentize(#16b005, .3)
-  }
-
-  .fa {
-    background-color: transparentize(#ff0044, .8)
+    background: var(--bg);
   }
 
   .as {

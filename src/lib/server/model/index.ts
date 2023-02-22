@@ -173,6 +173,7 @@ export class Comment {
     _own?: 1 | 2;
     _slug?: string
     _post?: { title: string, slug: string };
+
 }
 
 export class CmUser {

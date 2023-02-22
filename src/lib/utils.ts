@@ -500,7 +500,6 @@ export const getColor = (a: number | string, opacity = 1) => {
         a = e
     }
     a = Math.floor(a);
-    console.log(a)
     const c = colors[a % d];
     if (opacity < 1) {
         const r = parseInt(c.slice(1, 3), 16)
