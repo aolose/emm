@@ -175,6 +175,7 @@ export class DB {
   delByPk<T extends Model>(c: Class<T>, pks: unknown[]) {
     const pk = pkMap[c.name] as string;
     const sql = `delete from ${c.name} where ${pk} in (${sqlFields(pks.length)})`;
+    Log.debug('delete',sql,pks)
     return this.db.prepare(sql).run(...pks);
   }
 

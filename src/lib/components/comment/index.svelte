@@ -7,7 +7,6 @@
     import Ld from "$lib/components/loading.svelte";
     import {method} from "$lib/enum";
     import {randNm, rndAr} from "$lib/utils";
-
     let page = 1;
     let total = 1;
     let ld = 0;
@@ -65,12 +64,14 @@
         if (cur.name) localStorage.nm = cur.name
         if (cur.avatar) localStorage.av = cur.avatar
     }
-
+    const rm = i => () => {
+        ls = ls.filter(a => a !== i)
+    }
     export let slug = ''
 </script>
 <div class="a">
     {#each ls as i}
-        <Itm d={i} {cur} {user}/>
+        <Itm d={i} {cur} {user} remove={rm(i)}/>
     {/each}
     {#if total > 1}
         <div class="p">

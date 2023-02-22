@@ -6,6 +6,7 @@
     import Pg from '$lib/components/pg.svelte'
     import {req} from "$lib/req";
     import {method} from "$lib/enum";
+    import {confirm} from "$lib/store";
 
     export let d = {};
     export let user = {};
@@ -18,6 +19,7 @@
     $:avatar = own === 1 && user.avatar || d._avatar;
     let page = 1;
     export let done
+    export let remove
 
     function reply() {
         if (cur.reply === d.id) {
@@ -35,6 +37,18 @@
         cur.set(0, 0)
     }
 
+    function del(id) {
+        return () => {
+            confirm('sure to delete?').then((a) => {
+                if(a)req('cm', id, {method: method.DELETE}).then((err) => {
+                    if (!err) {
+                        remove && remove(id)
+                    }
+                })
+            })
+        }
+    }
+
     function go(n) {
         page = n
         req('cmLs', {
@@ -44,6 +58,25 @@
             d._cms = a
         })
     }
+
+    let editMod = false
+    $:{
+        if (editMod) {
+            d.done = a => {
+                d = {...d, ...a}
+                editMod = false
+            }
+            d.close = () => {
+                editMod = false
+            }
+        }
+    }
+    const rm = i => () => {
+        const itm = d?._cms?.items
+        if (itm) {
+            d._cms.items = itm.filter(a => a !== i)
+        }
+    }
 </script>
 <div class="a" class:m={topic} transition:slide>
     {#if !topic}
@@ -51,36 +84,42 @@
             <div class="v">
                 <Ava size={topic?16:32} idx={avatar}/>
             </div>
-            <p style={`color:${isAdm?'#ff5722':''}`}>{name}</p>
+            <p style={`${isAdm?'color:#ff5722':''}`}>{name}</p>
         </div>
     {/if}
     <div class="c">
-        <p>
-            {#if topic}
-                <label>
-                    <span style={`color:${isAdm?'#ff5722':''}`}>{name}: </span>
-                </label>
-            {/if}
-            {#if d._reply}<span>@{d._reply}</span>{/if}
-            {d.content}
-        </p>
-        <div class="n">
-            <div class="u">
-                <button class="icon i-reply" on:click={reply}></button>
-                {#if own === 1}
-                    <button class="icon i-ed"></button>
-                {/if}
-                {#if own}
-                    <button class="icon i-del"></button>
-                {/if}
+        {#if editMod}
+            <div class="e" transition:slide>
+                <Cm edit={d}/>
             </div>
-            <div class="t">
-                <span>{time(d.createAt)}</span>
-                {#if d.save}
-                    <span class="e">last edit at {time(d.save)}</span>
+        {:else }
+            <p>
+                {#if topic}
+                    <label>
+                        <span style={`${isAdm?'color:#ff5722':''}`}>{name}: </span>
+                    </label>
                 {/if}
+                {#if d._reply}<span>@{d._reply}</span>{/if}
+                {d.content}
+            </p>
+            <div class="n">
+                <div class="u">
+                    <button class="icon i-reply" on:click={reply}></button>
+                    {#if own === 1}
+                        <button class="icon i-ed" on:click={()=>editMod=1}></button>
+                    {/if}
+                    {#if own}
+                        <button class="icon i-del" on:click={del(d.id)}></button>
+                    {/if}
+                </div>
+                <div class="t">
+                    {#if d.save}
+                        <span class="e">last edit at {time(d.save)}</span>
+                    {/if}
+                    <span>{time(d.createAt)}</span>
+                </div>
             </div>
-        </div>
+        {/if}
     </div>
     {#if (topic ? cur.topic === topic : cur.topic === d.id) && cur.reply === d.id}
         <div class="r" transition:slide>
@@ -94,7 +133,7 @@
     {#if !topic}
         <div class="ls">
             {#each (d._cms?.items || []) as i}
-                <svelte:self d={i} {cur} {user} done={ok} topic={d.id}/>
+                <svelte:self d={i} {cur} {user} done={ok} topic={d.id} remove={rm(i)}/>
             {/each}
             {#if d._cms?.total > 1}
                 <div class="p">
@@ -105,10 +144,15 @@
     {/if}
 </div>
 <style lang="scss">
-  .p{
+  .e {
+    margin: 10px;
+  }
+
+  .p {
     display: flex;
     justify-content: flex-end;
   }
+
   .ls {
     width: 100%;
     padding-left: 80px;
@@ -145,14 +189,16 @@
     .c {
       border: none;
       background: none;
+
       p {
         color: #8396af;
         display: flex;
         padding: 0 5px;
         font-size: 13px;
         line-height: 2;
-        &>span{
-          padding:  0 5px;
+
+        & > span {
+          padding: 0 5px;
           color: var(--darkgrey-h);
         }
       }
@@ -166,7 +212,7 @@
     span {
       font-size: inherit;
       line-height: inherit;
-      padding-left: 5px;
+      padding:0 5px;
     }
   }
 
@@ -210,6 +256,9 @@
     opacity: .6;
     flex: 1;
     align-items: center;
+    span{
+      padding-left: 10px;
+    }
   }
 
   .u {

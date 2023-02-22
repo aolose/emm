@@ -70,7 +70,7 @@ export const cmManager = (() => {
                 if (a.save === a.createAt) delete (a as Obj<Comment>).save
                 return patchUserInfo(a)
             }) as Comment[], [
-            'content', 'createAt', 'save', '_name', '_avatar', '_name', '_reply', 'id'
+            'content', 'createAt', 'save', '_name', '_avatar', '_name', '_reply', 'id','_own'
         ])
         return {total, items}
     }
@@ -157,25 +157,14 @@ export const cmManager = (() => {
             const now = Date.now();
             const isAdm = getClient(req)?.ok(permission.Admin);
             const tk = getTk(req);
-            const ids = req.url
+            const ids = new Set((await req.text())
                 .replace(/^.*?\?/, "")
-                .split(",").map(a => +a).filter(a => a);
-            if (!ids.length) return;
-            if (isAdm) {
-                const u0 = new Set(db.all(model(Comment), `id in (${sqlFields(ids.length)})`, ...ids).map(a => a.userId));
-                db.delByPk(Comment, [ids]);
-                const u1 = new Set(db.all(model(Comment), `userId in (${sqlFields(u0.size)})`, ...u0).map(a => a.userId));
-                for (const u of u1) {
-                    u0.delete(u);
-                }
-                if (u0.size) {
-                    clear = 1;
-                    db.db.prepare(`update CmUser set del=? where id in (${sqlFields(u0.size)})`)
-                        .run(1, ...u0);
-                }
-            } else {
-                if (!tk) return errMsg("no permission");
-                const id = ids[0];
+                .split(",").map(a => +a).filter(a => a));
+            const sz = ids.size
+            if (!sz) return;
+            if (!isAdm) {
+                if (!tk || ids.size > 1) return errMsg("no permission");
+                const id = [...ids][0];
                 if (id) {
                     const cm = db.get(model(Comment, {id}));
                     if (!cm) return errMsg("comment not exist", true);
@@ -183,15 +172,23 @@ export const cmManager = (() => {
                     if (!usr) {
                         return errMsg("invalid token");
                     }
-                    if (usr.exp > now) {
-                        db.delByPk(Comment, [cm.id]);
-                        if (!db.get(model(Comment, {userId: usr.id}))) {
-                            usr.del = 1;
-                            clear = 1;
-                            db.save(usr);
-                        }
-                    } else return errMsg("token expire");
+                    if (usr.exp < now) return errMsg("token expire");
                 }
+            }
+            const q = sqlFields(sz)
+            const u0 = new Set(db.all(model(Comment), `id in (${q}) or topic in (${q})`, ...ids, ...ids).map(a => {
+                ids.add(a.id)
+                return a.userId
+            }));
+            db.delByPk(Comment, [...ids]);
+            const u1 = new Set(db.all(model(Comment), `userId in (${sqlFields(u0.size)})`, ...u0).map(a => a.userId));
+            for (const u of u1) {
+                u0.delete(u);
+            }
+            if (u0.size) {
+                clear = 1;
+                db.db.prepare(`update CmUser set del=? where id in (${sqlFields(u0.size)})`)
+                    .run(1, ...u0);
             }
         },
         get: (req: Request) => {
@@ -223,6 +220,13 @@ export const cmManager = (() => {
                 if (cm.id) {
                     const c = db.get(model(Comment, {id: cm.id}));
                     if (!c) return errMsg("comment not exist");
+                    else {
+                        Object.assign(cm, c, cm)
+                        db.save(cm)
+                        return {
+                            save: cm.save
+                        }
+                    }
                 }
             } else {
                 if (cm.id && !isAdm) return errMsg("no permission", true);

@@ -8,10 +8,11 @@
     export let slug
     export let reply
     export let done
+    export let edit
     export let user = {}
     export let cur = {}
     let sh = 0;
-    let cm;
+    let cm = edit ? edit.content : '';
     let dis;
     let ed = 0;
     let ld = 0;
@@ -40,7 +41,7 @@
         if (reply?.topic) o.topic = reply.topic
         req('cm', o).then(a => {
             user.set(o._name, o._avatar)
-            const v = {...o, ...a, own: 1}
+            const v = {...o, ...a, _own: 1}
             if (o.reply) v._reply = reply.name
             done && done(v)
             msg = [1, 'post success!']
@@ -53,12 +54,22 @@
         // ld = 0;
     }
 
+    function edi() {
+        req('cm', {id: edit.id, content: cm}).then(a => {
+            msg=[1,'update success']
+            edit.done({
+                ...a,
+                content: cm
+            })
+        })
+    }
+
     $:{
         cm = (cm || '').replace(/\n+/g, '\n').slice(0, 512)
         dis = !cur.name?.length || !cm?.length;
     }
 </script>
-<div class="c" class:m={reply}>
+<div class="c" class:m={reply} class:ed={edit}>
     {#if msg.length === 2}
         <div class="tp"
              class:su={msg[0]}
@@ -67,7 +78,7 @@
             {msg[1]}
         </div>
     {/if}
-    {#if !reply && sh}
+    {#if !reply && !edit && sh}
         <div class="as" transition:fade>
             {#each av as a}
                 <Ava idx={a}
@@ -81,40 +92,60 @@
             {/each}
         </div>
     {/if}
-    <div class="o">
-        <div class="nf">
-            {#if !reply}
-                <Ava idx={cur.avatar} size="34" click={()=>sh=1}/>
-                {#if ed}
-                    <input bind:value={cur.name} placeholder="name"
-                           on:blur={()=>ed=0}/>
+    {#if !edit}
+        <div class="o">
+            <div class="nf">
+                {#if !reply}
+                    <Ava idx={cur.avatar} size="34" click={()=>sh=1}/>
+                    {#if ed}
+                        <input bind:value={cur.name} placeholder="name"
+                               on:blur={()=>ed=0}/>
+                    {:else }
+                        <span class="n">{cur.name}</span>
+                        <button class="icon i-refresh" on:click={cur.refresh}></button>
+                        <button class="icon i-ed" on:click={se}></button>
+                    {/if}
                 {:else }
-                    <span class="n">{cur.name}</span>
-                    <button class="icon i-refresh" on:click={cur.refresh}></button>
-                    <button class="icon i-ed" on:click={se}></button>
+                    <p>reply @{reply.name}</p>
                 {/if}
-            {:else }
-                <p>reply @{reply.name}</p>
-            {/if}
-            <div class="s"></div>
+                <div class="s"></div>
+            </div>
+            <button class="icon i-pub"
+                    class:dis={dis}
+                    on:click={cmt}>
+            </button>
         </div>
-        <button class="icon i-pub"
-                class:dis={dis}
-                on:click={cmt}>
-        </button>
-    </div>
+    {/if}
     <div class="sd">
         <div class="v">{cm}</div>
         <textarea placeholder="write something~" bind:value={cm}></textarea>
-        <span class="t">{cm?.length || 0} / {limit}</span>
+        <div class="ft">
+            {#if edit}
+                <div class="bn">
+                    <button class="icon i-ok" on:click={edi}></button>
+                    <button class="icon i-close" on:click={edit.close}></button>
+                </div>
+            {/if}
+            <span class="t">{cm?.length || 0} / {limit}</span>
+        </div>
     </div>
     <Ld act={ld} text="submitting"/>
 </div>
 <style lang="scss">
+  .ft {
+    display: flex;
+    justify-content: space-between;
+
+    button {
+      margin-right: 15px;
+      padding: 0 3px;
+    }
+  }
+
   .t {
     position: absolute;
-    right: 15px;
-    bottom: 10px;
+    right: 10px;
+    bottom: 5px;
     font-size: 13px;
     color: #2e4a65;
   }
@@ -302,6 +333,20 @@
 
     .v {
       min-height: 50px;
+    }
+  }
+
+  .ed {
+    background: rgba(100, 100, 100, .05);
+    margin: 0;
+
+    .v, textarea {
+      padding: 10px;
+    }
+
+    .t {
+      right: 5px;
+      bottom: 3px;
     }
   }
 </style>
