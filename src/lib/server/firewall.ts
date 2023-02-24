@@ -51,7 +51,6 @@ export const fw2log = (l: FwLog) => {
   return [l.save, l.ip, l.path, l.headers, l.status, ipInfo(l.ip)?.short || "", l.mark, l.method] as log;
 };
 export const filterLog = (logs: log[], t: FWRule) => {
-  logs=[...logs].reverse()
   return logs.filter(a => {
     if (t.headers && !matchHeader(t.headers, new Headers(str2Hds(a[3])))) return;
     if (t.path && !match(t.path, a[2])) return;

@@ -270,9 +270,11 @@ const apis: APIRoutes = {
       const t = (await req.json()) as FWRule & { type: number, page: number, size: number, t: number };
       const { page, size, type } = t;
       const lgs = filterLog(type ? db.all(model(FwLog)).map(fw2log) : logCache, t);
-      const total = Math.floor((lgs.length + t.size - 1) / t.size);
-      const st = (page - 1) * size;
-      const d = lgs.slice(st, st + size)
+      const l = lgs.length
+      const total = Math.floor((l + t.size - 1) / t.size);
+      console.log(l,page,size)
+      const st = l- page * size;
+      const d = lgs.slice(Math.max(st,0), st + size)
         .filter(a => {
           return t.t ? a[0] > t.t : 1;
         });
