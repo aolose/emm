@@ -5,6 +5,7 @@ import path from "path";
 import etag from 'etag'
 import {sys, db} from "$lib/server";
 import {Res} from "$lib/server/model";
+import { contentType } from "$lib/enum";
 
 export const GET: RequestHandler = ({params}) => {
     const res = new Res()
@@ -33,8 +34,11 @@ export const GET: RequestHandler = ({params}) => {
                 const h = new Headers({
                     'ETag': etag(f)
                 })
+                h.set(contentType,r.type)
                 if (!/image|text|video/i.test(r.type || '')) {
                     h.set(desc, `attachment; filename=${r.name}`)
+                }else {
+                  h.set(desc, `inline; filename=${r.name}`)
                 }
                 return new Response(f, {
                     headers: h

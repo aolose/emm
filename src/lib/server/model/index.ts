@@ -251,6 +251,7 @@ export class FwLog {
     save = INT;
     mark = TEXT;
     _city = "";
+    status=INT;
 }
 
 export class TokenInfo {

@@ -93,8 +93,9 @@ export class DB {
   private select(one: boolean, o: Obj<Model>, where = "", values: unknown[]) {
     const [sql, w, v] = select(o);
     const wh = [w, where].filter((a) => a).join(" and ");
-    const s = sql + (wh ? ` WHERE ${wh}` : "");
+    const s = sql + (wh ? ` WHERE ${wh}` : "").replace(/where order by/i,'order by');
     const params = sqlVal([...v, ...values]);
+    Log.debug('sql',s)
     const paper = this.db.prepare(s);
     if (one) return paper.get(...params);
     return paper.all(...params);

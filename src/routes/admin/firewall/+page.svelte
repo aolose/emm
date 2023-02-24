@@ -1,137 +1,135 @@
 <script>
-    import {onMount} from "svelte";
-    import {req} from "$lib/req";
-    import Itm from './item.svelte'
-    import Pg from '$lib/components/pg.svelte'
-    import Ck from '$lib/components/check.svelte'
-    import Ld from '$lib/components/loading.svelte'
-    import Ft from './pop.svelte'
-    import Ru from './rules.svelte'
+  import { onMount } from "svelte";
+  import { req } from "$lib/req";
+  import Itm from "./item.svelte";
+  import Pg from "$lib/components/pg.svelte";
+  import Ck from "$lib/components/check.svelte";
+  import Ld from "$lib/components/loading.svelte";
+  import Ft from "./pop.svelte";
+  import Ru from "./rules.svelte";
+  import { watch } from "$lib/utils";
 
-    let pop
-    let sel = new Set()
-    let tab = 0
-    let ls = []
-    let lastL = 0
-    let loop = 1
-    const size = 30
-    let p = 1
-    let total
-    let ld = false
-    let filter = {}
-    $:lss = ls.slice(size * (p - 1), size * p)
-    let hasF = 0
-    $:{
-        let c = 0
-        hasF = 0
-        Object.keys(filter).forEach(k => {
-            if (!filter[k]) {
-                c = 1
-                delete filter[k]
-            } else hasF = 1
-        })
-        if (c) filter = {...filter}
-    }
+  let pop;
+  let sel = new Set();
+  let tab = 0;
+  let ls = [];
+  let lastL = 0;
+  let loop = 1;
+  const size = 10;
+  let p = 1;
+  let total;
+  let ld = false;
+  let filter = {};
+  let hasF = 0;
+  const lsWatch = watch(tab, p);
+  $:{
+    lsWatch(() => {
+      lastL = 0;
+      ls = [];
+    }, tab, p);
+  }
 
-    function tabCk(a) {
-        return () => {
-            if (tab === a) return;
-            tab = a
-            loadLog(1)
-        }
-    }
+  function tabCk(a) {
+    return () => {
+      if (tab === a) return;
+      tab = a;
+      loadLog(1);
+    };
+  }
 
-    function fx() {
-        const l = []
-        const s = new Set()
-        ls.forEach(a => {
-            if (a && a.length) {
-                const k = a[0] + a[1]
-                if (s.has(k)) return
-                s.add(k)
-                l.push(a)
-            }
-        })
-        l.sort((a, b) => b[0] - a [0])
-        lastL = (l[0] || [0])[0]
-        ls = l
-    }
+  function fx() {
+    const l = [];
+    const s = new Set();
+    ls.forEach(a => {
+      if (a && a.length) {
+        const k = a[0] + a[1];
+        if (s.has(k)) return;
+        s.add(k);
+        l.push(a);
+      }
+    });
+    l.sort((a, b) => b[0] - a [0]);
+    if (l.length) lastL = (l[0] || [0])[0];
+    ls = l.slice(0, size);
+  }
 
-    function loadLog(page) {
-        ld = true
-        const opt = {
-            ...filter,
-            page: p,
-            type: tab,
-            size,
-        }
-        if (page) {
-            opt.page = p = page
-            ls = []
-        } else opt.t = lastL
-        req('log', opt).then(r => {
-            ls.push(...r.data)
-            total = r.total
-            fx()
-        }).finally(() => ld = false)
-    }
+  function loadLog(page) {
+    ld = true;
+    const opt = {
+      ...filter,
+      page: p,
+      type: tab,
+      size
+    };
+    if (page) {
+      opt.page = p = page;
+    } else opt.t = lastL;
+    req("log", opt).then(r => {
+      if (lastL) {
+        ls = [...r.data, ...ls];
+      } else {
+        ls = r.data;
+      }
+      total = r.total;
+      fx();
+    }).finally(() => ld = false);
+  }
 
-    onMount(() => {
-        let t = setInterval(() => {
-            if (loop) loadLog()
-        }, 3e3)
-        loadLog(1)
-        return () => clearInterval(t)
-    })
+  onMount(() => {
+    let t = setInterval(() => {
+      if (loop) loadLog();
+    }, 3e3);
+    loadLog(1);
+    return () => clearInterval(t);
+  });
 
-    function ck(k) {
-        return () => {
-            if (sel.has(k)) sel.delete(k)
-            else sel.add(k)
-            sel = new Set(sel)
-        }
-    }
+  function ck(k) {
+    return () => {
+      if (sel.has(k)) sel.delete(k);
+      else sel.add(k);
+      sel = new Set(sel);
+    };
+  }
 
-    function search() {
-        pop(0, filter).then(d => {
-            if (!d) return
-            filter = d
-            ls = []
-            loadLog(1)
-        })
-    }
+  function search() {
+    pop(0, filter).then(d => {
+      if (!d) return;
+      filter = d;
+      loadLog(1);
+    });
+  }
 
 </script>
 <div class="a">
-    <div class="c">
-        <div class="d">
-            <div class="h">
-                <h1>Logs</h1>
-                <s></s>
-                <div class="tb" class:ac={tab}>
-                    <span on:click={tabCk(0)}>real-time</span>
-                    <span on:click={tabCk(1)}>firewall</span>
-                    <i></i>
-                </div>
-                <Ck name="auto" bind:value={loop}/>
-                <button on:click={loadLog} class="icon i-refresh"></button>
-                <button class="icon i-filter" class:act={hasF} on:click={search}></button>
-            </div>
+  <div class="c">
+    <div class="d">
+      <div class="h">
+        <h1>Logs</h1>
+        <s></s>
+        <div class="tb" class:ac={tab}>
+          <span on:click={tabCk(0)}>real-time</span>
+          <span on:click={tabCk(1)}>firewall</span>
+          <i></i>
         </div>
-        <div class="e">
-            <div class="b">
-                {#each lss as d (d[0] + d[1])}
-                    <Itm ck={ck} data={d} sel={sel} isDb={tab}/>
-                {/each}
-            </div>
-            <Pg total={total} page={p} go={loadLog}/>
-        </div>
-        <Ld act={ld}/>
+        <Ck name="auto" bind:value={loop} />
+        <button on:click={()=>loadLog()} class="icon i-refresh"></button>
+        <button class="icon i-filter" class:act={hasF} on:click={search}></button>
+      </div>
     </div>
-    <div class="sd">
-        <Ru {pop}/>
-        <Ft bind:pop={pop}/>
+    <div class="e">
+      <div class="b">
+        {#each ls as d (d[0] + d[1])}
+          <Itm ck={ck} data={d} sel={sel} isDb={tab} />
+        {/each}
+      </div>
+      <Pg total={total} page={p} go={loadLog} />
     </div>
+    <Ld act={ld} />
+  </div>
+  <div class="sd">
+    <Ru {pop} />
+    <Ft bind:pop={pop} />
+  </div>
 </div>
 <style lang="scss">
   .i-filter {

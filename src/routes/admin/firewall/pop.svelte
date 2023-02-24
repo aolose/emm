@@ -234,10 +234,10 @@
     align-items: center;
     justify-content: center;
     position: fixed;
-    left: 0;
+    left: 72px;
     top: 0;
     bottom: 0;
     right: 0;
-    background: rgba(0, 0, 0, .6);
+    background: rgba(100, 100, 100, .1);
   }
 </style>
