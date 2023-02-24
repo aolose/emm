@@ -272,7 +272,6 @@ const apis: APIRoutes = {
       const lgs = filterLog(type ? db.all(model(FwLog)).map(fw2log) : logCache, t);
       const l = lgs.length
       const total = Math.floor((l + t.size - 1) / t.size);
-      console.log(l,page,size)
       const st = l- page * size;
       const d = lgs.slice(Math.max(st,0), st + size)
         .filter(a => {
