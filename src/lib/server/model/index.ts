@@ -275,3 +275,27 @@ export class TokenInfo {
 
     createAt = INT;
 }
+
+class Analysis_visitor {
+    request=INT
+    uniqueIP=INT
+    hour=INT
+}
+
+class Analysis_path {
+    count=INT
+    path=TEXT
+    hour=INT
+}
+
+class Analysis_country {
+    country=TEXT
+    count=INT
+    hour=INT
+}
+class Analysis_device {
+    type=TEXT
+    os=TEXT
+    count=INT
+    hour=INT
+}
