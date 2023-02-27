@@ -341,9 +341,10 @@
     .sd {
       flex-grow: 1;
       max-height: 200px;
-        .v,textarea{
-            padding: 0 20px;
-        }
+
+      .v, textarea {
+        padding: 0 20px;
+      }
     }
 
     .v {
@@ -357,6 +358,7 @@
     border-radius: 4px;
     position: relative;
     width: 90%;
+    max-width: 300px;
     background: var(--blue);
     margin: 10px auto;
     height: 30px;
