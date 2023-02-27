@@ -31,7 +31,10 @@
 
   async function cmt() {
     ld = 1;
-    const o = {
+    const o = admin ? {
+      isAdm: 1,
+      content: cm
+    } : {
       _slug: slug,
       _name: cur.name,
       _avatar: cur.avatar,

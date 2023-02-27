@@ -9,14 +9,50 @@ import { ipInfo } from "$lib/server/ipLite";
 
 
 export let rules: FWRule[];
+
+function sort() {
+  rules.sort((a, b) => b.createAt - a.createAt);
+}
+
 export const addRule = (fr: FWRule) => {
   db.save(fr);
   const r = rules.findIndex(a => a.id === fr.id);
   if (r === -1) {
     rules.push(fr);
   } else rules[r] = fr;
+  sort();
 };
 
+export const ruleHit = (r: {
+  ip?: string,
+  path?: string,
+  method?: string,
+  headers?: Headers
+}) => {
+  const { path = "", ip = "", method = "", headers } = r;
+  let o: Obj<FWRule> | undefined;
+  for (const k of rules) {
+    if (!k.active) continue;
+    if (k.path && !match(k.path, path)) continue;
+    if (k.method && k.method.toLowerCase() !== method) continue;
+    if (k.headers && !matchHeader(k.headers, headers || new Headers())) continue;
+    if (k.ip) {
+      if (!ipRangeCheck(ip, k.ip)) continue;
+      if (k.country) {
+        const f = ipInfo(ip);
+        if (f && f.short) {
+          if (!match(k.country, f.short)) continue;
+        }
+      }
+    }
+    if (!o) o = { mark: "", _match: [] };
+    o._match?.push(k.id);
+    if (k.mark) o.mark = o.mark?.split(",").concat(k.mark).filter(a => a.replace(/^\s+|\s+$/g, "")).join();
+    Object.assign(o, filter({ ...k }, ["noAccess", "log"], false));
+  }
+  return o;
+};
+export const lsRules = (page: number, size: number) => rules.slice(size * (page - 1), size * page);
 export const delRule = (ids: number[]) => {
   db.delByPk(FWRule, ids);
   rules = rules.filter(a => ids.indexOf(a.id) === -1);
@@ -24,13 +60,14 @@ export const delRule = (ids: number[]) => {
 
 function loadRules() {
   rules = db.all(model(FWRule));
+  sort();
   setTimeout(loadRules, 1e3 * 3600 * 72);
 }
 
 type log = [number, string, string, string, number, string, string, string]
 export let logCache: log[] = [];
 const max = 1000;
-export const reqRLog = (event: RequestEvent, status: number, fr?:Obj<FWRule>) => {
+export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
   const ip = getClientAddr(event);
   const path = event.url.pathname;
   const method = event.request.method;
@@ -40,9 +77,9 @@ export const reqRLog = (event: RequestEvent, status: number, fr?:Obj<FWRule>) =>
   logCache.push(r);
   const l = logCache.length;
   if (l > max) logCache = logCache.slice(l - max);
-  if(fr?.log){
+  if (fr?.log) {
     db.save(model(FwLog, {
-      path, ip, mark: fr.mark, headers: ua, method,status
+      path, ip, mark: fr.mark, headers: ua, method, status
     }));
   }
 };
@@ -108,26 +145,9 @@ export const fwFilter = (event: RequestEvent): Obj<FWRule> | undefined => {
   const path = event.url.pathname;
   const headers = event.request.headers;
   const method = event.request.method.toLowerCase();
-  let o: Obj<FWRule> | undefined;
-  for (const k of rules) {
-    if (!k.active) continue;
-    if (k.path && !match(k.path, path)) continue;
-    if (k.method && k.method.toLowerCase() !== method) continue;
-    if (k.headers && !matchHeader(k.headers, headers)) continue;
-    if (k.ip) {
-      if (!ipRangeCheck(ip, k.ip)) continue;
-      if (k.country) {
-        const f = ipInfo(ip);
-        if (f && f.short) {
-          if (!match(k.country, f.short)) continue;
-        }
-      }
-    }
-    if (!o) o = { mark: "" };
-    if (k.mark) o.mark = o.mark?.split(",").concat(k.mark).filter(a => a.replace(/^\s+|\s+$/g, "")).join();
-    Object.assign(o, filter({ ...k }, ["noAccess", "log"], false));
-  }
-  return o;
+  return ruleHit({
+    ip, path, headers, method
+  });
 };
 
 type times = number

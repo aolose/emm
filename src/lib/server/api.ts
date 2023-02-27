@@ -25,12 +25,12 @@ import type { RespHandle } from "$lib/types";
 import sharp from "sharp";
 import { Buffer } from "buffer";
 import { FwLog, FWRule, Post, Require, Res, Tag, TokenInfo } from "$lib/server/model";
-import { diffObj, enc, filter } from "$lib/utils";
+import { arrFilter, diffObj, enc, filter } from "$lib/utils";
 import { permission } from "$lib/enum";
 import path from "path";
 import fs from "fs";
 import { genToken } from "$lib/server/token";
-import { addRule, blockIp, delRule, filterLog, fw2log, logCache } from "$lib/server/firewall";
+import { addRule, blockIp, delRule, filterLog, fw2log, logCache, lsRules, ruleHit } from "$lib/server/firewall";
 import { loadGeoDb } from "$lib/server/ipLite";
 import { publishedPost, tagPatcher, tags } from "$lib/server/store";
 import { get } from "svelte/store";
@@ -270,10 +270,10 @@ const apis: APIRoutes = {
       const t = (await req.json()) as FWRule & { type: number, page: number, size: number, t: number };
       const { page, size, type } = t;
       const lgs = filterLog(type ? db.all(model(FwLog)).map(fw2log) : logCache, t);
-      const l = lgs.length
+      const l = lgs.length;
       const total = Math.floor((l + t.size - 1) / t.size);
-      const st = l- page * size;
-      const d = lgs.slice(Math.max(st,0), st + size)
+      const st = l - page * size;
+      const d = lgs.slice(Math.max(st, 0), st + size)
         .filter(a => {
           return t.t ? a[0] > t.t : 1;
         });
@@ -281,6 +281,15 @@ const apis: APIRoutes = {
         return { total, data: d };
       }
     })
+  },
+  bip:{
+    post: auth(Read, async req => {
+      const ip = await req.text()
+      if(ip){
+        const o = ruleHit({ip})
+        if(o?.noAccess)return 1
+      }
+    }),
   },
   rule: {
     post: auth(Admin, async req => {
@@ -299,11 +308,8 @@ const apis: APIRoutes = {
       const r = new Uint8Array(await req.arrayBuffer());
       const p = r[0];
       const s = r[1];
-      return pageBuilder(p, s, FWRule,
-        ["createAt desc"],
-        ["id", "path", "headers", "ip", "mark",
-          "country", "log", "active", "noAccess"]
-      );
+      return arrFilter(lsRules(p, s), ["id", "path", "headers", "ip", "mark",
+        "country", "log", "active", "noAccess"]);
     })
   },
   login: {

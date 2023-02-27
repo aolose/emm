@@ -239,6 +239,7 @@ export class FWRule {
     noAccess = false;
     country = TEXT;
     active = true;
+    _match?:number[]
 }
 
 export class FwLog {

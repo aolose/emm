@@ -26,6 +26,13 @@
 
   const ftWatch = watch(status);
   let ls = [];
+  const filter = (id) => {
+    if (id === 0) return sel = 0;
+    ls = ls.filter(a => {
+      if (id) return a.id !== id;
+      return 1;
+    });
+  };
 
   function go(n = 1) {
     page = n;
@@ -84,7 +91,7 @@
     </div>
   </div>
   {#if sel}
-    <Detail d={sel} />
+    <Detail d={sel} filter={filter} />
   {/if}
 </div>
 <style lang="scss">
@@ -122,7 +129,7 @@
 
   .a {
     width: 400px;
-      padding-bottom: 20px;
+    padding-bottom: 20px;
     display: flex;
     flex-direction: column;
     background: var(--bg1);

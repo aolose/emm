@@ -106,7 +106,7 @@ export const cmManager = (() => {
             } else if (topic) {
                 const cm = db.get(model(Comment, {id: topic}))
                 if (!cm) return errMsg('topic not exist')
-                return subCm(cm.subCm, page, tk, isAdmin)
+                return subCm(cm.subCm||'', page, tk, isAdmin)
             }
             const ks: (keyof Comment)[] = [];
             let uid = 0;
