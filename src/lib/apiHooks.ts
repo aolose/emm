@@ -27,6 +27,16 @@ export const hooks: apiHooks = {
                 if(o.topic===o.reply)delete  o.reply;
             }
         }
+    },
+    cmLs:{
+       get:{
+           before:p=>{
+               const o  = p  as {status?:number}
+               if(o.status===-1){
+                   delete o.status
+               }
+               return o
+           }
+       }
     }
-
 };

@@ -88,6 +88,7 @@ export const cmManager = (() => {
         list: async (req: Request) => {
             const params = new URL(req.url).searchParams;
             const topic = +(params.get("topic") || 0);
+            const status = +(params.get("status") || -1);
             const slug = params.get("slug");
             const page = +(params.get("page") || 1);
             const p = slug && db.get(model(Post, {slug}));
@@ -126,6 +127,10 @@ export const cmManager = (() => {
                     const u = db.get(model(CmUser, {token: tk}));
                     if (u && u.exp > Date.now()) uid = u.id;
                 }
+            }else if(status!==-1){
+                if(!isAdmin)return  errMsg('no permission for filter')
+                where.push(`state=?`)
+                values.push(status)
             }
             const w = where.length ? [where.join(" and "), ...values] as [string, ...unknown[]] : undefined;
             return pageBuilder(page,
