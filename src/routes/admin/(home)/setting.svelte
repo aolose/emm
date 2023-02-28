@@ -50,11 +50,13 @@
   };
   const ok = () => {
     saveNow.set(1);
-    setting.set(0);
-    editPost.update(p => ({ ...p, ...post }));
+    const autoSave = get(setting);
+    autoSave({ ...get(editPost), ...post }).then(a => {
+      if (a) setting.set(null);
+    });
   };
   const cancel = () => {
-    setting.set(0);
+    setting.set(null);
   };
 
   onMount(() => {
@@ -207,11 +209,11 @@
         background: var(--bg2) center no-repeat;
         width: 100%;
         outline: none;
-        padding: 10px!important;
+        padding: 10px !important;
         box-shadow: inset 0 0 3px rgb(0 0 0 / 20%);
         border-radius: 3px;
-        border: none!important;
-        min-height: 50px!important;
+        border: none !important;
+        min-height: 50px !important;
       }
     }
   }
@@ -221,6 +223,7 @@
     display: flex;
     width: 100%;
     margin-top: 20px;
+
     button {
       width: 40px;
       background: var(--bg3);

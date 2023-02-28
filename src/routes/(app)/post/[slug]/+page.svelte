@@ -222,7 +222,7 @@
       display: block;
       text-align: right;
       font-size: 12px;
-      color: #69789b;
+      color: #95a1bb;
       font-style: italic;
     }
   }
@@ -264,7 +264,7 @@
     left: 0;
     right: 0;
     top: 0;
-    height: 50%;
+    height: 60%;
     max-height: 100%;
     min-height: 400px;
     //bottom: 0;
@@ -307,9 +307,7 @@
   @supports (mix-blend-mode: multiply) {
     .ft {
       mix-blend-mode: multiply;
-      filter: none;
       backdrop-filter: grayscale(.5);
-      opacity: .7;
     }
   }
 
