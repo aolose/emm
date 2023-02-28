@@ -43,7 +43,7 @@
     if (reply?.cm) o.reply = reply.cm;
     if (reply?.topic) o.topic = reply.topic;
     req("cm", o).then(a => {
-      user.set(o._name, o._avatar);
+      if (!admin) user.set(o._name, o._avatar);
       const v = { ...o, ...a, _own: 1 };
       if (o.reply) v._reply = reply.name;
       done && done(v);
@@ -337,10 +337,10 @@
   .am, .sd {
     display: flex;
     flex-direction: column;
-    height: 320px;
   }
 
   .am {
+    height: 300px;
     .sd {
       flex-grow: 1;
       max-height: 200px;
