@@ -2,6 +2,7 @@
   import Ava from "$lib/components/post/ava.svelte";
   import { time } from "$lib/utils";
   import { cmStatus } from "$lib/enum";
+  import { slide } from "svelte/transition";
 
   const stu = a => {
     switch (a) {
@@ -15,46 +16,65 @@
         return "auto";
     }
   };
+  export let topic;
   export let ck;
   export let d = {};
   export let detail = 0;
 </script>
-<div class="a" on:click={()=>ck&&ck(d)} class:dt={detail}>
+<div class="a" on:click={()=>ck&&ck(d)} class:dt={detail} class:tp={topic} transition:slide>
   <div class="v">
-    <div class="b">
-      <Ava idx={d._avatar} size={detail?18:32} />
-    </div>
-    <span>{d._name}</span>
+    {#if !topic}
+      <div class="b">
+        <Ava idx={d.isAdm?-1:d._avatar} size={detail?18:32} />
+      </div>
+    {/if}
+    <span>{d.isAdm ? 'admin' : d._name}</span>
+    {#if topic}
+      <span>create at: {time(d.createAt)}</span>
+      {#if d.save}  <span>update at: {time(d.save)}</span>{/if}
+    {/if}
     {#if d._reply && detail}
       <span>@{d._reply}</span>
     {/if}
   </div>
   <div class="d">
-    <div class="h">
-      {#if d._reply}
-        <span class="rp">@{d._reply}</span>
-      {/if}
-      <s />
-      <a target="_blank" href={'/post/'+d._post?.slug}>
-        {d._post?.title}
-      </a>
-      <span class="s"
-            class:ap={d.statue===cmStatus.Approve}
-            class:re={d.statue===cmStatus.Reject}
-            class:pe={d.statue===cmStatus.Pending}
-      >
+    {#if !topic}
+      <div class="h">
+        {#if d._reply}
+          <span class="rp">@{d._reply}</span>
+        {/if}
+        <s />
+        <a target="_blank" href={'/post/'+d._post?.slug}>
+          {d._post?.title}
+        </a>
+        <span class="s"
+              class:ap={d.statue===cmStatus.Approve}
+              class:re={d.statue===cmStatus.Reject}
+              class:pe={d.statue===cmStatus.Pending}
+        >
      {stu(d.status)}
-   </span>
-    </div>
+           </span>
+      </div>
+    {/if}
     <div class="t">
       <p class="c">
+        {#if topic && d._reply}
+          <span class="rp">@{d._reply}</span>
+        {/if}
         {d.content}
       </p>
-      <div class="i">
-        <span>{d.ip || '-'}</span>
-        <span>create at: {time(d.createAt)}</span>
-        {#if d.save}  <span>update at: {time(d.save)}</span>{/if}
-      </div>
+      {#if !topic}
+        <div class="i">
+          {#if detail}
+            <a target="_blank" href={'/post/'+d._post?.slug}>
+              {d._post?.title}
+            </a>
+          {/if}
+          <span>{d.ip || '-'}</span>
+          <span>create at: {time(d.createAt)}</span>
+          {#if d.save}  <span>update at: {time(d.save)}</span>{/if}
+        </div>
+      {/if}
     </div>
   </div>
 </div>
@@ -84,6 +104,7 @@
   }
 
   a {
+    margin-right: 10px;
     opacity: .5;
     font-size: 13px;
     color: inherit;
@@ -177,9 +198,10 @@
 
   .dt {
     margin: 0;
-    background: rgba(155,155,155,.05);
+    background: rgba(155, 155, 155, .05);
     flex-direction: column;
     cursor: auto;
+
     .rp {
       display: none;
     }
@@ -209,17 +231,59 @@
     .t {
       display: block;
     }
-    .c{
+
+    .c {
       max-width: none;
       padding: 20px 16px;
       overflow: auto;
       max-height: none;
       white-space: normal;
     }
+
     .i {
       justify-content: flex-start;
       flex-direction: row;
       height: auto;
+    }
+  }
+
+  .tp {
+    flex-direction: column;
+    cursor: auto;
+    max-width: 500px;
+    background: none;
+    border: none;
+    padding: 10px;
+
+    .v {
+      flex-direction: row;
+      width: 100%;
+      justify-content: flex-start;
+      align-items: flex-start;
+
+      span {
+        padding-right: 10px;
+        width: auto;
+      }
+    }
+
+    .d {
+      background: #16293f;
+      width: 100%;
+      margin: 10px;
+      padding: 10px 20px;
+      border-radius: 20px;
+    }
+
+    .rp {
+      padding-right: 10px;
+      font-size: 12px;
+    }
+
+    .c {
+      width: 100%;
+      max-width: none;
+      overflow: auto;
     }
   }
 </style>

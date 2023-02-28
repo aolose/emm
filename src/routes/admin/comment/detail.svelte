@@ -5,7 +5,9 @@
   import { req } from "$lib/req";
   import { cmStatus, method } from "$lib/enum";
   import { confirm } from "$lib/store";
-  import Ld from '$lib/components/loading.svelte'
+  import Ld from "$lib/components/loading.svelte";
+  import Pg from "$lib/components/pg.svelte";
+
   export let d = {};
   export let filter;
   let ban = 0;
@@ -15,24 +17,30 @@
   let page = 1;
   let total = 1;
   let ld = 0;
+  const go = n => {
+    page = n;
+    const { id } = d;
+    req("cmLs", {
+      topic: id,
+      page
+    }, { method: method.GET }).then(({ items, total: t } = {}) => {
+      if (id !== d.id) return;
+      total = t;
+      ls = items || [];
+    }).finally(() => {
+      ld = 0;
+    });
+  };
   $:{
     wid(() => {
       ls = [];
       ld = 1;
-      page=1
-      total=1
-      req("cmLs", {
-        topic: d.id,
-        page
-      }, { method: method.GET }).then(({ items, total: t, page: p }={}) => {
-        total = t;
-        page = p;
-        ls = items||[];
-      }).finally(() => {
-        ld = 0;
-      });
+      page = 1;
+      total = 1;
+      go(page);
     }, d.id);
     wip(() => {
+      if (d.isAdm) return;
       ban = 0;
       const { ip } = d;
       if (ip) {
@@ -58,29 +66,41 @@
     });
     filter(0);
   };
+  const done = id=>a=>{
+    if(id===d.id){
+      ls=ls.concat(a)
+    }
+  }
 </script>
 <div class="a">
   <Item detail={1} {d} />
-  <Cm admin={1} reply={{
+  <Cm admin={1}
+      done={done(d.id)}
+      reply={{
           topic:d.topic||d.id,
            cm:d.id,
            name:d._name
   }} />
   <div class="b">
-    <button class="icon i-ip" class:act={ban}></button>
-    {#if d.state === cmStatus.Reject}
+    {#if !d.isAdm}
+      <button class="icon i-ip" class:act={ban}></button>
+    {/if}
+    {#if !d.isAdm && d.state === cmStatus.Reject}
       <button class="icon i-fbi" on:click={set(cmStatus.Reject)}></button>
     {/if}
-    {#if d.state !== cmStatus.Approve}
+    {#if !d.isAdm && d.state !== cmStatus.Approve}
       <button class="icon i-ok" on:click={set(cmStatus.Approve)}></button>
     {/if}
     <button class="icon i-del" on:click={del(d.id)}></button>
   </div>
   <div class="l">
-    {#each ls as i}
-      <Item topic={d.id} d={i} />
-    {/each}
-    <Ld act={ld}/>
+    <div class="ls">
+      {#each ls as i}
+        <Item topic={d.id} d={i} />
+      {/each}
+      <Ld act={ld} />
+    </div>
+    <Pg {page} {total} {go} />
   </div>
 </div>
 <style lang="scss">
@@ -121,5 +141,17 @@
     &.i-del {
       color: #fff;
     }
+  }
+
+  .l {
+    flex-grow: 1;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+  }
+  .ls{
+    flex: 1;
+    overflow: auto;
   }
 </style>
