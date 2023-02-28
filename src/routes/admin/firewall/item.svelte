@@ -34,7 +34,7 @@
     {/if}
     <div class="r2"><span>{ph}</span></div>
     <div class="r6"><span>{ct}</span></div>
-    <div class="r4"><span>{mk}</span></div>
+    <div class="r4"><span>{mk||''}</span></div>
     <div class="r5">
         <button class="icon"
                 on:click|stopPropagation={()=>exp=1-exp}

@@ -30,7 +30,7 @@ import { permission } from "$lib/enum";
 import path from "path";
 import fs from "fs";
 import { genToken } from "$lib/server/token";
-import { addRule, blockIp, delRule, filterLog, fw2log, logCache, lsRules, ruleHit } from "$lib/server/firewall";
+import { addRule, blockIp, delRule, filterLog, fw2log, logCache, lsRules, ruleHit, rules } from "$lib/server/firewall";
 import { loadGeoDb } from "$lib/server/ipLite";
 import { publishedPost, tagPatcher, tags } from "$lib/server/store";
 import { get } from "svelte/store";
@@ -308,8 +308,11 @@ const apis: APIRoutes = {
       const r = new Uint8Array(await req.arrayBuffer());
       const p = r[0];
       const s = r[1];
-      return arrFilter(lsRules(p, s), ["id", "path", "headers", "ip", "mark",
-        "country", "log", "active", "noAccess"]);
+      return {
+        items:arrFilter(lsRules(p, s), ["id", "path", "headers", "ip", "mark",
+          "country", "log", "active", "noAccess"]),
+        total:Math.ceil(rules.length/s)
+      };
     })
   },
   login: {
