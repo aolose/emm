@@ -1,67 +1,37 @@
 <script>
-    import {getColor,getPain} from "$lib/utils";
+  import { getColor, getPain } from "$lib/utils";
 
-    export let p = {}
-    const {banner, slug, title, desc, content, createAt} = p
-    const sty = banner ? `background-image:url(/res/${banner})` : '';
-    const tm = new Date(createAt)
-    const y = tm.getFullYear()
-    const m = tm.getMonth() + 1
-    const d = tm.getDate()
-    const showY = new Date().getFullYear() !== y
-    let ds
-    $:{
-        ds = (desc||getPain(content)).substring(0,140)
-    }
+  export let p = {};
+  const { banner, slug, title, desc, content, createAt } = p;
+  const sty = banner ? `background-image:url(/res/${banner})` : "";
+  const tm = new Date(createAt);
+  const y = tm.getFullYear();
+  const m = tm.getMonth() + 1;
+  const d = tm.getDate();
+  const showY = new Date().getFullYear() !== y;
+  let ds;
+  $:{
+    ds = (desc || getPain(content)).substring(0, 140);
+  }
 </script>
 
 <div class="s p" style={`background-color:${getColor(createAt/3600)}`}>
-    <div class="x" style={sty}></div>
-    <div class="t">
-        {m}/{d}
-        {#if showY} {y}{/if}
-    </div>
-    <a class="f" href={`/post/${slug}`}>
-        <div class="c" class:ex={!banner}>
-            <h3>{title}</h3>
-        </div>
-        <div class="ss"></div>
-        <p>{ds}...</p>
-    </a>
-    <div class="ms"><a href={`/post/${slug}`}>Read</a></div>
+  <div class="x" style={sty}></div>
+  <div class="t">
+    {m}/{d}
+    {#if showY} {y}{/if}
+  </div>
+  <a class="f" href={`/post/${slug}`}>
+    <div class="c" class:ex={!banner}></div>
+    <h3>{title}</h3>
+    <h3>{title}</h3>
+    <div class="ss"></div>
+    <p>{ds}...</p>
+  </a>
 </div>
 
 <style lang="scss">
   @import "../../break";
-
-  .ms {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 10;
-    background: linear-gradient(rgba(0, 0, 0, .0),  rgba(6, 9 ,25, .7));
-    border-radius: inherit;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: .3s ease-in-out;
-    transform: translate3d(0, 100%, 0);
-
-    a {
-      display: block;
-      opacity: .8;
-      cursor: pointer;
-      background: #fff;
-      padding: 5px 30px;
-      border-radius: 3px;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
 
   .x {
     transition: 2s ease-in-out;
@@ -92,33 +62,41 @@
     }
 
     &:hover {
-      .x {
-        transform: scale(1.05);
-        filter: grayscale(.1) blur(1px);
-      }
+      h3 {
+        opacity: 0;
 
-      .f {
-        opacity: .5;
-        @include s() {
+        & + h3 {
           opacity: 1;
         }
       }
 
-      .ms {
-        @include s() {
-          display: none;
-        }
-        transform: translate3d(0, 0, 0);
+      p {
+        opacity: 0;
+      }
+
+      .x {
+        transform: scale(1.05);
+        filter: grayscale(.1) blur(1px);
       }
     }
   }
 
 
   h3 {
+    transform: translate3d(0, 0, 0);
+    transition: .5s ease-in-out;
     font-size: 24px;
-    text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
-    color: #fff;
+    text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 3px;
+    color: #ddd;
     font-weight: 100;
+    &+h3{
+        position: absolute;
+        opacity: 0;
+        font-size: 32px;
+        left: 50%;
+        top: 50%;
+        transform: translate3d(-50%, -50%, 0);
+    }
   }
 
   .ss {
@@ -126,6 +104,7 @@
   }
 
   p {
+    transition: .5s ease-in-out;
     margin-bottom: 10px;
     display: flex;
     overflow: hidden;
@@ -173,7 +152,7 @@
     bottom: 0;
     border-radius: inherit;
     padding: inherit;
-    background:  linear-gradient(177deg, rgba(30, 48, 63, 0.2), rgba(6, 9 ,25, .7));
+    background: linear-gradient(177deg, rgba(30, 48, 63, 0.2), rgba(6, 9, 25, .7));
   }
 
 </style>
