@@ -63,6 +63,7 @@ function insert(obj: Obj<Model>): [string, unknown[]] {
   const [k, m] = noNullKeyValues(obj);
   const v = sqlVal(m);
   const q = sqlFields(k.length);
+  if (!k.length) return ["", v];
   return [`insert into ${table} (${k.join()}) values (${q})`, v];
 }
 
@@ -77,6 +78,7 @@ function update(obj: Obj<Model>): [string, unknown[]] {
     w.push(k.splice(i, 1)[0]);
     v.push(v.splice(i, 1)[0]);
   }
+  if (!k.length) return ["", v];
   return [`update ${table} set ${k.map(a => `${a} = ?`).join()}${w.length ? ` where ${pk}=?` : ""}`, v];
 }
 
@@ -93,9 +95,9 @@ export class DB {
   private select(one: boolean, o: Obj<Model>, where = "", values: unknown[]) {
     const [sql, w, v] = select(o);
     const wh = [w, where].filter((a) => a).join(" and ");
-    const s = sql + (wh ? ` WHERE ${wh}` : "").replace(/where order by/i,'order by');
+    const s = sql + (wh ? ` WHERE ${wh}` : "").replace(/where order by/i, "order by");
     const params = sqlVal([...v, ...values]);
-    Log.debug('sql',s)
+    Log.debug("sql", s);
     const paper = this.db.prepare(s);
     if (one) return paper.get(...params);
     return paper.all(...params);
@@ -132,9 +134,9 @@ export class DB {
     const l = ` limit ${size * (page - 1)},${size}`;
     let w = "";
     let p = [] as unknown[];
-    if (where && where.length > 1) {
+    if (where && where.length) {
       w = ` where ${where[0]}`;
-      p = where?.slice(1);
+      p = where?.slice(1) || [];
     }
     const sql = s + w + d + l;
     Log.debug("sql", sql);
@@ -162,6 +164,11 @@ export class DB {
       setKey(a, "createAt", now);
       [sql, values] = insert(o);
     } else [sql, values] = update(o);
+    Log.debug("save", sql, values);
+    if (!sql) {
+      Log.warn('save',table,'empty sql')
+      return { changes: 0, lastInsertRowid: 0 };
+    }
     const r = this.db.prepare(sql).run(...values);
     if (r.changes === 1 && !kv) {
       const t = typeof kv;
@@ -176,7 +183,7 @@ export class DB {
   delByPk<T extends Model>(c: Class<T>, pks: unknown[]) {
     const pk = pkMap[c.name] as string;
     const sql = `delete from ${c.name} where ${pk} in (${sqlFields(pks.length)})`;
-    Log.debug('delete',sql,pks)
+    Log.debug("delete", sql, pks);
     return this.db.prepare(sql).run(...pks);
   }
 

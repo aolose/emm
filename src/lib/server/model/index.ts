@@ -77,7 +77,7 @@ export class Post {
     _r: number[] | undefined;
 
     onSave(db: DB, now: number) {
-        const {id, title_d, title, content_d, content} = this;
+        const {id, title_d, title, content_d} = this;
         const oo = id ? db.get(model(this.constructor as FunctionConstructor, {id})) : {};
         const ori = oo as Post;
         const df = diffObj(

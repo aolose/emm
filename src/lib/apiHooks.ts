@@ -16,7 +16,7 @@ export const hooks: apiHooks = {
             before: v => {
                 const o = v as Post & { _?: number }
                 if (o.id && o._) delete o._
-                modelArr2Str(o, "_reqs")
+                return modelArr2Str(o, "_reqs")
             }
         }
     },
