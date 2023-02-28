@@ -511,7 +511,14 @@ export const getColor = (a: number | string, opacity = 1) => {
 };
 
 export const getPain = (src: string) => {
-    return src ? convert(marked.parse(src)) : "";
+    return src ? convert(marked.parse(src),{
+        selectors:[
+            {selector:'a',options:{ignoreHref:true}},
+            { selector: 'img', format: 'skip' },
+            { selector: 'code', format: 'skip' },
+            { selector: 'table', format: 'skip' },
+        ]
+    }) : "";
 };
 export const rndAr = <T extends string | number>(a: T[]) => {
     return a[Math.floor(Math.random() * a.length)];
@@ -666,15 +673,6 @@ export const sort = <T extends object>(target: T[], key?: (keyof T)[] | keyof T,
     return target;
 };
 
-export const modelArr2Str = <T extends Model>(m: T, key: keyof T, rfKey?: keyof T) => {
-    const arr = m[key];
-    if (Array.isArray(arr)) return {
-        ...m,
-        [key]: arr.map(a => a[rfKey || key]).join()
-    };
-    return m;
-};
-
 export const watch = (...args: unknown[]) => {
     let keys = JSON.stringify(args)
     return (fn: () => void, ...args: unknown[]) => {
@@ -685,6 +683,15 @@ export const watch = (...args: unknown[]) => {
         }
     }
 }
+
+export const modelArr2Str = <T extends Model>(m: T, key: keyof T, rfKey?: keyof T) => {
+    const arr = m[key];
+    if (Array.isArray(arr)) return {
+        ...m,
+        [key]: arr.map(a => a[rfKey || key]).join()
+    };
+    return m;
+};
 
 export const getErr = (e: Error | { data: { message: string } | string }) => {
     if ('data' in e) {
