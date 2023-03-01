@@ -25,6 +25,8 @@
             <Link href="/">Home</Link>
             <Link href="/posts" exact={false}>Posts</Link>
             <Link href="/tags" exact={false}>Tags</Link>
+            <Link href="/ticket" exact={false}>Ticket</Link>
+            <Link href="/rss" exact={false}>RSS</Link>
         {/if}
     </div>
     <div class="a"></div>

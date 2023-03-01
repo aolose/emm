@@ -1,61 +1,115 @@
 <script>
-    import Canvas from '$lib/components/ctx.svelte'
-    import UpDownScroll from "$lib/components/upDownScroll.svelte";
-    import Ph from '$lib/components/post/hd.svelte'
-    import {tick} from "svelte";
-    import {expand} from "$lib/store";
+  import Canvas from "$lib/components/ctx.svelte";
+  import UpDownScroll from "$lib/components/upDownScroll.svelte";
+  import Ph from "$lib/components/post/hd.svelte";
+  import { tick } from "svelte";
+  import { expand } from "$lib/store";
+  import { req } from "$lib/req";
+  import { getErr, watch } from "$lib/utils";
 
-    let a
-    let sc
+  let a;
+  let sc;
+  export let data;
+  const { admin, read, post } = data.d;
 
-    let inf = [
-        [1, 'show secret posts', 1],
-        [0, 'view admin page', 2],
-        [0, 'all admin permissions', 2],
-    ]
+  let inf = [
+    [post, "show secret posts", 1],
+    [read, "view admin page", 2],
+    [admin, "all admin permissions", 2]
+  ];
 
-    async function scTop() {
-        await tick()
-        if (sc) {
-            document.scrollingElement.scrollTop = 0
-            window.scrollTo(0, 0)
-            sc.scrollTop = 0
-        }
+  async function scTop() {
+    await tick();
+    if (sc) {
+      document.scrollingElement.scrollTop = 0;
+      window.scrollTo(0, 0);
+      sc.scrollTop = 0;
     }
+  }
+
+  let tm;
+  let ld = 0;
+  let code = "";
+  let err = "";
+  let e = 0;
+  const we = watch(err);
+  $:{
+    we(() => {
+      clearTimeout(tm);
+      e = !!err;
+      if (err) {
+        tm = setTimeout(() => e = 0, 2e3);
+      }
+    }, err);
+  }
+
+  function check() {
+    if (ld) return;
+    err = "";
+    ld = 1;
+    if (!code) return;
+    req("ticket", code).then(a => {
+      debugger
+      code = "";
+    }).catch(e => {
+      err = getErr(e);
+    }).finally(() => {
+      ld = 0;
+    });
+  }
+
 </script>
 <svelte:head>
-    <title>Err - Posts</title>
+  <title>Err - Posts</title>
 </svelte:head>
-<UpDownScroll bind:down={a}/>
-<svelte:window on:sveltekit:navigation-end={scTop}/>
-<Canvas type={1}/>
+<UpDownScroll bind:down={a} />
+<svelte:window on:sveltekit:navigation-end={scTop} />
+<Canvas type={1} />
 <div class="o" class:e={$expand}>
-    <Ph bind:shrink={a}>Ticket</Ph>
-    <div>
-        <div class="i">
-            <div class="v">
-                <input placeholder="enter code"/>
-                <button>Check</button>
-            </div>
-            <h1>status</h1>
-            {#each inf as [act, t]}
-                <div class="r" class:act>
-                    <div class="icon" class:i-ok={act}></div>
-                    <span>{t}</span>
-                </div>
-            {/each}
+  <Ph bind:shrink={a}>Ticket</Ph>
+  <div>
+    <div class="i">
+      <div class="v">
+        <input bind:value={code} placeholder="enter code" />
+        <button on:click={check}>Check</button>
+      </div>
+      <span class="er" class:act={e}>{err}</span>
+      <h1>status</h1>
+      {#each inf as [act, t]}
+        <div class="r" class:act>
+          <div class="icon" class:i-ok={act}></div>
+          <span>{t}</span>
         </div>
+      {/each}
     </div>
+  </div>
 </div>
 <style lang="scss">
   @import "../../../lib/break.scss";
+
+  .er {
+    opacity: 0;
+    background: rgba(190, 100, 150, .1);
+    line-height: 2;
+    padding: 5px 20px;
+    border-radius: 4px;
+    color: #c9a6a6;
+    transition: .5s ease-in-out;
+
+    &.act {
+      opacity: 1;
+    }
+  }
+
   $r: 6px;
   .o {
     transition: .3s ease-in-out;
+
     &.e {
       padding-top: 30px;
     }
   }
+
   .i {
     padding: 20px;
     width: 90%;

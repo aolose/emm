@@ -30,6 +30,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError = (({ error, event }) => {
+  console.error(error)
   const { data, message, status } = error as {
     status: number,
     data: string, message: string
