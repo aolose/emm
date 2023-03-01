@@ -6,7 +6,7 @@
   import { expand } from "$lib/store";
   import { req } from "$lib/req";
   import { getErr, watch } from "$lib/utils";
-
+  import { fade } from "svelte/transition";
   let a;
   let sc;
   export let data;
@@ -14,8 +14,8 @@
 
   let inf = [
     [post, "show secret posts", 1],
-    [read, "view admin page", 2],
-    [admin, "all admin permissions", 2]
+    [read, "view backstage system", 2],
+    [admin, "full admin privileges", 2]
   ];
 
   async function scTop() {
@@ -65,7 +65,7 @@
 <UpDownScroll bind:down={a} />
 <svelte:window on:sveltekit:navigation-end={scTop} />
 <Canvas type={1} />
-<div class="o" class:e={$expand}>
+<div class="o" class:e={$expand} transition:fade>
   <Ph bind:shrink={a}>Ticket</Ph>
   <div>
     <div class="i">
@@ -74,7 +74,7 @@
         <button on:click={check}>Check</button>
       </div>
       <span class="er" class:act={e}>{err}</span>
-      <h1>status</h1>
+      <h1>Permissions</h1>
       {#each inf as [act, t]}
         <div class="r" class:act>
           <div class="icon" class:i-ok={act}></div>
@@ -104,7 +104,11 @@
   $r: 6px;
   .o {
     transition: .3s ease-in-out;
-
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     &.e {
       padding-top: 30px;
     }
@@ -116,6 +120,7 @@
     margin: 0 auto;
     @include s() {
       width: 100%;
+      padding: 10px 7%;
     }
   }
 
@@ -141,10 +146,9 @@
     height: 60px;
     width: 400px;
     box-shadow: rgba(0, 0, 0, .1) 2px 10px -5px;
-    margin: 20px 0;
+    margin: 30px 0 10px;
     display: flex;
     align-items: center;
-
     button {
       text-transform: uppercase;
       font-size: 16px;
@@ -153,6 +157,18 @@
       width: 120px;
       height: 100%;
       border-radius: 0 $r $r 0;
+    }
+    @include s(){
+      width: 95%;
+      margin:  30px auto 10px;
+      height: 50px;
+      input{
+        font-size: 18px;
+      }
+      button{
+        width: 30%;
+        font-size: 14px;
+      }
     }
   }
 

@@ -7,7 +7,7 @@
     import Ph from './hd.svelte'
     import UpDownScroll from "../upDownScroll.svelte";
     import {expand} from "$lib/store";
-
+    import { fade } from "svelte/transition";
     let a = 0
 
     async function scTop() {
@@ -30,7 +30,7 @@
 <UpDownScroll bind:down={a}/>
 <svelte:window on:sveltekit:navigation-end={scTop}/>
 <Canvas type={1}/>
-<div class="o" class:e={$expand}>
+<div class="o" class:e={$expand}  transition:fade>
     <Ph bind:shrink={a}><slot></slot></Ph>
     <div class="t" bind:this={sc} class:v={a} bind:offsetHeight={oh}>
         <Ctx>

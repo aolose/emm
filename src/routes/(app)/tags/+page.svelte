@@ -1,37 +1,39 @@
 <script>
-    import Ph from '$lib/components/post/hd.svelte'
-    import Canvas from '$lib/components/ctx.svelte'
-    import {bubbles, getColor} from "$lib/utils";
-    import UpDownScroll from "$lib/components/UpDownScroll.svelte";
-    import {expand} from "$lib/store";
-    let a =0
-    export let data
-    const d = data.d.split(',').filter(a=>a)
+  import Ph from "$lib/components/post/hd.svelte";
+  import Canvas from "$lib/components/ctx.svelte";
+  import { bubbles, getColor } from "$lib/utils";
+  import UpDownScroll from "$lib/components/UpDownScroll.svelte";
+  import { expand } from "$lib/store";
+  import { fade } from "svelte/transition";
+
+  let a = 0;
+  export let data;
+  const d = data.d.split(",").filter(a => a);
 </script>
 
 <svelte:head>
-    <title>Err - tags</title>
+  <title>Err - tags</title>
 </svelte:head>
-<UpDownScroll bind:down={a}/>
-<Canvas type={2}/>
-<div class="o" class:e={$expand}>
-    <Ph bind:shrink={a}>Tags</Ph>
-    <div class="v" class:s={a}>
-        <div class="ls">
-            {#each d as tag,i}
-                <a
-                        on:mouseenter={e=>bubbles(e.target)}
-                        href={`/tag/${tag}`}
-                        style={`background:${getColor(i)}`}
-                >
+<UpDownScroll bind:down={a} />
+<Canvas type={2} />
+<div class="o" class:e={$expand} transition:fade>
+  <Ph bind:shrink={a}>Tags</Ph>
+  <div class="v" class:s={a}>
+    <div class="ls">
+      {#each d as tag,i}
+        <a
+          on:mouseenter={e=>bubbles(e.target)}
+          href={`/tag/${tag}`}
+          style={`background:${getColor(i)}`}
+        >
                     <span>{tag}
                     </span></a>
-            {/each}
-            {#if !d.length}
-                <p>No tags found.</p>
-            {/if}
-        </div>
+      {/each}
+      {#if !d.length}
+        <p>No tags found.</p>
+      {/if}
     </div>
+  </div>
 
 </div>
 <style lang="scss">
@@ -43,9 +45,11 @@
     flex-direction: column;
     height: 100%;
   }
-  .e{
-    transform: translate3d(0,30px,0);
+
+  .e {
+    transform: translate3d(0, 30px, 0);
   }
+
   .cc {
     padding: 60px 0 20px;
     position: relative;

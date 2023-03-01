@@ -58,7 +58,9 @@
     padding: 20px;
     margin: 10px;
     @include s() {
-      width: 100%;
+      width: 95%;
+      margin:  10px auto;
+      height: 180px;
     }
 
     &:hover {

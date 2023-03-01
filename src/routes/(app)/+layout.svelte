@@ -1,21 +1,23 @@
 <script>
-    import Nav from '$lib/components/nav.svelte'
-    import {expand} from "$lib/store";
-    import Confirm from '$lib/components/confirm.svelte'
-    let b = ''
+  import Nav from "$lib/components/nav.svelte";
+  import { expand } from "$lib/store";
+  import Confirm from "$lib/components/confirm.svelte";
+
+  let b = "";
 </script>
 <div class="b" style={b}>
-    <div class="nv ">
-        <Nav/>
-    </div>
-    <div class="g" class:ex={$expand}>
-        <slot>
-        </slot>
-    </div>
+  <div class="nv ">
+    <Nav />
+  </div>
+  <div class="g" class:ex={$expand}>
+    <slot>
+    </slot>
+  </div>
 </div>
-<Confirm/>
+<Confirm />
 <style lang="scss">
   @import "../../lib/break";
+
   :global {
     :root {
       --it: -160px;
@@ -30,13 +32,13 @@
       --itp: 10px;
       --mr: 30px;
       --ex: 80%;
-      --artP:60px;
-      --artC:20px 20px 60px;
-      --fs:28px;
+      --artP: 60px;
+      --artC: 20px 20px 60px;
+      --fs: 28px;
       @include s() {
-        --fs:20px;
-        --artC:0 0 50px;
-        --artP:40px;
+        --fs: 20px;
+        --artC: 0 0 50px;
+        --artP: 40px;
         --ex: 99%;
         --mr: 10px;
         --skA: 0deg;
@@ -54,9 +56,10 @@
     * {
       color: #808fa9;
     }
+
     *::-webkit-scrollbar-thumb {
       border-radius: 10px;
-      background-color: transparentize(#222f48,.4)
+      background-color: transparentize(#222f48, .4)
     }
   }
 
@@ -68,7 +71,7 @@
     position: fixed;
   }
 
-  .b{
+  .b {
     position: absolute;
     left: 0;
     right: 0;
@@ -86,13 +89,11 @@
     top: 0;
     bottom: 0;
     transition: .3s ease-in-out;
+
     &.ex {
-      :global{
-        .ctx{
+      :global {
+        .ctx {
           padding-top: 30px;
-          @include s() {
-            padding-top: 0;
-          }
         }
       }
     }

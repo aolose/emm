@@ -1,8 +1,7 @@
 <script>
-    import {fade} from "svelte/transition";
    export let shrink = 0
 </script>
-<div class="ph" class:s={shrink} transition:fade>
+<div class="ph" class:s={shrink}>
     <div class="cc">
         <h1>
             <slot></slot>

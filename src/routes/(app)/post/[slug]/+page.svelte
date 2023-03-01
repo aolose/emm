@@ -178,7 +178,7 @@
       bottom: inherit;
       position: relative;
       &:global {
-        .ctx {
+        .cvs {
           padding: 0 !important;
         }
       }
