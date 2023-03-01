@@ -108,6 +108,9 @@
     justify-content:center;
 
   }
+  .a{
+      margin-bottom: 60px;
+  }
   .tp {
     text-align:center;
     min-width: 200px;

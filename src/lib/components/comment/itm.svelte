@@ -117,9 +117,11 @@
         </div>
         <div class="t">
           {#if d.save}
-            <span class="e">last edit at {time(d.save)}</span>
+            <span>last edit at {time(d.save)}</span>
           {/if}
-          <span>{time(d.createAt)}</span>
+          {#if d.createAt}
+            <span>{time(d.createAt)}</span>
+          {/if}
         </div>
       </div>
     {/if}
@@ -147,8 +149,9 @@
   {/if}
 </div>
 <style lang="scss">
-  .e {
-    margin: 10px;
+  @mixin bg {
+    border: 1px solid rgba(80, 100, 150, .07);
+    background: rgba(80, 100, 150, .07);
   }
 
   .p {
@@ -169,15 +172,13 @@
   .a {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
   }
 
   .m {
-    margin: 10px 0;
-    border-radius: 4px;
-    background: var(--bg);
-    border: 1px solid var(--bg5);
+    margin: 10px 0 0;
     flex-direction: column;
+    @include bg;
 
     .r {
       padding-left: 0;
@@ -195,10 +196,10 @@
 
       p {
         color: #8396af;
-        display: flex;
-        padding: 0 5px;
+        padding: 0 5px 5px;
         font-size: 13px;
         line-height: 2;
+        white-space: pre-wrap;
 
         & > span {
           padding: 0 5px;
@@ -234,16 +235,15 @@
   }
 
   .c {
-    border: 1px solid var(--bg5);
-    border-radius: 4px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: var(--bg);
+    padding: 5px 0 0 7px;
+    @include bg;
 
     p {
       flex-grow: 1;
-      padding: 10px;
+      padding: 5px 10px 15px;
       white-space: normal;
       word-break: break-all;
       color: #a6afb4;

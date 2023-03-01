@@ -264,7 +264,7 @@
     left: 0;
     right: 0;
     top: 0;
-    height: 60%;
+    height: 90%;
     max-height: 100%;
     min-height: 400px;
     //bottom: 0;

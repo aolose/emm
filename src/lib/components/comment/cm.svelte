@@ -159,8 +159,8 @@
   }
 
   .dis {
-    cursor: not-allowed;
-    opacity: .5;
+    opacity: 0;
+    pointer-events: none;
   }
 
   input, .n {
@@ -189,12 +189,12 @@
   }
 
   .i-pub {
-    background: #1a2641;
+    background: #477dc1;
     color: #fff;
     font-size: 18px;
     width: 40px;
     height: 30px;
-    border-radius: 4px;
+    border-radius: 3px;
   }
 
   .nf {
@@ -216,8 +216,8 @@
   .c {
     margin-top: 20px;
     border-radius: 4px;
-    border: 1px solid var(--bg5);
-    background: var(--bg);
+    border: 1px solid rgba(80,100,150,.07);
+    background: rgba(80,100,150,.07);
   }
 
   .as {
@@ -227,8 +227,8 @@
     top: -160px;
     width: 210px;
     overflow: hidden;
-    background: var(--bg1);
-    backdrop-filter: blur(6px);
+    background: rgba(10,15,20,.5);
+    backdrop-filter: blur(15px);
     border: 1px solid #1d283a;
     box-shadow: rgba(0, 0, 0, .2) 0 3px 8px -3px;
     border-radius: 5px;
@@ -244,7 +244,7 @@
         border-radius: 6px;
 
         &.act, &:hover {
-          background-color: #070c17;
+          background-color: #000;
         }
       }
     }
@@ -288,12 +288,11 @@
   .m {
     margin: 0;
     height: auto;
-
+    background: rgba(0,0,0,.05);
     .i-pub {
-      width: auto;
-      color: #1c93ff;
-      background: none;
-      height: 20px;
+      font-size: 14px;
+      width: 32px;
+      height: 24px;
       margin-top: 5px;
     }
 
