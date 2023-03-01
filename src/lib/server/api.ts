@@ -5,6 +5,7 @@ import {
   checkStatue,
   combineResult,
   DBProxy,
+  debugMode,
   delCookie,
   getClient,
   getReqJson,
@@ -15,7 +16,6 @@ import {
   resp,
   saveFile,
   setToken,
-  debugMode,
   sqlFields,
   sysStatue,
   throwDbProxyError,
@@ -46,6 +46,7 @@ import {
 import { versionStrPatch } from "$lib/setStrPatchFn";
 import { NULL } from "$lib/server/enum";
 import { cmManager } from "$lib/server/comment";
+import { pubPostList } from "$lib/server/posts";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
   if (!sysStatue) return resp("system uninitialized", 403);
@@ -123,6 +124,42 @@ const apis: APIRoutes = {
       return t;
     })
   },
+  ticket: {
+    get: req => {
+      const cli = getClient(req);
+      if (cli) {
+        return {
+          read: cli.ok(Read) ? 1 : undefined,
+          admin: cli.ok(Admin) ? 1 : undefined,
+          post: cli.ok(permission.Post) ? 1 : undefined
+        };
+      }
+    },
+    post: async (req) => {
+      const code = await req.text();
+      if (code) {
+        const tk = codeTokens.get(code);
+        if (tk) {
+          const client = getClient(req);
+          if (client?.has(tk)) return "";
+          const n = Date.now();
+          const { expire = 0, times = 0 } = tk;
+          if (expire < 0 || expire > n) {
+            if (times > 0) tk.times = times - 1;
+            tk.used = (tk.used || 0) + 1;
+            if (times === 1) codeTokens.delete({ code });
+            if (times) {
+              const re = resp(filter(tk, ["type", "expire", "times"]));
+              setToken(req, re, tk as TokenInfo);
+              return re;
+            }
+          }
+          codeTokens.delete({ code });
+        }
+      }
+      return resp("invalid code", 403);
+    }
+  },
   code: {
     delete: auth(Admin, async req => {
       return codeTokens.delete({
@@ -170,31 +207,7 @@ const apis: APIRoutes = {
           }
           return b as TokenInfo[];
         });
-    }),
-    post: async (req) => {
-      const code = await req.text();
-      if (code) {
-        const tk = codeTokens.get(code);
-        if (tk) {
-          const client = getClient(req);
-          if (client?.has(tk)) return "";
-          const n = Date.now();
-          const { expire = 0, times = 0 } = tk;
-          if (expire < 0 || expire > n) {
-            tk.times = times - 1;
-            tk.used = (tk.used || 0) + 1;
-            if (times === 1) codeTokens.delete({ code });
-            if (times) {
-              const re = resp(tk.type);
-              setToken(req, re, tk as TokenInfo);
-              return re;
-            }
-          }
-          codeTokens.delete({ code });
-        }
-      }
-      return resp("invalid code", 403);
-    }
+    })
   },
   require: {
     delete: auth(Admin, async req => {
@@ -282,14 +295,14 @@ const apis: APIRoutes = {
       }
     })
   },
-  bip:{
+  bip: {
     post: auth(Read, async req => {
-      const ip = await req.text()
-      if(ip){
-        const o = ruleHit({ip})
-        if(o?.noAccess)return 1
+      const ip = await req.text();
+      if (ip) {
+        const o = ruleHit({ ip });
+        if (o?.noAccess) return 1;
       }
-    }),
+    })
   },
   rule: {
     post: auth(Admin, async req => {
@@ -309,9 +322,9 @@ const apis: APIRoutes = {
       const p = r[0];
       const s = r[1];
       return {
-        items:arrFilter(lsRules(p, s), ["id", "path", "headers", "ip", "mark",
+        items: arrFilter(lsRules(p, s), ["id", "path", "headers", "ip", "mark",
           "country", "log", "active", "noAccess"]),
-        total:Math.ceil(rules.length/s)
+        total: Math.ceil(rules.length / s)
       };
     })
   },
@@ -443,31 +456,8 @@ const apis: APIRoutes = {
       const page = +(params.get("page") || 1);
       const size = +(params.get("size") || 10);
       const tag = params.get("tag");
-      const where: string[] = ["published=?"];
-      const values: unknown[] = [1];
-
-      if (tag) {
-        const tg = get(tags).find(a => a.name === tag);
-        const ps = tg ? tagPostCache.getPostIds(tg.id) : [];
-        if (ps.length) {
-          where.push(`id in (${sqlFields(ps.length)})`);
-          values.push(...ps);
-        }
-      }
-      const disableIds = noAccessPosts(getClient(req));
-      if (disableIds) {
-        where.push(`id not in (${sqlFields(disableIds.length)})`);
-        values.push(...disableIds);
-      }
-      return pageBuilder(page, size, Post,
-        ["createAt desc"], [
-          "banner", "desc",
-          "content", "createAt",
-          "_tag", "title", "slug"
-        ],
-        [where.join(" and "), ...values],
-        patchPostTags
-      );
+      const skips = noAccessPosts(getClient(req));
+      return pubPostList(page, size, tag, skips);
     },
     post: auth(Read, async (req) => {
       const {
