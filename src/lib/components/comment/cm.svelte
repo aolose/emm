@@ -341,6 +341,7 @@
   .am {
     height: 300px;
     .sd {
+      padding:  0 10px;
       flex-grow: 1;
       max-height: 200px;
 
@@ -356,13 +357,12 @@
   }
 
   .pu {
+    width: 100px;
     transition: .2s;
     border-radius: 4px;
     position: relative;
-    width: 90%;
-    max-width: 300px;
-    background: var(--blue);
-    margin: 10px auto;
+    background: #496cad;
+    margin: 10px 20px 20px auto;
     height: 30px;
     color: #ddd;
   }

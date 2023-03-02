@@ -1,51 +1,59 @@
 <script>
-    import Item from './item.svelte'
-    import Ctx from "./ctx.svelte";
-    import Canvas from '../ctx.svelte'
-    import {tick} from "svelte";
-    import Nav from "../pg.svelte"
-    import Ph from './hd.svelte'
-    import UpDownScroll from "../upDownScroll.svelte";
-    import {expand} from "$lib/store";
-    import { fade } from "svelte/transition";
-    let a = 0
+  import Item from "./item.svelte";
+  import Ctx from "./ctx.svelte";
+  import Canvas from "../ctx.svelte";
+  import { tick } from "svelte";
+  import Nav from "../pg.svelte";
+  import Ph from "./hd.svelte";
+  import UpDownScroll from "../upDownScroll.svelte";
+  import { expand } from "$lib/store";
+  import { fade } from "svelte/transition";
 
-    async function scTop() {
-        await tick()
-        if (sc) {
-            document.scrollingElement.scrollTop = 0
-            window.scrollTo(0, 0)
-            sc.scrollTop = 0
-        }
+  let a = 0;
+
+  async function scTop() {
+    await tick();
+    if (sc) {
+      document.scrollingElement.scrollTop = 0;
+      window.scrollTo(0, 0);
+      sc.scrollTop = 0;
     }
+  }
 
-    let sc, oh = 0, ih = 0
-    export let name=''
-    export let d = {}
-    $:cur = d.cur
-    $:total = d.total
-    let ls = []
-    $:ls = d.items || []
+  let sc, oh = 0, ih = 0;
+  export let name = "";
+  export let d = {};
+  let cur;
+  let total = 1;
+  $:cur = d.cur;
+  $:total = d.total;
+  let ls = [];
+  $:ls = d.items || [];
 </script>
-<UpDownScroll bind:down={a}/>
-<svelte:window on:sveltekit:navigation-end={scTop}/>
-<Canvas type={1}/>
-<div class="o" class:e={$expand}  transition:fade>
-    <Ph bind:shrink={a}><slot></slot></Ph>
-    <div class="t" bind:this={sc} class:v={a} bind:offsetHeight={oh}>
-        <Ctx>
-            <div class="c" bind:offsetHeight={ih}>
-                {#each ls as p,i (p.slug)}
-                    <Item p={p} n={i}/>
-                {/each}
-            </div>
-        </Ctx>
+<UpDownScroll bind:down={a} />
+<svelte:window on:sveltekit:navigation-end={scTop} />
+<Canvas type={1} />
+<div class="o" class:e={$expand} transition:fade>
+  <Ph bind:shrink={a}>
+    <slot></slot>
+  </Ph>
+  <div class="t" bind:this={sc} class:v={a} bind:offsetHeight={oh}>
+    <Ctx>
+      <div class="c" bind:offsetHeight={ih}>
+        {#each ls as p,i (p.slug)}
+          <Item p={p} n={i} />
+        {/each}
+      </div>
+      {#if !ls.length}
+        <p>No posts found.</p>
+      {/if}
+    </Ctx>
+  </div>
+  <div class="n" class:v={ih>oh&&!a}>
+    <div class="nn">
+      <Nav total={total} cur={cur} go={'/'+name} length="2" tm="1" />
     </div>
-    <div class="n" class:v={ih>oh&&!a}>
-        <div class="nn">
-            <Nav total={total} cur={cur} go={'/'+name} length="2" tm="1"/>
-        </div>
-    </div>
+  </div>
 </div>
 <style lang="scss">
   @import "../../break";
@@ -70,7 +78,7 @@
     transition: .3s ease-in-out;
     transform: translate3d(0, 0, 0);
     clip-path: inset(80px 0 0 0);
-    @include s(){
+    @include s() {
       top: 60px;
     }
   }
@@ -85,7 +93,8 @@
     left: 0;
     right: 0;
     transition: .3s ease-in-out;
-    &.e{
+
+    &.e {
       padding-top: 30px;
     }
   }
@@ -123,5 +132,9 @@
         transform: translate3d(0, 50px, 0);
       }
     }
+  }
+
+  p {
+    padding: 20px 10px;
   }
 </style>
