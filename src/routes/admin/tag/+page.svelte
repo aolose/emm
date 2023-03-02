@@ -108,6 +108,7 @@
   .o {
     button {
       background: #1c93ff;
+      color: #fff;
     }
   }
 

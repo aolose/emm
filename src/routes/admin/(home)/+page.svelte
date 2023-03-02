@@ -1,79 +1,78 @@
 <script>
-    import Search from './search.svelte';
-    import AddPost from './add.svelte';
-    import Pg from '$lib/components/pg.svelte';
-    import Editor from './editor.svelte';
-    import PItem from './pItem.svelte'
-    import Setting from './setting.svelte'
-    import FileWin from '$lib/components/fileManager.svelte';
-    import Viewer from '$lib/components/viewer.svelte'
-    import {editPost, originPost, posts} from "$lib/store";
-    import {api} from "$lib/req";
-    import {onMount} from "svelte";
+  import Search from "./search.svelte";
+  import AddPost from "./add.svelte";
+  import Pg from "$lib/components/pg.svelte";
+  import Editor from "./editor.svelte";
+  import PItem from "./pItem.svelte";
+  import Setting from "./setting.svelte";
+  import FileWin from "$lib/components/fileManager.svelte";
+  import Viewer from "$lib/components/viewer.svelte";
+  import { editPost, originPost, posts } from "$lib/store";
+  import { api } from "$lib/req";
+  import { onMount } from "svelte";
 
-    const getPost = api('posts')
-    let pages = 1
-    let tmpMark = 1
+  const getPost = api("posts");
+  let pages = 1;
+  let tmpMark = 1;
 
-    function sel(p) {
-        console.log(p)
-        if(!p){
-            originPost.set({})
-            editPost.set({})
-            return
-        }
-        const o = {...p}
-        if (!o.id) {
-            o._ = tmpMark++
-        }
-        if (!o.title_d) o.title_d = o.title
-        if (!o.content_d) o.content_d = o.content
-        originPost.set({...o})
-        editPost.set({...o})
+  function sel(p) {
+    if (!p) {
+      originPost.set({});
+      editPost.set({});
+      return;
     }
-
-    function page(n = 1) {
-        getPost({page:n,size:10}).then(p => {
-            const {total, items = []} = p
-            if (items) posts.set(items)
-            pages = total
-        })
+    const o = { ...p };
+    if (!o.id) {
+      o._ = tmpMark++;
     }
+    if (!o.title_d) o.title_d = o.title;
+    if (!o.content_d) o.content_d = o.content;
+    originPost.set({ ...o });
+    editPost.set({ ...o });
+  }
 
-    function close() {
-        sel()
-    }
+  function page(n = 1) {
+    getPost({ page: n, size: 10 }).then(p => {
+      const { total, items = [] } = p;
+      if (items) posts.set(items);
+      pages = total;
+    });
+  }
 
-    onMount(() => {
-        page()
-    })
+  function close() {
+    sel();
+  }
+
+  onMount(() => {
+    page();
+  });
 </script>
 
 <div class="x">
-    <div class="m">
-        <div class="a">
-            <div class="h">
-                <Search/>
-                <AddPost/>
-            </div>
-            <div class="ls">
-                {#each $posts as p (p._ || p.id)}
-                    <PItem p={p} sel={sel}/>
-                {/each}
-            </div>
-            <div class="p">
-                <Pg go={page} total={pages}/>
-            </div>
-        </div>
-        <div class="b">
-            <Editor close={close}/>
-        </div>
-        <div class="c">
-            <Viewer preview={true}/>
-        </div>
-        <FileWin/>
-        <Setting/>
+  <div class="m">
+    <div class="a">
+      <div class="h">
+        <Search />
+        <AddPost />
+      </div>
+      <div class="ls">
+        {#each $posts as p (p._ || p.id)}
+          <PItem p={p} sel={sel} />
+        {/each}
+      </div>
+      <div class="p">
+        <Pg go={page} total={pages} />
+      </div>
     </div>
+    <div class="b">
+      <Editor close={close} />
+    </div>
+    <div class="c">
+      <Viewer preview={true} />
+    </div>
+    <FileWin />
+    <Setting />
+  </div>
 </div>
 
 <style lang="scss">
@@ -92,16 +91,15 @@
   }
 
   .a {
-    width: 40%;
-    max-width: 400px;
+    width: 400px;
     background: var(--bg1);
     display: flex;
     flex-direction: column;
   }
 
   .b {
-    width: 50%;
     max-width: 1000px;
+    flex: 1;
   }
 
   .ls {

@@ -137,10 +137,11 @@
     font-size: 12px;
     color: #637288;
     display: flex;
-
     p {
+      white-space: pre-wrap;
       line-height: 2;
       color: #ddd;
+      max-height: none;
     }
   }
 
@@ -198,7 +199,7 @@
 
   .dt {
     margin: 0;
-    background: rgba(155, 155, 155, .05);
+    background: rgba(105, 125, 185, .05);
     flex-direction: column;
     cursor: auto;
 
@@ -253,8 +254,8 @@
     max-width: 500px;
     background: none;
     border: none;
-    padding: 10px;
-
+    padding: 0 10px;
+   margin-bottom: 0;
     .v {
       flex-direction: row;
       width: 100%;
@@ -268,11 +269,11 @@
     }
 
     .d {
-      background: #16293f;
+      background: rgba(80,100,150,.2);
       width: 100%;
       margin: 10px;
       padding: 10px 20px;
-      border-radius: 20px;
+      border-radius: 4px;
     }
 
     .rp {

@@ -38,7 +38,9 @@
 </div>
 <style lang="scss">
   @import "../../../lib/break";
-
+  p{
+    padding: 20px 10px;
+  }
   .o {
     transition: .3s ease-in-out;
     display: flex;
