@@ -1,14 +1,14 @@
 import type { Require } from "$lib/server/model";
-import { CmUser, Comment, Post, PostTag, RequireMap, Tag, TokenInfo } from "$lib/server/model";
+import { Post, PostTag, RequireMap, Tag, TokenInfo } from "$lib/server/model";
 import type { Client } from "$lib/server/client";
-import { DBProxy, model, } from "$lib/server/utils";
+import { DBProxy, model } from "$lib/server/utils";
 import { db } from "$lib/server/index";
 import { requireType } from "$lib/server/enum";
-import type { DiffFn, Model, Obj } from "$lib/types";
+import type { DiffFn, Model, Obj, Timer } from "$lib/types";
 import { tags } from "$lib/server/store";
 import { diffStrSet } from "$lib/setStrPatchFn";
 import { get } from "svelte/store";
-import { permission } from "$lib/enum";
+import { arrFilter, rndAr, rndPick } from "$lib/utils";
 
 export const requireMap = new Map<number, Require>();
 
@@ -23,7 +23,7 @@ export const tagPostCache = (() => {
     delete(postId?: number | number[], tagId?: number | number[]) {
       const ids = new Set<number>();
       const pSet = new Set(([] as number[]).concat(postId || []));
-      const tSet = new Set(([] as number[]).concat(postId || []));
+      const tSet = new Set(([] as number[]).concat(tagId || []));
       tps.forEach(({ postId, tagId, id }) => {
         if ((!pSet.size || pSet.has(postId)) || (!tSet.size || tSet.has(tagId))) {
           ids.add(id);
@@ -44,7 +44,6 @@ export const tagPostCache = (() => {
         }
       });
       if (ts.size) {
-        const add: string[] = [];
         get(tags).forEach(t => {
           if (ts.has(t.name)) {
             tps.push(DBProxy(PostTag, { postId, tagId: t.id }));
@@ -92,8 +91,18 @@ export const tagPostCache = (() => {
 
 export const codeTokens = (() => {
   const o = new Map<string, Obj<TokenInfo>>();
-
+  let t: Timer;
+  let next = 0;
+  const dur = 1e3 * 60;
   return {
+    clear() {
+      const n = Date.now();
+      next = n + dur;
+      const ids = [...o.values()]
+        .filter(a => a.expire && a.expire > 0 && a.expire < n || a.times === 0)
+        .map(a => a.id) as number[];
+      this.delete({ id: ids });
+    },
     load() {
       const n = Date.now();
       const ids: number[] = [];
@@ -104,6 +113,12 @@ export const codeTokens = (() => {
         }
       });
       if (ids.length) db.delByPk(TokenInfo, ids);
+      clearInterval(t);
+      t = setInterval(() => {
+        if (next < n) {
+          this.clear();
+        }
+      }, dur);
     },
     add(code: string, token: Obj<TokenInfo>) {
       o.set(code, token);
@@ -113,6 +128,14 @@ export const codeTokens = (() => {
     has(code: string) {
       return o.has(code);
     },
+    share(n = 5) {
+      this.clear();
+      const codes = ([...o.values()] as TokenInfo[]).filter(a => a.share && a.code);
+      return arrFilter(
+        rndPick(codes, n),
+        ["code", "expire", "times", "type"], false
+      );
+    },
     get(code: string) {
       return o.get(code);
     },
@@ -121,7 +144,7 @@ export const codeTokens = (() => {
       const codes: string[] = [];
       const ids: number[] = [];
       if (code) codes.push(code);
-      if (id) {
+      if (id && id.length) {
         ids.push(...id);
         for (const [k, v] of o) {
           if (ids.includes(v.id as number)) {
@@ -130,7 +153,8 @@ export const codeTokens = (() => {
         }
       }
       codes.forEach(c => o.delete(c));
-      return db.delByPk(TokenInfo, ids).changes;
+      if (ids.length)
+        return db.delByPk(TokenInfo, ids).changes;
     }
   };
 })();
@@ -168,10 +192,12 @@ export const reqPostCache = (() => {
         c = c.concat(n);
       }
     },
-    get(rq: { postId?: number, reqId?: number } = {}) {
+    get(rq: { postId?: number | number[], reqId?: number | number[] } = {}) {
       const { postId, reqId } = rq;
+      const pSet = postId ? new Set(([] as number[]).concat(postId)) : undefined;
+      const rSet = reqId ? new Set(([] as number[]).concat(reqId)) : undefined;
       return c.filter(a => {
-        if ((postId && postId !== a.targetId) || (reqId && reqId !== a.reqId)) {
+        if ((pSet && !pSet.has(a.targetId)) || (rSet && !rSet.has(a.reqId))) {
           return false;
         }
         return true;
@@ -214,16 +240,13 @@ export const patchPostReqs = (ps: Post[]) => ps.map(a => {
   return a;
 });
 
-
 export const noAccessPosts = (cli?: Client) => {
-  const posts = new Set(reqPostCache.get().map(a => a.targetId).filter(a => +a));
+  let all = [...reqPostCache.get()].filter(a => a.targetId);
   if (cli) {
     cli.clear();
-    const p = cli.tokens.get(permission.Post);
-    if (p instanceof Map) for (const [k] of p) {
-      posts.delete(k);
-    }
+    const rq = cli.getReqs();
+    if (rq) all = all.filter(a => !rq.get(a.reqId));
   }
-  const s = posts.size;
-  return s ? [...posts] : undefined;
+  const s = all.length;
+  return s ? all.map(a => a.targetId) : undefined;
 };

@@ -92,8 +92,8 @@ export const cmManager = (() => {
       const slug = params.get("slug");
       const page = +(params.get("page") || 1);
       const p = slug && db.get(model(Post, { slug }));
-      const isAdmin = getClient(req)?.ok(permission.Admin);
-      if (!p && !isAdmin) return errMsg("post not exist", true);
+      const canView = getClient(req)?.ok(permission.Admin)||getClient(req)?.ok(permission.Read);
+      if (!p && !canView) return errMsg("post not exist", true);
       const where: string[] = [];
       const values: unknown[] = [];
       const tk = getTk(req);
@@ -125,12 +125,12 @@ export const cmManager = (() => {
         if (topic) {
           const cm = db.get(model(Comment, { id: topic }));
           if (!cm) return errMsg("topic not exist");
-          return subCm(cm.subCm || "", page, tk, isAdmin);
+          return subCm(cm.subCm || "", page, tk, canView);
         } else {
           where.push("topic is null");
         }
         if (status !== -1) {
-          if (!isAdmin) return errMsg("no permission for filter");
+          if (!canView) return errMsg("no permission for filter");
           where.push(`state=?`);
           values.push(status);
         }
@@ -143,7 +143,7 @@ export const cmManager = (() => {
           const postCache = new Map<number, { title: string, slug: string }>();
           arr.forEach(a => {
             if (slug && !topic && a.subCm) {
-              a._cms = subCm(a.subCm, 1, tk, isAdmin);
+              a._cms = subCm(a.subCm, 1, tk, canView);
             }
             patchUserInfo(a);
             if (a.save === a.createAt) delete (a as Obj<Comment>).save;
@@ -162,7 +162,7 @@ export const cmManager = (() => {
             } else {
               if (uid && uid === a.userId) {
                 a._own = 1;
-              } else if (isAdmin) {
+              } else if (canView) {
                 if (a.isAdm) a._own = 1;
                 else a._own = 2;
               }

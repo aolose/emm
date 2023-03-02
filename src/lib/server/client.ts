@@ -6,9 +6,9 @@ import type { Obj } from "$lib/types";
 import { debugMode } from "$lib/server/utils";
 
 export class Client {
-  constructor() {
+  constructor(skip?: boolean) {
     this.tokens = new Map();
-    clientMap.set(
+    if (!skip) clientMap.set(
       this.uuid = randomUUID(),
       this
     );
@@ -22,7 +22,7 @@ export class Client {
     this.clear();
     const t = this.tokens.get(permission.Post);
     if (t && t instanceof Map) {
-      return [...t.keys()];
+      return t;
     }
   }
 
@@ -53,14 +53,16 @@ export class Client {
       for (const cli of clientMap.values()) {
         cli.rmPermission(type);
       }
-      this.tokens.set(type, expire);
-    } else {
+    }
+    if (type == permission.Read || type === permission.Admin)
+      this.tokens.set(type, expire || -1);
+    if (type === permission.Post) {
       let ct = this.tokens.get(tk.type);
       if (!ct && _reqs?.size) {
         this.tokens.set(type, ct = new Map());
         for (const c of _reqs) {
           const e = ct.get(c) || 0;
-          if (e !== -1) ct.set(c, Math.max(expire, e));
+          if (e !== -1) ct.set(c, Math.max(expire, e) || -1);
         }
       }
     }
@@ -73,25 +75,26 @@ export class Client {
   ok(p: permission) {
     this.clear();
     if (debugMode) return true;
-    const ct = this.tokens.get(p);
-    if (!ct) return false;
-    return true;
+    return !!this.tokens.get(p);
   }
 
   clear() {
     const n = Date.now();
     let keep = 0;
     for (const [k, v] of this.tokens) {
-      if (k === permission.Admin) {
-        if (v > -1 && v < n) this.tokens.delete(permission.Admin);
-        else keep = 1;
-      } else {
-        const m = v as Map<number, number>;
-        for (const [a, b] of m) {
-          if (b !== -1 && b < n) m.delete(a);
+      const m = v as Map<number, number>;
+      switch (k) {
+        case permission.Admin:
+        case permission.Read:
+          if (v > -1 && v < n) this.tokens.delete(permission.Admin);
           else keep = 1;
-        }
-        if (!m.size) this.tokens.delete(k);
+          break;
+        case permission.Post:
+          for (const [a, b] of m) {
+            if (b !== -1 && b < n) m.delete(a);
+            else keep = 1;
+          }
+          if (!m.size) this.tokens.delete(k);
       }
     }
     return keep;
