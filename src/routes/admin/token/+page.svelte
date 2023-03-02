@@ -82,6 +82,7 @@
       { name: "expire", cell: ({ expire }) => !expire ? "∞" : time(expire) },
       { name: "create at", cell: ({ createAt }) => time(createAt) },
       { name: "times", cell: ({ times }) => (times === -1 || !times) ? "∞" : times },
+      { name: "share", cell: ({ share }) => share?'Y':'N' },
       { detail: "_reqs", btn: btnClick }
     ]
   ][ta];

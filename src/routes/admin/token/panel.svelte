@@ -32,12 +32,12 @@
       if (fine) {
         tk = {
           type: d.type,
+          share: +d.share || 0,
           times: +d.times || -1,
           reqs: d._reqs.map(a => a.id).join()
         };
         if (hasExp) tk.expire = d.expire;
       }
-      // todo
     } else {
       delete d._reqs;
       d.name = (d.name || "").replace(/^\s+|\s+$/g, "");
@@ -87,8 +87,8 @@
               const [id, ca] = o.split(" ");
               d.id = id;
               d.createAt = +ca;
-            }else {
-              o._reqs=d._reqs
+            } else {
+              o._reqs = d._reqs;
             }
           }
           show = 0;
@@ -145,13 +145,20 @@
           </div>
           <div class="r">
             <span>times</span>
-            <input bind:value={d.times} type="number" step="1" min="-1" max="999">
+            <input
+              placeholder="-1"
+              bind:value={d.times} type="number" step="1" min="-1" max="999">
           </div>
+          {#if t}
+            <div class="r rr">
+              <span><Ck name="Show the ticket on tickets page" bind:value={d.share} /></span>
+            </div>
+          {/if}
         {/if}
       </div>
       <div class="n">
         {#if fine}
-          <button transition:slidLeft on:click={ok}>submit</button>
+          <button transition:slidLeft on:click={ok}>{t&&editMod?'create':'submit'}</button>
         {/if}
         <button on:click={cancel}>cancel</button>
       </div>
@@ -198,7 +205,7 @@
     bottom: 0;
     right: 0;
     backdrop-filter: blur(2px);
-    background: rgba(100,100,150,.1);
+    background: rgba(80, 100, 150, .1);
   }
 
   .a {
@@ -297,6 +304,13 @@
       flex-grow: 1;
       border: 1px solid rgba(140, 181, 236, 0.1);
       background: var(--bg3);
+    }
+  }
+
+  .rr {
+    span {
+      text-align: left;
+      width: 100%;
     }
   }
 </style>
