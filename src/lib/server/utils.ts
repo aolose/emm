@@ -307,7 +307,7 @@ export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: obj
     const o = k as keyof T;
     if (typeof a[o] !== "function") delete a[o];
   });
-  return filter(Object.assign(a, o), [...ks]);
+  return Object.assign(a, filter(o, [...ks]));
 };
 
 export const md5 = (buf: Buffer | string) => {
@@ -452,11 +452,14 @@ export const setCookie = (resp: Response, key: string, value: string, expires?: 
 
 export const getClient = (req: Request) => {
   const c = getCookie(req, "token");
-  if (debugMode) if (!c) {
-    const cli = new Client();
-    return cli;
+  let cli;
+  if (c) {
+    cli = clientMap.get(c);
   }
-  if (c) return clientMap.get(c);
+  if (debugMode) if (!cli) {
+    cli = new Client(true);
+  }
+  return cli;
 };
 
 export const setToken = (req: Request, resp: Response, token: TokenInfo) => {
@@ -472,7 +475,7 @@ export function checkRedirect(statue: number, path: string, req: Request) {
   const config = "/config";
   if (statue > 1) {
     const client = getClient(req);
-    needLogin = !client?.ok(permission.Admin);
+    needLogin = !client?.ok(permission.Read);
   }
   if (needLogin && !debugMode) {
     if (/^\/(admin|config)/i.test(path)) return login;

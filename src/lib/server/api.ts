@@ -111,11 +111,13 @@ const apis: APIRoutes = {
         expire,
         type,
         times,
-        reqs
+        reqs,
+        share
       } = await req.json();
       const tk = genToken(type, {
         expire,
         times,
+        share,
         code: true,
         _reqs: new Set(reqs.split(",").map((a: string) => +a))
       });
@@ -124,32 +126,80 @@ const apis: APIRoutes = {
       return t;
     })
   },
+  reqs: {
+    // get allowed hidden posts
+    post: async req => {
+      let ids: number[] = [];
+      let m = new Map<number, number>();
+      const page = +(await req.text() || 0);
+      if (debugMode) {
+        ids = noAccessPosts() || [];
+      } else {
+        const cli = getClient(req);
+        if (cli) {
+          const c = cli.getReqs();
+          if (c) {
+            const rq = reqPostCache.get({ reqId: [...c.keys()] });
+            m = new Map();
+            ids = [];
+            rq.forEach(q => {
+              ids.push(q.targetId);
+              m.set(q.targetId, c.get(q.reqId) || -1);
+            });
+          }
+        }
+      }
+      if (ids.length) return pageBuilder(page, 4, Post, ["createAt desc"],
+        ["title", "slug", "_p"], [
+          `id in (${sqlFields(ids.length)})`,
+          ...ids
+        ], arr => {
+          arr.forEach(a => {
+            a._p = +(m.get(a.id) || -1);
+          });
+          return arr;
+        });
+    }
+  },
   ticket: {
+    // get client status
     get: req => {
       const cli = getClient(req);
+      const share = codeTokens.share(3);
       if (cli) {
+        cli.clear();
+        const a = debugMode ? -1 : cli.tokens.get(Admin);
+        const r = a || cli.tokens.get(Read);
+        const p = a || cli.tokens.get(permission.Post);
         return {
-          read: cli.ok(Read) ? 1 : undefined,
-          admin: cli.ok(Admin) ? 1 : undefined,
-          post: cli.ok(permission.Post) ? 1 : undefined
+          read: r ? r || -1 : undefined,
+          admin: a ? a || -1 : undefined,
+          post: p ? 1 : undefined,
+          share
         };
       }
+      return { share };
     },
     post: async (req) => {
       const code = await req.text();
       if (code) {
+        const ks = ["type", "expire", "times"] as (keyof TokenInfo)[];
         const tk = codeTokens.get(code);
         if (tk) {
-          const client = getClient(req);
-          if (client?.has(tk)) return "";
+          const cli = getClient(req);
+          if (cli?.has(tk)) return filter(tk, ks, false);
           const n = Date.now();
-          const { expire = 0, times = 0 } = tk;
+          let { expire, times } = tk;
+          expire = expire || -1;
+          times = times || -1;
           if (expire < 0 || expire > n) {
             if (times > 0) tk.times = times - 1;
             tk.used = (tk.used || 0) + 1;
+            db.save(tk);
             if (times === 1) codeTokens.delete({ code });
             if (times) {
-              const re = resp(filter(tk, ["type", "expire", "times"]));
+              const tt = filter(tk, ks, false);
+              const re = resp(tt);
               setToken(req, re, tk as TokenInfo);
               return re;
             }

@@ -16,6 +16,7 @@ export const genToken = (type: permission, cfg: {
   code?: boolean,
   times?: number,
   expire?: number,
+  share?: number | boolean,
   _reqs?: Set<number>
 } = {}) => {
   const now = Date.now();
@@ -28,6 +29,7 @@ export const genToken = (type: permission, cfg: {
   if (cfg.code) {
     const cd = randStr(randNum(1e4).toString(36));
     token.code = cd;
+    if (cfg.share) token.share = 1;
     codeTokens.add(cd, token);
   }
   return token as TokenInfo;

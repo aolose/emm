@@ -4,6 +4,7 @@ import "viewerjs/dist/viewer.css";
 import hjs from "highlight.js/lib/core";
 import "highlight.js/styles/github-dark.css";
 import { delay } from "$lib/utils";
+import Clipboard from "clipboard";
 
 Viewer.setDefaults({
   button: true,
@@ -68,7 +69,7 @@ export const highlight = delay(async (n: HTMLElement) => {
   const r = new Set<string>();
   for (const a of n.querySelectorAll("code")) {
     let lang = (a.className || "").replace("language-", "") || "common";
-    a.setAttribute('name',lang)
+    a.setAttribute("name", lang);
     let reg;
     if (!r.has(lang)) {
       switch (lang) {
@@ -102,10 +103,31 @@ export const highlight = delay(async (n: HTMLElement) => {
           reg = await import("highlight.js/lib/languages/nginx");
           break;
       }
-      if(reg){
-        hjs.registerLanguage(lang,reg.default)
+      if (reg) {
+        hjs.registerLanguage(lang, reg.default);
       }
     }
-    a.innerHTML = hjs.highlight(a.innerHTML, { language: lang }).value
+    a.innerHTML = hjs.highlight(a.innerHTML, { language: lang }).value;
   }
-},60);
+}, 60);
+
+
+export function clipboard(n: HTMLElement, cb: () => void) {
+  let c: Clipboard;
+  const r = (n: HTMLElement, cb: () => void) => {
+    if (c) c.destroy();
+    c = new Clipboard(n, {
+      text(target) {
+        return target.getAttribute("data-text") || "";
+      }
+    });
+    c.on("success", cb);
+  };
+  r(n, cb);
+  return {
+    update: r,
+    destroy() {
+      if (c) c.destroy();
+    }
+  };
+}
