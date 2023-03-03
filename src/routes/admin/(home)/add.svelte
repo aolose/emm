@@ -1,7 +1,7 @@
 <script>
     import {editPost, originPost} from "$lib/store";
     import {randNum} from "$lib/utils";
-
+    export let done
     export let a = '';
     $: {
         a = a.replace(/^\s+|\s+$/, '');
@@ -18,6 +18,7 @@
             originPost.set({_})
             editPost.set({...o})
             a = ''
+            done&&done()
         }
     }
 </script>

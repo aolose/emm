@@ -1,44 +1,51 @@
 <script lang="ts">
-    import {act} from '$lib/use';
-    import {req} from "$lib/req";
-    import {method} from "$lib/enum";
-    import {status} from "$lib/store";
+  import { act } from "$lib/use";
+  import { req } from "$lib/req";
+  import { method } from "$lib/enum";
+  import { status } from "$lib/store";
+  import { confirm } from "../../lib/store";
 
-    function logout(){
-        req('logout',undefined,{method:method.GET}).then(()=>{
-            status.set(0)
-        })
-    }
+  function logout() {
+    confirm('Log out?').then(a=>{
+      if(a) req("logout", undefined, { method: method.GET }).then(() => {
+        status.set(0);
+      });
+    })
+  }
 </script>
 
 <div class="m">
-    <a class="o" href="/"></a>
-    <div class="u">
-        <s></s>
-        <a use:act href="/admin" class="icon i-post"></a>
-        <a use:act href="/admin/comment" class="icon i-comment"></a>
-        <a use:act href="/admin/tag" class="icon i-tag"></a>
-        <a use:act href="/admin/firewall" class="icon i-safe"></a>
-        <a use:act href="/admin/token" class="icon i-rq"></a>
-        <a use:act href="/admin/setting" class="icon i-sys"></a>
-        <s></s>
-        <s></s>
-    </div>
-    <div class="v">
-        <button
-                on:click={logout}
-                class="icon i-exit"></button>
-    </div>
+  <a class="o" href="/"></a>
+  <div class="u">
+    <s></s>
+    <a use:act href="/admin" class="icon i-post"></a>
+    <a use:act href="/admin/comment" class="icon i-comment"></a>
+    <a use:act href="/admin/tag" class="icon i-tag"></a>
+    <a use:act href="/admin/firewall" class="icon i-safe"></a>
+    <a use:act href="/admin/token" class="icon i-rq"></a>
+    <a use:act href="/admin/setting" class="icon i-sys"></a>
+    <s></s>
+    <s></s>
+  </div>
+  <div class="v">
+    <button
+      on:click={logout}
+      class="icon i-exit"></button>
+  </div>
 </div>
 
 <style lang="scss">
+  @import "../../lib/break";
+
   .v {
     height: 30px;
     width: 100%;
     padding-bottom: 70px;
-    button{
-      margin:  0 auto;
+
+    button {
+      margin: 0 auto;
       transform: rotateY(180deg);
+
       &:hover {
         color: #fff;
         background: var(--blue);
@@ -88,7 +95,7 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
-      background: var(--bg7);
+    background: var(--bg7);
   }
 
   .o {
@@ -101,5 +108,45 @@
 
   i {
     display: block;
+  }
+
+  @include s() {
+    .o{
+      background-color: rgba(60,90,140,.4);
+      background-size: 50%;
+      width: 45px;
+      height: 100%;
+      margin: 0;
+    }
+    .m, .u {
+      flex-direction: row;
+    }
+    .v {
+      height: 100%;
+      width: 40px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+    }
+    .u{
+      flex:1;
+      s{display: none}
+      :global {
+        .icon {
+          flex: 1;
+          margin: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100%;
+          &.act,
+          &:hover {
+            background: rgba(90,110,180,.2);
+            color: #fff;
+            border-radius: 0;
+          }
+        }
+      }
+    }
   }
 </style>

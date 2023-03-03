@@ -492,5 +492,5 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 }
 
 
-export const debugMode = false;
+export const debugMode = 1;
 export const sqlFields = (n: number) => ",?".repeat(n).slice(1);

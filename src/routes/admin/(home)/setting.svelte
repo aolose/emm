@@ -116,8 +116,7 @@
           </div>
         </div>
         <div class="r">
-          <CheckBox name="allow comment" />
-          <CheckBox name="need approval" />
+          <CheckBox name="allow comment" bind:value={post.disCm} revert={1}/>
         </div>
       </div>
       <List type={1} permission={permission.Post} bind:select={setPms} />

@@ -74,8 +74,12 @@ const { Admin, Read } = permission;
 
 const apis: APIRoutes = {
   alCm: {
-    get: auth(Read, () => +sys?.comment),
-    post: auth(Admin, async req => sys.comment = !!await req.json())
+    get: auth(Read, () => `${+sys?.comment || 0}${+sys?.cmCheck}`),
+    post: auth(Admin, async req => {
+      const a = await req.text();
+      sys.comment = +a[0];
+      sys.cmCheck = +a[1];
+    })
   },
   cmLs: {
     get: cmManager.list
@@ -534,16 +538,6 @@ const apis: APIRoutes = {
       }
     })
   },
-  comment: {
-    post: () => {
-      return "";
-    }
-  },
-  comments: {
-    get: () => {
-      return [];
-    }
-  },
   post: {
     get: async (req) => {
       const slug = req.url.replace(/.*?\?/, "");
@@ -557,8 +551,9 @@ const apis: APIRoutes = {
               return resp("You do not have permission to view this post", 403);
             }
           }
+          p._cm = +(sys.comment && !(p.disCm || 0));
           return filter(patchPostTags([p])[0], [
-            "banner", "comment", "desc",
+            "banner", "_cm", "desc",
             "content", "createAt",
             "_tag", "title"
           ], false);

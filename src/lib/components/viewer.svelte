@@ -10,6 +10,7 @@
   let patchMod = false;
   let rd;
   export let ctx = {};
+  export let close;
   export let preview = false;
   let title = "";
   let content = "";
@@ -46,6 +47,9 @@
     {#if preview}
       <div class="t">
         <h1>{title || ''}</h1>
+        {#if close}
+          <button class="icon i-close" on:click={close}></button>
+        {/if}
       </div>
     {/if}
     <div class="c" bind:this={el}>
@@ -56,6 +60,8 @@
   </div>
 {/if}
 <style lang="scss">
+  @import "../../lib/break";
+
   .a {
     overflow: auto;
     padding: 20px;
@@ -100,7 +106,7 @@
             left: 0;
             right: 0;
             line-height: 30px;
-            background: rgba(76,116,173, .23);
+            background: rgba(76, 116, 173, .23);
           }
 
           padding: 40px 10px 10px;
@@ -122,12 +128,30 @@
 
   .t {
     margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    @include s() {
+      margin: 0;
+    }
+    button {
+      display: none;
+      @include s() {
+        display: block;
+        padding: 5px;
+        opacity: .5;
+        color: #1c93ff;
+        font-size: 32px;
+      }
+    }
   }
 
   .p {
     background: var(--bg1);
     padding: 10px 0 60px;
     overflow: hidden;
+    @include s() {
+      padding: 0 ;
+    }
 
     .t {
       padding: 10px 30px;
@@ -135,7 +159,7 @@
 
     .c {
       line-height: 2;
-      padding: 1px 30px;
+      padding: 1px 30px 20px;
       flex: 1;
       overflow: auto;
     }
@@ -144,8 +168,5 @@
   h1 {
     font-weight: 200;
     font-size: 40px;
-  }
-
-  .c {
   }
 </style>

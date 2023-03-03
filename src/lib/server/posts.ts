@@ -4,7 +4,7 @@ import { patchPostTags, tagPostCache } from "$lib/server/cache";
 import { pageBuilder, sqlFields } from "$lib/server/utils";
 import { Post } from "$lib/server/model";
 
-export const pubPostList = (page: number, size: number, tag: string|null, skips?: number[]) => {
+export const pubPostList = (page: number, size: number, tag: string | null, skips?: number[]) => {
   const where: string[] = ["published=?"];
   const values: unknown[] = [1];
 

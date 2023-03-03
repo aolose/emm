@@ -1,123 +1,123 @@
 <script>
-    import {jump} from '$lib/transition'
-    import LD from '$lib/components/loading.svelte'
-    import {fade} from 'svelte/transition'
-    import Tm from "$lib/components/typeMsg.svelte";
-    import {onDestroy, onMount} from "svelte";
-    import {req} from "$lib/req";
-    import {goto} from "$app/navigation";
-    import {enc, randNum} from "$lib/utils";
-    import {msg, status} from "$lib/store";
+  import { jump } from "$lib/transition";
+  import LD from "$lib/components/loading.svelte";
+  import { fade } from "svelte/transition";
+  import Tm from "$lib/components/typeMsg.svelte";
+  import { onDestroy, onMount } from "svelte";
+  import { req } from "$lib/req";
+  import { goto } from "$app/navigation";
+  import { enc, randNum } from "$lib/utils";
+  import { msg, status } from "$lib/store";
 
-    let wt = 0
-    let w = 0
+  let wt = 0;
+  let w = 0;
 
-    const setMsg = (m) => {
-        msg.set(m)
+  const setMsg = (m) => {
+    msg.set(m);
+  };
+  const t = setInterval(() => {
+    if (wt > 0) {
+      wt = wt - 1;
     }
-    const t = setInterval(() => {
-        if (wt > 0) {
-            wt = wt - 1
+  }, 1e3);
+  onMount(() => status.subscribe(a => {
+    if (a) goto("/admin", { replaceState: true });
+  }));
+  onDestroy(() => clearInterval(t));
+
+  async function login() {
+    if (!usr || !pwd) return;
+    w = 1;
+    const v = randNum();
+    const u = await enc(await enc(usr) + v);
+    const p = await enc(await enc(pwd) + v);
+    req("login", [u, p, v]).then(() => {
+      status.set(1);
+    }).catch(({ data }) => {
+      if (data) setMsg(`Please try again in ${data / 1e3} seconds.`);
+      else setMsg("wrong user name or password");
+    }).finally(() => {
+      w = 0;
+    });
+  }
+
+  let dis;
+  let ke = 1, bk = 0, br;
+  let ft;
+  let mf;
+  let ftt = "";
+  let usr = "";
+  let pwd = "";
+  let iu, ip;
+  $:{
+    dis = usr.length < 2 || pwd.length < 4 || pwd.length > 30 || usr.length > 20;
+  }
+
+  function nx(e) {
+    if (e.code === "Enter") {
+      if (this === iu) {
+        ip.focus();
+      } else {
+        if (!dis) {
+          login();
         }
-    }, 1e3)
-    onMount(() => status.subscribe(a => {
-        if (a) goto('/admin', {replaceState: true})
-    }))
-    onDestroy(() => clearInterval(t))
-
-    async function login() {
-        if (!usr || !pwd) return
-        w = 1
-        const v = randNum()
-        const u = await enc(await enc(usr) + v)
-        const p = await enc(await enc(pwd) + v)
-        req('login', [u, p, v]).then(() => {
-            status.set(1)
-        }).catch(({data}) => {
-            if (data) setMsg(`Please try again in ${data / 1e3} seconds.`)
-            else setMsg('wrong user name or password')
-        }).finally(() => {
-            w = 0
-        })
+      }
     }
+  }
 
-    let dis
-    let ke = 1, bk = 0, br
-    let ft
-    let mf
-    let ftt = ''
-    let usr = ""
-    let pwd = ""
-    let iu, ip
-    $:{
-        dis = usr.length < 2 || pwd.length < 4 || pwd.length > 30 || usr.length > 20
+  function go() {
+    ke = Math.random();
+    const { offsetLeft: lf, offsetWidth: w0, offsetParent: { offsetWidth: w1 } } = br;
+    mf = 120 * lf / 220;
+    const lft = +getComputedStyle(br).left.replace("px", "");
+    const step = 20;
+    if (!bk) {
+      ft = lft - step;
+      if (lf <= w0) bk = 1;
+    } else {
+      ft = lft + step;
+      if (lf + w0 > w1) bk = 0;
     }
-
-    function nx(e) {
-        if (e.code === 'Enter') {
-            if (this === iu) {
-                ip.focus()
-            } else {
-                if (!dis) {
-                    login()
-                }
-            }
-        }
-    }
-
-    function go() {
-        ke = Math.random()
-        const {offsetLeft: lf, offsetWidth: w0, offsetParent: {offsetWidth: w1}} = br;
-        mf = 120 * lf / 220
-        const lft = +getComputedStyle(br).left.replace('px', '');
-        const step = 20;
-        if (!bk) {
-            ft = lft - step
-            if (lf <= w0) bk = 1
-        } else {
-            ft = lft + step
-            if (lf + w0 > w1) bk = 0
-        }
-        ftt = `transform:translate3d(${mf}px,0,0)`
-    }
+    ftt = `transform:translate3d(${mf}px,0,0)`;
+  }
 </script>
 
 <div class="g" transition:fade>
-    <div class="bg"></div>
-    <div class="cc">
-        <div class="bx">
-            <LD act={w}/>
-            <div class="msg" style={ftt}>
-                <Tm defaultText="Have a nice day !"/>
-            </div>
-            <div class="br" style={`left:${ft}px`} class:bk={bk} bind:this={br}>
-                {#if $msg}
-                    <div class="v"></div>
-                {/if}
-                {#key ke}<i in:jump={{y:-18,duration:150}}></i>{/key}
-            </div>
-            <div class="l">
-                <div class="r" class:a={usr}>
-                    <input
-                            on:input={go}
-                            bind:value={usr}
-                            bind:this={iu}
-                            on:keydown={nx}
-                            type="text"/>
-                    <label>Username</label>
-                </div>
-                <div class="r" class:a={pwd}>
-                    <input bind:value={pwd}
-                           bind:this={ip}
-                           on:keydown={nx}
-                           type="password" autocomplete="new-password" on:input={go}/>
-                    <label>Password</label>
-                </div>
-                <button class:dis={dis} on:click={login}>Login</button>
-            </div>
-            <a href="/">{'<  '}Home</a>
+  <div class="bg"></div>
+  <div class="cc">
+    <div class="bx">
+      <LD act={w} />
+      <div class="msg" style={ftt}>
+        <Tm defaultText="Have a nice day !" />
+      </div>
+      <div class="br" style={`left:${ft}px`} class:bk={bk} bind:this={br}>
+        {#if $msg}
+          <div class="v"></div>
+        {/if}
+        {#key ke}<i in:jump={{y:-18,duration:150}}></i>{/key}
+      </div>
+      <div class="l">
+        <div class="r" class:a={usr}>
+          <input
+            on:input={go}
+            bind:value={usr}
+            bind:this={iu}
+            on:keydown={nx}
+            type="text" />
+          <label>Username</label>
         </div>
+        <div class="r" class:a={pwd}>
+          <input bind:value={pwd}
+                 bind:this={ip}
+                 on:keydown={nx}
+                 type="password" autocomplete="new-password" on:input={go} />
+          <label>Password</label>
+        </div>
+        <button class:dis={dis} on:click={login}>Login</button>
+      </div>
+      <a href="/">{'<  '}Home</a>
     </div>
+  </div>
 </div>
 <style lang="scss">
   .l {
@@ -189,19 +189,21 @@
     pointer-events: none;
   }
 
-  .g,.bg {
+  .g, .bg {
     width: 100%;
     height: 100%;
-    background:  var(--bg3);
+    background: var(--bg3);
   }
-  .bg{
+
+  .bg {
     background: url("$lib/components/img/bg.jpg") bottom center;
     background-size: cover;
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
-    opacity: .4;
+    opacity: .5;
   }
+
   label {
     font-size: 15px;
     pointer-events: none;
@@ -220,13 +222,16 @@
   }
 
   .cc {
-    height: 100%;
-    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(5px);
-    background: transparentize(#1c202a, 0.1);
+    background: rgba(20,25,35,.9);
   }
 
   .bx {

@@ -28,6 +28,7 @@
 </div>
 
 <style lang="scss">
+  @import "../../lib/break";
   .a {
     height: 100%;
     width: 100%;
@@ -48,5 +49,14 @@
   .c {
     background: var(--bg1);
     flex: 1;
+  }
+  @include s(){
+    .a{
+      flex-direction: column;
+    }
+    .b{
+      width: 100%;
+      height: 48px;
+    }
   }
 </style>

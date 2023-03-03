@@ -13,6 +13,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.i-view:before {
+  content: "\e625";
+}
+
 .i-comment:before {
   content: "\e689";
 }

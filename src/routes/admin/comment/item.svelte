@@ -79,6 +79,8 @@
   </div>
 </div>
 <style lang="scss">
+  @import "../../../lib/break";
+
   .h {
     width: 100%;
     display: flex;
@@ -96,8 +98,11 @@
     flex-direction: column;
     align-items: flex-end;
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
-
+    a{
+      flex-shrink: 0;
+    }
     span {
       white-space: nowrap;
     }
@@ -137,6 +142,7 @@
     font-size: 12px;
     color: #637288;
     display: flex;
+
     p {
       white-space: pre-wrap;
       line-height: 2;
@@ -215,7 +221,9 @@
       flex-direction: row;
       width: 100%;
       align-items: center;
-
+      @include s() {
+        padding: 10px;
+      }
       span {
         width: auto;
         margin: 0;
@@ -239,6 +247,9 @@
       overflow: auto;
       max-height: none;
       white-space: normal;
+      @include s() {
+         padding: 10px 0;
+      }
     }
 
     .i {
@@ -255,7 +266,8 @@
     background: none;
     border: none;
     padding: 0 10px;
-   margin-bottom: 0;
+    margin-bottom: 0;
+
     .v {
       flex-direction: row;
       width: 100%;
@@ -269,7 +281,7 @@
     }
 
     .d {
-      background: rgba(80,100,150,.2);
+      background: rgba(80, 100, 150, .2);
       width: 100%;
       margin: 10px;
       padding: 10px 20px;

@@ -10,12 +10,15 @@
   import { watch } from "$lib/utils";
   import Detail from "./detail.svelte";
 
+  let view = 0;
+  let sty = "";
   let status = -1;
   let total = 1;
   let page = 1;
   let allowCm = 0;
+  let checkCm = 0;
+  const cmWatch = watch(allowCm, checkCm);
   let ld = 0;
-  let _al = 0;
   let sel;
   const cStatus = [
     [-1, "All"],
@@ -46,60 +49,84 @@
   }
 
   onMount(() => {
-    req("alCm", undefined, { method: method.GET }).then(a => _al = allowCm = +a);
+    req("alCm", undefined, { method: method.GET }).then(a => {
+      allowCm = +a[0];
+      checkCm = +a[1];
+    });
     go();
   });
   $:{
+    sty = `transform:translate3d(${-view * 100 / 2}%,0,0)`;
     ftWatch(() => {
       go();
     }, status);
-    if (_al !== allowCm) {
-      _al = allowCm;
-      req("alCm", _al);
-    }
+    cmWatch(() => {
+      req("alCm", "" + +allowCm + +checkCm);
+    }, allowCm, checkCm);
   }
 </script>
-<div class="x">
-  <div class="a">
-    <div class="t">
-      <h1>Comments</h1>
-      <div class="b">
-        <div>
-          <span class="icon i-status"></span>
-          <Select bind:value={status} items={cStatus} />
+<div class="m">
+  <div class="x" style={sty}>
+    <div class="a">
+      <div class="t">
+        <h1>Comments</h1>
+        <div class="b">
+          <div>
+            <span class="icon i-status"></span>
+            <Select bind:value={status} items={cStatus} />
+          </div>
         </div>
+        <button class="icon i-refresh" on:click={()=>go(page)}></button>
       </div>
-      <button class="icon i-refresh" on:click={()=>go(page)}></button>
+      <div class="e">
+        <div class="ls">
+          <div>
+            {#each ls as c }
+              <div class="r">
+                <Item d={c} ck={()=>{
+                  sel=c
+                  view=1
+                }} />
+              </div>
+            {/each}
+          </div>
+        </div>
+        <div class="p">
+          <div>
+            <Ck bind:value={allowCm} name="Allow comments" />
+            <Ck bind:value={checkCm} name="Need review" />
+          </div>
+          <Pg {page} {total} {go} />
+        </div>
+        <Loading act={ld} />
+      </div>
     </div>
-    <div class="e">
-      <div class="ls">
-        <div>
-          {#each ls as c }
-            <div class="r">
-              <Item d={c} ck={()=>sel=c} />
-            </div>
-          {/each}
-        </div>
-      </div>
-      <div class="p">
-        <div>
-          <Ck bind:value={allowCm} name="Allow guest comments" />
-        </div>
-        <Pg {page} {total} {go} />
-      </div>
-      <Loading act={ld} />
-    </div>
+    {#if sel}
+      <Detail d={sel} filter={filter} close={()=>view=0}/>
+    {/if}
   </div>
-  {#if sel}
-    <Detail d={sel} filter={filter} />
-  {/if}
 </div>
 <style lang="scss">
+  @import "../../../lib/break";
+
+  .m {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
   .x {
     width: 100%;
     height: 100%;
     background: var(--bg2);
     display: flex;
+    transition: .3s ease-in-out;
+    @include s() {
+      width: 200%;
+      .a {
+        width: 50%
+      }
+    }
   }
 
   .i-refresh {

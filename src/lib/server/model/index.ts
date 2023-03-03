@@ -61,7 +61,8 @@ export class Post {
   desc = TEXT;
   _tag = TEXT;
   published = 0;
-  comment = 1;
+  disCm = INT;
+  _cm = INT;
   title = TEXT;
   content = TEXT;
   title_d = TEXT;
@@ -202,9 +203,9 @@ export class System {
   codeLogin = true;
   description = TEXT;
   keywords = TEXT;
-  comment = false; // use comment
+  comment = INT; // use comment
   noSpam = false; // check spam comment
-  cmCheck = false; // check comment
+  cmCheck = INT; // check comment
   analysis = false; // use analysis
   pageScript = TEXT;
   pageCss = TEXT;

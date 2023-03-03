@@ -38,7 +38,7 @@
       @include s() {
         --fs: 20px;
         --artC: 0 0 50px;
-        --artP: 40px;
+        --artP: 20px;
         --ex: 99%;
         --mr: 10px;
         --skA: 0deg;

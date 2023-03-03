@@ -29,7 +29,7 @@ export const cmManager = (() => {
     }
     return us;
   };
-  const errMsg = (msg = "", keepToken = false) => {
+  const errMsg = (msg = "", keepToken: boolean | 0 | 1 = false) => {
     const r = resp(msg, 403);
     if (!keepToken) delCookie(r, ck);
     return r;
@@ -92,8 +92,9 @@ export const cmManager = (() => {
       const slug = params.get("slug");
       const page = +(params.get("page") || 1);
       const p = slug && db.get(model(Post, { slug }));
-      const canView = getClient(req)?.ok(permission.Admin)||getClient(req)?.ok(permission.Read);
-      if (!p && !canView) return errMsg("post not exist", true);
+      const isAdm = getClient(req)?.ok(permission.Admin);
+      const canView = isAdm || getClient(req)?.ok(permission.Read);
+      if (!p && !canView) return errMsg("post not exist", 1);
       const where: string[] = [];
       const values: unknown[] = [];
       const tk = getTk(req);
@@ -104,28 +105,29 @@ export const cmManager = (() => {
       const ks: (keyof Comment)[] = [];
       let uid = 0;
       if (slug) {
-        where.push("topic is null");
-        if (sys.cmCheck) {
-          where.push("state=?");
-          values.push(cmStatus.Approve);
-        } else {
-          where.push("(state !=? or state is null)");
-          values.push(cmStatus.Reject);
+        if (tk) {
+          const u = db.get(model(CmUser, { token: tk }));
+          if (u && u.exp > Date.now()) uid = u.id;
         }
+        where.push("topic is null");
+        values.push(cmStatus.Approve);
+        if (sys.cmCheck && uid) {
+          where.push("state=? or (state=? and userid=?)");
+          values.push(cmStatus.Pending, uid);
+        } else {
+          where.push("state=?");
+        }
+        if (sys.cmCheck) ks.push("state");
         ks.push(
           "id", "_avatar", "_own",
           "isAdm", "_name", "content", "createAt",
           "_cms"
         );
-        if (tk) {
-          const u = db.get(model(CmUser, { token: tk }));
-          if (u && u.exp > Date.now()) uid = u.id;
-        }
       } else {
         if (topic) {
           const cm = db.get(model(Comment, { id: topic }));
-          if (!cm) return errMsg("topic not exist");
-          return subCm(cm.subCm || "", page, tk, canView);
+          if (!cm) return errMsg("topic not exist", 1);
+          return subCm(cm.subCm || "", page, tk, isAdm);
         } else {
           where.push("topic is null");
         }
@@ -143,7 +145,7 @@ export const cmManager = (() => {
           const postCache = new Map<number, { title: string, slug: string }>();
           arr.forEach(a => {
             if (slug && !topic && a.subCm) {
-              a._cms = subCm(a.subCm, 1, tk, canView);
+              a._cms = subCm(a.subCm, 1, tk, isAdm);
             }
             patchUserInfo(a);
             if (a.save === a.createAt) delete (a as Obj<Comment>).save;
@@ -162,10 +164,11 @@ export const cmManager = (() => {
             } else {
               if (uid && uid === a.userId) {
                 a._own = 1;
-              } else if (canView) {
+              } else if (isAdm) {
                 if (a.isAdm) a._own = 1;
                 else a._own = 2;
               }
+              if (!a._own && !isAdm) delete (a as { state?: number }).state;
             }
           });
           return arr;
@@ -185,7 +188,7 @@ export const cmManager = (() => {
         const id = [...ids][0];
         if (id) {
           const cm = db.get(model(Comment, { id }));
-          if (!cm) return errMsg("comment not exist", true);
+          if (!cm) return errMsg("comment not exist", 1);
           const usr = db.get(model(CmUser, { id: cm.userId }));
           if (!usr) {
             return errMsg("invalid token");
@@ -255,22 +258,27 @@ export const cmManager = (() => {
       let rp: Comment | undefined;
       if (cm.topic) {
         top = db.get(model(Comment, { id: cm.topic }));
-        if (!top) return errMsg("reply comment not exist!");
+        if (!top) return errMsg("reply comment not exist!", 1);
         if (!cm.reply) {
           rp = top;
           cm.reply = cm.topic;
         } else {
           rp = db.get(model(Comment, { id: cm.reply }));
-          if (!rp) return errMsg("reply comment not exist!");
+          if (!rp) return errMsg("reply comment not exist!", 1);
         }
       }
       const fp = {} as Obj<Post>;
       if (rp) fp.id = rp.postId;
       if (cm._slug) fp.slug = cm._slug;
       const p = (fp.slug || fp.id) && db.get(model(Post, fp));
-      if (!p || !p.published) return errMsg("post not exist", true);
+      if (!p || !p.published) return errMsg("post not exist", 1);
+      if ((p.disCm || !sys.comment) && !isAdm) return errMsg("not allow comment");
       cm.postId = p.id;
+      cm.state = cmStatus.Approve;
       if (!cm.isAdm) {
+        if (sys.cmCheck) {
+          cm.state = cmStatus.Pending;
+        }
         if (cm._avatar) user.avatar = cm._avatar;
         let name = (cm._name || "").replace(/^\s+|\s}$/g, "");
         if (name) {
@@ -301,6 +309,7 @@ export const cmManager = (() => {
         o.createAt = cm.createAt;
         o.id = cm.id;
       }
+      if (sys.cmCheck) o.state = cm.state;
       const rsp = resp(o);
       if (!cm.isAdm) setCookie(rsp, ck, user.token, user.exp);
       return rsp;

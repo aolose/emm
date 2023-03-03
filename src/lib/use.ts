@@ -1,7 +1,7 @@
 import { page } from "$app/stores";
 import Viewer from "viewerjs";
 import "viewerjs/dist/viewer.css";
-import hjs from "highlight.js/lib/core";
+import hjs from "highlight.js/lib/common";
 import "highlight.js/styles/github-dark.css";
 import { delay } from "$lib/utils";
 import Clipboard from "clipboard";
@@ -107,7 +107,7 @@ export const highlight = delay(async (n: HTMLElement) => {
         hjs.registerLanguage(lang, reg.default);
       }
     }
-    a.innerHTML = hjs.highlight(a.innerHTML, { language: lang }).value;
+    a.innerHTML = hjs.highlightAuto(a.innerHTML).value;
   }
 }, 60);
 

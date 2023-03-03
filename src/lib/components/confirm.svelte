@@ -29,7 +29,7 @@
 </script>
 <svelte:window on:keydown={esc} />
 {#if cfg.show}
-    <div class="a" on:click={cancel} class:act={cfg.show} transition:fade>
+    <div class="a" class:act={cfg.show} transition:fade>
         <div class="b" on:click|stopPropagation={()=>0}>
             <p>{cfg.text}</p>
             <div class="n">
@@ -52,7 +52,8 @@
     bottom: 0;
     right: 0;
     z-index: 99;
-    background: rgba(0, 0, 0, .36);
+      backdrop-filter: blur(1px);
+    background: rgba(23, 25, 30, .36);
     display: flex;
     align-items: center;
     justify-content: center;

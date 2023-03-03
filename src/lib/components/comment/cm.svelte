@@ -136,6 +136,8 @@
   <Ld act={ld} text="submitting" />
 </div>
 <style lang="scss">
+  @import "../../../lib/break";
+
   :root {
     --bg: rgba(0, 0, 0, .15)
   }
@@ -216,8 +218,8 @@
   .c {
     margin-top: 20px;
     border-radius: 4px;
-    border: 1px solid rgba(80,100,150,.07);
-    background: rgba(80,100,150,.07);
+    border: 1px solid rgba(80, 100, 150, .07);
+    background: rgba(80, 100, 150, .07);
   }
 
   .as {
@@ -227,7 +229,7 @@
     top: -160px;
     width: 210px;
     overflow: hidden;
-    background: rgba(10,15,20,.5);
+    background: rgba(10, 15, 20, .5);
     backdrop-filter: blur(15px);
     border: 1px solid #1d283a;
     box-shadow: rgba(0, 0, 0, .2) 0 3px 8px -3px;
@@ -288,7 +290,8 @@
   .m {
     margin: 0;
     height: auto;
-    background: rgba(0,0,0,.05);
+    background: rgba(0, 0, 0, .05);
+
     .i-pub {
       font-size: 14px;
       width: 32px;
@@ -340,8 +343,26 @@
 
   .am {
     height: 300px;
+    @include s() {
+      height: 200px;
+      padding: 10px;
+      .pu {
+        font-size: 13px;
+        border-radius: 3px;
+        width: 80px;
+        height: 24px;
+        margin: 0;
+        left: 20px;
+        bottom: 15px;
+        position: absolute;
+      }
+      .t{
+        right: 0;
+      }
+    }
+
     .sd {
-      padding:  0 10px;
+      padding: 0 10px;
       flex-grow: 1;
       max-height: 200px;
 

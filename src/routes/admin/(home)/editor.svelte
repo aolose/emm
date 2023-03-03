@@ -13,6 +13,7 @@
   let title = "";
   let draft = "";
   let cid = 0;
+  export let preview
   const ctxWatch = watch(draft, title);
   const tSet = {
     name: "setting",
@@ -71,8 +72,7 @@
             posts.update(u => {
               return u.filter(u => u.id !== cid);
             });
-            originPost.set({});
-            editPost.set({});
+            close&&close()
           }
         });
       });
@@ -80,6 +80,14 @@
     className: "icon i-del",
     title: "delete"
   };
+  const tView ={
+    name:'preview',
+    action(){
+      preview&&preview()
+    },
+    className:"icon i-view",
+    title:'preview'
+  }
   let tools = [];
   $:{
     ctxWatch(() => {
@@ -162,6 +170,7 @@
       }
       if (hasDraft) t.push(tPub);
       if (id) t.push(tDel);
+      t.push(tView)
       if (tools.join() !== t.join()) {
         tools = t;
       }
@@ -184,6 +193,7 @@
 {/if}
 
 <style lang="scss">
+  @import "../../../lib/break";
   .a {
     height: 100%;
     display: flex;
@@ -200,7 +210,12 @@
     align-items: center;
     align-content: normal;
     padding: 10px 8%;
-
+    @include s(){
+      width: 76%;
+      margin:  0 auto 0 8%;
+      border-bottom: 1px solid rgba(80,100,150,.3);
+      padding: 0;
+    }
     input {
       padding-right: 30px;
       margin: 0;
@@ -212,6 +227,9 @@
       right: 20px;
       top: 50%;
       transform: translateY(-50%);
+      @include s(){
+        right: -16%;
+      }
     }
   }
 
@@ -238,5 +256,20 @@
     resize: none;
     color: #556175;
     outline: none;
+    @include s(){
+      font-size: 30px;
+      line-height: 2;
+    }
+  }
+  :global{
+    .editor-toolbar .i-view{
+      display: none;
+      @include s(){
+        display: inline-block;
+      }
+    }
+    .EasyMDEContainer .CodeMirror{
+      background: rgba(50,80,90,.07);
+    }
   }
 </style>

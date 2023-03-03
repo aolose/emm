@@ -7,7 +7,9 @@
   import { confirm } from "$lib/store";
   import Ld from "$lib/components/loading.svelte";
   import Pg from "$lib/components/pg.svelte";
+  import { tick } from "svelte";
 
+  export let close;
   export let d = {};
   export let filter;
   let ban = 0;
@@ -55,25 +57,30 @@
   const set = m => () => {
     const a = d;
     req("cm", { id: a.id, state: m, isAdm: 1 }).then(a => {
-      a.state = m;
+      d.state = m;
       filter();
     });
   };
-
+  let el;
   const del = id => () => {
     confirm("sure to delete?").then(a => {
       if (a) req("cm", id, { method: method.DELETE }).then(() => filter(id));
     });
-    filter(0);
   };
-  const done = id=>a=>{
-    if(id===d.id){
-      ls=ls.concat(a)
+  const done = id => a => {
+    if (id === d.id) {
+      ls = ls.concat(a);
+      tick().then(() => {
+        el.scrollTop = el.scrollHeight;
+      });
     }
-  }
+  };
 </script>
 <div class="a">
-  <Item detail={1} {d} />
+  <div class="h">
+    <Item detail={1} {d} />
+    <button class="icon i-close" on:click={close}></button>
+  </div>
   <Cm admin={1}
       done={done(d.id)}
       reply={{
@@ -85,29 +92,51 @@
     {#if !d.isAdm}
       <button class="icon i-ip" class:act={ban}></button>
     {/if}
-    {#if !d.isAdm && d.state === cmStatus.Reject}
-      <button class="icon i-fbi" on:click={set(cmStatus.Reject)}></button>
+    {#if !d.isAdm}
+      <button class:act={d.state === cmStatus.Reject} class="icon i-fbi" on:click={set(cmStatus.Reject)}></button>
     {/if}
-    {#if !d.isAdm && d.state !== cmStatus.Approve}
-      <button class="icon i-ok" on:click={set(cmStatus.Approve)}></button>
+    {#if !d.isAdm}
+      <button class="icon i-ok" class:act={ d.state === cmStatus.Approve} on:click={set(cmStatus.Approve)}></button>
     {/if}
     <button class="icon i-del" on:click={del(d.id)}></button>
   </div>
   <div class="l">
-    <div class="ls">
+    <div class="ls" bind:this={el}>
       {#each ls as i}
         <Item topic={d.id} d={i} />
       {/each}
       <Ld act={ld} />
     </div>
-    <Pg {page} {total} {go} />
+    <Pg {page} {total} {go} length={3} />
   </div>
 </div>
 <style lang="scss">
+  @import "../../../lib/break";
+
+  .h {
+    .i-close {
+      display: none;
+      @include s() {
+        display: block;
+        top: 10px;
+        padding: 10px;
+        position: absolute;
+        right: 5px;
+        font-size: 24px;
+        color: #1c93ff;
+        opacity: .5;
+      }
+    }
+  }
+
   .a {
     flex: 1;
     display: flex;
     flex-direction: column;
+    @include s() {
+      flex: none;
+      width: 50%;
+    }
   }
 
   .b {
@@ -115,15 +144,18 @@
     right: 10px;
     top: 10px;
     padding: 10px;
+    @include s() {
+      right: 40px;
+    }
   }
 
   button {
-    padding: 0 2px;
+    padding: 0 5px;
     transition: .1s;
     opacity: .5;
   }
 
-  .act, button:hover {
+  .act {
     opacity: 1;
 
     &.i-ip {
@@ -131,7 +163,7 @@
     }
 
     &.i-fbi {
-      color: orange;
+      color: orangered;
     }
 
     &.i-ok {
@@ -149,8 +181,13 @@
     display: flex;
     flex-direction: column;
     padding-bottom: 10px;
+    @include s() {
+      min-height: 0;
+      height: 0;
+    }
   }
-  .ls{
+
+  .ls {
     flex: 1;
     overflow: auto;
   }

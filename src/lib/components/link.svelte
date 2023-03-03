@@ -1,19 +1,20 @@
 <script>
-    import {act} from '$lib/use';
-    import {slidLeft} from "$lib/transition";
+  import { act } from "$lib/use";
+  import { slidLeft } from "$lib/transition";
 
-    export let exact = true
-    export let href
+  export let exact = true;
+  export let href;
 </script>
 
 <a class="k"
    transition:slidLeft|local
    use:act={exact}
    href={href}>
-    <slot/>
+  <slot />
 </a>
 
 <style lang="scss">
+  @import "../../lib/break";
 
   .k {
     color: #485c72;
@@ -22,12 +23,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin:  0 20px;
+    margin: 0 20px;
+
     &:hover {
       color: #6fa1da;
     }
+
+    @include s() {
+      margin: 0;
+      width: 25%;
+    }
   }
-  :global .k{
+
+  :global .k {
     &.act {
       color: rgba(255, 255, 255, 0.8);
     }

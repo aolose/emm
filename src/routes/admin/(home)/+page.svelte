@@ -14,13 +14,16 @@
   const getPost = api("posts");
   let pages = 1;
   let tmpMark = 1;
+  let view = 0;
 
   function sel(p) {
     if (!p) {
       originPost.set({});
       editPost.set({});
+      view=0
       return;
     }
+    view=1
     const o = { ...p };
     if (!o.id) {
       o._ = tmpMark++;
@@ -46,14 +49,18 @@
   onMount(() => {
     page();
   });
+  let sty;
+  $:{
+    sty = `transform:translate3d(${(-view * 100 / 3).toFixed(4)}%,0,0)`;
+  }
 </script>
 
 <div class="x">
-  <div class="m">
+  <div class="m" style={sty}>
     <div class="a">
       <div class="h">
         <Search />
-        <AddPost />
+        <AddPost done={()=>view=1}/>
       </div>
       <div class="ls">
         {#each $posts as p (p._ || p.id)}
@@ -65,10 +72,10 @@
       </div>
     </div>
     <div class="b">
-      <Editor close={close} />
+      <Editor close={close} preview={()=>view=2}/>
     </div>
     <div class="c">
-      <Viewer preview={true} />
+      <Viewer preview={true} close={()=>view=1}/>
     </div>
     <FileWin />
     <Setting />
@@ -76,7 +83,7 @@
 </div>
 
 <style lang="scss">
-
+  @import "../../../lib/break";
 
   .x {
     width: 100%;
@@ -128,5 +135,27 @@
 
   .c {
     width: 800px;
+  }
+
+  @include s() {
+    .m {
+      transition: .3s ease-in-out;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 300%;
+    }
+    .a, .b, .c {
+      flex: 1;
+      width: 33%;
+      min-width: 0;
+      max-width: none;
+    }
+    .pi {
+      min-width: 0;
+      max-width: 100%;
+      width: 100%;
+    }
   }
 </style>

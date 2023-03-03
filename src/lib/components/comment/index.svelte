@@ -103,13 +103,17 @@
 </div>
 <Cm av={avLs} {slug} {cur} {user} done={done}/>
 <style lang="scss">
-  .p {
+  @import "../../../lib/break";
+    .p {
     display:flex;
     justify-content:center;
 
   }
   .a{
       margin-bottom: 60px;
+      @include s() {
+           margin-bottom: 40px;
+      }
   }
   .tp {
     text-align:center;

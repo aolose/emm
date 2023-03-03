@@ -222,6 +222,15 @@
   .j {
     flex: 1;
     overflow: auto;
+    @include s() {
+      position: absolute;
+      flex: none;
+      top: 60px;
+      left: 0;
+      right: 0;
+      padding-top: 70px;
+      bottom: 0;
+    }
   }
 
   .i {

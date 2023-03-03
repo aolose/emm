@@ -1,182 +1,184 @@
 <script>
-    import Pg from './pg.svelte';
-    import Item from './fItems.svelte';
-    import {confirm, fileManagerStore, filesUpload, getProgress, upFiles} from '$lib/store';
-    import {api, req} from "$lib/req";
-    import {onMount, tick} from "svelte";
-    import {get, writable} from "svelte/store";
-    import {slidLeft} from '../transition'
-    import {fade, slide} from "svelte/transition";
+  import Pg from "./pg.svelte";
+  import Item from "./fItems.svelte";
+  import { confirm, fileManagerStore, filesUpload, getProgress, upFiles } from "$lib/store";
+  import { api, req } from "$lib/req";
+  import { onMount, tick } from "svelte";
+  import { get, writable } from "svelte/store";
+  import { slidLeft } from "../transition";
+  import { fade, slide } from "svelte/transition";
 
-    const getRes = api('res')
+  const getRes = api("res");
 
-    let cfg = {}
-    let total = 1
-    let state = ''
-    let ss
-    let ls = []
-    let loading = false
-    const size = 15
-    const trigger = writable(0)
+  let cfg = {};
+  let total = 1;
+  let state = "";
+  let ss;
+  let ls = [];
+  let loading = false;
+  const size = 15;
+  const trigger = writable(0);
 
-    function ok() {
-        cfg.resolve?.([...selected])
-        fileManagerStore.set({})
-        selected = new Set()
-    }
+  function ok() {
+    cfg.resolve?.([...selected]);
+    fileManagerStore.set({});
+    selected = new Set();
+  }
 
-    function cancel() {
-        cfg.reject?.()
-        fileManagerStore.set({})
-        selected = new Set()
-    }
+  function cancel() {
+    cfg.reject?.();
+    fileManagerStore.set({});
+    selected = new Set();
+  }
 
-    function load(page = 1) {
-        loading = 1
-        const ext = {}
-        if (cfg.type)
-            ext.headers = new Headers({
-                filetype: cfg.type
-            })
-        getRes(new Uint8Array([page, size]), ext).then(({total: t, items}) => {
-            loading = 0
-            total = t
-            ls = items
-            const n = [...selected]
-            items.forEach(f => {
-                const idx = n.findIndex(a => a.id === f.id)
-                if (idx !== -1) n[idx] = f
-            })
-            selected = new Set(n)
-            rePosition()
-        })
-    }
-
-    let fs = [];
-    upFiles.subscribe((f) => {
-        fs = f.map((f) => [f.name, getProgress(f), f.abort]);
+  function load(page = 1) {
+    loading = 1;
+    const ext = {};
+    if (cfg.type)
+      ext.headers = new Headers({
+        filetype: cfg.type
+      });
+    getRes(new Uint8Array([page, size]), ext).then(({ total: t, items }) => {
+      loading = 0;
+      total = t;
+      ls = items;
+      const n = [...selected];
+      items.forEach(f => {
+        const idx = n.findIndex(a => a.id === f.id);
+        if (idx !== -1) n[idx] = f;
+      });
+      selected = new Set(n);
+      rePosition();
     });
+  }
 
-    function upload(e) {
-        state = 0;
-        let files = e.type === 'drop' ? e.dataTransfer.files : e.target.files;
-        const tp = cfg.type
-        if (tp&&files?.length) files = [].filter.call(files,f => new RegExp(tp.replace(/[*]/g,'.*')).test(f.type))
-        if(files?.length) filesUpload(files, f => {
-            if (ls.find(a => a.id === f.id)) return
-            ls = [f].concat(ls)
-            rePosition()
-        });
+  let fs = [];
+  upFiles.subscribe((f) => {
+    fs = f.map((f) => [f.name, getProgress(f), f.abort]);
+  });
+
+  function upload(e) {
+    state = 0;
+    let files = e.type === "drop" ? e.dataTransfer.files : e.target.files;
+    const tp = cfg.type;
+    if (tp && files?.length) files = [].filter.call(files, f => new RegExp(tp.replace(/[*]/g, ".*")).test(f.type));
+    if (files?.length) filesUpload(files, f => {
+      if (ls.find(a => a.id === f.id)) return;
+      ls = [f].concat(ls);
+      rePosition();
+    });
+  }
+
+  function rePosition() {
+    tick().then(() => {
+      trigger.update(a => a + 1);
+    });
+  }
+
+  function del() {
+    const s = selected.size;
+    confirm(`Are you sure to delete the selected file${s > 1 ? "s" : ""}?`).then(() => {
+      return req("res", new Uint8Array([...selected].map(a => a.id)), { method: 2 });
+    }).then(a => {
+      if (a) {
+        ls = ls.filter(a => !selected.has(a));
+        rePosition();
+        selected = new Set();
+      }
+    });
+  }
+
+  onMount(() => {
+    return fileManagerStore.subscribe(s => {
+      cfg = s;
+      if (s.show) load();
+    });
+  });
+
+  $:limit = cfg.limit || 0;
+  let selected = new Set();
+  $:ss = `${selected.size}${limit ? " / " + limit : ""}`;
+
+  const sel = f => () => {
+    if (selected.has(f)) selected.delete(f);
+    else {
+      const n = [...selected];
+      if (limit && limit === selected.size) {
+        n.shift();
+      }
+      n.push(f);
+      selected = new Set(n);
     }
-
-    function rePosition() {
-        tick().then(() => {
-            trigger.update(a => a + 1)
-        })
-    }
-
-    function del() {
-        const s = selected.size
-        confirm(`Are you sure to delete the selected file${s > 1 ? 's' : ''}?`).then(() => {
-            return req('res', new Uint8Array([...selected].map(a => a.id)), {method: 2})
-        }).then(a => {
-            if (a) {
-                ls = ls.filter(a => !selected.has(a))
-                rePosition()
-                selected = new Set()
-            }
-        })
-    }
-
-    onMount(() => {
-        return fileManagerStore.subscribe(s => {
-            cfg = s
-            if (s.show) load()
-        })
-    })
-
-    $:limit = cfg.limit || 0
-    let selected = new Set();
-    $:ss = `${selected.size}${limit ? ' / ' + limit : ''}`
-
-    const sel = f => () => {
-        if (selected.has(f)) selected.delete(f)
-        else {
-            const n = [...selected]
-            if (limit && limit === selected.size) {
-                n.shift()
-            }
-            n.push(f)
-            selected = new Set(n)
-        }
-        selected = new Set(selected)
-    }
+    selected = new Set(selected);
+  };
 </script>
 
 {#if cfg.show}
-    <div
-            transition:fade
-            class="a"
-            class:dr={state === 1}
-            on:dragover|preventDefault={() => state = 1}
-            on:drop|preventDefault={upload}
-            on:dragleave|preventDefault={()=>state = 0}
-            on:dragend|preventDefault={()=>state = 0}
-            on:click={cancel}
-    >
-        <div class="dp" on:click|stopPropagation></div>
-        <div class="b" on:click|stopPropagation>
-            <div class="h">
-                <div class="g">
-                    <button class="icon i-add" title="upload files">
-                        <input type="file"
-                               accept={cfg.type||'*/*'}
-                               on:change={upload} multiple/>
-                    </button>
-                    {#if selected.size}
-                        <button transition:slidLeft|local class="icon i-ok" title="use selected"
-                                on:click={ok}
-                        ></button>
-                        <button transition:slidLeft|local class="icon i-no" title="clear selected"
-                                on:click={()=>selected=new Set()}></button>
-                        <button transition:slidLeft|local class="icon i-del" title="delete selected"
-                                on:click={del}></button>
-                        <span class="v">{ss}</span>
-                    {/if}
-                </div>
-                <s></s>
-                <div class="s">
-                    <button class="icon i-search"></button>
-                    <input/>
-                </div>
-                <button class="icon i-close" on:click={cancel}></button>
-            </div>
-            <div class="ls">
-                {#each ls as file,index (file.id)}
-                    <Item bind:file trigger={trigger} act={selected.has(file)} on:click={sel(file)}/>
-                {/each}
-            </div>
-            {#if $upFiles.length}
-                <div class="u" transition:slide>
-                    {#each fs as u}
-                        <div class="r">
-                            <span title={u[0]}>{u[0]}</span>
-                            <div class="t">
-                                <div style:width={`${get(u[1])}%`}></div>
-                            </div>
-                            <button class="icon i-close" on:click={u[2]}></button>
-                        </div>
-                    {/each}
-                </div>
-            {/if}
-            <div class="p">
-                <Pg go={load} total={total}/>
-            </div>
+  <div
+    transition:fade
+    class="a"
+    class:dr={state === 1}
+    on:dragover|preventDefault={() => state = 1}
+    on:drop|preventDefault={upload}
+    on:dragleave|preventDefault={()=>state = 0}
+    on:dragend|preventDefault={()=>state = 0}
+    on:click={cancel}
+  >
+    <div class="dp" on:click|stopPropagation></div>
+    <div class="b" on:click|stopPropagation>
+      <div class="h">
+        <div class="g">
+          <button class="icon i-add" title="upload files">
+            <input type="file"
+                   accept={cfg.type||'*/*'}
+                   on:change={upload} multiple />
+          </button>
+          {#if selected.size}
+            <button transition:slidLeft|local class="icon i-ok" title="use selected"
+                    on:click={ok}
+            ></button>
+            <button transition:slidLeft|local class="icon i-no" title="clear selected"
+                    on:click={()=>selected=new Set()}></button>
+            <button transition:slidLeft|local class="icon i-del" title="delete selected"
+                    on:click={del}></button>
+            <span class="v">{ss}</span>
+          {/if}
         </div>
+        <s></s>
+        <div class="s">
+          <button class="icon i-search"></button>
+          <input />
+        </div>
+        <button class="icon i-close" on:click={cancel}></button>
+      </div>
+      <div class="ls">
+        {#each ls as file,index (file.id)}
+          <Item bind:file trigger={trigger} act={selected.has(file)} on:click={sel(file)} />
+        {/each}
+      </div>
+      {#if $upFiles.length}
+        <div class="u" transition:slide>
+          {#each fs as u}
+            <div class="r">
+              <span title={u[0]}>{u[0]}</span>
+              <div class="t">
+                <div style:width={`${get(u[1])}%`}></div>
+              </div>
+              <button class="icon i-close" on:click={u[2]}></button>
+            </div>
+          {/each}
+        </div>
+      {/if}
+      <div class="p">
+        <Pg go={load} total={total} />
+      </div>
     </div>
+  </div>
 {/if}
 
 <style lang="scss">
+  @import "../../lib/break";
+
   .g {
     display: flex;
     align-items: center;
@@ -327,6 +329,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    @include s() {
+      backdrop-filter: none;
+    }
   }
 
   .b {
@@ -335,7 +340,12 @@
     background: var(--bg0);
     display: flex;
     flex-direction: column;
-    box-shadow: rgba(0,0,0,.5) 0 10px 50px;
+    box-shadow: rgba(0, 0, 0, .5) 0 10px 50px;
+    @include s() {
+      width: 33.333%;
+      height: 100%;
+      box-shadow: none;
+    }
   }
 
   .ls {

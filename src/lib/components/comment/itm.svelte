@@ -116,6 +116,9 @@
           {/if}
         </div>
         <div class="t">
+          {#if d.state === 0}
+            <span class="o">review needed</span>
+          {/if}
           {#if d.save}
             <span>last edit at {time(d.save)}</span>
           {/if}
@@ -149,9 +152,15 @@
   {/if}
 </div>
 <style lang="scss">
+  @import "../../../lib/break";
+
   @mixin bg {
     border: 1px solid rgba(80, 100, 150, .07);
     background: rgba(80, 100, 150, .07);
+  }
+
+  .o {
+    color: orangered;
   }
 
   .p {
@@ -162,6 +171,9 @@
   .ls {
     width: 100%;
     padding-left: 80px;
+    @include s() {
+      padding: 0;
+    }
   }
 
   .r {
@@ -226,6 +238,19 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    @include s() {
+      width: 100%;
+      flex-direction: row;
+      padding:  0 10px 10px;
+      .v{
+        :global{
+          i{
+            max-width: 20px;
+            max-height: 20px;
+          }
+        }
+      }
+    }
 
     p {
       margin-top: 5px;

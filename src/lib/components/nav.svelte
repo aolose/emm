@@ -1,36 +1,39 @@
 <script>
-    import Link from './link.svelte'
-    import {expand} from "$lib/store";
-    import {page} from "$app/stores";
-    import {onMount} from "svelte";
-    let type
-    onMount(() => page.subscribe(pg => {
-        const p = pg.url.pathname
-        if (p === '/') type = 1
-        else if (p.startsWith('/post/')) type = 0
-        else type=2
-    }))
+  import Link from "./link.svelte";
+  import { expand } from "$lib/store";
+  import { page } from "$app/stores";
+  import { onMount } from "svelte";
+
+  let type;
+  onMount(() => page.subscribe(pg => {
+    const p = pg.url.pathname;
+    if (p === "/") type = 1;
+    else if (p.startsWith("/post/")) type = 0;
+    else type = 2;
+  }));
 </script>
 <div class="e" on:click={()=>expand.update(a=>1-a)} class:act={$expand}>
-    <i class="e0"></i>
-    <i class="e1"></i>
-    <i class="e2"></i>
+  <i class="e0"></i>
+  <i class="e1"></i>
+  <i class="e2"></i>
 </div>
 <nav class:act={$expand}
      class:n={type===1}
      class:m={type===2}
 >
-    <div class="a">
-        {#if $expand}
-            <Link href="/">Home</Link>
-            <Link href="/posts" exact={false}>Posts</Link>
-            <Link href="/tags" exact={false}>Tags</Link>
-            <Link href="/ticket" exact={false}>Ticket</Link>
-        {/if}
-    </div>
-    <div class="a"></div>
+  <div class="a">
+    {#if $expand}
+      <Link href="/">Home</Link>
+      <Link href="/posts" exact={false}>Posts</Link>
+      <Link href="/tags" exact={false}>Tags</Link>
+      <Link href="/ticket" exact={false}>Ticket</Link>
+    {/if}
+  </div>
+  <div class="a"></div>
 </nav>
 <style lang="scss">
+  @import "../../lib/break";
+
   nav {
     display: flex;
     transition: .3s ease-in-out;
@@ -42,13 +45,15 @@
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(15 ,19 ,25, 0.9);
-
+    background: rgba(15, 19, 25, 0.9);
+    @include s() {
+      padding-left: 50px;
+    }
     &.m {
       background: linear-gradient(
                       90deg,
-                      rgba(15 ,19 ,25,  1),
-                      rgba(15 ,19 ,25, 0.4)
+                      rgba(15, 19, 25, 1),
+                      rgba(15, 19, 25, 0.4)
       );
     }
 
@@ -67,6 +72,12 @@
     display: flex;
     align-items: center;
     height: 60px;
+    @include s() {
+      margin-right: 40px;
+      &+.a{
+          display: none;
+      }
+    }
   }
 
   .e {

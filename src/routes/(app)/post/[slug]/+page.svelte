@@ -66,7 +66,9 @@
             <h1>
             </h1>
             <div class="cm">
-              <Comment slug={p.slug} />
+              {#if d._cm}
+                <Comment slug={p.slug} />
+              {/if}
             </div>
           </div>
         </div>
@@ -247,8 +249,8 @@
     opacity: .8;
     cursor: pointer;
     color: #6fa1da;
-    top: 15px;
-    right: 15px;
+    top: 12px;
+    right: 12px;
     z-index: 100;
 
     &:hover {
