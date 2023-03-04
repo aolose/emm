@@ -2,7 +2,7 @@ import { NULL } from "./enum";
 import { contentType, dataType, encryptIv, encTypeIndex, geTypeIndex, permission } from "../enum";
 import cookie from "cookie";
 import type { CookieSerializeOptions } from "cookie";
-import type { Api, ApiData, ApiName, Class, Model, Obj } from "../types";
+import type { Api, ApiData, ApiName, Class, Model, Obj, Timer } from "../types";
 import apis from "./api";
 import {
   arrFilter,
@@ -211,11 +211,17 @@ const dBProxyErrs = new WeakMap<Model, Writable<Error | number>>();
 export const throwDbProxyError = <T extends Model>(o: T): Promise<T> => {
   const err = dBProxyErrs.get(o);
   let un: Unsubscriber | undefined;
+  let t:Timer;
+  if (err) {
+    t = setTimeout(() => {
+      err.set(0);
+    }, 300);
+  }
   return new Promise<T>((r, fail) => {
     if (!err) {
       r(o);
     } else {
-      err.set(-1);
+      err.set(-1)
       un = err.subscribe(n => {
         if (n) {
           if (n instanceof Error) fail(n);
@@ -223,6 +229,7 @@ export const throwDbProxyError = <T extends Model>(o: T): Promise<T> => {
       });
     }
   }).finally(() => {
+    clearTimeout(t);
     if (un) un();
   });
 };

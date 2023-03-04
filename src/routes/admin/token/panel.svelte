@@ -158,7 +158,7 @@
       </div>
       <div class="n">
         {#if fine}
-          <button transition:slidLeft on:click={ok}>{t&&editMod?'create':'submit'}</button>
+          <button transition:slidLeft on:click={ok}>{t && editMod ? 'create' : 'submit'}</button>
         {/if}
         <button on:click={cancel}>cancel</button>
       </div>
@@ -168,6 +168,8 @@
   </div>
 {/if}
 <style lang="scss">
+  @import "../../../lib/break";
+
   [type="number"] {
     height: 40px;
 
@@ -206,6 +208,9 @@
     right: 0;
     backdrop-filter: blur(2px);
     background: rgba(80, 100, 150, .1);
+    @include s(){
+      backdrop-filter: none;
+    }
   }
 
   .a {
@@ -214,11 +219,14 @@
     display: flex;
     flex-direction: column;
     width: 400px;
-    max-width: 100%;
     height: 500px;
-    max-height: 100%;
     background: var(--bg1);
     box-shadow: var(--bg3) 0 20px 50px -30px;
+    @include s(){
+      height: 100%;
+      box-shadow: none;
+      border-radius: 0;
+    }
   }
 
   .b {

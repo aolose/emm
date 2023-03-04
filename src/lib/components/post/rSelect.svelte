@@ -6,7 +6,7 @@
   };
 </script>
 <div class="v" class:i={inline}>
-  {#each (items||[]) as p}
+  {#each (items || []) as p}
     <div title={`ID: ${p.id}`} class="p" on:click|stopPropagation={del(p)}>
       <span>{p.title || p.name}</span>
       <button class="icon i-close"></button>
@@ -14,6 +14,8 @@
   {/each}
 </div>
 <style lang="scss">
+  @import "../../../lib/break";
+
   .v {
     padding: 20px;
     height: 150px;
@@ -38,12 +40,14 @@
   .p {
     display: flex;
     align-items: center;
-    height: 28px;
+    min-height: 28px;
     background: #20263c;
     margin: 3px 2px;
-
     span {
       padding: 5px 10px;
+      @include s(){
+        padding: 5px;
+      }
     }
 
     button {

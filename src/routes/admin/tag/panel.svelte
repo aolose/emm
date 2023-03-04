@@ -6,6 +6,7 @@
   import Pls from "$lib/components/post/rSelect.svelte";
   import List from "$lib/components/post/rList.svelte";
 
+  export let close;
   let ok;
   let cancel;
   let show = false;
@@ -23,7 +24,7 @@
     const n = { ...a };
     d = { ...a };
     show = !!a;
-    if(opened)setPost()
+    if (opened) setPost();
     return new Promise(r => {
       ok = () => {
         const o = n.id ? diffObj(n, d) : d;
@@ -32,16 +33,19 @@
           req("tag", o).then(c => {
             if (c) Object.assign(d, c);
             r(d);
+            close()
           }).catch(e => confirm(e.data, "", "ok"));
         }
       };
-      cancel = () => r();
+      cancel = () => {
+        close()
+        r();
+      }
     }).finally(() => {
       show = false;
     });
   };
   let d = {};
-
   function sel() {
     selectFile(1, "image/*").then(a => {
       const id = a?.[0]?.id;
@@ -93,6 +97,7 @@
   </div>
 {/if}
 <style lang="scss">
+  @import "../../../lib/break";
   .b {
     flex: 1;
     max-width: 600px;
@@ -226,7 +231,9 @@
     background: var(--bg2);
     color: #6c7a93;
     font-size: 18px;
-
+    @include s(){
+      width: 30px;
+    }
     &:hover {
       background: var(--bg1);
     }

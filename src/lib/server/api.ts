@@ -460,7 +460,7 @@ const apis: APIRoutes = {
       const { _posts } = tag;
       try {
         if (t) {
-          await throwDbProxyError(Object.assign(t, filter(tag, ["banner", "desc"], false)));
+          await throwDbProxyError(Object.assign(t, filter(tag, ["banner", "desc","name"], false)));
         } else ts.unshift(await throwDbProxyError(t = DBProxy(Tag, tag)));
       } catch (e) {
         if (e instanceof Error) {

@@ -1,108 +1,111 @@
 <script>
-    import Pg from '$lib/components/pg.svelte'
-    import {confirm} from "$lib/store";
-    import {req} from "$lib/req";
-    import {method} from "$lib/enum";
-    import {onMount} from "svelte";
+  import Pg from "$lib/components/pg.svelte";
+  import { confirm } from "$lib/store";
+  import { req } from "$lib/req";
+  import { method } from "$lib/enum";
+  import { onMount } from "svelte";
 
-    let total = 1
-    let p = 1
-    export let pop
-    let go = (n) => {
-        p = n
-        req('rules', new Uint8Array([p,20])).then(d => {
-            ls = d.items
-            total = d.total
-        })
-    }
-    const add = () => {
-        pop(2).then(d => {
-            if(!d)return
-            req('rule', d).then(id => {
-                d.id = id
-                ls = [d, ...ls]
-            })
-        })
-    }
+  let total = 1;
+  let p = 1;
+  export let pop;
+  let go = (n) => {
+    p = n;
+    req("rules", new Uint8Array([p, 20])).then(d => {
+      ls = d.items;
+      total = d.total;
+    });
+  };
+  const add = () => {
+    pop(2).then(d => {
+      if (!d) return;
+      req("rule", d).then(id => {
+        d.id = id;
+        ls = [d, ...ls];
+      });
+    });
+  };
 
-    const del = (id) => {
-        confirm('sure to delete?').then(ok => {
-            if (ok) {
-                req('rules', id, {method: method.DELETE})
-                    .then(() => {
-                        ls = ls.filter(a => a.id !== id)
-                    })
-            }
-        })
-    }
+  const del = (id) => {
+    confirm("sure to delete?").then(ok => {
+      if (ok) {
+        req("rules", id, { method: method.DELETE })
+          .then(() => {
+            ls = ls.filter(a => a.id !== id);
+          });
+      }
+    });
+  };
 
-    const edit = (da) => {
-        pop(1, da).then(d => {
-            if(!d)return
-            d.id=da.id
-            req('rule', d).then(() => {
-                const idx = ls.indexOf(da)
-                if (idx > -1) {
-                    ls = [...ls]
-                    ls[idx] = d
-                }
-            })
-        })
-    }
+  const edit = (da) => {
+    pop(1, da).then(d => {
+      if (!d) return;
+      d.id = da.id;
+      req("rule", d).then(() => {
+        const idx = ls.indexOf(da);
+        if (idx > -1) {
+          ls = [...ls];
+          ls[idx] = d;
+        }
+      });
+    });
+  };
 
-    let ls = []
+  let ls = [];
 
-    onMount(() => {
-        go(1)
-    })
+  onMount(() => {
+    go(1);
+  });
 
 </script>
 <div class="a">
-    <div class="b">
-        <div class="d">
-            <h1>Rules</h1>
-            <button on:click={add} class="icon i-add"></button>
-        </div>
+  <div class="b">
+    <div class="d">
+      <h1>Rules</h1>
+      <button on:click={add} class="icon i-add"></button>
     </div>
-    <div class="c">
-        {#each ls as r}
-            <div class="u" class:act={r.active}>
-                <div class="i">
-                    {#if r.ip}
-                        <div class="icon i-ip"><span>{r.ip}</span></div>
-                    {/if}
-                    {#if r.path}
-                        <div class="icon i-target"><span>{r.path}</span></div>
-                    {/if}
-                    {#if r.country}
-                        <div class="icon i-geo"><span>{r.country}</span></div>
-                    {/if}
-                    {#if r.headers}
-                        <div class="icon i-comment">
-                            <pre>{r.headers}</pre>
-                        </div>
-                    {/if}
-                </div>
-                <div class="r">
-                    {#if r.log}
-                        <span class="icon i-log"></span>
-                    {/if}
-                    {#if r.noAccess}
-                        <span class="icon i-fbi"></span>
-                    {/if}
-                    <span class="m">{r.mark || ''}</span>
-                    <button class="icon i-del" on:click={()=>del(r.id)}></button>
-                    <button class="icon i-ed" on:click={()=>edit(r)}></button>
-                </div>
+  </div>
+  <div class="c">
+    {#each ls as r}
+      <div class="u" class:act={r.active}>
+        <div class="i">
+          {#if r.ip}
+            <div class="icon i-ip"><span>{r.ip}</span></div>
+          {/if}
+          {#if r.path}
+            <div class="icon i-target"><span>{r.path}</span></div>
+          {/if}
+          {#if r.country}
+            <div class="icon i-geo"><span>{r.country}</span></div>
+          {/if}
+          {#if r.headers}
+            <div class="icon i-set">
+              <pre>{r.headers}</pre>
             </div>
-        {/each}
-    </div>
-    <Pg {total} {go}/>
+          {/if}
+        </div>
+        <div class="r">
+          {#if r.log}
+            <span class="icon i-log"></span>
+          {/if}
+          {#if r.noAccess}
+            <span class="icon i-fbi"></span>
+          {/if}
+          <span class="m">{r.mark || ''}</span>
+          <button class="icon i-del" on:click={()=>del(r.id)}></button>
+          <button class="icon i-ed" on:click={()=>edit(r)}></button>
+        </div>
+      </div>
+    {/each}
+  </div>
+  <Pg {total} {go} />
 </div>
 <style lang="scss">
-  .i-comment{
-    background: rgba(0,0,0,.1);
+  @import "../../../lib/break";
+
+  .i-set {
+    background: rgba(0, 0, 0, .1);
   }
+
   .u {
     margin: 10px;
     overflow: hidden;
@@ -159,7 +162,7 @@
       }
     }
 
-    .i-comment {
+    .i-set {
       line-height: 2;
       align-items: flex-start;
       display: flex;
@@ -232,6 +235,9 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    @include s() {
+      width: 100%;
+    }
   }
 
   .b {

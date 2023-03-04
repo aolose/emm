@@ -9,6 +9,8 @@
   import Ru from "./rules.svelte";
   import { watch } from "$lib/utils";
 
+  let view = 0;
+  let sty;
   let pop;
   let sel = new Set();
   let tab = 0;
@@ -23,6 +25,7 @@
   let hasF = 0;
   const lsWatch = watch(tab, p);
   $:{
+    sty = `transform:translate3d(${-view * 100 / 2}%,0,0)`;
     lsWatch(() => {
       lastL = 0;
       ls = [];
@@ -100,38 +103,51 @@
   }
 
 </script>
-<div class="a">
-  <div class="c">
-    <div class="d">
-      <div class="h">
-        <h1>Logs</h1>
-        <s></s>
-        <div class="tb" class:ac={tab}>
-          <span on:click={tabCk(0)}>real-time</span>
-          <span on:click={tabCk(1)}>firewall</span>
-          <i></i>
+<div class="m">
+  <div class="a" style={sty}>
+    <div class="c">
+      <div class="d">
+        <div class="h">
+          <h1>Logs</h1>
+          <s></s>
+          <div class="tb" class:ac={tab}>
+            <span on:click={tabCk(0)}>real-time</span>
+            <span on:click={tabCk(1)}>firewall</span>
+            <i></i>
+          </div>
+          <Ck name="auto" bind:value={loop} />
+          <button on:click={()=>loadLog()} class="icon i-refresh"></button>
+          <button class="icon i-filter" class:act={hasF} on:click={search}></button>
+          <button class="icon i-set" on:click={()=>view=1}></button>
         </div>
-        <Ck name="auto" bind:value={loop} />
-        <button on:click={()=>loadLog()} class="icon i-refresh"></button>
-        <button class="icon i-filter" class:act={hasF} on:click={search}></button>
       </div>
-    </div>
-    <div class="e">
-      <div class="b">
-        {#each ls as d (d[0] + d[1])}
-          <Itm ck={ck} data={d} sel={sel} isDb={tab} />
-        {/each}
+      <div class="e">
+        <div class="b">
+          {#each ls as d (d[0] + d[1])}
+            <Itm ck={ck} data={d} sel={sel} isDb={tab} />
+          {/each}
+        </div>
+        <Pg total={total} page={p} go={loadLog} />
       </div>
-      <Pg total={total} page={p} go={loadLog} />
+      <Ld act={ld} />
     </div>
-    <Ld act={ld} />
+    <div class="sd">
+      <Ru {pop} />
+    </div>
   </div>
-  <div class="sd">
-    <Ru {pop} />
-    <Ft bind:pop={pop} />
-  </div>
+  <Ft bind:pop={pop} />
 </div>
 <style lang="scss">
+  @import "../../../lib/break";
+
+  .m {
+    width: 100%;
+    height: 100%;
+    @include s() {
+      overflow: hidden;
+    }
+  }
+
   .i-filter {
     &.act {
       color: #1c93ff;
@@ -143,6 +159,9 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    @include s(){
+      width: 50%;
+    }
   }
 
   .f0 {
@@ -210,6 +229,9 @@
     font-size: 18px;
     padding: 0 10px;
     color: #6d7f94;
+    @include s() {
+      display: none;
+    }
   }
 
   .h {
@@ -250,6 +272,10 @@
     width: 100%;
     height: 100%;
     display: flex;
+    @include s() {
+      width: 200%;
+      transition: .3s ease-in-out;
+    }
   }
 
 
@@ -259,6 +285,10 @@
     height: 100%;
     //width: 600px;
     width: 100%;
+    @include s() {
+      width: 50%;
+      flex-shrink: 0;
+    }
   }
 
   .b {

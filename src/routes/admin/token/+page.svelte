@@ -60,7 +60,7 @@
       req(["require", "code"][ta], [...ids].join(), { method: method.DELETE }).then(a => {
         items = items.filter(a => !ids.has(a.id));
         if (!items.length) go(page === 1 ? 1 : page - 1);
-        ids=new Set();
+        ids = new Set();
       });
     });
   }
@@ -82,7 +82,7 @@
       { name: "expire", cell: ({ expire }) => !expire ? "∞" : time(expire) },
       { name: "create at", cell: ({ createAt }) => time(createAt) },
       { name: "times", cell: ({ times }) => (times === -1 || !times) ? "∞" : times },
-      { name: "share", cell: ({ share }) => share?'Y':'N' },
+      { name: "share", cell: ({ share }) => share ? "Y" : "N" },
       { detail: "_reqs", btn: btnClick }
     ]
   ][ta];
@@ -90,7 +90,7 @@
   $:siz = ids.size;
   const act = (n) => () => {
     if (ta !== n) {
-      ids=new Set()
+      ids = new Set();
       ta = n;
       go();
     }
@@ -125,11 +125,15 @@
 
 
 <style lang="scss">
+  @import "../../../lib/break";
+
   .t {
     justify-content: space-between;
     display: flex;
     padding: 12px 20px;
-
+     @include s(){
+       padding-right: 5px;
+     }
     button {
       padding: 0 10px;
     }
@@ -182,10 +186,19 @@
     height: 100%;
     background: var(--bg1);
     padding-bottom: 15px;
+    @include s(){
+      padding-bottom: 5px;
+    }
   }
 
   .ls {
     flex: 1;
     overflow: auto;
+    @include s() {
+      margin-bottom: 5px;
+      &::-webkit-scrollbar {
+        height: 5px;
+      }
+    }
   }
 </style>

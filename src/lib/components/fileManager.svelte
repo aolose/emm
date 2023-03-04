@@ -16,6 +16,7 @@
   let ss;
   let ls = [];
   let loading = false;
+  export let w;
   const size = 15;
   const trigger = writable(0);
 
@@ -94,7 +95,7 @@
       if (s.show) load();
     });
   });
-
+  let limit;
   $:limit = cfg.limit || 0;
   let selected = new Set();
   $:ss = `${selected.size}${limit ? " / " + limit : ""}`;
@@ -111,10 +112,12 @@
     }
     selected = new Set(selected);
   };
+  const sty = `--w:${w}%`;
 </script>
 
 {#if cfg.show}
   <div
+    style={sty}
     transition:fade
     class="a"
     class:dr={state === 1}
@@ -185,6 +188,7 @@
   }
 
   .v {
+    white-space: nowrap;
     background: var(--bg0);
     font-size: 12px;
     padding: 0 5px;
@@ -342,7 +346,7 @@
     flex-direction: column;
     box-shadow: rgba(0, 0, 0, .5) 0 10px 50px;
     @include s() {
-      width: 33.333%;
+      width: var(--w);
       height: 100%;
       box-shadow: none;
     }

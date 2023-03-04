@@ -10,6 +10,8 @@
   let name = "";
   let ok = false;
   let sel = {};
+  let view = 0;
+  let sty;
 
   function allTags() {
     req("tagLS").then(d => {
@@ -19,22 +21,27 @@
 
   function add() {
     if (!ok) return;
+    view = 1;
     ss({ name })();
     name = "";
   }
 
   function ss(n) {
     return (e) => {
+      view = 1;
       let t;
       if (e) e.stopPropagation();
       if (sel === n) sel = {};
       else t = sel = n;
       setTag(t).then(d => {
-        const t = ls.find(a => a.id === d.id);
-        if (t) {
-          Object.assign(t, d);
-          ls = [...ls];
-        } else ls = [d, ...ls];
+        if (d) {
+          const t = ls.find(a => a.id === d.id);
+          if (t) {
+            Object.assign(t, d);
+            ls = [...ls];
+          } else ls = [d, ...ls];
+        }
+        view=0
         sel = {};
       });
     };
@@ -44,6 +51,7 @@
     allTags();
   });
   $:{
+    sty = `transform:translate3d(${-view * 100 / 2}%,0,0)`;
     name = name.replace(/[;, \t\s]/g, "");
     ok = name && !ls.find(a => a.name === name);
   }
@@ -55,31 +63,45 @@
     });
   }
 </script>
-<div class="c">
-  <div class="a">
-    <div class="r h" class:o={ok}>
-      <span>Tags</span>
-      <s></s>
-      <input placeholder="tag name" bind:value={name} />
-      <button class="icon i-add" on:click={add}></button>
+<div class="m">
+  <div class="c" style={sty}>
+    <div class="a">
+      <div class="r h" class:o={ok}>
+        <span>Tags</span>
+        <s></s>
+        <input placeholder="tag name" bind:value={name} />
+        <button class="icon i-add" on:click={add}></button>
+      </div>
+      <div class="ls">
+        {#each ls as i}
+          <T d={i} ck={ss(i)} sel={sel===i} del={del} />
+        {/each}
+      </div>
     </div>
-    <div class="ls">
-      {#each ls as i}
-        <T d={i} ck={ss(i)} sel={sel===i} del={del} />
-      {/each}
-    </div>
+    <P bind:setTag={setTag} close={()=>view=0} />
   </div>
-  <P bind:setTag={setTag} />
+  <FileWin w={100}/>
 </div>
-<FileWin />
-
-
 <style lang="scss">
+  @import "../../../lib/break";
+
   .c {
     width: 100%;
     height: 100%;
     display: flex;
     background: var(--bg3);
+    @include s() {
+      transition: .3s ease-in-out;
+      width: 200%;
+    }
+  }
+
+  .m {
+    height: 100%;
+    width: 100%;
+    @include s() {
+      overflow: hidden;
+    }
   }
 
   s {
@@ -119,6 +141,9 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    @include s() {
+      width: 50%;
+    }
   }
 
   .ls {

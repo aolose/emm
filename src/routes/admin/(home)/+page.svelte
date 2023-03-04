@@ -77,7 +77,7 @@
     <div class="c">
       <Viewer preview={true} close={()=>view=1}/>
     </div>
-    <FileWin />
+    <FileWin w={33.33333}/>
     <Setting />
   </div>
 </div>
@@ -140,11 +140,8 @@
   @include s() {
     .m {
       transition: .3s ease-in-out;
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
       width: 300%;
+      height: 100%;
     }
     .a, .b, .c {
       flex: 1;

@@ -1,54 +1,56 @@
 <script>
-    import {str2Hds, time} from "$lib/utils";
-    import {fade, slide} from "svelte/transition";
+  import { str2Hds, time } from "$lib/utils";
+  import { fade, slide } from "svelte/transition";
 
-    export let data = []
-    const [tm, ip, ph, hds, st, ct, mk, mt] = data
-    export let sel
-    export let ck
+  export let data = [];
+  const [tm, ip, ph, hds, st, ct, mk, mt] = data;
+  export let sel;
+  export let ck;
 
-    let exp = 0
-    $:hd = str2Hds(hds).filter(([a]) => exp ? 1 : /^user-agent$/gi.test(a))
+  let exp = 0;
+  $:hd = str2Hds(hds).filter(([a]) => exp ? 1 : /^user-agent$/gi.test(a));
 
-    function col(n, s) {
-        if (n < 300) return 0 === s
-        if (n >= 500) return 3 === s
-        if (n >= 400) return 2 === s
-        return 1 === s
-    }
+  function col(n, s) {
+    if (n < 300) return 0 === s;
+    if (n >= 500) return 3 === s;
+    if (n >= 400) return 2 === s;
+    return 1 === s;
+  }
 
 
 </script>
 
 <div class="r" class:act={sel.has(tm+ip)} transition:fade on:click={ck(tm+ip)}>
-    <div class="r0"><span>{time(tm)}</span></div>
-    <div class="r1"><span>{ip}</span></div>
-    <div class="r6"><span>{(mt||'').toUpperCase()}</span></div>
-    {#if st}
-        <div class="r3"><span
-                class:c0={col(st,0)}
-                class:c1={col(st,1)}
-                class:c2={col(st,2)}
-                class:c3={col(st,3)}
-        >{st}</span></div>
-    {/if}
-    <div class="r2"><span>{ph}</span></div>
-    <div class="r6"><span>{ct}</span></div>
-    <div class="r4"><span>{mk||''}</span></div>
-    <div class="r5">
-        <button class="icon"
-                on:click|stopPropagation={()=>exp=1-exp}
-                class:i-add={!exp} class:i-no={exp}></button>
-        {#each hd as [k, v]}
-            <div transition:slide>
-                <span>{k}:</span>
-                <span>{v}</span>
-            </div>
-        {/each}
-    </div>
+  <div class="r0"><span>{time(tm)}</span></div>
+  <div class="r1"><span>{ip}</span></div>
+  <div class="r6"><span>{(mt || '').toUpperCase()}</span></div>
+  {#if st}
+    <div class="r3"><span
+      class:c0={col(st,0)}
+      class:c1={col(st,1)}
+      class:c2={col(st,2)}
+      class:c3={col(st,3)}
+    >{st}</span></div>
+  {/if}
+  <div class="r2"><span>{ph}</span></div>
+  <div class="r6"><span>{ct}</span></div>
+  <div class="r4"><span>{mk || ''}</span></div>
+  <div class="r5">
+    <button class="icon"
+            on:click|stopPropagation={()=>exp=1-exp}
+            class:i-add={!exp} class:i-no={exp}></button>
+    {#each hd as [k, v]}
+      <div transition:slide>
+        <span>{k}:</span>
+        <span>{v}</span>
+      </div>
+    {/each}
+  </div>
 </div>
 
 <style lang="scss">
+  @import "../../../lib/break";
+
   .r {
     transition: .3s ease-in-out;
     background: var(--bg1);
@@ -56,6 +58,9 @@
     display: flex;
     font-size: 13px;
     border-radius: 5px;
+    @include s() {
+      padding: 10px;
+    }
 
     span {
       padding: 0 10px;
@@ -72,6 +77,9 @@
       height: 100%;
       min-height: 35px;
       align-self: center;
+      @include s() {
+        padding: 0;
+      }
     }
 
     &:not(.act):hover {
@@ -138,6 +146,7 @@
   .r5 {
     background: var(--bg2);
     width: 100%;
+
     button {
       position: absolute;
       left: 10px;
@@ -163,7 +172,15 @@
 
   .r {
     .r5 {
+      @include s() {
+        margin: -10px;
+      }
       padding: 5px 10px 12px 35px;
+
+      div {
+        min-height:0;
+          line-height: 1.5;
+      }
     }
   }
 
