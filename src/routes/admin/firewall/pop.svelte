@@ -47,7 +47,7 @@
             <Ck bind:value={d.log}>log</Ck>
           </label>
           <label>
-            <Ck bind:value={d.noAccess}>no access</Ck>
+            <Ck bind:value={d.forbidden}>forbidden</Ck>
           </label>
         </div>
       {/if}

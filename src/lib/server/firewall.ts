@@ -48,7 +48,7 @@ export const ruleHit = (r: {
     if (!o) o = { mark: "", _match: [] };
     o._match?.push(k.id);
     if (k.mark) o.mark = o.mark?.split(",").concat(k.mark).filter(a => a.replace(/^\s+|\s+$/g, "")).join();
-    Object.assign(o, filter({ ...k }, ["noAccess", "log"], false));
+    Object.assign(o, filter({ ...k }, ["forbidden", "log"], false));
   }
   return o;
 };

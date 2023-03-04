@@ -354,7 +354,7 @@ const apis: APIRoutes = {
       const ip = await req.text();
       if (ip) {
         const o = ruleHit({ ip });
-        if (o?.noAccess) return 1;
+        if (o?.forbidden) return 1;
       }
     })
   },
@@ -377,7 +377,7 @@ const apis: APIRoutes = {
       const s = r[1];
       return {
         items: arrFilter(lsRules(p, s), ["id", "path", "headers", "ip", "mark",
-          "country", "log", "active", "noAccess"]),
+          "country", "log", "active", "forbidden"]),
         total: Math.ceil(rules.length / s)
       };
     })

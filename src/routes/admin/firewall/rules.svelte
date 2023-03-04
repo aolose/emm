@@ -87,7 +87,7 @@
           {#if r.log}
             <span class="icon i-log"></span>
           {/if}
-          {#if r.noAccess}
+          {#if r.forbidden}
             <span class="icon i-fbi"></span>
           {/if}
           <span class="m">{r.mark || ''}</span>

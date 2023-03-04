@@ -237,7 +237,7 @@ export class FWRule {
   createAt = INT;
   save = INT;
   log = false;
-  noAccess = false;
+  forbidden = false;
   country = TEXT;
   active = true;
   _match?: number[];
