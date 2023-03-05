@@ -1,9 +1,8 @@
 <script>
 	import { fade } from 'svelte/transition';
-	import { onDestroy } from 'svelte';
-	import { browser } from '$app/environment';
+	import { onMount } from "svelte";
 
-	const ff = ['tag', 'title', 'content', 'token'];
+	const ff = ['title', 'content'];
 	let act = 0;
 	let a;
 	let t;
@@ -20,10 +19,9 @@
 		}, 100);
 	}
 
-	$: ft = {};
-	onDestroy(() => {
-		if (!browser) return;
-		rml();
+	const ft = {};
+	onMount(() => {
+		return ()=>rml();
 	});
 	export let ctx = {};
 
@@ -39,18 +37,18 @@
 
 	export function show() {
 		act = 1 - act;
-		if (!browser) return;
 		clearTimeout(t);
 		if (act) {
 			rml();
 			window.addEventListener('click', hide, true);
 		}
 	}
-
+  let size
 	$: size = Object.values(ft).reduce((a, b) => a + b, 0);
 	$: {
 		ctx.value = ff.filter((f) => ft[f]);
 		ctx.show = show;
+		ctx={...ctx}
 	}
 </script>
 

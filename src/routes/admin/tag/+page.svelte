@@ -5,6 +5,7 @@
   import { req } from "$lib/req";
   import { onMount } from "svelte";
   import { method } from "$lib/enum";
+  import { small } from "$lib/store";
 
   let ls = [];
   let name = "";
@@ -51,7 +52,7 @@
     allTags();
   });
   $:{
-    sty = `transform:translate3d(${-view * 100 / 2}%,0,0)`;
+    sty = $small&&`transform:translate3d(${-view * 100 / 2}%,0,0)`;
     name = name.replace(/[;, \t\s]/g, "");
     ok = name && !ls.find(a => a.name === name);
   }

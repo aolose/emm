@@ -9,6 +9,7 @@
   import Loading from "$lib/components/loading.svelte";
   import { watch } from "$lib/utils";
   import Detail from "./detail.svelte";
+  import { small } from "$lib/store";
 
   let view = 0;
   let sty = "";
@@ -56,7 +57,7 @@
     go();
   });
   $:{
-    sty = `transform:translate3d(${-view * 100 / 2}%,0,0)`;
+    sty = $small&&`transform:translate3d(${-view * 100 / 2}%,0,0)`;
     ftWatch(() => {
       go();
     }, status);

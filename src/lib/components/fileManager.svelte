@@ -7,6 +7,8 @@
   import { get, writable } from "svelte/store";
   import { slidLeft } from "../transition";
   import { fade, slide } from "svelte/transition";
+  import { delay, watch } from "$lib/utils";
+  import Mobile from "$lib/components/Mobile.svelte";
 
   const getRes = api("res");
 
@@ -34,12 +36,9 @@
 
   function load(page = 1) {
     loading = 1;
-    const ext = {};
-    if (cfg.type)
-      ext.headers = new Headers({
-        filetype: cfg.type
-      });
-    getRes(new Uint8Array([page, size]), ext).then(({ total: t, items }) => {
+    const o = { page, size, type: cfg.type };
+    if (sc) o.name = sc;
+    getRes(o).then(({ total: t, items }) => {
       loading = 0;
       total = t;
       ls = items;
@@ -52,6 +51,8 @@
       rePosition();
     });
   }
+
+  const dLoad = delay(load, 300);
 
   let fs = [];
   upFiles.subscribe((f) => {
@@ -113,8 +114,15 @@
     selected = new Set(selected);
   };
   const sty = `--w:${w}%`;
+  let sc = "";
+  const ws = watch(sc);
+  $:{
+    ws(() => {
+      sc = sc.replace(/^\s+|\s+$/, "");
+      dLoad(1);
+    }, sc);
+  }
 </script>
-
 {#if cfg.show}
   <div
     style={sty}
@@ -150,7 +158,7 @@
         <s></s>
         <div class="s">
           <button class="icon i-search"></button>
-          <input />
+          <input bind:value={sc}/>
         </div>
         <button class="icon i-close" on:click={cancel}></button>
       </div>

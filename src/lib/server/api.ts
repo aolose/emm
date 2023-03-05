@@ -460,7 +460,7 @@ const apis: APIRoutes = {
       const { _posts } = tag;
       try {
         if (t) {
-          await throwDbProxyError(Object.assign(t, filter(tag, ["banner", "desc","name"], false)));
+          await throwDbProxyError(Object.assign(t, filter(tag, ["banner", "desc", "name"], false)));
         } else ts.unshift(await throwDbProxyError(t = DBProxy(Tag, tag)));
       } catch (e) {
         if (e instanceof Error) {
@@ -514,14 +514,31 @@ const apis: APIRoutes = {
       return pubPostList(page, size, tag, skips);
     },
     post: auth(Read, async (req) => {
+      const d = await req.json()
+      let {sc=''} = d
       const {
-        page, size
-      } = await req.json();
+        page, size,ft
+      } = d
+      const w = []
+      const v = []
       let where: [string, ...unknown[]] | undefined;
       if (!getClient(req)?.ok(Admin)) {
-        where = ["published=? ", 1];
+        w.push("published=?")
+        v.push(1)
       }
-
+      sc=sc.replace(/^\s+|\s+$/g,'')
+      if(sc){
+        const s = `%${sc}%`
+        if(ft&1){
+          w.push('(title like ? or title_d like ?)')
+          v.push(s,s)
+        }
+        if(ft&2){
+          w.push('(content like ? or content_d like ?)')
+          v.push(s,s)
+        }
+      }
+      if(w.length)where=[w.join(' and '),...v]
       return pageBuilder(page, size, Post,
         ["createAt desc"], undefined, where,
         combine(patchPostTags, patchPostReqs)
@@ -587,15 +604,23 @@ const apis: APIRoutes = {
     }),
     post: auth(Read, async (req) => {
       let where: [string, ...unknown[]] | undefined;
-      let type = req.headers.get("filetype");
+      const d = await req.json();
+      const { page, size } = d;
+      let { type, name = "" } = d;
+      const w = [];
+      const v = [];
+      name = name.replace(/$\s+|\s+$/g, "");
+      if (name) {
+        w.push("name like ?");
+        v.push(`%${name}%`);
+      }
       if (type) {
         type = type.replace(/\*/g, "%");
-        where = ["type like ?", type];
+        w.push("type like ?");
+        v.push(type);
       }
-      const r = new Uint8Array(await req.arrayBuffer());
-      const p = r[0];
-      const s = r[1];
-      return pageBuilder(p, s, Res,
+      if (w.length) where = [w.join(" and "), ...v];
+      return pageBuilder(page, size, Res,
         ["save desc"],
         ["id", "name", "size", "type", "thumb"],
         where

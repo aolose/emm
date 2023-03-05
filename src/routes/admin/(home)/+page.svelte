@@ -7,9 +7,10 @@
   import Setting from "./setting.svelte";
   import FileWin from "$lib/components/fileManager.svelte";
   import Viewer from "$lib/components/viewer.svelte";
-  import { editPost, originPost, posts } from "$lib/store";
+  import { editPost, originPost, posts, small } from "$lib/store";
   import { api } from "$lib/req";
   import { onMount } from "svelte";
+  import { watch } from "$lib/utils";
 
   const getPost = api("posts");
   let pages = 1;
@@ -20,10 +21,10 @@
     if (!p) {
       originPost.set({});
       editPost.set({});
-      view=0
+      view = 0;
       return;
     }
-    view=1
+    view = 1;
     const o = { ...p };
     if (!o.id) {
       o._ = tmpMark++;
@@ -34,8 +35,18 @@
     editPost.set({ ...o });
   }
 
+  let sc = "";
+  let ft = 1;
+  const wc = watch(sc);
+  const wt = watch(ft);
+
   function page(n = 1) {
-    getPost({ page: n, size: 10 }).then(p => {
+    const o = { page: n, size: 10 };
+    if (sc) {
+      o.sc = sc;
+      o.ft = ft;
+    }
+    getPost(o).then(p => {
       const { total, items = [] } = p;
       if (items) posts.set(items);
       pages = total;
@@ -46,12 +57,28 @@
     sel();
   }
 
+  function ch(val, f) {
+    sc = val.replace(/^\s+|\s+$/g, "");
+    if (f.size) {
+      let i = 0;
+      if (f.has("title")) i += 1;
+      if (f.has("content")) i += 2;
+      ft = i;
+    } else ft = 1;
+  }
+
   onMount(() => {
     page();
   });
   let sty;
   $:{
-    sty = `transform:translate3d(${(-view * 100 / 3).toFixed(4)}%,0,0)`;
+    sty = $small && `transform:translate3d(${(-view * 100 / 3).toFixed(4)}%,0,0)`;
+    wc(() => {
+      page(1);
+    }, sc);
+    wt(() => {
+      if (sc) page(1);
+    }, ft);
   }
 </script>
 
@@ -59,8 +86,8 @@
   <div class="m" style={sty}>
     <div class="a">
       <div class="h">
-        <Search />
-        <AddPost done={()=>view=1}/>
+        <Search change={ch} />
+        <AddPost done={()=>view=1} />
       </div>
       <div class="ls">
         {#each $posts as p (p._ || p.id)}
@@ -72,12 +99,12 @@
       </div>
     </div>
     <div class="b">
-      <Editor close={close} preview={()=>view=2}/>
+      <Editor close={close} preview={()=>view=2} />
     </div>
     <div class="c">
-      <Viewer preview={true} close={()=>view=1}/>
+      <Viewer preview={true} close={()=>view=1} />
     </div>
-    <FileWin w={33.33333}/>
+    <FileWin w={33.33333} />
     <Setting />
   </div>
 </div>

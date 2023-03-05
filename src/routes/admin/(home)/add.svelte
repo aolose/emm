@@ -1,38 +1,44 @@
 <script>
-    import {editPost, originPost} from "$lib/store";
-    import {randNum} from "$lib/utils";
-    export let done
-    export let a = '';
-    $: {
-        a = a.replace(/^\s+|\s+$/, '');
-    }
+  import { editPost, originPost } from "$lib/store";
+  import { randNum } from "$lib/utils";
 
-    function add() {
-        if (a) {
-            const _ = randNum()
-            const o = {
-                _,
-                title_d: a,
-                content_d: ''
-            }
-            originPost.set({_})
-            editPost.set({...o})
-            a = ''
-            done&&done()
-        }
+  export let done;
+  export let a = "";
+  $: {
+    a = a.replace(/^\s+|\s+$/, "");
+  }
+
+  function add() {
+    if (a) {
+      const _ = randNum();
+      const o = {
+        _,
+        title_d: a,
+        content_d: ""
+      };
+      originPost.set({ _ });
+      editPost.set({ ...o });
+      a = "";
+      done && done();
     }
+  }
 </script>
 
 <div class="a">
-    <input placeholder="write a new story..." bind:value={a}/>
-    <button class="icon i-add" class:act={a} on:click={add}></button>
+  <input placeholder="write a new story..." bind:value={a} />
+  <button class="icon i-add" class:act={a} on:click={add}></button>
 </div>
 
 <style lang="scss">
+  @import "../../../lib/break";
+
   .a {
     width: 300px;
     display: flex;
     margin: 20px auto;
+    @include s(){
+      width: 80%;
+    }
   }
 
   input {

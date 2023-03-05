@@ -1,65 +1,78 @@
 <script>
-	import Filter from './filters.svelte';
+  import Filter from "./filters.svelte";
+  import { delay, watch } from "$lib/utils";
 
-	export let value = '';
-	let ctx = {};
-	$: {
-		value = value.replace(/^\s+|\s+$/, '');
-	}
+  export let change;
+  const dCh = delay(change, 500);
+  export let value = "";
+  let ctx = {};
+  const wc = watch(value,ctx);
+  $: {
+		value = value.replace(/^\s+|\s+$/, "");
+    wc(() => {
+      dCh(value,new Set(ctx.value))
+    }, value,ctx);
+
+  }
 </script>
 
 <div class="a">
-	<i class="icon i-filter" class:act={ctx.value?.length} on:click={ctx.show} />
-	<input bind:value />
-	<div class="l" />
-	<i class="icon i-search" class:act={value} />
-	<Filter bind:ctx />
+  <i class="icon i-filter" class:act={ctx.value?.length} on:click={ctx.show} />
+  <input bind:value />
+  <div class="l" />
+  <i class="icon i-search" class:act={value} />
+  <Filter bind:ctx />
 </div>
 
 <style lang="scss">
-	.a {
-		display: flex;
-		width: 300px;
-		margin: 20px auto;
-		height: 40px;
-		border-bottom: 1px solid var(--darkgrey);
-		align-items: center;
-	}
+  @import "../../../lib/break";
 
-	.icon {
-		color: var(--darkgrey);
-		font-size: 20px;
-		transition: 0.3s ease-in-out;
-		cursor: pointer;
+  .a {
+    display: flex;
+    width: 300px;
+    margin: 20px auto;
+    height: 40px;
+    border-bottom: 1px solid var(--darkgrey);
+    align-items: center;
+    @include s() {
+      width: 80%;
+    }
+  }
 
-		&:hover {
-			color: #d0c791;
-		}
-	}
+  .icon {
+    color: var(--darkgrey);
+    font-size: 20px;
+    transition: 0.3s ease-in-out;
+    cursor: pointer;
 
-	.act {
-		color: var(--green);
-	}
+    &:hover {
+      color: #d0c791;
+    }
+  }
 
-	.l {
-		position: absolute;
-		bottom: 0;
-		right: 50%;
-		transition: 0.3s ease-in-out;
-		transform: translateX(50%);
-		height: 1px;
-		background: #394f62;
-		width: 0;
-	}
+  .act {
+    color: var(--green);
+  }
 
-	input {
-		flex: 1;
-		height: 40px;
-		outline: none;
-		border: none;
+  .l {
+    position: absolute;
+    bottom: 0;
+    right: 50%;
+    transition: 0.3s ease-in-out;
+    transform: translateX(50%);
+    height: 1px;
+    background: #394f62;
+    width: 0;
+  }
 
-		&:focus + .l {
-			width: 100%;
-		}
-	}
+  input {
+    flex: 1;
+    height: 40px;
+    outline: none;
+    border: none;
+
+    &:focus + .l {
+      width: 100%;
+    }
+  }
 </style>
