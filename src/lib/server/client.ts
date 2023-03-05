@@ -3,17 +3,24 @@ import { clientMap } from "$lib/server/cache";
 import { permission } from "$lib/enum";
 import type { TokenInfo } from "$lib/server/model";
 import type { Obj } from "$lib/types";
-import { debugMode } from "$lib/server/utils";
+import { debugMode, model } from "$lib/server/utils";
+import { TkTick } from "$lib/server/model";
+import { db } from "$lib/server/index";
 
+const hasReqClean = 1e3 * 3600 * 24 * 30; // 30days
+const empClean = 1e3 * 3600 * 24 * 7; // 7days
 export class Client {
-  constructor(skip?: boolean) {
+  constructor(skip?: boolean, uuid?: string) {
     this.tokens = new Map();
+    this.destroy = Date.now() + empClean;
     if (!skip) clientMap.set(
-      this.uuid = randomUUID(),
+      this.uuid = uuid || randomUUID(),
       this
     );
   }
 
+  destroy = 0;
+  lastAct = 0;
   disable = false;
   uuid = "";
   tokens: Map<permission, Map<number, number> | number>;
@@ -66,6 +73,12 @@ export class Client {
         }
       }
     }
+    if (tk.code) {
+      const t = model(TkTick, { token: this.uuid, ticket: tk.code });
+      const h = db.get(t);
+      if (!h) db.save(t, { create: true });
+    }
+    this.destroy = Date.now() + hasReqClean;
   }
 
   rmPermission(p: permission) {
@@ -97,6 +110,7 @@ export class Client {
           if (!m.size) this.tokens.delete(k);
       }
     }
+    this.destroy = n + (keep ? hasReqClean : empClean);
     return keep;
   }
 }

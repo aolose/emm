@@ -166,14 +166,12 @@ export class DB {
     } else [sql, values] = update(o);
     Log.debug("save", sql, values);
     if (!sql) {
-      Log.warn('save',table,'empty sql')
+      Log.warn("save", table, "empty sql");
       return { changes: 0, lastInsertRowid: 0 };
     }
     const r = this.db.prepare(sql).run(...values);
-    if (r.changes === 1 && !kv) {
+    if (pk && r.changes === 1 && !kv) {
       const t = typeof kv;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       o[pk] = (t === "number" || t === "bigint") ? r.lastInsertRowid :
         this.db.prepare(`select ${pk} from ${table} where rowid=?`).get(r.lastInsertRowid)[pk];
     }
@@ -187,12 +185,24 @@ export class DB {
     return this.db.prepare(sql).run(...pks);
   }
 
-  del<T extends Model>(o: Obj<T>) {
-    const pk = getPrimaryKey(o.constructor.name) as keyof typeof o & string;
-    if (!pk) return;
-    const v = o[pk];
-    const sql = `delete from ${o.constructor.name} where ${pk}=?`;
-    return this.db.prepare(sql).run(v);
+  del<T extends Model>(o: Obj<T>, where?: string, ...values: unknown[]) {
+    const table = o.constructor.name;
+    const pk = getPrimaryKey(table) as keyof typeof o & string;
+    const wh = [];
+    const va = [];
+    if (pk) {
+      wh.push(`${pk}=?`);
+      va.push(o[pk]);
+    }
+    if (where) {
+      wh.push(where);
+    }
+    if (values && values.length) va.push(...values);
+    const cd = wh.join(" and ");
+    if (!cd) throw new Error(`empty condition when delete ${table}`);
+    const sql = `delete from ${o.constructor.name} where ${cd}`;
+    Log.debug("del", sql, va);
+    return this.db.prepare(sql).run(...va);
   }
 
   createTables() {

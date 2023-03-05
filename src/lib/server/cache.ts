@@ -1,18 +1,35 @@
 import type { Require } from "$lib/server/model";
-import { Post, PostTag, RequireMap, Tag, TokenInfo } from "$lib/server/model";
-import type { Client } from "$lib/server/client";
-import { DBProxy, model } from "$lib/server/utils";
+import { Post, PostTag, RequireMap, Tag, TkTick, TokenInfo } from "$lib/server/model";
+import { Client } from "$lib/server/client";
+import { DBProxy, model, sqlFields } from "$lib/server/utils";
 import { db } from "$lib/server/index";
 import { requireType } from "$lib/server/enum";
 import type { DiffFn, Model, Obj, Timer } from "$lib/types";
 import { tags } from "$lib/server/store";
 import { diffStrSet } from "$lib/setStrPatchFn";
 import { get } from "svelte/store";
-import { arrFilter, rndAr, rndPick } from "$lib/utils";
+import { arrFilter, rndPick } from "$lib/utils";
 
 export const requireMap = new Map<number, Require>();
 
 export const clientMap = new Map<string, Client>();
+
+// auto clean client
+setInterval(()=>{
+  if(clientMap.size){
+    const cs = []
+    const n = Date.now()
+    for (const [k,v] of clientMap) {
+      if(v.destroy<n){
+        clientMap.delete(k)
+        cs.push(k)
+      }
+    }
+    if(cs.length){
+      db.del(model(TkTick),`token in (${sqlFields(cs.length)})`,...cs)
+    }
+  }
+},1e3*3600)
 
 export const tagPostCache = (() => {
   let tps: PostTag[] = [];
@@ -88,7 +105,6 @@ export const tagPostCache = (() => {
     }
   };
 })();
-
 export const codeTokens = (() => {
   const o = new Map<string, Obj<TokenInfo>>();
   let t: Timer;
@@ -98,10 +114,17 @@ export const codeTokens = (() => {
     clear() {
       const n = Date.now();
       next = n + dur;
+      const code: string[] = [];
       const ids = [...o.values()]
         .filter(a => a.expire && a.expire > 0 && a.expire < n || a.times === 0)
-        .map(a => a.id) as number[];
+        .map(a => {
+          if (a.code) {
+            code.push(a.code);
+          }
+          return a.id;
+        }) as number[];
       this.delete({ id: ids });
+      if (code.length) db.del(model(TkTick), `ticket in (${sqlFields(code.length)})`, ...code);
     },
     load() {
       const n = Date.now();
@@ -119,6 +142,20 @@ export const codeTokens = (() => {
           this.clear();
         }
       }, dur);
+      if (o.size) {
+        const ts = db.all(model(TkTick), `ticket in (${sqlFields(o.size)})`, ...o.keys());
+        if (ts.length) {
+          const clients = new Map<string, Client>();
+          ts.forEach(a => {
+            let cli = clients.get(a.token);
+            if (!cli) {
+              cli = new Client(false, a.token);
+            }
+            const tk = codeTokens.get(a.ticket) as TokenInfo;
+            if (tk) cli.addToken(tk);
+          });
+        }
+      }
     },
     add(code: string, token: Obj<TokenInfo>) {
       o.set(code, token);

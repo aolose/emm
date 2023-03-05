@@ -279,6 +279,13 @@ export class TokenInfo {
   createAt = INT;
 }
 
+export class TkTick{
+  @noNull
+  ticket=TEXT
+  @noNull
+  token=TEXT
+}
+
 class Analysis_visitor {
   request = INT;
   uniqueIP = INT;
