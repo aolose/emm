@@ -7,8 +7,8 @@ import { debugMode, model } from "$lib/server/utils";
 import { TkTick } from "$lib/server/model";
 import { db } from "$lib/server/index";
 
-const hasReqClean = 1e3 * 3600 * 24 * 30; // 30days
-const empClean = 1e3 * 3600 * 24 * 7; // 7days
+const hasReqClean = 1e3 * 3600 * 24 * 60; // 60days
+const empClean = 1e3 * 60;
 export class Client {
   constructor(skip?: boolean, uuid?: string) {
     this.tokens = new Map();

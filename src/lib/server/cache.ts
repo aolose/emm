@@ -124,7 +124,14 @@ export const codeTokens = (() => {
           return a.id;
         }) as number[];
       this.delete({ id: ids });
-      if (code.length) db.del(model(TkTick), `ticket in (${sqlFields(code.length)})`, ...code);
+      if (code.length) {
+        for (const [k, v] of clientMap) {
+          if (!v.clear()) {
+            clientMap.delete(k);
+          }
+        }
+        db.del(model(TkTick), `ticket in (${sqlFields(code.length)})`, ...code);
+      }
     },
     load() {
       const n = Date.now();
