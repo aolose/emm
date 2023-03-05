@@ -191,7 +191,7 @@ export const cmManager = (() => {
           if (!cm) return errMsg("comment not exist", 1);
           const usr = db.get(model(CmUser, { id: cm.userId }));
           if (!usr) {
-            return errMsg("invalid token");
+            return errMsg("no permission");
           }
           if (usr.exp < now) return errMsg("token expire");
         }

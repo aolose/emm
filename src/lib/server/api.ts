@@ -59,7 +59,7 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
         for (const p of requires) {
           const s = client.ok(p);
           if (s) continue;
-          else return resp("invalid token", 403);
+          else return resp("no permission", 403);
         }
       }
     }
