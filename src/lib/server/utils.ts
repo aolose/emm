@@ -12,7 +12,7 @@ import {
   diffObj,
   encrypt,
   encryptHeader,
-  filter,
+  filter, getErr,
   getKINums,
   hasOwnProperty,
   parseBody,
@@ -211,7 +211,7 @@ const dBProxyErrs = new WeakMap<Model, Writable<Error | number>>();
 export const throwDbProxyError = <T extends Model>(o: T): Promise<T> => {
   const err = dBProxyErrs.get(o);
   let un: Unsubscriber | undefined;
-  let t:Timer;
+  let t: Timer;
   if (err) {
     t = setTimeout(() => {
       err.set(0);
@@ -221,7 +221,7 @@ export const throwDbProxyError = <T extends Model>(o: T): Promise<T> => {
     if (!err) {
       r(o);
     } else {
-      err.set(-1)
+      err.set(-1);
       un = err.subscribe(n => {
         if (n) {
           if (n instanceof Error) fail(n);
@@ -469,11 +469,11 @@ export const getClient = (req: Request) => {
   return cli;
 };
 
-export const expDay = (n:number)=>Date.now()+n*86400000
+export const expDay = (n: number) => Date.now() + n * 86400000;
 export const setToken = (req: Request, resp: Response, token: TokenInfo) => {
   const client = getClient(req) || new Client();
   client.addToken(token);
-  setCookie(resp, "token", client.uuid,expDay(360));
+  setCookie(resp, "token", client.uuid, expDay(360));
 };
 
 export function checkRedirect(statue: number, path: string, req: Request) {
@@ -500,5 +500,24 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 }
 
 
-export const debugMode = 0;
+export const debugMode = 1;
 export const sqlFields = (n: number) => ",?".repeat(n).slice(1);
+
+
+export const mv = (from: string, to: string) => {
+  let mv = 0;
+  try {
+    if (from && fs.existsSync(from)) {
+      mv = 1;
+    }
+    if (to && !fs.existsSync(to)) {
+      fs.mkdirSync(to, { recursive: true });
+    }
+    if (mv) {
+      fs.renameSync(from, to);
+    }
+  } catch (e) {
+    if (e instanceof Error)
+      return getErr(e);
+  }
+};

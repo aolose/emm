@@ -84,7 +84,7 @@ async function update() {
 }
 
 let t: ReturnType<typeof setTimeout>
-let geoIp: typeof ip2location
+let geoIp: typeof ip2location|null
 const load = (file?: string) => {
     if (!file) return
     ip2location.close()
@@ -92,6 +92,14 @@ const load = (file?: string) => {
     if (ip2location.loadBin()) {
         geoIp = ip2location
     } else console.log('fail load bin!')
+}
+export const geoClose=()=>{
+    if(geoIp){
+        geoIp.close()
+        geoIp=null
+        ip2location.close()
+    }
+
 }
 export const loadGeoDb = () => {
     const dir = sys.ipLiteDir

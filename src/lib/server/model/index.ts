@@ -200,7 +200,6 @@ export class System {
   blogBio = TEXT;
   ipLiteToken = TEXT;
   ipLiteDir = TEXT;
-  codeLogin = true;
   description = TEXT;
   keywords = TEXT;
   comment = INT; // use comment

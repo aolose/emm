@@ -11,7 +11,7 @@ import {
   getReqJson,
   md5,
   mkdir,
-  model,
+  model, mv,
   pageBuilder,
   resp,
   saveFile,
@@ -24,14 +24,14 @@ import {
 import type { RespHandle } from "$lib/types";
 import sharp from "sharp";
 import { Buffer } from "buffer";
-import { FwLog, FWRule, Post, Require, Res, Tag, TokenInfo } from "$lib/server/model";
+import { FwLog, FWRule, Post, Require, Res, System, Tag, TokenInfo } from "$lib/server/model";
 import { arrFilter, diffObj, enc, filter } from "$lib/utils";
 import { permission } from "$lib/enum";
 import path from "path";
 import fs from "fs";
 import { genToken } from "$lib/server/token";
 import { addRule, blockIp, delRule, filterLog, fw2log, logCache, lsRules, ruleHit, rules } from "$lib/server/firewall";
-import { loadGeoDb } from "$lib/server/ipLite";
+import { geoClose, loadGeoDb } from "$lib/server/ipLite";
 import { publishedPost, tagPatcher, tags } from "$lib/server/store";
 import { get } from "svelte/store";
 import {
@@ -106,7 +106,7 @@ const apis: APIRoutes = {
           if (c.ok(permission.Admin) || c.ok(permission.Read)) s = 1;
         }
       }
-      return `${s}${sys.codeLogin}`;
+      return s;
     }
   },
   genCode: {
@@ -514,31 +514,31 @@ const apis: APIRoutes = {
       return pubPostList(page, size, tag, skips);
     },
     post: auth(Read, async (req) => {
-      const d = await req.json()
-      let {sc=''} = d
+      const d = await req.json();
+      let { sc = "" } = d;
       const {
-        page, size,ft
-      } = d
-      const w = []
-      const v = []
+        page, size, ft
+      } = d;
+      const w = [];
+      const v = [];
       let where: [string, ...unknown[]] | undefined;
       if (!getClient(req)?.ok(Admin)) {
-        w.push("published=?")
-        v.push(1)
+        w.push("published=?");
+        v.push(1);
       }
-      sc=sc.replace(/^\s+|\s+$/g,'')
-      if(sc){
-        const s = `%${sc}%`
-        if(ft&1){
-          w.push('(title like ? or title_d like ?)')
-          v.push(s,s)
+      sc = sc.replace(/^\s+|\s+$/g, "");
+      if (sc) {
+        const s = `%${sc}%`;
+        if (ft & 1) {
+          w.push("(title like ? or title_d like ?)");
+          v.push(s, s);
         }
-        if(ft&2){
-          w.push('(content like ? or content_d like ?)')
-          v.push(s,s)
+        if (ft & 2) {
+          w.push("(content like ? or content_d like ?)");
+          v.push(s, s);
         }
       }
-      if(w.length)where=[w.join(' and '),...v]
+      if (w.length) where = [w.join(" and "), ...v];
       return pageBuilder(page, size, Post,
         ["createAt desc"], undefined, where,
         combine(patchPostTags, patchPostReqs)
@@ -723,8 +723,36 @@ const apis: APIRoutes = {
       return "";
 
     })
+  },
+  sys: {
+    get: auth(Read, () => {
+      return filter(sys, sysKs);
+    }),
+    post: auth(Admin, async req => {
+      const o = filter(await req.json(), sysKs) as System;
+      for (const [k, v] of Object.entries(o)) {
+        const kk = k as keyof System;
+        const n = (v as string).replace(/^\s+|\s+$/g, "");
+        if (n && n !== sys[kk]) {
+          const isGeo = "ipLiteDir" === kk || "ipLiteToken" === kk;
+          if (isGeo) {
+            geoClose();
+          }
+          if (["uploadDir", "thumbDir", "ipLiteDir"].includes(kk)) {
+            const err = mv(sys[kk] as string, n);
+            if (err) return resp(err, 500);
+          }
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          sys[kk] = n;
+        }
+      }
+    })
   }
 };
-
+const sysKs: (keyof System)[] = [
+  "blogUrl", "blogName", "blogBio", "robots", "uploadDir",
+  "thumbDir", "ipLiteToken", "ipLiteDir"
+];
 export const apiPath = Object.keys(apis);
 export default apis;
