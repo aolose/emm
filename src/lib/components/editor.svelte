@@ -108,14 +108,10 @@
     height: 100%;
     overflow: hidden;
     line-height: 2;
-    padding-bottom: 20px;
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
-    @include s() {
-      padding-bottom: 0;
-    }
   }
 </style>
