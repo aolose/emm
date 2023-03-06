@@ -469,10 +469,11 @@ export const getClient = (req: Request) => {
   return cli;
 };
 
+export const expDay = (n:number)=>Date.now()+n*86400000
 export const setToken = (req: Request, resp: Response, token: TokenInfo) => {
   const client = getClient(req) || new Client();
   client.addToken(token);
-  setCookie(resp, "token", client.uuid);
+  setCookie(resp, "token", client.uuid,expDay(360));
 };
 
 export function checkRedirect(statue: number, path: string, req: Request) {

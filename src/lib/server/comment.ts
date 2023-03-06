@@ -1,5 +1,5 @@
 import {
-  delCookie,
+  delCookie, expDay,
   getClient,
   getCookie,
   getIp,
@@ -311,7 +311,7 @@ export const cmManager = (() => {
       }
       if (sys.cmCheck) o.state = cm.state;
       const rsp = resp(o);
-      if (!cm.isAdm) setCookie(rsp, ck, user.token, user.exp);
+      if (!cm.isAdm) setCookie(rsp, ck, user.token, user.exp||expDay(2));
       return rsp;
     }
   };

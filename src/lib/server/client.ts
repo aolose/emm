@@ -53,7 +53,7 @@ export class Client {
     return false;
   }
 
-  addToken(tk: TokenInfo) {
+  addToken(tk: TokenInfo,skip=false) {
     this.clear();
     const { expire, _reqs, type } = tk;
     if (type === permission.Admin) {
@@ -73,7 +73,7 @@ export class Client {
         }
       }
     }
-    if (tk.code) {
+    if (!skip&&tk.code) {
       const t = model(TkTick, { token: this.uuid, ticket: tk.code });
       const h = db.get(t);
       if (!h) db.save(t, { create: true });

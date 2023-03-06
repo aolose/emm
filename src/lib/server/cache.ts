@@ -157,9 +157,10 @@ export const codeTokens = (() => {
             let cli = clients.get(a.token);
             if (!cli) {
               cli = new Client(false, a.token);
+              clients.set(a.token,cli)
             }
             const tk = codeTokens.get(a.ticket) as TokenInfo;
-            if (tk) cli.addToken(tk);
+            if (tk) cli.addToken(tk,true);
           });
         }
       }
