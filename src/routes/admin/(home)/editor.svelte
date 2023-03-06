@@ -268,8 +268,10 @@
         display: inline-block;
       }
     }
-    .EasyMDEContainer .CodeMirror{
-      background: rgba(50,80,90,.07);
+    @include s(){
+      .EasyMDEContainer .CodeMirror{
+        background: rgba(50,80,90,.07);
+      }
     }
   }
 </style>
