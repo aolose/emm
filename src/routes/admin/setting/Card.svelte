@@ -21,6 +21,7 @@
   <Ld act={ld} />
 </div>
 <style lang="scss">
+  @import "../../../lib/break";
   .a {
     border: 1px solid #000;
     width: 400px;
@@ -29,6 +30,10 @@
     background: var(--bg2);
     border-radius: 4px;
     box-shadow: rgba(0, 0, 0, .1) 0 2px 4px -1px;
+    @include s(){
+      width: 96%;
+      margin: 5px auto;
+    }
   }
 
   .t {

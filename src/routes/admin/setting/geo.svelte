@@ -77,7 +77,7 @@
     }
 
     b {
-        margin-left: 30px;
+        margin-left: 40px;
         font-weight: 200;
         color: cornflowerblue;
     }
