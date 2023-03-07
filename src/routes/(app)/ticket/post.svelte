@@ -35,7 +35,7 @@
     {#each ls as { title, slug, _p }}
       <div class="i">
         <a href={`/post/${slug}`} {title}>{title}</a>
-        <span>expire: {_p === -1 ? 'no limit' : time(_p)}</span>
+        <span>expire: {_p === -1 ? 'never' : time(_p)}</span>
       </div>
     {/each}
     {#if !ls || !ls.length}

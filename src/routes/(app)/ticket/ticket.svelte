@@ -43,8 +43,8 @@
   {/if}
   <div>
     <p>{desc(type)}</p>
-    <span><b>expire</b>{expire ? time(expire) : 'Unlimited'}</span>
-    <span><b>times</b>{times ? times : 'Unlimited'}</span>
+    <span><b>expire</b>{expire ? time(expire) : 'never'}</span>
+    <span><b>times</b>{times ? times : 'unlimited'}</span>
   </div>
 </div>
 <style lang="scss">
