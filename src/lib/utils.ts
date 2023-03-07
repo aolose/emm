@@ -292,7 +292,7 @@ export const delay = (fn: (...params: never[]) => void, ms = 0) => {
   };
 };
 
-export const filter = <T extends Model>(o: Obj<T>, keys: (keyof T)[], nullAble = true) => {
+export const filter = <T extends object>(o: Obj<T>, keys: (keyof T)[], nullAble = true) => {
   if (!o) return o;
   o = { ...o };
   const limit = new Set(keys);
@@ -414,7 +414,8 @@ export function goBack(root = "/posts") {
   else return goto("/posts", { replaceState: true });
 }
 
-export const time = (value: number) => {
+export const time = (value?: number) => {
+  if(!value)return ''
   const d = new Date(value);
   if (!d || !d.getTime()) return "";
   return new Intl.DateTimeFormat("en-GB", {
@@ -434,14 +435,16 @@ export const hds2Str = (hs: Headers | [string, string][]) => {
   }
   return h.join("\n");
 };
-
+export const trim = (a?:string,double=false)=>a?
+  double?a.replace(/^\s+|\s{2,}$/g,'')
+    :a.replace(/^\s+|\s+$/g,''):''
 export const str2Hds = (str: string) => {
   const v: [string, string][] = [];
   str.split("\n").forEach(a => {
     const u = a.match(/^(.*?):(.*)$/);
     if (u) {
       const x = u[1].replace(/[^a-z0-9-_]/ig, "");
-      if (x) v.push([x, u[2].replace(/^\s+|\s+$/gi, "")]);
+      if (x) v.push([x, trim(u[2])]);
     }
   });
   return v;
@@ -510,7 +513,7 @@ export const getColor = (a: number | string, opacity = 1) => {
   return c;
 };
 
-export const getPain = (src: string) => {
+export const getPain = (src?: string) => {
   return src ? convert(marked.parse(src), {
     selectors: [
       { selector: "a", options: { ignoreHref: true } },

@@ -1,11 +1,11 @@
 <script>
   import { editPost, originPost } from "$lib/store";
-  import { randNum } from "$lib/utils";
+  import { randNum, trim } from "$lib/utils";
 
   export let done;
   export let a = "";
   $: {
-    a = a.replace(/^\s+|\s+$/, "");
+    a =trim(a);
   }
 
   function add() {

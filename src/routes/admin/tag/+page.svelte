@@ -6,6 +6,7 @@
   import { onMount } from "svelte";
   import { method } from "$lib/enum";
   import { small } from "$lib/store";
+  import { trim } from "$lib/utils";
 
   let ls = [];
   let name = "";
@@ -53,7 +54,7 @@
   });
   $:{
     sty = $small&&`transform:translate3d(${-view * 100 / 2}%,0,0)`;
-    name = name.replace(/[;, \t\s]/g, "");
+    name = trim(name);
     ok = name && !ls.find(a => a.name === name);
   }
   let setTag;

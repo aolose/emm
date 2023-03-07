@@ -1,9 +1,10 @@
 import type { Post } from "$lib/server/model";
-import {sys } from "$lib/server";
+import { sys } from "$lib/server";
 import type { RequestHandler } from "@sveltejs/kit";
-import { getPain, time } from "$lib/utils";
+import { time } from "$lib/utils";
 import { noAccessPosts } from "$lib/server/cache";
 import { pubPostList } from "$lib/server/posts";
+import type { Obj } from "$lib/types";
 
 export const GET: RequestHandler = async ({ request, url }) => {
   const skips = noAccessPosts();
@@ -18,21 +19,21 @@ export const GET: RequestHandler = async ({ request, url }) => {
   });
 };
 
-const render = (base: string, posts: Post[]) => `<?xml version="1.0" encoding="UTF-8" ?>
+const render = (base: string, posts: Obj<Post>[]) => `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<atom:link href="${sys.blogUrl || base}/rss" rel="self" type="application/rss+xml" />
+<atom:link href="${sys.blogDomain || base}/rss" rel="self" type="application/rss+xml" />
 <title>${sys.blogName || ""}</title>
-<link>${sys.blogUrl || base}</link>
+<link>${sys.blogDomain || base}</link>
 <description>${sys.blogBio || ""}</description>
 ${posts
   .map(
     (post) => `<item>
-<guid>${sys.blogUrl || base}/post/${post.slug}</guid>
+<guid>${sys.blogDomain || base}/post/${post.slug}</guid>
 <title>${post.title}</title>
-<link>${sys.blogUrl || base}/post/${post.slug}</link>
-<description>${getPain(post.desc || post.content).substring(0, 140)}</description>
-<pubDate>${time(post.publish)}</pubDate>
+<link>${sys.blogDomain || base}/post/${post.slug}</link>
+<description>${(post?.desc || post?.content || "").substring(0, 140)}</description>
+<pubDate>${time(post?.publish)}</pubDate>
 </item>`
   )
   .join("")}

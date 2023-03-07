@@ -3,6 +3,7 @@
     import {req} from "$lib/req";
     import {slide, fade} from "svelte/transition";
     import {goto} from "$app/navigation";
+    import { trim } from "$lib/utils";
 
     export let data
     let step = data.d
@@ -13,7 +14,7 @@
         'Set upload directory',
         'Set ipLocation (optional)'
     ]
-    const fx = db => db.replace(/^\s+|\s+$/, '')
+    const fx = db => trim(db)
     let o = {
         usr: '',
         pwd: '',

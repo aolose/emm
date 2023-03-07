@@ -1,6 +1,6 @@
 <script>
   import Filter from "./filters.svelte";
-  import { delay, watch } from "$lib/utils";
+  import { delay, trim, watch } from "$lib/utils";
 
   export let change;
   const dCh = delay(change, 500);
@@ -8,7 +8,7 @@
   let ctx = {};
   const wc = watch(value,ctx);
   $: {
-		value = value.replace(/^\s+|\s+$/, "");
+		value = trim(value);
     wc(() => {
       dCh(value,new Set(ctx.value))
     }, value,ctx);

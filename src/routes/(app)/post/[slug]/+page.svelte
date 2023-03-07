@@ -7,6 +7,7 @@
   import { expand } from "$lib/store";
   import { imageViewer } from "$lib/use";
   import Comment from "$lib/components/comment/index.svelte";
+  import Head from "$lib/components/Head.svelte";
 
   export let data;
   const d = data.d;
@@ -21,19 +22,17 @@
     }
   }
 </script>
-<svelte:head>
-  <title>{d.title}</title>
-  <meta property="description" content={d.desc} />
-  <meta property="og:type" content="article" />
-  <meta property="og:title" content={d.title} />
-  <meta property="og:description" content={d.desc} />
-  <meta property="og:url" content={d.slug} />
-  <meta property="article:published_time" content={time(d.createAt)} />
-  <meta property="article:tag" content={d._tag} />
-  <meta property="og:image" content={`/res/_${d.banner}`} />
-  <meta property="og:image:width" content="600" />
-  <meta property="og:image:height" content="400" />
-</svelte:head>
+<Head title={d.title} description={d.desc}>
+  <meta name="og:type" content="article" />
+  <meta name="og:title" content={d.title} />
+  <meta name="og:description" content={d.desc} />
+  <meta name="og:url" content={d.slug} />
+  <meta name="article:published_time" content={time(d.createAt)} />
+  <meta name="article:tag" content={d._tag} />
+  <meta name="og:image" content={`/res/_${d.banner}`} />
+  <meta name="og:image:width" content="600" />
+  <meta name="og:image:height" content="400" />
+</Head>
 
 {#if d}
   <div class={'bk icon i-close'} on:click={()=>goBack()}></div>

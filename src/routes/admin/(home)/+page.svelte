@@ -10,7 +10,7 @@
   import { editPost, originPost, posts, small } from "$lib/store";
   import { api } from "$lib/req";
   import { onMount } from "svelte";
-  import { watch } from "$lib/utils";
+  import { trim, watch } from "$lib/utils";
 
   const getPost = api("posts");
   let pages = 1;
@@ -58,7 +58,7 @@
   }
 
   function ch(val, f) {
-    sc = val.replace(/^\s+|\s+$/g, "");
+    sc = trim(val);
     if (f.size) {
       let i = 0;
       if (f.has("title")) i += 1;

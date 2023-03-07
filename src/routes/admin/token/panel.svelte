@@ -11,6 +11,7 @@
   import { fade } from "svelte/transition";
   import DateInput from "$lib/components/date.svelte";
   import Ck from "$lib/components/check.svelte";
+  import { trim } from "$lib/utils";
 
   let show = 0;
   let ok;
@@ -40,7 +41,7 @@
       }
     } else {
       delete d._reqs;
-      d.name = (d.name || "").replace(/^\s+|\s+$/g, "");
+      d.name = trim(d.name || "");
       fine = d.name && /\d+/g.test(d.type);
     }
     if (d && d.times) d.times = Math.min(Math.max(-1, Math.floor(d.times)), 999);

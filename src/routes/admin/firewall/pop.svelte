@@ -4,13 +4,14 @@
   import { slidLeft } from "$lib/transition";
   import Ck from "./ck.svelte";
   import Sel from "./sel.svelte";
+  import { trim } from "$lib/utils";
 
   let d = {};
   let show = 0;
   let tp = 0;  // 0- filter 1-editor 2-create
   let ok = () => 0;
   let cancel = () => 0;
-  $:hasV = (d.ip || d.path || d.headers || d.mark || d.country || "").replace(/^\s+|\s+$/g, "");
+  $:hasV = trim(d.ip || d.path || d.headers || d.mark || d.country || "");
   export const pop = (type, data = {}) => {
     tp = type;
     if (tp === 2) {
