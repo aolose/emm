@@ -21,14 +21,21 @@
   }
 
   span {
-    line-height: 34px;
     flex-shrink: 0;
+    padding-top: 6px;
     width: 80px;
   }
 
   input, textarea {
+    padding: 5px 10px;
+    min-height: 34px;
     resize: none;
+    font-size: 13px;
+    line-height: 1.4;
     width: 0;
     flex: 1;
+  }
+  textarea {
+    height: 100px;
   }
 </style>

@@ -4,6 +4,9 @@
   import A from './acc.svelte'
   import C from './clear.svelte'
   import R from './res.svelte'
+  import { onMount } from "svelte";
+  import { load } from "./sys";
+  onMount(load)
 </script>
 <div class="m">
   <B/>

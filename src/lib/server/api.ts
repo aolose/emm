@@ -31,7 +31,7 @@ import path from "path";
 import fs from "fs";
 import { genToken } from "$lib/server/token";
 import { addRule, blockIp, delRule, filterLog, fw2log, logCache, lsRules, ruleHit, rules } from "$lib/server/firewall";
-import { geoClose, loadGeoDb } from "$lib/server/ipLite";
+import { geoClose, geoStatue, loadGeoDb } from "$lib/server/ipLite";
 import { publishedPost, tagPatcher, tags } from "$lib/server/store";
 import { get } from "svelte/store";
 import {
@@ -107,11 +107,11 @@ const apis: APIRoutes = {
         }
       }
       return filter({
-        statue:s,
-        key:sys.seoKey,
-        desc:sys.seoDesc,
-        title:sys.blogName
-      },[],false);
+        statue: s,
+        key: sys.seoKey,
+        desc: sys.seoDesc,
+        title: sys.blogName
+      }, [], false);
     }
   },
   genCode: {
@@ -509,6 +509,9 @@ const apis: APIRoutes = {
       return versionStrPatch(r);
     })
   },
+  geo: {
+    get: auth(Read, () => geoStatue())
+  },
   posts: {
     get: async req => {
       const params = new URL(req.url).searchParams;
@@ -531,7 +534,7 @@ const apis: APIRoutes = {
         w.push("published=?");
         v.push(1);
       }
-      sc = trim(sc)
+      sc = trim(sc);
       if (sc) {
         const s = `%${sc}%`;
         if (ft & 1) {
@@ -614,7 +617,7 @@ const apis: APIRoutes = {
       let { type, name = "" } = d;
       const w = [];
       const v = [];
-      name =trim(name)
+      name = trim(name);
       if (name) {
         w.push("name like ?");
         v.push(`%${name}%`);
@@ -735,6 +738,7 @@ const apis: APIRoutes = {
     }),
     post: auth(Admin, async req => {
       const o = filter(await req.json(), sysKs) as System;
+      let loadGeo;
       for (const [k, v] of Object.entries(o)) {
         const kk = k as keyof System;
         const n = trim(v as string);
@@ -747,17 +751,21 @@ const apis: APIRoutes = {
             const err = mv(sys[kk] as string, n);
             if (err) return resp(err, 500);
           }
+          if ((kk === "ipLiteDir" && sys[kk] !== o[kk]) || (kk === "ipLiteToken" && o[kk] !== sys[kk])) loadGeo = 1;
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           sys[kk] = n;
         }
+      }
+      if (loadGeo && sys.ipLiteDir && sys.ipLiteToken) {
+        loadGeoDb();
       }
     })
   }
 };
 const sysKs: (keyof System)[] = [
   "blogDomain", "blogName", "blogBio", "robots", "uploadDir",
-  "thumbDir", "ipLiteToken", "ipLiteDir","seoKey","seoDesc"
+  "thumbDir", "ipLiteToken", "ipLiteDir", "seoKey", "seoDesc"
 ];
 export const apiPath = Object.keys(apis);
 export default apis;

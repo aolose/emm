@@ -173,7 +173,7 @@
                     <input bind:value={ipTk}/>
                     <i></i>
                     <span>IpLocation Database Token</span>
-                    <a href="https://lite.ip2location.com/database-download" target="_blank">where to find?</a>
+                    <a rel="noreferrer" href="https://lite.ip2location.com/database-download" target="_blank">where to find?</a>
                 </div>
                 <div class="r" class:act={ipDir}>
                     <input bind:value={ipDir}/>
