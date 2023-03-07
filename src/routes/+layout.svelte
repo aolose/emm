@@ -1,6 +1,32 @@
 <script>
   import Mobile from "$lib/components/Mobile.svelte";
-</script>
+  import { seo, status } from "$lib/store";
+  import { page } from "$app/stores";
+  import { onMount } from "svelte";
 
-<slot/>
-<Mobile/>
+  function getInf() {
+    const base = { ...$seo };
+    const cur = $seo[$page.route.id];
+    return { ...base, ...(cur || {}) };
+  }
+  export let data
+  const {d}=data
+  let o = getInf();
+  let title,key,desc
+  $:{
+    ({title,key,desc}=o)
+  }
+  onMount(()=>{
+    status.set(d.statue);
+    return seo.subscribe(() => {
+      o = getInf();
+    });
+  })
+</script>
+<svelte:head>
+  <title>{title}</title>
+  <meta name="keywords" content={key}>
+  <meta name="description" content={desc}>
+</svelte:head>
+<slot />
+<Mobile />

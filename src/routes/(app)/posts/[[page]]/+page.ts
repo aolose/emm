@@ -3,4 +3,4 @@ import {method} from "$lib/enum";
 
 export const load = useApi('posts', ({params: {page}}) => {
     return {page: +(page || 1), size: 10}
-},{method: method.GET})
+},{method: method.GET,group:'posts',cache:1e3*3600*3})

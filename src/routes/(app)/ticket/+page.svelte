@@ -4,13 +4,15 @@
   import Ph from "$lib/components/post/hd.svelte";
   import { tick } from "svelte";
   import { expand } from "$lib/store";
-  import { req } from "$lib/req";
+  import { clearGroup, req } from "$lib/req";
   import { getErr, watch, time } from "$lib/utils";
   import { fade } from "svelte/transition";
   import { slide } from "svelte/transition";
   import Ticket from "./ticket.svelte";
   import { permission } from "$lib/enum";
   import Post from "./post.svelte";
+  import Head from "$lib/components/Head.svelte";
+  import { seo } from "$lib/store";
 
   let a;
   let sc;
@@ -69,6 +71,7 @@
         case permission.Read:
           return inf[2][0] = mx(read, expire);
         case permission.Post:
+          clearGroup('posts')
           return inf[1][0] = mx(post, expire);
       }
       share = [...share];
@@ -84,9 +87,7 @@
   let o = {};
   let idx;
 </script>
-<svelte:head>
-  <title>Err - Posts</title>
-</svelte:head>
+<Head title={`${$seo.title} - Ticket`}/>
 <UpDownScroll bind:down={a} />
 <svelte:window on:sveltekit:navigation-end={scTop} />
 <Canvas type={1} />

@@ -24,9 +24,7 @@
     clearTimeout(a);
   });
 </script>
-<svelte:head>
-  <title>Err</title>
-</svelte:head>
+
 <Ctx />
 <div class="b">
   <div class="bb">

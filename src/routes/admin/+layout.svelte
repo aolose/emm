@@ -2,20 +2,18 @@
   import Menu from "./sideMenu.svelte";
   import Confirm from "$lib/components/confirm.svelte";
   import { onMount } from "svelte";
-  import { status } from "$lib/store";
+  import { status, seo } from "$lib/store";
   import { goto } from "$app/navigation";
+  import Head from "$lib/components/Head.svelte";
 
   export let data;
-  const { d } = data;
   onMount(() => {
-    status.set(d);
     status.subscribe(s => {
       if (!s) goto("/login", { replaceState: true });
     });
   });
-
 </script>
-
+<Head title={`${$seo.title} - Admin`} />
 <div class="a">
   <div class="b">
     <Menu />
@@ -28,6 +26,7 @@
 
 <style lang="scss">
   @import "../../lib/break";
+
   .a {
     height: 100%;
     width: 100%;
@@ -49,11 +48,12 @@
     background: var(--bg1);
     flex: 1;
   }
-  @include s(){
-    .a{
+
+  @include s() {
+    .a {
       flex-direction: column;
     }
-    .b{
+    .b {
       width: 100%;
       height: 48px;
     }

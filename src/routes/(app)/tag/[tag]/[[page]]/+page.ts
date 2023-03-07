@@ -8,4 +8,4 @@ export const load = useApi('posts',
             size: 10,
             tag
         }
-    },{method: method.GET})
+    },{method: method.GET,group:'posts',cache:1e3*3600*3})
