@@ -1,8 +1,9 @@
 import { get } from "svelte/store";
 import { tags } from "$lib/server/store";
-import { patchPostTags, tagPostCache } from "$lib/server/cache";
+import { combine, patchPostTags, tagPostCache } from "$lib/server/cache";
 import { pageBuilder, sqlFields } from "$lib/server/utils";
 import { Post } from "$lib/server/model";
+import { getPain } from "$lib/utils";
 
 export const pubPostList = (page: number, size: number, tag: string | null, skips?: number[]) => {
   const where: string[] = ["published=?"];
@@ -27,6 +28,9 @@ export const pubPostList = (page: number, size: number, tag: string | null, skip
       "_tag", "title", "slug"
     ],
     [where.join(" and "), ...values],
-    patchPostTags
+    combine(patchPostTags,arr=>{
+      arr.forEach(a=>a.content=getPain(a.content))
+      return arr
+    })
   );
 };

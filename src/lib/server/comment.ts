@@ -12,7 +12,7 @@ import {
 import { CmUser, Comment, Post } from "$lib/server/model";
 import { db, sys } from "$lib/server/index";
 import { randomUUID } from "crypto";
-import { arrFilter, filter } from "$lib/utils";
+import { arrFilter, filter, trim } from "$lib/utils";
 import { cmStatus, permission } from "$lib/enum";
 import type { Obj } from "$lib/types";
 
@@ -280,7 +280,7 @@ export const cmManager = (() => {
           cm.state = cmStatus.Pending;
         }
         if (cm._avatar) user.avatar = cm._avatar;
-        let name = (cm._name || "").replace(/^\s+|\s}$/g, "");
+        let name = trim(cm._name || "")
         if (name) {
           if (/admin/g.test(name)) name = "fake admin";
           user.name = name;

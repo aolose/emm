@@ -1,5 +1,5 @@
 <script>
-  import { getColor, getPain } from "$lib/utils";
+  import { getColor } from "$lib/utils";
 
   export let p = {};
   const { banner, slug, title, desc, content, createAt } = p;
@@ -11,7 +11,7 @@
   const showY = new Date().getFullYear() !== y;
   let ds;
   $:{
-    ds = (desc || getPain(content)).substring(0, 140);
+    ds = (desc || content || "").substring(0, 140);
   }
 </script>
 
@@ -59,7 +59,7 @@
     margin: 10px;
     @include s() {
       width: 95%;
-      margin:  10px auto;
+      margin: 10px auto;
       height: 180px;
     }
 
@@ -91,13 +91,14 @@
     text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 3px;
     color: #ddd;
     font-weight: 100;
-    &+h3{
-        position: absolute;
-        opacity: 0;
-        font-size: 32px;
-        left: 50%;
-        top: 50%;
-        transform: translate3d(-50%, -50%, 0);
+
+    & + h3 {
+      position: absolute;
+      opacity: 0;
+      font-size: 32px;
+      left: 50%;
+      top: 50%;
+      transform: translate3d(-50%, -50%, 0);
     }
   }
 

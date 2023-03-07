@@ -2,7 +2,7 @@ import type { RequestEvent } from "@sveltejs/kit";
 import ipRangeCheck from "ip-range-check";
 import { db } from "$lib/server/index";
 import { FwLog, FWRule } from "$lib/server/model";
-import { filter, hds2Str, str2Hds } from "$lib/utils";
+import { filter, hds2Str, str2Hds, trim } from "$lib/utils";
 import type { Obj, Timer } from "$lib/types";
 import { getClientAddr, model } from "$lib/server/utils";
 import { ipInfo } from "$lib/server/ipLite";
@@ -47,7 +47,7 @@ export const ruleHit = (r: {
     }
     if (!o) o = { mark: "", _match: [] };
     o._match?.push(k.id);
-    if (k.mark) o.mark = o.mark?.split(",").concat(k.mark).filter(a => a.replace(/^\s+|\s+$/g, "")).join();
+    if (k.mark) o.mark = o.mark?.split(",").concat(k.mark).filter(a => trim(a)).join();
     Object.assign(o, filter({ ...k }, ["forbidden", "log"], false));
   }
   return o;

@@ -196,8 +196,10 @@ export class System {
   uploadDir = TEXT;
   thumbDir = TEXT;
   blogName = TEXT;
-  blogUrl = TEXT;
+  blogDomain = TEXT;
   blogBio = TEXT;
+  seoKey = TEXT;
+  seoDesc = TEXT;
   ipLiteToken = TEXT;
   ipLiteDir = TEXT;
   description = TEXT;

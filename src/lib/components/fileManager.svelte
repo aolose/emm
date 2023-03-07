@@ -7,7 +7,7 @@
   import { get, writable } from "svelte/store";
   import { slidLeft } from "../transition";
   import { fade, slide } from "svelte/transition";
-  import { delay, watch } from "$lib/utils";
+  import { delay, trim, watch } from "$lib/utils";
   import Mobile from "$lib/components/Mobile.svelte";
 
   const getRes = api("res");
@@ -118,7 +118,7 @@
   const ws = watch(sc);
   $:{
     ws(() => {
-      sc = sc.replace(/^\s+|\s+$/, "");
+      sc =trim(sc)
       dLoad(1);
     }, sc);
   }
