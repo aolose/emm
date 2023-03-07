@@ -25,7 +25,7 @@ import type { RespHandle } from "$lib/types";
 import sharp from "sharp";
 import { Buffer } from "buffer";
 import { FwLog, FWRule, Post, Require, Res, System, Tag, TokenInfo } from "$lib/server/model";
-import { arrFilter, diffObj, enc, filter } from "$lib/utils";
+import { arrFilter, diffObj, enc, filter, trim } from "$lib/utils";
 import { permission } from "$lib/enum";
 import path from "path";
 import fs from "fs";
@@ -106,7 +106,12 @@ const apis: APIRoutes = {
           if (c.ok(permission.Admin) || c.ok(permission.Read)) s = 1;
         }
       }
-      return s;
+      return filter({
+        statue:s,
+        key:sys.seoKey,
+        desc:sys.seoDesc,
+        title:sys.blogName
+      },[],false);
     }
   },
   genCode: {
@@ -526,7 +531,7 @@ const apis: APIRoutes = {
         w.push("published=?");
         v.push(1);
       }
-      sc = sc.replace(/^\s+|\s+$/g, "");
+      sc = trim(sc)
       if (sc) {
         const s = `%${sc}%`;
         if (ft & 1) {
@@ -609,7 +614,7 @@ const apis: APIRoutes = {
       let { type, name = "" } = d;
       const w = [];
       const v = [];
-      name = name.replace(/$\s+|\s+$/g, "");
+      name =trim(name)
       if (name) {
         w.push("name like ?");
         v.push(`%${name}%`);
@@ -732,7 +737,7 @@ const apis: APIRoutes = {
       const o = filter(await req.json(), sysKs) as System;
       for (const [k, v] of Object.entries(o)) {
         const kk = k as keyof System;
-        const n = (v as string).replace(/^\s+|\s+$/g, "");
+        const n = trim(v as string);
         if (n && n !== sys[kk]) {
           const isGeo = "ipLiteDir" === kk || "ipLiteToken" === kk;
           if (isGeo) {
@@ -751,8 +756,8 @@ const apis: APIRoutes = {
   }
 };
 const sysKs: (keyof System)[] = [
-  "blogUrl", "blogName", "blogBio", "robots", "uploadDir",
-  "thumbDir", "ipLiteToken", "ipLiteDir"
+  "blogDomain", "blogName", "blogBio", "robots", "uploadDir",
+  "thumbDir", "ipLiteToken", "ipLiteDir","seoKey","seoDesc"
 ];
 export const apiPath = Object.keys(apis);
 export default apis;
