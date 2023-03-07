@@ -17,6 +17,7 @@ import { hooks } from "$lib/apiHooks";
 const cacheData = ".d";
 const cacheKey = ".k";
 const cacheExpire = ".e";
+const cacheGroup = ".g";
 const cacheBegin = ".b";
 
 
@@ -32,14 +33,28 @@ const reqKey = (url: string, params: reqParams, method?: MethodNumber, key?: str
   }
   return rk;
 };
-
+export const clearGroup = (groupKey: string) => {
+  const s = group.get(groupKey);
+  if (s && s.size) {
+    group.delete(groupKey);
+    for (const k of s) {
+      reqCacheMap.delete(k);
+    }
+    saveCacheToStorage();
+  }
+};
+const group = new Map<string, Set<string>>();
 const saveCacheToStorage = () => {
   if (!browser) return;
   const d = [] as unknown[];
   const k = [] as string[];
   const e = [] as number[];
   const now = Date.now();
-
+  const g = [];
+  for (const [k, v] of group) {
+    g.push(`${k}:${[...v].join()}`);
+  }
+  localStorage.setItem(cacheGroup, g.join(";"));
   localStorage.setItem(cacheBegin, now + "");
   for (const [a, [n, b, p]] of reqCacheMap) {
     const dur = n - now;
@@ -58,6 +73,13 @@ const saveCacheToStorage = () => {
 const loadCacheFromStorage = () => {
   if (!browser) return;
   if (!reqCacheMap) reqCacheMap = new Map();
+  const g = localStorage.getItem(cacheGroup);
+  if (g) {
+    g.split(";").forEach(a => {
+      const [k, v] = a.split(":");
+      group.set(k, new Set(v.split(",")));
+    });
+  }
   let ch;
   const [d, k, e, b] = cacheNames.map((a) => localStorage.getItem(a));
   if (d && k && e && b) {
@@ -71,10 +93,13 @@ const loadCacheFromStorage = () => {
         const exp = a + bg;
         if (exp > n) {
           reqCacheMap.set(ke[i], [exp, da[i], undefined]);
-        } else ch = 1;
+        } else {
+          ch = 1;
+          delGroupKey(ke[i]);
+        }
       });
     } catch (e) {
-      console.error(e)
+      console.error(e);
       // ignore
     }
   }
@@ -188,13 +213,27 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
     return ru;
   });
 };
+const addGroupKey = (groupKey: string, key: string) => {
+  if (groupKey) {
+    const s = group.get(groupKey) || new Set();
+    s.add(key);
+    group.set(groupKey, s);
+  }
+};
+const delGroupKey = (key: string) => {
+  for (const [k, v] of group) {
+    if (v.has(key)) v.delete(key);
+    if (!v.size) group.delete(k);
+  }
+};
 
 export const saveCache = (
   url: ApiName,
   params: reqParams | reqData,
   data: reqData | number,
   cache?: number,
-  method?: MethodNumber
+  method?: MethodNumber,
+  groupKey?: string
 ) => {
   let p: reqParams;
   let d: reqData;
@@ -208,6 +247,7 @@ export const saveCache = (
     c = cache as number;
   }
   const key = reqKey(url, p, method);
+  if (groupKey) addGroupKey(groupKey, key);
   const now = Date.now();
   const r = [now + c, d, undefined] as cacheRecord;
   reqCacheMap.set(key, r);
@@ -249,6 +289,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
     return p;
   }
   const key = reqKey(url, params, cfg?.method);
+  if (cfg?.group) addGroupKey(cfg.group, key);
   let p = browser ? reqPromiseCache.get(key) : undefined;
   if (!p) {
     const cache = cfg?.cache;
@@ -284,9 +325,10 @@ export const api = (url: ApiName, cfg?: reqOption) => {
 };
 export const useApi = (url: ApiName, getParams?: (event: LoadEvent, cfg: reqOption) => reqParams, cfg?: reqOption): Load =>
   async function(event) {
-    const { fetch,params } = event;
+    const { fetch, params } = event;
     (cfg = cfg || {}).fetch = fetch;
     return {
-      p:params,
-      d: await req(url, getParams?.(event, cfg), cfg) };
+      p: params,
+      d: await req(url, getParams?.(event, cfg), cfg)
+    };
   };
