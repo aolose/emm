@@ -50,6 +50,7 @@
     req("sys", o).then(() => {
       getGeoStatus();
       sys.update(a => ({ ...a, ...o }));
+      err = 0;
       msg = "update success";
       act = 1;
     }).catch(e => {
