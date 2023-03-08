@@ -12,8 +12,8 @@
   <B/>
   <G/>
   <A/>
-  <C/>
   <R/>
+  <C/>
 </div>
 <style lang="scss">
   @import "../../../lib/break";

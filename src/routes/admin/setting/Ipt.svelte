@@ -1,16 +1,19 @@
 <script>
-  export let label;
-  export let value;
-  export let placeholder;
-  export let box;
+    export let label;
+    export let value;
+    export let placeholder;
+    export let box;
+    export let password
 </script>
 <div class="r">
-  <span>{label}</span>
-  {#if box}
-    <textarea bind:value={value} placeholder={placeholder}></textarea>
-  {:else }
-    <input bind:value={value} placeholder={placeholder} />
-  {/if}
+    <span>{label}</span>
+    {#if box}
+        <textarea bind:value={value} placeholder={placeholder}></textarea>
+    {:else if password}
+        <input type="password" bind:value={value} placeholder={placeholder}/>
+    {:else }
+        <input bind:value={value} placeholder={placeholder}/>
+    {/if}
 </div>
 <style lang="scss">
   .r {
@@ -23,7 +26,7 @@
   span {
     flex-shrink: 0;
     padding-top: 6px;
-    width: 80px;
+    width: 88px;
   }
 
   input, textarea {
@@ -35,6 +38,7 @@
     width: 0;
     flex: 1;
   }
+
   textarea {
     height: 100px;
   }

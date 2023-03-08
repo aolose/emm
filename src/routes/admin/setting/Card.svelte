@@ -5,12 +5,12 @@
   export let ld;
   export let msg;
   export let act;
-  export let isErr;
+  export let err;
   export let title
   export let save
 </script>
 <div class="a">
-  <Tip act={msg} err={isErr} text={msg} />
+  <Tip {act} {err} text={msg} />
   <div class="t">
     <h1>{title}</h1>
     {#if save}
@@ -57,5 +57,9 @@
     padding: 3px 10px;
     right: -10px;
     border-radius: 3px;
+    transition: .2s ease-in-out;
+    &:hover{
+      background: rgba(50, 90, 170, .8);
+    }
   }
 </style>
