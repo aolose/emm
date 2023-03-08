@@ -1,10 +1,9 @@
-<script lang="ts">
+<script>
   import { act } from "$lib/use";
   import { req } from "$lib/req";
   import { method } from "$lib/enum";
   import { status } from "$lib/store";
-  import { confirm } from "../../lib/store";
-
+  import { confirm } from "$lib/store";
   function logout() {
     confirm('Log out?').then(a=>{
       if(a) req("logout", undefined, { method: method.GET }).then(() => {

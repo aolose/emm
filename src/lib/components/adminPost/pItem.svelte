@@ -33,7 +33,7 @@
 </div>
 
 <style lang="scss">
-  @import "../../../lib/break";
+  @import "../../break";
   .v {
     position: absolute;
     right: 10%;

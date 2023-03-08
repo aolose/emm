@@ -193,7 +193,7 @@
 {/if}
 
 <style lang="scss">
-  @import "../../../lib/break";
+  @import "../../break";
   .a {
     height: 100%;
     display: flex;

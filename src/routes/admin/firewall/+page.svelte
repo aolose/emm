@@ -123,7 +123,7 @@
       </div>
       <div class="e">
         <div class="b">
-          {#each ls as d (d[0] + d[1])}
+          {#each ls as d (d[0] + d[1]+tab)}
             <Itm ck={ck} data={d} sel={sel} isDb={tab} />
           {/each}
         </div>

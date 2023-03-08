@@ -1,10 +1,10 @@
 <script>
-  import Search from "./search.svelte";
-  import AddPost from "./add.svelte";
+  import Search from "$lib/components/adminPost/search.svelte";
+  import AddPost from "$lib/components/adminPost/add.svelte";
   import Pg from "$lib/components/pg.svelte";
-  import Editor from "./editor.svelte";
-  import PItem from "./pItem.svelte";
-  import Setting from "./setting.svelte";
+  import Editor from "$lib/components/adminPost/editor.svelte";
+  import PItem from "$lib/components/adminPost/pItem.svelte";
+  import Setting from "$lib/components/adminPost/setting.svelte";
   import FileWin from "$lib/components/fileManager.svelte";
   import Viewer from "$lib/components/viewer.svelte";
   import { editPost, originPost, posts, small } from "$lib/store";
@@ -110,7 +110,7 @@
 </div>
 
 <style lang="scss">
-  @import "../../../lib/break";
+  @import "../../lib/break";
 
   .x {
     width: 100%;

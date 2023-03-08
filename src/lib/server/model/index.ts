@@ -211,6 +211,7 @@ export class System {
   pageScript = TEXT;
   pageCss = TEXT;
   robots = TEXT;
+  maxFireLogs=INT
 }
 
 export class User {

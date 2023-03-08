@@ -1,6 +1,6 @@
 import type { RequestEvent } from "@sveltejs/kit";
 import ipRangeCheck from "ip-range-check";
-import { db } from "$lib/server/index";
+import {db, sys} from "$lib/server/index";
 import { FwLog, FWRule } from "$lib/server/model";
 import { filter, hds2Str, str2Hds, trim } from "$lib/utils";
 import type { Obj, Timer } from "$lib/types";
@@ -81,6 +81,10 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
     db.save(model(FwLog, {
       path, ip, mark: fr.mark, headers: ua, method, status
     }));
+    const del =db.count(FwLog)-(sys.maxFireLogs||1000)
+    if(del>100){
+      db.db.prepare(`DELETE FROM FwLog WHERE id in (SELECT id FROM FwLog LIMIT ${del})`).run()
+    }
   }
 };
 

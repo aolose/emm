@@ -25,7 +25,7 @@
 </div>
 
 <style lang="scss">
-  @import "../../../lib/break";
+  @import "../../break";
 
   .a {
     display: flex;

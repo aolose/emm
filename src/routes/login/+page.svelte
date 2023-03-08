@@ -5,7 +5,6 @@
   import Tm from "$lib/components/typeMsg.svelte";
   import { onDestroy, onMount } from "svelte";
   import { req } from "$lib/req";
-  import { goto } from "$app/navigation";
   import { enc, randNum } from "$lib/utils";
   import { msg, status } from "$lib/store";
 
@@ -20,9 +19,6 @@
       wt = wt - 1;
     }
   }, 1e3);
-  onMount(() => status.subscribe(a => {
-    if (a) goto("/admin", { replaceState: true });
-  }));
   onDestroy(() => clearInterval(t));
 
   async function login() {

@@ -1,17 +1,10 @@
 <script>
   import Menu from "./sideMenu.svelte";
   import Confirm from "$lib/components/confirm.svelte";
-  import { onMount } from "svelte";
-  import { status, seo } from "$lib/store";
-  import { goto } from "$app/navigation";
+  import { seo } from "$lib/store";
   import Head from "$lib/components/Head.svelte";
 
   export let data;
-  onMount(() => {
-    status.subscribe(s => {
-      if (!s) goto("/login", { replaceState: true });
-    });
-  });
 </script>
 <Head title={`${$seo.title} - Admin`} />
 <div class="a">

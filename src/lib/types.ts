@@ -38,9 +38,10 @@ export type reqOption = {
   method?: method;
   headers?: Headers;
   encrypt?: boolean;
-  before?(data: unknown, url?: string): [unknown, string | undefined, Headers?];
-  done?(result: unknown): void;
-  fail?(result: unknown, req: Response): void;
+  ctx?:unknown;
+  before?(data: unknown, url?: string,ctx?:unknown): [unknown, string | undefined, Headers?];
+  done?(result: unknown,ctx?:unknown): void;
+  fail?(result: unknown, req: Response,ctx?:unknown): void;
 };
 
 

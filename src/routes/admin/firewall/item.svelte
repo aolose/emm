@@ -1,6 +1,6 @@
 <script>
   import { str2Hds, time } from "$lib/utils";
-  import { fade, slide } from "svelte/transition";
+  import { slide } from "svelte/transition";
 
   export let data = [];
   const [tm, ip, ph, hds, st, ct, mk, mt] = data;
@@ -20,7 +20,7 @@
 
 </script>
 
-<div class="r" class:act={sel.has(tm+ip)} transition:fade on:click={ck(tm+ip)}>
+<div class="r" class:act={sel.has(tm+ip)} on:click={ck(tm+ip)}>
   <div class="r0"><span>{time(tm)}</span></div>
   <div class="r1"><span>{ip}</span></div>
   <div class="r6"><span>{(mt || '').toUpperCase()}</span></div>

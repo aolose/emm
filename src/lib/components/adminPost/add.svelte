@@ -30,7 +30,7 @@
 </div>
 
 <style lang="scss">
-  @import "../../../lib/break";
+  @import "../../break";
 
   .a {
     width: 300px;
