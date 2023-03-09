@@ -11,9 +11,10 @@ const lock = 'pnpm-lock.yaml'
 pkg.scripts = {
 	start: 'node --trace-uncaught -r dotenv/config app dotenv_config_path=' + env
 };
-if (fs.existsSync('dist')) fs.rmSync('dist', { recursive: true });
-fs.mkdirSync('dist');
-fes.moveSync('app', 'dist/app');
-fs.copyFileSync(env, 'dist/' + env);
-fs.copyFileSync(lock, 'dist/' + lock);
-fs.writeFileSync('dist/package.json', JSON.stringify(pkg));
+if (fs.existsSync('./dist')) fs.rmSync('./dist', { recursive: true });
+fs.mkdirSync('./dist');
+fes.moveSync('./app', './dist/app');
+fs.copyFileSync(env, './dist/' + env);
+fs.copyFileSync(lock, './dist/' + lock);
+fs.writeFileSync('./dist/package.json', JSON.stringify(pkg),{flag:'w'});
+console.log('publish done!')
