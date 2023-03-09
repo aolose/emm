@@ -1,11 +1,11 @@
 <script>
-	import Item from './item.svelte';
-	import Ctx from './ctx.svelte';
-	import Canvas from '../ctx.svelte';
-	import { tick } from 'svelte';
-	import Nav from '../pg.svelte';
-	import Ph from './hd.svelte';
-	import UpDownScroll from '../upDownScroll.svelte';
+	import Item from '$lib/components/item.svelte';
+	import Ctx from '$lib/components/post/ctx.svelte';
+	import Canvas from '$lib/components/ctx.svelte';
+	import { tick } from '$lib/components/svelte';
+	import Nav from '$lib/components/pg.svelte';
+	import Ph from '$lib/components/hd.svelte';
+	import UpDownScroll from '$lib/components/upDownScroll.svelte';
 	import { expand } from '$lib/store';
 	import { fade } from 'svelte/transition';
 
