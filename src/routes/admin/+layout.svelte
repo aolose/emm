@@ -1,6 +1,5 @@
 <script>
   import Menu from "./sideMenu.svelte";
-  import Confirm from "$lib/components/confirm.svelte";
   import { seo } from "$lib/store";
   import Head from "$lib/components/Head.svelte";
 
@@ -14,7 +13,6 @@
   <div class="c">
     <slot />
   </div>
-  <Confirm />
 </div>
 
 <style lang="scss">

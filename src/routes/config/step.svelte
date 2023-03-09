@@ -1,39 +1,56 @@
 <script>
-    export let value = 0
-    export let info = []
-    const l = [0, [0, 30, 60, 90], [10, 40, 70, 100]]
-    const fx = a => (Math.floor(a + 0.5))
-    $:cc = n => `polygon(0 0,100% 0,100% ${l[n][fx(value)]}%, 0 ${l[n][fx(value)]}%)`
+  import { small } from "$lib/store";
+
+  export let value = 0;
+  export let info = [];
+  const l = [0, [0, 30, 60, 90], [10, 40, 70, 100]];
+  const fx = a => (Math.floor(a + 0.5));
+  let cc;
+  $:cc = n => $small ? "none" : `polygon(0 0,100% 0,100% ${l[n][fx(value)]}%, 0 ${l[n][fx(value)]}%)`;
 </script>
 <div class="k">
-    {#each [0, 1, 2] as n}
-        <div class="a"
-             class:f={n===1}
-             class:e={n===2}
-             style:clip-path={n&&cc(n)}
-        >
-            {#each info as i,index}
-                <div class="s"
-                     class:d={fx(value)>index}
-                     class:c={fx(value)===index}>
-                    {#if index !== 3}<i></i>{/if}
-                    <span>{index + 1}.</span>
-                    <p>{i}</p>
-                </div>
-            {/each}
+  {#each [0, 1, 2] as n}
+    <div class="a"
+         class:f={n===1}
+         class:e={n===2}
+         style:clip-path={n&&cc(n)}
+    >
+      {#each info as i,index}
+        <div class="s"
+             class:d={fx(value)>index}
+             class:c={fx(value)===index}>
+          {#if index !== 3}<i></i>{/if}
+          <span>{index + 1}.</span>
+          <p>{i}</p>
         </div>
-    {/each}
+      {/each}
+    </div>
+  {/each}
 </div>
 <style lang="scss">
+  @import "../../lib/break";
+
   .a {
     padding-left: 50px;
     width: 400px;
     z-index: 0;
     transition: clip-path 1s linear;
     color: var(--darkgrey);
+    @include s() {
+      padding: 5px 10px;
+    }
   }
 
   .k {
+    @include s() {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      bottom: -80px;
+      .a {
+        margin: 0 auto;
+      }
+    }
   }
 
   .e, .f {
@@ -44,6 +61,9 @@
     position: absolute;
     color: #fff;
     clip-path: polygon(0 0, 100% 0, 100% 0%, 0 0%);
+    @include s() {
+      display: none !important;
+    }
   }
 
   .e {
@@ -107,6 +127,31 @@
     padding: 20px 0;
     margin-bottom: 100px;
     display: flex;
+    @include s() {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      * {
+        background: none !important;
+        transform: none;
+        color: var(--blue) !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: auto;
+        position: relative;
+        font-size: 20px !important;
+      }
+      display: none;
+      justify-content: center;
+      i {
+        display: none;
+      }
+      &.c {
+        display: flex;
+      }
+    }
 
     &:last-child {
       margin: 0;

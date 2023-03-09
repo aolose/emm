@@ -2,7 +2,7 @@
   import G from './geo.svelte'
   import B from './blog.svelte'
   import A from './acc.svelte'
-  import C from './clear.svelte'
+  import C from './backup.svelte'
   import R from './res.svelte'
   import { onMount } from "svelte";
   import { load } from "./sys";

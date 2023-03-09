@@ -3,9 +3,11 @@ import { contentType, encryptIv, encTypeIndex } from "$lib/enum";
 import { fwFilter, reqRLog } from "$lib/server/firewall";
 import { checkStatue, sysStatue } from "$lib/server/utils";
 import { checkRedirect } from "$lib/server/utils";
+import { server } from "$lib/server";
 
 checkStatue();
 export const handle: Handle = async ({ event, resolve }) => {
+  if (server.maintain) return new Response("In maintenance", { status: 503 });
   const pn = event.url.pathname;
   let res: Response | undefined;
   const fr = fwFilter(event);
@@ -30,7 +32,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError = (({ error, event }) => {
-  console.error(error)
+  console.error(error);
   const { data, message, status } = error as {
     status: number,
     data: string, message: string

@@ -1,47 +1,49 @@
 <script>
-    import {onMount} from "svelte";
-    import {confirmStore} from "$lib/store";
-    import {fade} from "svelte/transition";
+  import { onMount } from "svelte";
+  import { confirmStore } from "$lib/store";
+  import { fade } from "svelte/transition";
 
-    let cfg = {}
-    onMount(() => {
-        return confirmStore.subscribe(c => cfg = c)
-    })
+  let cfg = {};
+  onMount(() => {
+    return confirmStore.subscribe(c => cfg = c);
+  });
 
-    function ok() {
-        cancel()
-        cfg.resolve?.(1)
-    }
+  function ok() {
+    cancel();
+    cfg.resolve?.(1);
+  }
 
-    function cancel(e) {
-        confirmStore.set({...cfg, show: false})
-        if (e) cfg.reject?.()
+  function cancel(e) {
+    confirmStore.set({ ...cfg, show: false });
+    if (e) cfg.reject?.();
+  }
+
+  function esc(e) {
+    if (cfg.show && e.code === "Escape") {
+      cancel();
     }
-    function esc(e){
-        if(cfg.show&&e.code==='Escape'){
-            cancel()
-        }
-    }
-    let bo,bc
-    $:{
-        if(cfg.show)(bo||bc)?.focus()
-    }
+  }
+
+  let bo, bc;
+  $:{
+    if (cfg.show) (bo || bc)?.focus();
+  }
 </script>
 <svelte:window on:keydown={esc} />
 {#if cfg.show}
-    <div class="a" class:act={cfg.show} transition:fade>
-        <div class="b" on:click|stopPropagation={()=>0}>
-            <p>{cfg.text}</p>
-            <div class="n">
-                {#if cfg.ok}
-                    <button bind:this={bo} on:click={ok}>{cfg.ok}</button>
-                {/if}
-                {#if cfg.cancel}
-                    <button bind:this={bc} on:click={cancel}>{cfg.cancel}</button>
-                {/if}
-            </div>
-        </div>
+  <div class="a" class:act={cfg.show} transition:fade>
+    <div class="b" on:click|stopPropagation={()=>0}>
+      <p>{cfg.text}</p>
+      <div class="n">
+        {#if cfg.ok}
+          <button bind:this={bo} on:click={ok}>{cfg.ok}</button>
+        {/if}
+        {#if cfg.cancel}
+          <button bind:this={bc} on:click={cancel}>{cfg.cancel}</button>
+        {/if}
+      </div>
     </div>
+  </div>
 {/if}
 
 <style lang="scss">
@@ -52,7 +54,7 @@
     bottom: 0;
     right: 0;
     z-index: 99;
-      backdrop-filter: blur(1px);
+    backdrop-filter: blur(1px);
     background: rgba(23, 25, 30, .36);
     display: flex;
     align-items: center;
@@ -73,6 +75,7 @@
   }
 
   p {
+    padding: 0 10px;
     line-height: 2;
     font-size: 15px;
     margin: 0 0 20px;

@@ -1,8 +1,6 @@
 <script>
   import Nav from "$lib/components/nav.svelte";
   import { expand } from "$lib/store";
-  import Confirm from "$lib/components/confirm.svelte";
-
   let b = "";
 </script>
 <div class="b" style={b}>
@@ -14,7 +12,6 @@
     </slot>
   </div>
 </div>
-<Confirm />
 <style lang="scss">
   @import "../../lib/break";
 

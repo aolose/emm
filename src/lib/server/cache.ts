@@ -134,6 +134,7 @@ export const codeTokens = (() => {
       }
     },
     load() {
+      codeTokens.clear()
       const n = Date.now();
       const ids: number[] = [];
       db.all(model(TokenInfo)).forEach(a => {

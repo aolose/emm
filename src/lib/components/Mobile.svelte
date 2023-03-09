@@ -6,4 +6,4 @@
     small.set(mobile);
   }
 </script>
-<Q query="only screen and (max-width: 600px)" bind:ok={mobile} />
+<Q query="only screen and (max-width: 600px)" bind:matches={mobile} />

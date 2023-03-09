@@ -158,5 +158,5 @@ export const msg = writable("");
 export const expand = writable(0);
 export const small = writable(0);
 
-
+export const statueSys=writable(0)
 export const seo = writable<headInfo>({key:'',title:'',desc:''});
