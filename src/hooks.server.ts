@@ -7,7 +7,7 @@ import { server } from '$lib/server';
 
 checkStatue();
 export const handle: Handle = async ({ event, resolve }) => {
-	if (server.maintain) return new Response('In maintenance', { status: 503 });
+	if (server.maintain&&sysStatue>1) return new Response('In maintenance', { status: 503 });
 	const pn = event.url.pathname;
 	let res: Response | undefined;
 	const fr = fwFilter(event);
