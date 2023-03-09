@@ -423,7 +423,7 @@ export const checkStatue = () => {
 
 export const getClientAddr = (event: RequestEvent) => {
 	const hdr = event.request.headers;
-	let addr = (hdr.get('x-forwarded-for') || hdr.get('x-real-ip') || '').split(/ +/)[0];
+	let addr = (hdr.get('x-real-ip') || hdr.get('x-forwarded-for') || '').split(/ +/)[0];
 	if (!addr) {
 		try {
 			addr = event.getClientAddress();
