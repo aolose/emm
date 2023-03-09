@@ -2,7 +2,7 @@
 	import Ph from '$lib/components/post/hd.svelte';
 	import Canvas from '$lib/components/ctx.svelte';
 	import { bubbles, getColor } from '$lib/utils';
-	import UpDownScroll from '$lib/components/UpDownScroll.svelte';
+	import UpDownScroll from '$lib/components/upDownScroll.svelte';
 	import { expand, seo } from '$lib/store';
 	import { fade } from 'svelte/transition';
 	import Head from '$lib/components/Head.svelte';
