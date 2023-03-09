@@ -32,7 +32,7 @@
 			--ex: 80%;
 			--artP: 60px;
 			--artC: 20px 20px 60px;
-			--fs: 28px;
+			--fs: 48px;
 			@include s() {
 				--fs: 20px;
 				--artC: 0 0 50px;

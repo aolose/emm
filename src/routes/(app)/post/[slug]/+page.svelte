@@ -48,7 +48,6 @@
 					<div class="h">
 						<h1>{d.title}</h1>
 						{#if d.desc}<p>{d.desc}</p>{/if}
-						<p>xxxxxx</p>
 						<span>{time(d.createAt)}</span>
 					</div>
 					<div class="art">
@@ -225,7 +224,7 @@
 			display: block;
 			text-align: right;
 			font-size: 12px;
-			color: #95a1bb;
+			color: #ddd;
 			font-style: italic;
 		}
 	}

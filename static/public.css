@@ -64,7 +64,7 @@ body {
 	color: rgba(212, 219, 238, 0.8);
 }
 
-input,
+input:not([type$=box]),
 textarea {
 	background: none;
 	display: block;
@@ -75,7 +75,7 @@ textarea {
 	line-height: 32px;
 	transition: 0.2s ease-in-out;
 }
-input:focus,
+input:not([type$=box]):focus,
 textarea:focus {
 	border-color: rgba(100, 129, 158, 0.6);
 }
