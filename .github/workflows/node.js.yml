@@ -15,6 +15,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Check Dir
+        run: ls -l /home/runner/work/emm/emm/src/lib/components
+
       - uses: pnpm/action-setup@v2
         name: Install pnpm
         id: pnpm-install
