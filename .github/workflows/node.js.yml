@@ -1,0 +1,30 @@
+name: Node.js CI
+on:
+  push:
+    branches: [master]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm install
+      - run: npm run build
+      - name: Depoly
+        uses: kostya-ten/ssh-server-deploy@v4
+        with:
+          host: ${{ secrets.VPS_ADDR }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USR }}
+          private_key: ${{ secrets.VPS_KEY }}
+          scp_source: "dist/*"
+          scp_target: "/home/aolose/errApp/"
+          after_script: |
+            cd "/home/aolose/errApp/"  & npm install & echo -e "${{ secrets.VPS_PWD }}\n" | sudo -S service errApp restart
