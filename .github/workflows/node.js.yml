@@ -44,4 +44,4 @@ jobs:
           scp_source: "dist/*"
           scp_target: "/home/aolose/errApp/"
           after_script: |
-            cd "/home/aolose/errApp/"  & pnpm i & echo -e "${{ secrets.VPS_PWD }}\n" | sudo -S service errApp restart
+            cd "/home/aolose/errApp/"  && pnpm i && echo -e "${{ secrets.VPS_PWD }}\n" | sudo -S service errApp restart
