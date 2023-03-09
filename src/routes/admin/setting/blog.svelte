@@ -6,6 +6,7 @@
 	import { getErr, trim } from '$lib/utils';
 	import { req } from '$lib/req';
 	import { seo } from '$lib/store';
+
 	let nm;
 	let bio;
 	let msg;
@@ -13,10 +14,12 @@
 	let err = 0;
 	let act;
 	let key;
+	let robot;
 	let mx = 1000;
 	let desc;
 	onMount(() =>
 		sys.subscribe((a) => {
+			robot = a.robots;
 			nm = a.blogName;
 			bio = a.blogBio;
 			key = a.seoKey;
@@ -28,6 +31,7 @@
 		ld = 1;
 		const o = {
 			seoKey: key,
+			robots: robot,
 			maxFireLogs: mx,
 			seoDesc: desc,
 			blogName: nm,
@@ -65,5 +69,6 @@
 	<Ipt label="Bio" bind:value={bio} placeholder="say something" />
 	<Ipt label="Keywords" bind:value={bio} placeholder="photos,foods,.ect" />
 	<Ipt box label="Description" bind:value={bio} placeholder="description for seo" />
+	<Ipt box label="Robots.text" bind:value={robot} placeholder="robots" />
 	<Ipt label="Max number of logs" bind:value={mx} />
 </Card>
