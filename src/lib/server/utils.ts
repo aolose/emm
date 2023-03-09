@@ -506,7 +506,7 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 	return '';
 }
 
-export const debugMode = 1;
+export const debugMode = 0;
 export const sqlFields = (n: number) => ',?'.repeat(n).slice(1);
 
 export const mv = (from: string, to: string) => {
@@ -548,7 +548,7 @@ export const blogExp = () => {
 	const name = dbpath.split(/[\\/]/).pop();
 	if (!name) return;
 	const dir = dbpath.slice(0, dbpath.length - name.length);
-	const f = fs.readFileSync(dbpath);
+	const f = db.db.serialize()
 	if (dir) zip.folder(dbpath)?.file(name, f);
 	else zip.file(dbpath, f);
 	z(sys.uploadDir);

@@ -10,3 +10,5 @@ node_modules
 *.db
 pnpm-lock.yaml
 /.dbCfg
+/.cssCache.json
+/dist/
