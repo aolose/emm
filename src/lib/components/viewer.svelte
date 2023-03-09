@@ -168,6 +168,7 @@
         opacity: 0.5;
         color: #1c93ff;
         font-size: 32px;
+        right: -8px;
       }
     }
   }
@@ -182,6 +183,9 @@
 
     .t {
       padding: 10px 60px;
+      @include s(){
+        padding: 10px 30px;
+      }
     }
 
     .c {
@@ -189,6 +193,9 @@
       padding: 1px 60px 20px;
       flex: 1;
       overflow: auto;
+      @include s(){
+        padding: 1px 30px 20px;
+      }
     }
   }
 
