@@ -5,7 +5,7 @@
 	export let done;
 	export let a = '';
 	$: {
-		a = trim(a);
+		a = trim(a,true);
 	}
 
 	function add() {
@@ -13,7 +13,7 @@
 			const _ = randNum();
 			const o = {
 				_,
-				title_d: a,
+				title_d: trim(a),
 				content_d: ''
 			};
 			originPost.set({ _ });

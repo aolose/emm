@@ -32,7 +32,7 @@ jobs:
         run: pnpm run publish
 
       - name: Ls
-        run: ls -l dist
+        run: ls -al dist
 
       - name: Depoly
         uses: kostya-ten/ssh-server-deploy@v4
