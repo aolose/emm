@@ -72,6 +72,10 @@
     flex-direction: column;
 
     :global {
+      p {
+        white-space: pre-wrap;
+      }
+
       blockquote {
         background: rgba(100, 120, 150, .1);
         border-left: 2px solid rgba(100, 120, 150, .5);
@@ -89,6 +93,7 @@
       }
 
       blockquote p {
+        color: #6f93be;
         display: inline;
       }
 
@@ -99,9 +104,6 @@
         color: #b4ab82;
         background: rgba(10, 20, 40, .4);
       }
-      p {
-				white-space: pre-wrap;
-			}
       pre {
         & > code {
           display: block;
@@ -139,7 +141,6 @@
       }
 
       p {
-        color: #95a3b7;
         line-height: 2;
       }
 
