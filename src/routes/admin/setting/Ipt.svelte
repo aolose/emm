@@ -6,7 +6,7 @@
 	export let password;
 </script>
 
-<div class="r">
+<form class="r" autocomplete="off">
 	<span>{label}</span>
 	{#if box}
 		<textarea bind:value {placeholder} />
@@ -15,7 +15,7 @@
 	{:else}
 		<input bind:value {placeholder} />
 	{/if}
-</div>
+</form>
 
 <style lang="scss">
 	.r {

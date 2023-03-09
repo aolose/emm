@@ -26,7 +26,7 @@
 
 	let bo, bc;
 	$: {
-		if(typeof cfg.text==='object')cfg.text=JSON.stringify(cfg.text)
+		if (typeof cfg.text === 'object') cfg.text = JSON.stringify(cfg.text);
 		if (cfg.show) (bo || bc)?.focus();
 	}
 </script>

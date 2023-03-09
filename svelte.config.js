@@ -35,7 +35,7 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
-		adapter: adapter({out:'app'})
+		adapter: adapter({ out: 'app' })
 	}
 };
 

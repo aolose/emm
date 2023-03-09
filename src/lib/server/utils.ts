@@ -548,7 +548,7 @@ export const blogExp = () => {
 	const name = dbpath.split(/[\\/]/).pop();
 	if (!name) return;
 	const dir = dbpath.slice(0, dbpath.length - name.length);
-	const f = db.db.serialize()
+	const f = db.db.serialize();
 	if (dir) zip.folder(dbpath)?.file(name, f);
 	else zip.file(dbpath, f);
 	z(sys.uploadDir);

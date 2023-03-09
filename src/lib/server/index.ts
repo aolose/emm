@@ -1,5 +1,5 @@
 import { DB } from './db/sqlite3';
-import { checkStatue, DBProxy, model } from "./utils";
+import { checkStatue, DBProxy, model } from './utils';
 import { Require, System, Tag } from './model';
 import { publishedPost, tags } from '$lib/server/store';
 import { loadGeoDb } from '$lib/server/ipLite';
@@ -44,7 +44,7 @@ export const server = {
 		});
 		codeTokens.load();
 		reqPostCache.load();
-		checkStatue()
+		checkStatue();
 	},
 	stop() {
 		this.maintain = true;

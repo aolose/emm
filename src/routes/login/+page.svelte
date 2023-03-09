@@ -106,7 +106,7 @@
 					<input on:input={go} bind:value={usr} bind:this={iu} on:keydown={nx} type="text" />
 					<label>Username</label>
 				</div>
-				<div class="r" class:a={pwd}>
+				<form class="r" class:a={pwd} autocomplete="off">
 					<input
 						bind:value={pwd}
 						bind:this={ip}
@@ -116,7 +116,7 @@
 						on:input={go}
 					/>
 					<label>Password</label>
-				</div>
+				</form>
 				<button class:dis on:click={login}>Login</button>
 			</div>
 			<a href="/">{'<  '}Home</a>
@@ -249,6 +249,7 @@
 	}
 
 	.r {
+		display: block;
 		width: 80%;
 		margin: 20px auto 30px;
 
