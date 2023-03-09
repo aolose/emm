@@ -1,10 +1,10 @@
 @mixin s() {
-  @media only screen and (max-width: 600px) {
-    @content;
-  }
+	@media only screen and (max-width: 600px) {
+		@content;
+	}
 }
 @mixin w() {
-  @media only screen and (min-width: 1500px) {
-    @content;
-  }
+	@media only screen and (min-width: 1500px) {
+		@content;
+	}
 }

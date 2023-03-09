@@ -1,18 +1,18 @@
 <script>
 	export let type = 'any';
 	export let size = 50;
-	const colors=[
-			'#264653',
-			'#2a9d8f',
-			'#f4a261',
-			'#e76f51',
-			'#0077b6',
-			'#4a4e69',
-			'#386641',
-			'#6a994e',
-			'#5e548e',
-	]
-	const color = colors[type.split('').reduce((a,b)=>a+b.charCodeAt(0),0)%colors.length]
+	const colors = [
+		'#264653',
+		'#2a9d8f',
+		'#f4a261',
+		'#e76f51',
+		'#0077b6',
+		'#4a4e69',
+		'#386641',
+		'#6a994e',
+		'#5e548e'
+	];
+	const color = colors[type.split('').reduce((a, b) => a + b.charCodeAt(0), 0) % colors.length];
 </script>
 
 <div class="a" style:color style:width={`${size}px`} style:height={`${size * 1.2}px`}>

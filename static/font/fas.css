@@ -1,58 +1,57 @@
 @font-face {
-    font-family: 'FontAwesome';
-    src: url('./fas.eot');
-    src: url('./fas.woff2') format('woff2'),
-    url('./fas.woff') format('woff'),
-    url('./fas.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal
+	font-family: 'FontAwesome';
+	src: url('./fas.eot');
+	src: url('./fas.woff2') format('woff2'), url('./fas.woff') format('woff'),
+		url('./fas.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
 }
 
 .fa {
-    display: inline-block;
-    font: normal normal normal 14px/1 FontAwesome;
-    font-size: inherit;
-    text-rendering: auto;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale
+	display: inline-block;
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 .fa-link:before {
-    content: "\f0c1"
+	content: '\f0c1';
 }
 
 .fa-bold:before {
-    content: "\f032"
+	content: '\f032';
 }
 
 .fa-italic:before {
-    content: "\f033"
+	content: '\f033';
 }
 
 .fa-strikethrough:before {
-    content: "\f0cc"
+	content: '\f0cc';
 }
 
 .fa-code:before {
-    content: "\f121"
+	content: '\f121';
 }
 
 .fa-quote-left:before {
-    content: "\f10d"
+	content: '\f10d';
 }
 
 .fa-list-ul:before {
-    content: "\f0ca"
+	content: '\f0ca';
 }
 
 .fa-list-ol:before {
-    content: "\f0cb"
+	content: '\f0cb';
 }
 
 .fa-linkedin:before {
-    content: "\f0e1"
+	content: '\f0e1';
 }
 
 .fa-table:before {
-    content: "\f0ce"
+	content: '\f0ce';
 }

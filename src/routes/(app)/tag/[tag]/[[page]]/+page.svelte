@@ -1,20 +1,22 @@
 <script>
-    import {page} from '$app/stores';
-    import Posts from "$lib/components/post/list.svelte"
-    import {onMount} from "svelte";
-    import Head from "$lib/components/Head.svelte";
-    import { seo } from "$lib/store";
+	import { page } from '$app/stores';
+	import Posts from '$lib/components/post/list.svelte';
+	import { onMount } from 'svelte';
+	import Head from '$lib/components/Head.svelte';
+	import { seo } from '$lib/store';
 
-    export let data
-    const {d} = data
-    const {params: {tag}} = $page
+	export let data;
+	const { d } = data;
+	const {
+		params: { tag }
+	} = $page;
 
-    onMount(() => {
-        sessionStorage.hasBack = 1
-    })
-
+	onMount(() => {
+		sessionStorage.hasBack = 1;
+	});
 </script>
-<Head title={`${$seo.title} - ${tag}`}/>
-<Posts d={d} name={`tag/${tag}`} >
-    <a href="/tags">{tag}</a>
+
+<Head title={`${$seo.title} - ${tag}`} />
+<Posts {d} name={`tag/${tag}`}>
+	<a href="/tags">{tag}</a>
 </Posts>

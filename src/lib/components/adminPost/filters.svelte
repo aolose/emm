@@ -1,6 +1,6 @@
 <script>
 	import { fade } from 'svelte/transition';
-	import { onMount } from "svelte";
+	import { onMount } from 'svelte';
 
 	const ff = ['title', 'content'];
 	let act = 0;
@@ -21,7 +21,7 @@
 
 	const ft = {};
 	onMount(() => {
-		return ()=>rml();
+		return () => rml();
 	});
 	export let ctx = {};
 
@@ -43,12 +43,12 @@
 			window.addEventListener('click', hide, true);
 		}
 	}
-  let size
+	let size;
 	$: size = Object.values(ft).reduce((a, b) => a + b, 0);
 	$: {
 		ctx.value = ff.filter((f) => ft[f]);
 		ctx.show = show;
-		ctx={...ctx}
+		ctx = { ...ctx };
 	}
 </script>
 
