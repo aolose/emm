@@ -119,6 +119,7 @@
 		box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
 		@include s() {
 			margin: 0;
+			min-height: 67vh;
 		}
 	}
 
@@ -298,6 +299,10 @@
 		background: $bg2;
 		height: 100%;
 		overflow: auto;
+		@include s(){
+			height: auto;
+			min-height: 100%;
+		}
 	}
 
 	.fc {
