@@ -31,6 +31,9 @@ jobs:
       - name: Build publish
         run: pnpm run publish
 
+      - name: Ls
+        run: ls -l dist
+
       - name: Depoly
         uses: kostya-ten/ssh-server-deploy@v4
         with:
@@ -41,4 +44,4 @@ jobs:
           scp_source: "dist/*"
           scp_target: "/home/aolose/errApp/"
           after_script: |
-            cd "/home/aolose/errApp/"  & npm install & echo -e "${{ secrets.VPS_PWD }}\n" | sudo -S service errApp restart
+            cd "/home/aolose/errApp/"  & pnpm i & echo -e "${{ secrets.VPS_PWD }}\n" | sudo -S service errApp restart
