@@ -824,7 +824,7 @@ const apis: APIRoutes = {
   }
 };
 const sysKs: (keyof System)[] = [
-  "blogDomain", "blogName", "blogBio", "robots", "uploadDir", "maxFireLogs",
+  "blogName", "blogBio", "robots", "uploadDir", "maxFireLogs",
   "thumbDir", "ipLiteToken", "ipLiteDir", "seoKey", "seoDesc"
 ];
 export const apiPath = Object.keys(apis);

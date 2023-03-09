@@ -6,8 +6,6 @@
     import {getErr, trim} from "$lib/utils";
     import {req} from "$lib/req";
     import {seo} from "$lib/store";
-
-    let url;
     let nm;
     let bio;
     let msg;
@@ -20,7 +18,6 @@
     onMount(() => sys.subscribe(a => {
         nm = a.blogName;
         bio = a.blogBio;
-        url = a.blogDomain;
         key = a.seoKey;
         desc = a.seoDesc;
         mx = a.maxFireLogs || 1000;
@@ -31,7 +28,7 @@
             seoKey: key,
             maxFireLogs: mx,
             seoDesc: desc,
-            blogName: nm, blogBio: bio, blogDomain: url
+            blogName: nm, blogBio: bio
         };
         req("sys", o).then(() => {
             act = 1;
@@ -46,7 +43,6 @@
         }).finally(() => ld = 0);
     };
     $:{
-        url = trim(url);
         nm = trim(nm);
         bio = trim(bio);
         desc = trim(desc, true);
@@ -58,9 +54,8 @@
     }
 </script>
 <Card {act} {msg} {err} title="Blog" {save} {ld}>
-    <Ipt label="Domain" bind:value={url} placeholder="www.blog.example"/>
     <Ipt label="Name" bind:value={nm} placeholder="my blog"/>
-    <Ipt label="Bio" bind:value={bio} placeholder="www.blog.example"/>
+    <Ipt label="Bio" bind:value={bio} placeholder="say something"/>
     <Ipt label="Keywords" bind:value={bio} placeholder="photos,foods,.ect"/>
     <Ipt box label="Description" bind:value={bio} placeholder="description for seo"/>
     <Ipt label="Max number of logs" bind:value={mx}/>

@@ -22,16 +22,16 @@ export const GET: RequestHandler = async ({ request, url }) => {
 const render = (base: string, posts: Obj<Post>[]) => `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<atom:link href="${sys.blogDomain || base}/rss" rel="self" type="application/rss+xml" />
+<atom:link href="${base}/rss" rel="self" type="application/rss+xml" />
 <title>${sys.blogName || ""}</title>
-<link>${sys.blogDomain || base}</link>
+<link>${base}</link>
 <description>${sys.blogBio || ""}</description>
 ${posts
   .map(
     (post) => `<item>
-<guid>${sys.blogDomain || base}/post/${post.slug}</guid>
+<guid>${base}/post/${post.slug}</guid>
 <title>${post.title}</title>
-<link>${sys.blogDomain || base}/post/${post.slug}</link>
+<link>${base}/post/${post.slug}</link>
 <description>${(post?.desc || post?.content || "").substring(0, 140)}</description>
 <pubDate>${time(post?.publish)}</pubDate>
 </item>`

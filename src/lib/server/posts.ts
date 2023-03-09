@@ -23,7 +23,7 @@ export const pubPostList = (page: number, size: number, tag: string | null, skip
   }
   return pageBuilder(page, size, Post,
     ["createAt desc"], [
-      "banner", "desc",
+      "banner", "desc","publish",
       "content", "createAt",
       "_tag", "title", "slug"
     ],

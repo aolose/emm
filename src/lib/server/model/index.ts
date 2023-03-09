@@ -196,7 +196,6 @@ export class System {
   uploadDir = TEXT;
   thumbDir = TEXT;
   blogName = TEXT;
-  blogDomain = TEXT;
   blogBio = TEXT;
   seoKey = TEXT;
   seoDesc = TEXT;
