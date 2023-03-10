@@ -5,7 +5,7 @@ import { TokenInfo } from '$lib/server/model';
 import type { Obj } from '$lib/types';
 import { model } from '$lib/server/utils';
 
-const h = 1e3 * 60;
+const h = 1e3 * 3600;
 const expires = new Map([
 	[permission.Admin, h * 24],
 	[permission.Post, h * 24 * 30]
@@ -29,8 +29,7 @@ export const genToken = (
 			expire: cfg.expire || now + (expires.get(type) || 0),
 			type,
 			_reqs: cfg._reqs
-		},
-		'value'
+		}
 	);
 	if (cfg.code) {
 		const cd = randStr(randNum(1e4).toString(36));
