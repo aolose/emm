@@ -103,7 +103,7 @@
 				{/each}
 			</div>
 			<Ld act={ld} />
-			<Pg {total} {page} />
+			<Pg {total} {page} {go}/>
 		</div>
 	</div>
 {/if}
