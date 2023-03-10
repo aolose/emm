@@ -10,9 +10,10 @@ export let db: DB;
 export const server = {
 	maintain: false,
 	start(path: string) {
-		if (db) return;
+		if (sys&&db) return;
 		try {
 			console.log('server start');
+			if(db)db?.db?.close()
 			db = new DB(path);
 			db.createTables();
 			sys = DBProxy(System);
@@ -45,6 +46,7 @@ export const server = {
 		codeTokens.load();
 		reqPostCache.load();
 		checkStatue();
+		// readRes();
 	},
 	stop() {
 		this.maintain = true;
