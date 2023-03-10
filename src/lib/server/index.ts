@@ -4,6 +4,8 @@ import { Require, System, Tag } from './model';
 import { publishedPost, tags } from '$lib/server/store';
 import { loadGeoDb } from '$lib/server/ipLite';
 import { codeTokens, reqPostCache, requireMap, tagPostCache } from '$lib/server/cache';
+import { readRes } from "$lib/server/back/readRes";
+import { loadRules } from "$lib/server/firewall";
 
 export let sys: System;
 export let db: DB;
@@ -19,6 +21,7 @@ export const server = {
 			sys = DBProxy(System);
 			this.sync();
 			loadGeoDb();
+			// readRes()
 			this.maintain = false;
 		} catch (e) {
 			this.stop();
@@ -45,6 +48,7 @@ export const server = {
 		});
 		codeTokens.load();
 		reqPostCache.load();
+		loadRules()
 		checkStatue();
 		// readRes();
 	},
