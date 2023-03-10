@@ -18,7 +18,7 @@
 	const tSet = {
 		name: 'setting',
 		action: () => {
-			setting.set(autoSave);
+			setting.set(1);
 		},
 		className: 'icon i-sys',
 		title: 'setting'
@@ -118,15 +118,20 @@
 	};
 	let saving = 0;
 	const id = (a) => a._ || a.id;
-	const autoSave = async (p, isPublish) => {
+	export const autoSave = async (p, isPublish) => {
 		if (saving) return;
 		const now = get(saveNow);
 		if (now) saving = 1;
 		saveNow.set(0);
 		const ori = get(originPost);
 		const o = diffObj(ori, p);
-		const ol = o && Object.keys(o).length;
-		if (!isPublish && (!o || (!(o.title_d + o.content_d) && ol === 2) || ol === 0))
+		const ol = o && new Set(Object.keys(o));
+		if (
+			!isPublish &&
+			(!o ||
+				(!(o.title_d + o.content_d) && ol.has('title_d') && ol.has('content_d')) ||
+				ol.size === 0)
+		)
 			return (saving = 0);
 		const _ = p._;
 		const v = { ...o, _ };
@@ -204,6 +209,7 @@
 
 <style lang="scss">
 	@import '../../break';
+
 	.a {
 		height: 100%;
 		display: flex;
@@ -226,6 +232,7 @@
 			border-bottom: 1px solid rgba(80, 100, 150, 0.3);
 			padding: 0;
 		}
+
 		input {
 			padding-right: 30px;
 			margin: 0;
@@ -271,6 +278,7 @@
 			line-height: 2;
 		}
 	}
+
 	:global {
 		.editor-toolbar .i-view {
 			display: none;
@@ -278,6 +286,7 @@
 				display: inline-block;
 			}
 		}
+
 		@include s() {
 			.EasyMDEContainer .CodeMirror {
 				background: rgba(50, 80, 90, 0.07);

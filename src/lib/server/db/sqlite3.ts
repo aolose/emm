@@ -162,7 +162,7 @@ export class DB {
 			changeSave = !o.onSave(this, now);
 		}
 		const table = o.constructor.name;
-		if (changeSave) setKey(a, 'save', now);
+		if (changeSave && !skipSave) setKey(a, 'save', now);
 		const pk = getPrimaryKey(table) as keyof typeof o & string;
 		const kv = val(o[pk]);
 		let sql: string;

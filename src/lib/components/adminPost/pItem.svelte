@@ -40,7 +40,7 @@
 		top: 20px;
 		display: flex;
 		line-height: 1;
-
+		z-index: 3;
 		span {
 			display: flex;
 			align-items: center;
