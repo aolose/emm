@@ -154,6 +154,7 @@
 
 	.b {
 		background: #20263c;
+		align-self: flex-start;
 
 		span {
 			padding: 5px 10px;

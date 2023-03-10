@@ -12,6 +12,7 @@
 
 	let setPms;
 	let post = {};
+	export let autoSave;
 	const getSlug = api('slug');
 	let slugInfo = '';
 	let t = -1;
@@ -53,13 +54,12 @@
 	};
 	const ok = () => {
 		saveNow.set(1);
-		const autoSave = get(setting);
 		autoSave({ ...get(editPost), ...post }).then((a) => {
-			if (a) setting.set(null);
+			if (a) setting.set(0);
 		});
 	};
 	const cancel = () => {
-		setting.set(null);
+		setting.set(0);
 	};
 
 	onMount(() => {

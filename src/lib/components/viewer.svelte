@@ -106,13 +106,14 @@
 			}
 			pre {
 				& > code {
+					border: rgba(0, 0, 0, 0.1) 1px solid;
 					display: block;
 					max-width: 100%;
 					overflow: auto;
-					line-height: 1.4;
+					line-height: 1.5;
 					font-size: 14px;
 					box-shadow: rgba(0, 0, 0, 0.4) 0 2px 8px -5px;
-
+					white-space: pre-wrap;
 					&:after {
 						content: '';
 						border: 3px solid rgba(188, 255, 148, 0.55);
@@ -142,12 +143,14 @@
 
 			p {
 				line-height: 2;
+				margin-bottom: 20px;
 			}
 
 			img {
-				max-width: 100%;
-				border-radius: 4px;
 				margin: 10px 0;
+				max-width: 100%;
+				border-radius: 6px;
+				border: 2px solid rgba(3, 169, 244, 0.08);
 			}
 		}
 	}

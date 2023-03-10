@@ -42,6 +42,7 @@
 	.p {
 		display: flex;
 		align-items: center;
+		align-self: flex-start;
 		min-height: 28px;
 		background: #20263c;
 		margin: 3px 2px;

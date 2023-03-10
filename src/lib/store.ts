@@ -143,7 +143,7 @@ export const patchedTag = writable({
 	tags: [] as string[]
 });
 export const posts = writable([] as curPost[]);
-export const setting = writable(null);
+export const setting = writable(0);
 export const saveNow = writable(0);
 
 editPost.subscribe((p) => {

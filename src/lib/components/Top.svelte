@@ -14,7 +14,7 @@
 			let top = 0;
 			const sc = () => {
 				const o = p.scrollTop;
-				if (o < top && o > h / 3) a = 1;
+				if (o < top && o > 100) a = 1;
 				else b = 0;
 				top = o;
 			};
@@ -36,7 +36,7 @@
 				clearTimeout(t);
 				t = setTimeout(() => {
 					a = b;
-				}, 500);
+				}, 530);
 			}
 		}, b);
 	}
@@ -49,7 +49,7 @@
 	@import '../break';
 
 	.t {
-		transition: 0.3s ease-in-out;
+		transition: 0.5s ease-in-out;
 		border-radius: 50%;
 		line-height: 1;
 		font-size: 20px;
@@ -77,7 +77,6 @@
 		}
 
 		@include s() {
-			bottom: 20px;
 			right: 20px;
 		}
 	}
