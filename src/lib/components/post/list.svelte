@@ -9,6 +9,7 @@
 	import { expand } from '$lib/store';
 	import { fade } from 'svelte/transition';
 	import { page } from "$app/stores";
+	import { afterNavigate } from "$app/navigation";
 
 	let a = 0;
 
@@ -30,10 +31,9 @@
 	$: total = d.total;
 	let ls = [];
 	$: ls = d.items || [];
+	afterNavigate(scTop)
 </script>
-
 <UpDownScroll bind:down={a} />
-<svelte:window on:sveltekit:navigation-end={scTop} />
 <Canvas type={1} />
 <div class="o" class:e={$expand} transition:fade>
 	<Ph bind:shrink={a}>
