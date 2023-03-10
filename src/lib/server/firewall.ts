@@ -56,11 +56,12 @@ export const delRule = (ids: number[]) => {
 	db.delByPk(FWRule, ids);
 	rules = rules.filter((a) => ids.indexOf(a.id) === -1);
 };
-
-function loadRules() {
+let t:Timer
+export function loadRules() {
 	rules = db.all(model(FWRule));
 	sort();
-	setTimeout(loadRules, 1e3 * 3600 * 72);
+	clearTimeout(t)
+	t=setTimeout(loadRules, 1e3 * 3600 * 72);
 }
 
 type log = [number, string, string, string, number, string, string, string];

@@ -152,9 +152,10 @@ export class DB {
 			create?: boolean;
 			skipSave?: boolean;
 			search?: boolean;
+			override_create?:boolean;
 		} = {}
 	) {
-		const { create, skipSave, search } = opt;
+		const { create, skipSave, search,override_create=false } = opt;
 		const now = Date.now();
 		const o = a as Obj<Model> & dbHooks;
 		let changeSave = true;
@@ -168,7 +169,7 @@ export class DB {
 		let sql: string;
 		let values: unknown[];
 		if ((!kv || create) && !search) {
-			setKey(a, 'createAt', now);
+			if(!override_create)setKey(a, 'createAt', now);
 			[sql, values] = insert(o);
 		} else [sql, values] = update(o);
 		Log.debug('save', sql, values);
