@@ -73,7 +73,7 @@
 	.t {
 		position: absolute;
 		top: 40px;
-		bottom: 10px;
+		bottom: 50px;
 		left: 0;
 		right: 0;
 		overflow: auto;
@@ -83,6 +83,7 @@
 		clip-path: inset(80px 0 0 0);
 		@include s() {
 			top: 60px;
+			bottom: 10px;
 		}
 	}
 

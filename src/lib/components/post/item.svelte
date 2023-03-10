@@ -1,5 +1,5 @@
 <script>
-	import { getColor } from '$lib/utils';
+	import { bgColor } from '$lib/utils';
 
 	export let p = {};
 	const { banner, slug, title, desc, content, createAt } = p;
@@ -15,7 +15,7 @@
 	}
 </script>
 
-<div class="s p" style={`background-color:${getColor(createAt / 3600)}`}>
+<div class="s p" style={`background-color:${bgColor(createAt)}`}>
 	<div class="x" style={sty} />
 	<div class="t">
 		{m}/{d}
