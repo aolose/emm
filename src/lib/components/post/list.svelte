@@ -8,6 +8,7 @@
 	import UpDownScroll from '$lib/components/upDownScroll.svelte';
 	import { expand } from '$lib/store';
 	import { fade } from 'svelte/transition';
+	import { page } from "$app/stores";
 
 	let a = 0;
 
@@ -25,9 +26,7 @@
 		ih = 0;
 	export let name = '';
 	export let d = {};
-	let cur;
 	let total = 1;
-	$: cur = d.cur;
 	$: total = d.total;
 	let ls = [];
 	$: ls = d.items || [];
@@ -54,7 +53,7 @@
 	</div>
 	<div class="n" class:v={ih > oh && !a}>
 		<div class="nn">
-			<Nav {total} {cur} go={'/' + name} length="2" tm="1" />
+			<Nav {total} page={+$page.params.page||1} length="2" go={'/' + name}  tm="1" />
 		</div>
 	</div>
 </div>
