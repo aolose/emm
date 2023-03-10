@@ -9,8 +9,8 @@
 		'#0077b6',
 		'#4a4e69',
 		'#386641',
-		'#6a994e',
-		'#5e548e'
+		'#ff90b3',
+		'#1a659e'
 	];
 	const color = colors[type.split('').reduce((a, b) => a + b.charCodeAt(0), 0) % colors.length];
 </script>

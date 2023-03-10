@@ -27,7 +27,7 @@ import type { RespHandle } from '$lib/types';
 import sharp from 'sharp';
 import { Buffer } from 'buffer';
 import { FwLog, FWRule, Post, Require, Res, System, Tag, TokenInfo } from '$lib/server/model';
-import { arrFilter, diffObj, enc, filter, getErr, trim } from '$lib/utils';
+import { arrFilter, diffObj, enc, filter, trim } from '$lib/utils';
 import { permission } from '$lib/enum';
 import path from 'path';
 import fs from 'fs';

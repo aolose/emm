@@ -231,32 +231,33 @@ const delGroupKey = (key: string) => {
 	}
 };
 
-// export const saveCache = (
-//     url: ApiName,
-//     params: reqParams | reqData,
-//     data: reqData | number,
-//     cache?: number,
-//     method?: MethodNumber,
-//     groupKey?: string
-// ) => {
-//     let p: reqParams;
-//     let d: reqData;
-//     let c: number;
-//     if (cache === undefined && typeof data === "number") {
-//         d = params;
-//         c = data;
-//     } else {
-//         p = params as reqParams;
-//         d = data;
-//         c = cache as number;
-//     }
-//     const key = reqKey(url, p, method);
-//     if (groupKey) addGroupKey(groupKey, key);
-//     const now = Date.now();
-//     const r = [now + c, d, undefined] as cacheRecord;
-//     reqCacheMap.set(key, r);
-//     saveCacheToStorage();
-// };
+export const saveCache = (
+    url: ApiName,
+    params: reqParams | reqData,
+    data: reqData | number,
+    cache?: number,
+    method?: MethodNumber,
+    groupKey?: string
+) => {
+	  if(!browser)return
+    let p: reqParams;
+    let d: reqData;
+    let c: number;
+    if (cache === undefined && typeof data === "number") {
+        d = params;
+        c = data;
+    } else {
+        p = params as reqParams;
+        d = data;
+        c = cache as number;
+    }
+    const key = reqKey(url, p, method);
+    if (groupKey) addGroupKey(groupKey, key);
+    const now = Date.now();
+    const r = [now + c, d, undefined] as cacheRecord;
+    reqCacheMap.set(key, r);
+    saveCacheToStorage();
+};
 
 const delayPms = new Map<string, Promise<reqData>>();
 const delayMap = new Map<string, [number, reqParams?]>();
