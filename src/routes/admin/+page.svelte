@@ -16,7 +16,7 @@
 	let pages = 1;
 	let tmpMark = 1;
 	let view = 0;
-
+	let autoSave;
 	function sel(p) {
 		if (!p) {
 			originPost.set({});
@@ -99,13 +99,13 @@
 			</div>
 		</div>
 		<div class="b">
-			<Editor {close} preview={() => (view = 2)} />
+			<Editor {close} bind:autoSave preview={() => (view = 2)} />
 		</div>
 		<div class="c">
 			<Viewer preview={true} close={() => (view = 1)} />
 		</div>
 		<FileWin w={33.33333} />
-		<Setting />
+		<Setting {autoSave} />
 	</div>
 </div>
 

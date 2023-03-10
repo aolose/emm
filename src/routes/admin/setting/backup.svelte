@@ -35,7 +35,12 @@
 			<span class="icon i-down" /></button
 		>
 		<button>
-			<input type="file" on:change={up} accept="application/zip" />
+			<input
+				type="file"
+				on:change={up}
+				on:click={(e) => (e.target.value = '')}
+				accept="application/zip"
+			/>
 			restore
 			<span class="icon i-upload" />
 		</button>
