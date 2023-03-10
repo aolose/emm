@@ -39,12 +39,12 @@
 {#if d}
 	<div class={'bk icon i-close'} on:click={() => goBack()} />
 	<div class="pg">
+		<Top />
 		<div class="bg" style={sly}>
 			<div class="ft" {style} />
 			<div class="fc" />
 		</div>
 		<div class="co" class:ex={$expand}>
-			<Top />
 			<Ctx>
 				<div class="v">
 					<div class="h">
@@ -302,8 +302,8 @@
 		height: 100%;
 		overflow: auto;
 		@include s() {
-			height: auto;
 			min-height: 100%;
+			background: var(--bg6);
 		}
 	}
 
