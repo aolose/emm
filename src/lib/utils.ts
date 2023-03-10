@@ -429,13 +429,14 @@ export const time = (value?: number) => {
 	if (!value) return '';
 	const d = new Date(value);
 	if (!d || !d.getTime()) return '';
-	return new Intl.DateTimeFormat('en-GB', {
+	return new Intl.DateTimeFormat('en-US', {
 		year: '2-digit',
 		month: '2-digit',
 		day: '2-digit',
 		hour: '2-digit',
 		minute: '2-digit',
-		second: '2-digit'
+		second: '2-digit',
+		hour12: false
 	}).format(d);
 };
 
@@ -794,7 +795,7 @@ export const modelArr2Str = <T extends Model>(m: T, key: keyof T, rfKey?: keyof 
 	if (Array.isArray(arr))
 		return {
 			...m,
-			[key]: arr.map((a) => a[rfKey || key]).join()
+			[key]: arr.map((a) => a[rfKey || 'id']).join()
 		};
 	return m;
 };
@@ -822,13 +823,15 @@ export const restoreVerify = async (data: ArrayBuffer) => {
 export const clientRestore =
 	(done: (m?: string) => void, err: (m: string) => void, before: () => void) =>
 	async (e: Event) => {
+		const ipt = e.target as HTMLInputElement;
+		if (!ipt.value) return;
 		const ok = await confirm(
 			'Restoring data will erase existing data, do you want to continue?',
 			'continue'
 		);
-		const ipt = e.target as HTMLInputElement;
-		if (!ok) return (ipt.value = '');
 		const file = ipt.files?.[0];
+		ipt.value = '';
+		if (!ok) return;
 		if (file) {
 			const buf = await file.arrayBuffer();
 			const e = await restoreVerify(buf);
