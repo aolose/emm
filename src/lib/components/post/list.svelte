@@ -8,8 +8,8 @@
 	import UpDownScroll from '$lib/components/upDownScroll.svelte';
 	import { expand } from '$lib/store';
 	import { fade } from 'svelte/transition';
-	import { page } from "$app/stores";
-	import { afterNavigate } from "$app/navigation";
+	import { page } from '$app/stores';
+	import { afterNavigate } from '$app/navigation';
 
 	let a = 0;
 
@@ -31,8 +31,9 @@
 	$: total = d.total;
 	let ls = [];
 	$: ls = d.items || [];
-	afterNavigate(scTop)
+	afterNavigate(scTop);
 </script>
+
 <UpDownScroll bind:down={a} />
 <Canvas type={1} />
 <div class="o" class:e={$expand} transition:fade>
@@ -53,7 +54,7 @@
 	</div>
 	<div class="n" class:v={ih > oh && !a}>
 		<div class="nn">
-			<Nav {total} page={+$page.params.page||1} length="2" go={'/' + name}  tm="1" />
+			<Nav {total} page={+$page.params.page || 1} length="2" go={'/' + name} tm="1" />
 		</div>
 	</div>
 </div>

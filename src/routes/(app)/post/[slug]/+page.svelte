@@ -1,5 +1,5 @@
 <script>
-	import { bgColor, goBack, time } from "$lib/utils";
+	import { bgColor, goBack, time } from '$lib/utils';
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
 	import PF from '$lib/components/post/pf.svelte';
@@ -16,8 +16,7 @@
 	let sly = '';
 	let style;
 	$: {
-		if (d.createAt)
-			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)});`;
+		if (d.createAt) style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)});`;
 		if (d.banner) {
 			sly = `background-image:url(/res/${d.banner})`;
 		}
