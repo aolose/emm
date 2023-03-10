@@ -81,6 +81,7 @@ export const highlight = delay(async (n: HTMLElement) => {
 				case 'scss':
 					reg = await import('highlight.js/lib/languages/scss');
 					break;
+				case 'yml':
 				case 'yaml':
 					reg = await import('highlight.js/lib/languages/yaml');
 					break;
@@ -105,7 +106,7 @@ export const highlight = delay(async (n: HTMLElement) => {
 				hjs.registerLanguage(lang, reg.default);
 			}
 		}
-		a.innerHTML = hjs.highlightAuto(a.innerHTML).value;
+		a.innerHTML = hjs.highlightAuto(a.innerText).value;
 	}
 }, 60);
 
