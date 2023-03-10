@@ -67,8 +67,8 @@
 <Card {act} {msg} {err} title="Blog" {save} {ld}>
 	<Ipt label="Name" bind:value={nm} placeholder="my blog" />
 	<Ipt label="Bio" bind:value={bio} placeholder="say something" />
-	<Ipt label="Keywords" bind:value={bio} placeholder="photos,foods,.ect" />
-	<Ipt box label="Description" bind:value={bio} placeholder="description for seo" />
+	<Ipt label="Keywords" bind:value={key} placeholder="photos,foods,.ect" />
+	<Ipt box label="Description" bind:value={desc} placeholder="description for seo" />
 	<Ipt box label="Robots.text" bind:value={robot} placeholder="robots" />
 	<Ipt label="Max number of logs" bind:value={mx} />
 </Card>

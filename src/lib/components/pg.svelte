@@ -89,7 +89,7 @@
 
 	.lt {
 		* {
-			color: rgba(80,100,150,.9);
+			color: rgba(80, 100, 150, 0.9);
 		}
 
 		.nv {
@@ -105,7 +105,7 @@
 		.nv:hover {
 			color: #fff;
 			border-color: transparent;
-			background:var(--darkgrey-h);
+			background: var(--darkgrey-h);
 		}
 	}
 </style>
