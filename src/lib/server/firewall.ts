@@ -28,7 +28,14 @@ export const ruleHit = (r: { ip?: string; path?: string; method?: string; header
 	for (const k of rules) {
 		if (!k.active) continue;
 		if (k.path && !match(k.path, path)) continue;
-		if (k.method && k.method.toLowerCase() !== method) continue;
+		if (k.method) {
+			const ms = k.method
+				.toLowerCase()
+				.split(',')
+				.filter((a) => a);
+			const mms = new Set(ms);
+			if (!mms.has(method.toLowerCase())) continue;
+		}
 		if (k.headers && !matchHeader(k.headers, headers || new Headers())) continue;
 		if (k.ip) {
 			if (!ipRangeCheck(ip, k.ip)) continue;
@@ -56,12 +63,13 @@ export const delRule = (ids: number[]) => {
 	db.delByPk(FWRule, ids);
 	rules = rules.filter((a) => ids.indexOf(a.id) === -1);
 };
-let t:Timer
+let t: Timer;
+
 export function loadRules() {
 	rules = db.all(model(FWRule));
 	sort();
-	clearTimeout(t)
-	t=setTimeout(loadRules, 1e3 * 3600 * 72);
+	clearTimeout(t);
+	t = setTimeout(loadRules, 1e3 * 3600 * 72);
 }
 
 type log = [number, string, string, string, number, string, string, string];
