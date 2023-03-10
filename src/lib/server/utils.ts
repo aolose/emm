@@ -409,11 +409,11 @@ const chk = () => {
 	}
 	if (!dbOk) return 0;
 	// step2 set admin:
-	if (!sys.admUsr || !sys.admPwd) return 1;
+	if (!sys?.admUsr || !sys?.admPwd) return 1;
 	// step3 set upload
-	if (!sys.uploadDir || !sys.thumbDir) return 2;
+	if (!sys?.uploadDir || !sys?.thumbDir) return 2;
 	// step4 set geo ip
-	if (sys.ipLiteToken === null) return 3;
+	if (sys?.ipLiteToken === null) return 3;
 	return 9;
 };
 export const checkStatue = () => {
