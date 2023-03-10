@@ -41,7 +41,7 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           username: ${{ secrets.VPS_USR }}
           private_key: ${{ secrets.VPS_KEY }}
-          scp_source: "dist/*"
-          scp_target: "/home/aolose/errApp/"
+          scp_source: 'dist/*'
+          scp_target: '/home/aolose/errApp/'
           after_script: |
             cd "/home/aolose/errApp/"  && pnpm i && echo -e "${{ secrets.VPS_PWD }}\n" | sudo -S service errApp restart
