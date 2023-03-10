@@ -124,7 +124,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-content: baseline;
-		@include s(){
+		@include s() {
 			padding-bottom: 60px;
 		}
 	}

@@ -45,7 +45,7 @@
 		background-size: cover;
 		filter: grayscale(0.5) blur(3px);
 		opacity: 0.3;
-		@include s(){
+		@include s() {
 			filter: grayscale(0.5) blur(2px);
 		}
 	}
