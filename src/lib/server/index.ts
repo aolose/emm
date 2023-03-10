@@ -5,17 +5,17 @@ import { publishedPost, tags } from '$lib/server/store';
 import { loadGeoDb } from '$lib/server/ipLite';
 import { codeTokens, reqPostCache, requireMap, tagPostCache } from '$lib/server/cache';
 // import { readRes } from "$lib/server/back/readRes";
-import { loadRules } from "$lib/server/firewall";
+import { loadRules } from '$lib/server/firewall';
 
 export let sys: System;
 export let db: DB;
 export const server = {
 	maintain: false,
 	start(path: string) {
-		if (sys&&db) return;
+		if (sys && db) return;
 		try {
 			console.log('server start');
-			if(db?.db?.open)db.db.close()
+			if (db?.db?.open) db.db.close();
 			db = new DB(path);
 			db.createTables();
 			sys = DBProxy(System);
@@ -48,7 +48,7 @@ export const server = {
 		});
 		codeTokens.load();
 		reqPostCache.load();
-		loadRules()
+		loadRules();
 		checkStatue();
 		// readRes();
 	},

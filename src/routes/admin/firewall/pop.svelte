@@ -65,7 +65,7 @@
 				<label>
 					<span>method:</span>
 					<Sel
-						items={['GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS']}
+						items={['', 'GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS']}
 						bind:value={d.method}
 					/>
 				</label>

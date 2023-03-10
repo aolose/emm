@@ -118,7 +118,7 @@ const loadP = () => {
 				published: +!!pub_content,
 				slug: slug
 			} as Post);
-			db.save(np, { skipSave: true, create: true ,override_create:true});
+			db.save(np, { skipSave: true, create: true, override_create: true });
 			if (np.id) {
 				reqPostCache.add(np.id, 1);
 				if (tags) {
