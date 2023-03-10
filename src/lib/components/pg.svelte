@@ -67,6 +67,7 @@
 		}
 
 		.act {
+			color: antiquewhite;
 			background: var(--act);
 		}
 
