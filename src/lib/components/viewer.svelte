@@ -72,6 +72,9 @@
 		flex-direction: column;
 
 		:global {
+			* {
+				line-height: 2;
+			}
 			p {
 				white-space: pre-wrap;
 			}
