@@ -13,7 +13,7 @@ export const server = {
 		if (sys&&db) return;
 		try {
 			console.log('server start');
-			if(db)db?.db?.close()
+			if(db?.db?.open)db.db.close()
 			db = new DB(path);
 			db.createTables();
 			sys = DBProxy(System);

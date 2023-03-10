@@ -19,4 +19,5 @@ fs.copyFileSync(env, './dist/' + env);
 fs.copyFileSync(npm + '.build', './dist/' + npm);
 fs.copyFileSync(lock, './dist/' + lock);
 fs.writeFileSync('./dist/package.json', JSON.stringify(pkg), { flag: 'w' });
+if(fs.existsSync('.cssCache.json'))fs.rmSync('.cssCache.json')
 console.log('publish done!');
