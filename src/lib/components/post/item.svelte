@@ -36,15 +36,18 @@
 	.x {
 		transition: 2s ease-in-out;
 		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		bottom: 0;
+		left: -3px;
+		right: -3px;
+		top: -3px;
+		bottom: -3px;
 		border-radius: 3px;
 		background: url('../img/1.jpg') center no-repeat;
 		background-size: cover;
 		filter: grayscale(0.5) blur(3px);
 		opacity: 0.3;
+		@include s(){
+			filter: grayscale(0.5) blur(2px);
+		}
 	}
 
 	.p {
@@ -60,7 +63,6 @@
 		@include s() {
 			width: 95%;
 			margin: 10px auto;
-			height: 180px;
 		}
 
 		&:hover {
@@ -90,11 +92,14 @@
 		text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 3px;
 		color: #ddd;
 		font-weight: 100;
-
+		position: absolute;
+		left: 20px;
+		right: 80px;
+		top: 20px;
 		& + h3 {
-			position: absolute;
 			opacity: 0;
 			font-size: 32px;
+			width: 80%;
 			left: 50%;
 			top: 50%;
 			transform: translate3d(-50%, -50%, 0);
@@ -115,6 +120,7 @@
 		text-overflow: ellipsis;
 		line-height: 1.5;
 		margin-top: 3px;
+		font-size: 15px;
 		color: #fcfcfc;
 		opacity: 0.5;
 		font-weight: 100;

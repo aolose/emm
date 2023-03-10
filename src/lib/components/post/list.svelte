@@ -124,6 +124,9 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-content: baseline;
+		@include s(){
+			padding-bottom: 60px;
+		}
 	}
 
 	.v {
