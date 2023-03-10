@@ -214,7 +214,7 @@
 		}
 
 		p {
-			opacity: 0.6;
+			line-height: 2;
 			color: #f8f8f8;
 			margin: 10px 0;
 			font-size: 14px;
