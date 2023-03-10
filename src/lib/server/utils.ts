@@ -514,11 +514,11 @@ export const mv = (from: string, to: string) => {
 	let err;
 	if (from) {
 		err = mkdir(from);
-		mv = 1;
+		mv++;
 	}
 	if (!err) {
 		if (to) err = mkdir(to);
-		mv = 2;
+		mv++;
 	}
 	if (!err && mv === 2) {
 		try {
