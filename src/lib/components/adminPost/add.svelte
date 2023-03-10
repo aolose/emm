@@ -5,7 +5,7 @@
 	export let done;
 	export let a = '';
 	$: {
-		a = trim(a,true);
+		a = trim(a, true);
 	}
 
 	function add() {

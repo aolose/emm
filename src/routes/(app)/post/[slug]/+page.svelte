@@ -8,6 +8,7 @@
 	import { imageViewer } from '$lib/use';
 	import Comment from '$lib/components/comment/index.svelte';
 	import Head from '$lib/components/Head.svelte';
+	import Top from '$lib/components/Top.svelte';
 
 	export let data;
 	const d = data.d;
@@ -43,6 +44,7 @@
 			<div class="fc" />
 		</div>
 		<div class="co" class:ex={$expand}>
+			<Top />
 			<Ctx>
 				<div class="v">
 					<div class="h">
@@ -299,7 +301,7 @@
 		background: $bg2;
 		height: 100%;
 		overflow: auto;
-		@include s(){
+		@include s() {
 			height: auto;
 			min-height: 100%;
 		}
