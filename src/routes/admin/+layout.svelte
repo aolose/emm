@@ -39,6 +39,9 @@
 	.c {
 		background: var(--bg1);
 		flex: 1;
+		@include s(){
+			height: 0;
+		}
 	}
 
 	@include s() {
