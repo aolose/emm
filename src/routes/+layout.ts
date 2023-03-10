@@ -60,7 +60,6 @@ const su = (s: number) => {
 if (browser) {
 	page.subscribe(ps);
 	seo.subscribe(ss);
-	statueSys.subscribe((a) => save({ sys: (sys = a) } as saveData));
 	status.subscribe(su);
 }
 
