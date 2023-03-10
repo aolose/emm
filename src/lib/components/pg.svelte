@@ -89,11 +89,10 @@
 
 	.lt {
 		* {
-			color: #1c334a;
+			color: rgba(80,100,150,.9);
 		}
 
 		.nv {
-			color: #000;
 			background: none;
 			padding: 5px 8px;
 			height: 24px;
@@ -105,8 +104,8 @@
 		.act,
 		.nv:hover {
 			color: #fff;
-			border-color: #000;
-			background: #000;
+			border-color: transparent;
+			background:var(--darkgrey-h);
 		}
 	}
 </style>
