@@ -29,8 +29,7 @@ export const restore = async (data: ArrayBuffer) => {
 	server.stop();
 	try {
 		fs.writeFileSync(fix(dbPath), Buffer.from(dbBuf));
-		fs.writeFileSync(cfgPath, dbPath);
-		fs.writeFileSync(fix(cfgPath), fix(dbPath), { flag: 'w' });
+		fs.writeFileSync(fix(cfgPath), dbPath, { flag: 'w' });
 		if (fs.existsSync(thumbDir)) fs.rmSync(thumbDir, { recursive: true, force: true });
 		if (fs.existsSync(uploadDir)) fs.rmSync(uploadDir, { recursive: true, force: true });
 		fs.mkdirSync(thumbDir, { recursive: true });
