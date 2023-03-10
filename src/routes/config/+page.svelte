@@ -136,7 +136,12 @@
 		<div class="o">Configure</div>
 		<Step value={step} info={steps} />
 		<button class="up">
-			<input accept="application/zip" type="file" on:change={ch} />
+			<input
+				accept="application/zip"
+				type="file"
+				on:click={(e) => (e.target.value = '')}
+				on:change={ch}
+			/>
 			Restore
 			<span class="icon i-upload" />
 		</button>
