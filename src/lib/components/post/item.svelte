@@ -11,7 +11,7 @@
 	const showY = new Date().getFullYear() !== y;
 	let ds;
 	$: {
-		ds = (desc || content || '').substring(0, 140);
+		ds = (desc || content || '').substring(0, 60);
 	}
 </script>
 
@@ -94,11 +94,12 @@
 		font-weight: 100;
 		position: absolute;
 		left: 20px;
-		right: 80px;
+		right: 90px;
 		top: 20px;
+		word-break: break-all;
 		& + h3 {
 			opacity: 0;
-			font-size: 32px;
+			font-size: 30px;
 			width: 80%;
 			text-align: center;
 			left: 50%;
