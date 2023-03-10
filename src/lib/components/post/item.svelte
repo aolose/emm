@@ -100,6 +100,7 @@
 			opacity: 0;
 			font-size: 32px;
 			width: 80%;
+			text-align: center;
 			left: 50%;
 			top: 50%;
 			transform: translate3d(-50%, -50%, 0);
