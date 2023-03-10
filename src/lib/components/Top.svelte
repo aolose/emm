@@ -2,7 +2,6 @@
 	import { watch } from '$lib/utils';
 	import { onMount } from 'svelte';
 
-	onMount(() => {});
 	let h = 99999;
 	let a = 0;
 	let b = 0;
