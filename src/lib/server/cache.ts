@@ -31,6 +31,7 @@ setInterval(() => {
 	}
 }, 1e3 * 3600);
 
+export const eTags = new Map<string, number>();
 export const tagPostCache = (() => {
 	let tps: PostTag[] = [];
 	return {

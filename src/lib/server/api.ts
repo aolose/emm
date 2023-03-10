@@ -49,6 +49,7 @@ import { get } from 'svelte/store';
 import {
 	codeTokens,
 	combine,
+	eTags,
 	noAccessPosts,
 	patchPostReqs,
 	patchPostTags,
@@ -670,6 +671,11 @@ const apis: APIRoutes = {
 		delete: auth(Admin, async (req) => {
 			const r = new Uint8Array(await req.arrayBuffer());
 			const { changes } = db.delByPk(Res, [...r]);
+
+			const ids = new Set([...r]);
+			for (const [k, v] of eTags) {
+				if (ids.has(v)) eTags.delete(k);
+			}
 			return changes;
 		}),
 		post: auth(Read, async (req) => {
