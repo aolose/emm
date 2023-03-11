@@ -8,6 +8,7 @@
 	import Ft from './pop.svelte';
 	import Ru from './rules.svelte';
 	import { watch } from '$lib/utils';
+	import { small } from "$lib/store";
 
 	let view = 0;
 	let sty;
@@ -25,7 +26,7 @@
 	let hasF = 0;
 	const lsWatch = watch(tab, p);
 	$: {
-		sty = `transform:translate3d(${(-view * 100) / 2}%,0,0)`;
+		sty = $small?`transform:translate3d(${(-view * 100) / 2}%,0,0)`:'';
 		lsWatch(
 			() => {
 				lastL = 0;
@@ -138,7 +139,7 @@
 			<Ld act={ld} />
 		</div>
 		<div class="sd">
-			<Ru {pop} />
+			<Ru {pop} close={()=>view=0}/>
 		</div>
 	</div>
 	<Ft bind:pop />
@@ -146,7 +147,12 @@
 
 <style lang="scss">
 	@import '../../../lib/break';
-
+   .i-set{
+		 display: none;
+		 @include s(){
+			 display: block;
+		 }
+	 }
 	.m {
 		width: 100%;
 		height: 100%;
