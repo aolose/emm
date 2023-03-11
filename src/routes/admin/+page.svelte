@@ -7,7 +7,7 @@
 	import Setting from '$lib/components/adminPost/setting.svelte';
 	import FileWin from '$lib/components/fileManager.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
-	import { editPost, originPost, posts, small } from '$lib/store';
+	import { editPost, originPost, posts, setting, small } from '$lib/store';
 	import { api } from '$lib/req';
 	import { onMount } from 'svelte';
 	import { trim, watch } from '$lib/utils';
@@ -69,6 +69,10 @@
 
 	onMount(() => {
 		page();
+		return () => {
+			sel();
+			setting.set(0);
+		};
 	});
 	let sty;
 	$: {

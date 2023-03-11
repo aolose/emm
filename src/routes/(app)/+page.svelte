@@ -1,36 +1,15 @@
 <script>
 	import Bird from '$lib/components/brid.svelte';
-	import { onDestroy, onMount } from 'svelte';
-	import { msg } from '$lib/store';
 	import { slidLeft } from '$lib/transition';
 	import Ctx from '$lib/components/ctx.svelte';
-
-	let c = 0;
-	let h = 0;
-	const m = ['welcome to my blog !'];
-	let t, t0, a;
-	onMount(() => {
-		a = setTimeout(() => (h = 1), 300);
-		t = setInterval(function () {
-			const v = c++ % m.length;
-			msg.set(m[v]);
-		}, 1e3 * 10);
-	});
-	onDestroy(() => {
-		clearInterval(t);
-		clearTimeout(t0);
-		clearTimeout(a);
-	});
 </script>
 
 <Ctx />
 <div class="b">
 	<div class="bb">
-		{#if h}
-			<Bird />
-		{/if}
+		<Bird />
 	</div>
-	<a class="rs" href="/rss" exact={false}>RSS</a>
+	<a class="rs" href="/rss">RSS</a>
 	<div class="mu">
 		<a href="/posts" transition:slidLeft|local>Posts -></a>
 	</div>

@@ -39,7 +39,7 @@
 	.c {
 		background: var(--bg1);
 		flex: 1;
-		@include s(){
+		@include s() {
 			height: 0;
 		}
 	}

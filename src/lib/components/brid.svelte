@@ -1,12 +1,35 @@
 <script>
 	import Msg from '$lib/components/typeMsg.svelte';
 	import { fade } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { req } from '$lib/req';
+	import { method } from '$lib/enum';
+	import { msg } from '$lib/store';
+
+	onMount(() => {
+		let stop;
+		req('bio', undefined, { method: method.GET }).then((a) => {
+			if (stop) return;
+			if (a) {
+				const d = a.split(/\n+/).filter((a) => !!a);
+				const l = d.length;
+				if (l) {
+					let i = 0;
+					const t = setInterval(() => {
+						if (stop) return clearInterval(t);
+						msg.set(d[i++ % l]);
+					}, 8e3);
+				}
+			}
+		});
+		return () => (stop = 1);
+	});
 </script>
 
 <div class="b" transition:fade={{ duration: 200 }}>
 	<div class="h">
 		<div class="mg">
-			<Msg defaultText={'have a nice day!'} />
+			<Msg defaultText={'welcome to my blog!'} />
 			<i />
 		</div>
 		<div class="m" />

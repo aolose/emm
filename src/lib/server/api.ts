@@ -849,6 +849,11 @@ const apis: APIRoutes = {
 				'content-disposition': `attachment; filename=blog_${Date.now()}.zip`
 			});
 		})
+	},
+	bio: {
+		get() {
+			return sys.blogBio || '';
+		}
 	}
 };
 const sysKs: (keyof System)[] = [

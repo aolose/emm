@@ -16,7 +16,8 @@
 	let sly = '';
 	let style;
 	$: {
-		if (d.createAt) style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
+		if (d.createAt)
+			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
 		if (d.banner) {
 			sly = `background-image:url(/res/${d.banner})`;
 		}

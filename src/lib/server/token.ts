@@ -22,15 +22,12 @@ export const genToken = (
 	} = {}
 ) => {
 	const now = Date.now();
-	const token: Obj<TokenInfo> = model(
-		TokenInfo,
-		{
-			createAt: now,
-			expire: cfg.expire || now + (expires.get(type) || 0),
-			type,
-			_reqs: cfg._reqs
-		}
-	);
+	const token: Obj<TokenInfo> = model(TokenInfo, {
+		createAt: now,
+		expire: cfg.expire || now + (expires.get(type) || 0),
+		type,
+		_reqs: cfg._reqs
+	});
 	if (cfg.code) {
 		const cd = randStr(randNum(1e4).toString(36));
 		token.code = cd;

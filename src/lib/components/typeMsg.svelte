@@ -1,50 +1,51 @@
 <script>
 	import { msg } from '$lib/store';
-	import { onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 
 	const base =
 		'abcdefghijklmnopqrstuvwxyz齉齾爩鱻' + '癵籱饢驫鲡鹂鸾麣纞虋讟麷鞻韽韾响顟顠饙ㄅㄧㄥㄒㄧㄢㄘㄨ';
 	const l = base.length;
 	let pv = '';
 	let pr = '';
-	let a = 0;
 	let t = -1;
-	let start = 0;
 	export let defaultText = '';
-	onDestroy(
-		msg.subscribe(() => {
-			pv = '';
-		})
-	);
 
-	$: {
-		if (defaultText && !start) {
-			msg.set(defaultText);
-			start = 1;
-		}
-		if (start) {
-			clearTimeout(t);
-			if ($msg && $msg + ' ' !== pv) {
-				t = setTimeout(function () {
-					if (a++ < 3) {
-						pr = base[Math.floor(Math.random() * l)];
-					} else {
-						clearTimeout(t);
-						t = -1;
-						a = 0;
-						pr = '';
-						pv = $msg.substr(0, pv.length + 1) + ' ';
-					}
-				}, 30);
+	const autoText = (str) => {
+		clearTimeout(t);
+		const m = str.length;
+		let i = 1;
+		const r = () => {
+			const b = Math.floor(i);
+			pv = str.substring(0, b);
+			if (i < m) {
+				pr = base[Math.floor(Math.random() * l)];
 			} else {
-				if ($msg !== defaultText)
-					t = setTimeout(function () {
-						msg.set(defaultText);
-						pv = '';
-					}, 5000);
+				pr = '';
+				return;
 			}
-		}
-	}
+			i += 0.5;
+			t = setTimeout(r, 40);
+		};
+		r();
+	};
+	onMount(() => {
+		let u;
+		const getMsg = () =>
+			(u = msg.subscribe((m) => {
+				autoText(m);
+			}));
+		let r;
+		if (defaultText) {
+			autoText(defaultText);
+			r = setTimeout(getMsg, 5e3);
+		} else getMsg();
+
+		return () => {
+			clearTimeout(r);
+			clearTimeout(t);
+			if (u) u();
+		};
+	});
 </script>
 
 <p>

@@ -155,7 +155,7 @@
 				border-radius: 6px;
 				border: 2px solid rgba(3, 169, 244, 0.08);
 			}
-			.hljs-section{
+			.hljs-section {
 				color: #2196f3;
 			}
 		}
