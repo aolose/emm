@@ -271,7 +271,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 		delayMap.set(delayKey, [Date.now() + delay, params]);
 		let p = delayPms.get(delayKey);
 		if (!p) {
-			p = new Promise<reqData>((resolve) => {
+			p = new Promise<reqData>((resolve,reject) => {
 				const run = () =>
 					requestAnimationFrame(() => {
 						const dt = delayMap.get(delayKey);
@@ -279,7 +279,9 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 							if (Date.now() > dt[0]) {
 								const c = { ...(cfg || {}) };
 								delete c.delay;
-								req(url, dt[1], c).then((r) => resolve(r));
+								req(url, dt[1], c)
+									.then((r) => resolve(r))
+									.catch(e=>reject(e));
 							} else {
 								run();
 								return;
