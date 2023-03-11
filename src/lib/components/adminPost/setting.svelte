@@ -127,7 +127,7 @@
 {/if}
 
 <style lang="scss">
-	@import "../../../lib/break";
+	@import '../../../lib/break';
 	.m {
 		z-index: 5;
 		position: fixed;
@@ -165,7 +165,7 @@
 		background: var(--bg1);
 		width: 400px;
 		box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 10px;
-		@include s(){
+		@include s() {
 			max-height: 100%;
 			width: 33.333%;
 			box-shadow: none;

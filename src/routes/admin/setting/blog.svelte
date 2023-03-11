@@ -54,9 +54,9 @@
 	};
 	$: {
 		nm = trim(nm);
-		bio = trim(bio);
+		bio = trim(bio, true);
 		desc = trim(desc, true);
-		key = trim(key);
+		key = trim(key, true);
 		mx = Math.abs(+mx) || 1000;
 		if (act) {
 			setTimeout(() => (act = 0), 2e3);
@@ -66,7 +66,7 @@
 
 <Card {act} {msg} {err} title="Blog" {save} {ld}>
 	<Ipt label="Name" bind:value={nm} placeholder="my blog" />
-	<Ipt label="Bio" bind:value={bio} placeholder="say something" />
+	<Ipt box label="Bio" bind:value={bio} placeholder="say something" />
 	<Ipt label="Keywords" bind:value={key} placeholder="photos,foods,.ect" />
 	<Ipt box label="Description" bind:value={desc} placeholder="description for seo" />
 	<Ipt box label="Robots.text" bind:value={robot} placeholder="robots" />
