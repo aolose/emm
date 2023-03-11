@@ -5,12 +5,21 @@ import { pageBuilder, sqlFields } from '$lib/server/utils';
 import { Post } from '$lib/server/model';
 import { getPain } from '$lib/utils';
 
-export const pubPostList = (page: number, size: number, tag: string | null, skips?: number[]) => {
+export const pubPostList = (
+	page: number,
+	size: number,
+	tag: string | null,
+	skips?: number[],
+	tagInfo = false
+) => {
 	const where: string[] = ['published=?'];
 	const values: unknown[] = [1];
-
+	let bn = null;
+	let desc = null;
 	if (tag) {
 		const tg = get(tags).find((a) => a.name === tag);
+		bn = tg?.banner;
+		desc = tg?.desc;
 		const ps = tg ? tagPostCache.getPostIds(tg.id) : [];
 		if (ps.length) {
 			where.push(`id in (${sqlFields(ps.length)})`);
@@ -21,7 +30,7 @@ export const pubPostList = (page: number, size: number, tag: string | null, skip
 		where.push(`id not in (${sqlFields(skips.length)})`);
 		values.push(...skips);
 	}
-	return pageBuilder(
+	const o = pageBuilder(
 		page,
 		size,
 		Post,
@@ -33,4 +42,9 @@ export const pubPostList = (page: number, size: number, tag: string | null, skip
 			return arr;
 		})
 	);
+	if (!tagInfo) return o;
+	const e = o as { bn?: string; desc?: string };
+	if (bn) e.bn = bn;
+	if (desc) e.desc = desc;
+	return e;
 };

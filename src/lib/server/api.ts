@@ -578,8 +578,9 @@ const apis: APIRoutes = {
 			const page = +(params.get('page') || 1);
 			const size = +(params.get('size') || 10);
 			const tag = params.get('tag');
+			const tagInfo = !!params.get('inf');
 			const skips = noAccessPosts(getClient(req));
-			return pubPostList(page, size, tag, skips);
+			return pubPostList(page, size, tag, skips, tagInfo);
 		},
 		post: auth(Read, async (req) => {
 			const d = await req.json();

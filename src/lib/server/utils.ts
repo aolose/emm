@@ -252,7 +252,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
 	let ori = {} as Obj<T>;
 	let changes = {} as T;
 	let create = false;
-	const save = delay(() => {
+	const saveSync = () => {
 		const p = diffObj(ori, { ...o, ...changes });
 		if (!p) return;
 		if (pk) p[pk] = o[pk];
@@ -269,7 +269,8 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
 		create = false;
 		ori = { ...Object.assign(o, changes, ch) };
 		changes = {} as T;
-	}, 100);
+	};
+	const save = delay(saveSync, 100);
 	if (load) {
 		const k = o[pk];
 		let u = 0;
@@ -288,7 +289,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
 				o = Object.assign(r, o);
 			}
 		}
-		save();
+		saveSync();
 	}
 	const px = new Proxy(o, {
 		get(target, p: string, receiver: T) {
@@ -365,7 +366,7 @@ const cacheCount = (model: Class<Model>, where?: [string, ...unknown[]]) => {
 	}
 };
 
-export const pageBuilder = async <T extends Model>(
+export const pageBuilder = <T extends Model>(
 	page: number,
 	size: number,
 	model: Class<T>,

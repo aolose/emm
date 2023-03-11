@@ -237,7 +237,8 @@ export const saveCache = (
 	data: reqData | number,
 	cache?: number,
 	method: MethodNumber = 1,
-	groupKey?: string
+	groupKey?: string,
+	customKey?: string
 ) => {
 	if (!browser) return;
 	let p: reqParams;
@@ -251,7 +252,7 @@ export const saveCache = (
 		d = data;
 		c = cache as number;
 	}
-	const key = reqKey(url, p, method);
+	const key = reqKey(url, p, method, customKey);
 	if (groupKey) addGroupKey(groupKey, key);
 	const now = Date.now();
 	const r = [now + c, d, undefined] as cacheRecord;
@@ -294,7 +295,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 		}
 		return p;
 	}
-	const key = reqKey(url, params, cfg?.method);
+	const key = reqKey(url, params, cfg?.method, cfg?.key);
 	if (cfg?.group) addGroupKey(cfg.group, key);
 	let p = browser ? reqPromiseCache.get(key) : undefined;
 	if (!p) {
@@ -335,10 +336,11 @@ export const api = (url: ApiName, cfg?: reqOption) => {
 export const useApi = (
 	url: ApiName,
 	getParams?: (event: LoadEvent, cfg: reqOption) => reqParams,
-	cfg?: reqOption
+	cfg?: reqOption | ((event: LoadEvent) => reqOption)
 ): Load =>
 	async function (event) {
 		const { fetch, params, url: u } = event;
+		if (typeof cfg === 'function') cfg = cfg(event);
 		(cfg = cfg || {}).fetch = fetch;
 		cfg.ctx = { url: u };
 		return {
