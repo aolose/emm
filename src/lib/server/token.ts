@@ -24,7 +24,7 @@ export const genToken = (
 	const now = Date.now();
 	const token: Obj<TokenInfo> = model(TokenInfo, {
 		createAt: now,
-		expire: cfg.expire || now + (expires.get(type) || 0),
+		expire: cfg.expire || now + (expires.get(type) || -1),
 		type,
 		_reqs: cfg._reqs
 	});
