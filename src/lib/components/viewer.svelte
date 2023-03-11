@@ -79,6 +79,10 @@
 				white-space: pre-wrap;
 			}
 
+			p,span {
+				word-break: break-all;
+			}
+
 			blockquote {
 				background: rgba(100, 120, 150, 0.1);
 				border-left: 2px solid rgba(100, 120, 150, 0.5);
