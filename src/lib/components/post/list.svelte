@@ -13,7 +13,8 @@
 
 	let a = 0;
 
-	async function scTop() {
+	async function scTop({from,to}) {
+		if(from.route.id!==to.route.id)return
 		await tick();
 		if (sc) {
 			document.scrollingElement.scrollTop = 0;
