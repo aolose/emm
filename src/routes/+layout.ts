@@ -8,9 +8,8 @@ import { page } from '$app/stores';
 import { h } from './head';
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
-import { get } from 'svelte/store';
 
-const jump = () => {
+const jump = async () => {
 	const adm = '/admin';
 	const lg = '/login';
 	const cfg = 'config';
@@ -21,9 +20,8 @@ const jump = () => {
 	else if (!stu && pathname.startsWith(adm)) rd = lg;
 	if (rd) {
 		if (browser) {
-			console.log(get(page));
 			pathname = rd;
-			goto(rd, { replaceState: true });
+			await goto(rd, { replaceState: true });
 		} else throw redirect(307, rd);
 	}
 };
@@ -52,9 +50,9 @@ const save = (a: saveData) => {
 	saveCache('statue', undefined, cacheData, cacheTime);
 };
 
-const su = (s: number) => {
+const su = async (s: number) => {
 	save({ statue: (stu = s) } as saveData);
-	jump();
+	await jump();
 };
 
 if (browser) {

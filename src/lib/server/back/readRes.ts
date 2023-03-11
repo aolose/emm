@@ -1,6 +1,6 @@
 import better from 'better-sqlite3';
 import { model } from '$lib/server/utils';
-import { Post, Res } from '$lib/server/model';
+import { Post, Res, Tag } from '$lib/server/model';
 import { db, sys } from '$lib/server';
 import fs from 'fs';
 import { reqPostCache, tagPostCache } from '$lib/server/cache';
@@ -129,7 +129,33 @@ const loadP = () => {
 		}
 	);
 };
+function fixTag() {
+	const m = new Map<number, number>();
+	db.all(model(Post)).forEach((a) => {
+		m.set(a.createAt, a.id);
+	});
+	const dl = [] as number[];
+	const p = new Map<number, string[]>();
+	old
+		.prepare('select created,tags from arts')
+		.all()
+		.forEach(({ tags, created }) => {
+			const ts = tags?.split(/[ ,;]/)?.filter((a: string) => a) || [];
+			if (!ts || !ts.length) return;
+			console.log(ts);
+			const id = m.get(created * 1000);
+			if (!id) return;
+			dl.push(id);
+			p.set(id, ts);
+		});
+	tagPostCache.delete(dl);
+	for (const [k, v] of p.entries()) {
+		tagPostCache.setTags(k, v);
+		p;
+	}
+}
 export const readRes = () => {
-	ldR();
-	loadP();
+	// ldR();
+	// loadP();
+	fixTag();
 };

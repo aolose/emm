@@ -73,7 +73,7 @@
 
 	.t {
 		position: absolute;
-		top: 40px;
+		top: 60px;
 		bottom: 50px;
 		left: 0;
 		right: 0;
@@ -83,7 +83,6 @@
 		transform: translate3d(0, 0, 0);
 		clip-path: inset(80px 0 0 0);
 		@include s() {
-			top: 60px;
 			bottom: 10px;
 		}
 	}

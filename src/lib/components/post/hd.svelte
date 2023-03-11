@@ -1,11 +1,15 @@
 <script>
 	export let shrink = 0;
+	export let desc;
 </script>
 
 <div class="ph" class:s={shrink}>
 	<div class="cc">
 		<h1>
 			<slot />
+			{#if desc}
+				<p>{desc}</p>
+			{/if}
 		</h1>
 	</div>
 </div>
@@ -29,10 +33,15 @@
 			color: #4c7fb9;
 			font-weight: 200;
 			text-transform: uppercase;
-
+			text-shadow: rgba(20, 30, 60, 0.4) 1px 1px 30px;
+			p {
+				font-size: 13px;
+				color: var(--darkgrey-h);
+			}
 			&:first-letter {
 				color: #fff;
 			}
+
 			:global {
 				a {
 					color: inherit;
@@ -44,6 +53,7 @@
 	.ph {
 		transform: translate3d(0, 0, 0);
 		position: relative;
+
 		&.s {
 			@include s() {
 				.cc {
