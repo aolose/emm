@@ -143,7 +143,7 @@
 		const r =
 			(await (now ? save : delaySave)({ ...v })
 				.catch((e) => {
-					confirm(getErr(e), null, 'ok');
+					confirm('save fail: '+getErr(e), null, 'ok');
 					throw e;
 				})
 				.finally(() => {
@@ -226,6 +226,7 @@
 		align-items: center;
 		align-content: normal;
 		padding: 10px 8%;
+		margin-top: 20px;
 		@include s() {
 			width: 76%;
 			margin: 0 auto 0 8%;
