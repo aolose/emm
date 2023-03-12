@@ -17,40 +17,6 @@
 	@import '../../lib/break';
 
 	:global {
-		:root {
-			--it: -160px;
-			--skA: -15deg;
-			--skB: 15deg;
-			--poW: 15px;
-			--poL: 108px;
-			--poL2: 150px;
-			--td: column;
-			--tw: 80px;
-			--pl: -10px;
-			--itp: 10px;
-			--mr: 30px;
-			--ex: 80%;
-			--artP: 60px;
-			--artC: 20px 20px 60px;
-			--fs: 48px;
-			@include s() {
-				--fs: 20px;
-				--artC: 0 0 50px;
-				--artP: 20px;
-				--ex: 99%;
-				--mr: 10px;
-				--skA: 0deg;
-				--skB: 0deg;
-				--poL: 0;
-				--poL2: 20px;
-				--it: -5px;
-				--itp: -20px;
-				--td: row;
-				--tw: auto;
-				--pl: 0;
-			}
-		}
-
 		* {
 			color: #808fa9;
 		}
