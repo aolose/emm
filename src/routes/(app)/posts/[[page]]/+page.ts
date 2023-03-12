@@ -1,7 +1,7 @@
-import { useApiLoad } from '$lib/req';
+import { apiLoad } from '$lib/req';
 import { method } from '$lib/enum';
 
-export const load = useApiLoad(
+export const load = apiLoad(
 	'posts',
 	({ params: { page } }) => {
 		return { page: +(page || 1), size: 10 };
