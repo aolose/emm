@@ -9,7 +9,7 @@ try {
 } catch (e) {
 	// ignore
 }
-let i = 10,
+let i = 0,
 	t;
 const b = {};
 

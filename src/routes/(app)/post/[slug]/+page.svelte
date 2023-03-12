@@ -117,9 +117,10 @@
 		border-radius: 4px;
 		overflow: hidden;
 		background: $bg;
-		padding: var(--artP);
+		padding: 60px;
 		box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
 		@include s() {
+			padding: 20px;
 			margin: 0;
 			min-height: 67vh;
 		}
@@ -238,7 +239,7 @@
 		margin: 14px 0 20px;
 		font-weight: 100;
 		text-align: center;
-		font-size: var(--fs);
+		font-size: 48px;
 	}
 
 	.bk {
@@ -324,9 +325,10 @@
 	.v {
 		max-width: 100%;
 		width: 800px;
-		margin: 20px auto 10px;
+		margin: 0 auto;
+		padding-bottom: 50px;
 		@include s() {
-			margin: 0;
+		  padding-bottom: 0;
 		}
 	}
 </style>
