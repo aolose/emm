@@ -326,9 +326,9 @@ export const arrFilter = <T extends Model>(o: T[], keys: (keyof T)[], nullAble =
 	return o.map((v) => filter(v, keys, nullAble));
 };
 
-export const getExt = (f: fView) => {
+export const getExt = (f: fView|File) => {
 	if (!f) return;
-	const t = f.type.split('/')[1];
+	const t =f.type.split('/')[1];
 	if (t) {
 		const match = (/^(x-)?([a-z0-9]+)/.exec(t) || [])[2];
 		if (match) return match.toString();
@@ -366,9 +366,7 @@ export function createFileMd(f: fView | File, u = '') {
 	if (type.startsWith('video/')) {
 		return `<label class="x-video">${name}<video controls><source src="${u}" type="${type}"></video></label>`;
 	}
-	return `<a class="x-file" download href="${u}"><p>${name}</p><span>${fileSize(
-		size
-	)}</span><i class="icon i-down"></i></a>`;
+	return `<x-file name="${name}" type="${getExt(f)}" size="${size}" src="${u}"/>`;
 }
 
 export function file2Md(f: fView[] | File[]) {
@@ -845,3 +843,5 @@ export const clientRestore =
 		}
 		done();
 	};
+
+
