@@ -142,7 +142,6 @@ function fixTag() {
 		.forEach(({ tags, created }) => {
 			const ts = tags?.split(/[ ,;]/)?.filter((a: string) => a) || [];
 			if (!ts || !ts.length) return;
-			console.log(ts);
 			const id = m.get(created * 1000);
 			if (!id) return;
 			dl.push(id);

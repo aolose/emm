@@ -5,7 +5,9 @@
 	import { fade } from 'svelte/transition';
 	import { highlight } from '../use';
 	import { watch } from '$lib/utils';
-
+	import { regElement } from "$lib/components/customent/reg";
+	import File from "$lib/components/post/File.svelte";
+  regElement('x-file',File)
 	let el;
 	let patchMod = false;
 	let rd;
@@ -60,7 +62,6 @@
 		</div>
 	</div>
 {/if}
-
 <style lang="scss">
 	@import '../../lib/break';
 
