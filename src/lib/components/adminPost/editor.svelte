@@ -143,7 +143,7 @@
 		const r =
 			(await (now ? save : delaySave)({ ...v })
 				.catch((e) => {
-					confirm('save fail: '+getErr(e), null, 'ok');
+					confirm('save fail: ' + getErr(e), null, 'ok');
 					throw e;
 				})
 				.finally(() => {

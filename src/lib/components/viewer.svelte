@@ -79,7 +79,8 @@
 				white-space: pre-wrap;
 			}
 
-			p,span {
+			p,
+			span {
 				word-break: break-all;
 			}
 

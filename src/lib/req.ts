@@ -3,6 +3,7 @@ import {
 	decryptBuf,
 	encryptHeader,
 	fetchOpt,
+	getErr,
 	getHeaderDataType,
 	randNum,
 	shareKey,
@@ -21,6 +22,7 @@ import type {
 } from './types';
 import type { Load, LoadEvent } from '@sveltejs/kit';
 import { hooks } from '$lib/apiHooks';
+import { error } from '@sveltejs/kit';
 
 const cacheData = '.d';
 const cacheKey = '.k';
@@ -271,7 +273,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 		delayMap.set(delayKey, [Date.now() + delay, params]);
 		let p = delayPms.get(delayKey);
 		if (!p) {
-			p = new Promise<reqData>((resolve,reject) => {
+			p = new Promise<reqData>((resolve, reject) => {
 				const run = () =>
 					requestAnimationFrame(() => {
 						const dt = delayMap.get(delayKey);
@@ -281,7 +283,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 								delete c.delay;
 								req(url, dt[1], c)
 									.then((r) => resolve(r))
-									.catch(e=>reject(e));
+									.catch((e) => reject(e));
 							} else {
 								run();
 								return;
@@ -335,7 +337,7 @@ export const api = (url: ApiName, cfg?: reqOption) => {
 		return req(url, params, { ...c, ...cfg });
 	};
 };
-export const useApi = (
+export const useApiLoad = (
 	url: ApiName,
 	getParams?: (event: LoadEvent, cfg: reqOption) => reqParams,
 	cfg?: reqOption | ((event: LoadEvent) => reqOption)
@@ -347,6 +349,11 @@ export const useApi = (
 		cfg.ctx = { url: u };
 		return {
 			p: params,
-			d: await req(url, getParams?.(event, cfg), cfg)
+			d: await req(url, getParams?.(event, cfg), cfg).catch((e) => {
+				if (e.status) {
+					throw error(e.status, getErr(e));
+				}
+				return e;
+			})
 		};
 	};

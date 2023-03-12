@@ -1,7 +1,7 @@
-import { useApi } from '$lib/req';
+import { useApiLoad } from '$lib/req';
 import { method } from '$lib/enum';
 
-export const load = useApi(
+export const load = useApiLoad(
 	'posts',
 	({ params: { page, tag } }) => {
 		return {

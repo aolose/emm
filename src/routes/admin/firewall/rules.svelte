@@ -4,7 +4,7 @@
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
 	import { onMount } from 'svelte';
-  export let close
+	export let close;
 	let total = 1;
 	let p = 1;
 	export let pop;
@@ -102,12 +102,12 @@
 
 <style lang="scss">
 	@import '../../../lib/break';
-   .i-close{
-		 display: none;
-		 @include s(){
-			 display: block;
-		 }
-	 }
+	.i-close {
+		display: none;
+		@include s() {
+			display: block;
+		}
+	}
 	.i-set {
 		background: rgba(0, 0, 0, 0.1);
 	}
@@ -220,7 +220,7 @@
 
 		button {
 			padding: 10px 20px;
-      @include s(){
+			@include s() {
 				padding: 10px 15px;
 			}
 			&:hover {
