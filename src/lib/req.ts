@@ -337,7 +337,7 @@ export const api = (url: ApiName, cfg?: reqOption) => {
 		return req(url, params, { ...c, ...cfg });
 	};
 };
-export const useApiLoad = (
+export const apiLoad = (
 	url: ApiName,
 	getParams?: (event: LoadEvent, cfg: reqOption) => reqParams,
 	cfg?: reqOption | ((event: LoadEvent) => reqOption)
