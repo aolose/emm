@@ -405,7 +405,7 @@ export function diffObj<T extends object>(origin: T, change: T) {
 }
 
 export function slugGen(title: string) {
-	return pinyin.convertToPinyin(title, '', true).replace(/ /, '-');
+	return pinyin.convertToPinyin(title, '', true).replace(/ /g, '-');
 }
 
 let _id = 0;
