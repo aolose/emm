@@ -1,4 +1,4 @@
-import { saveCache, useApi } from '$lib/req';
+import { saveCache, useApiLoad } from '$lib/req';
 import { method } from '$lib/enum';
 import { seo, statueSys, status } from '$lib/store';
 import type { headInfo } from '$lib/types';
@@ -61,7 +61,7 @@ if (browser) {
 	status.subscribe(su);
 }
 
-export const load = useApi('statue', undefined, {
+export const load = useApiLoad('statue', undefined, {
 	cache: cacheTime,
 	method: method.GET,
 	done(d: unknown, ctx) {
