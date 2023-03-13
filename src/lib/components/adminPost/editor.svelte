@@ -134,7 +134,9 @@
 		if (
 			!isPublish &&
 			(!o ||
-				(!(o.title_d + o.content_d) && ol.has('title_d') && ol.has('content_d')) ||
+				(!(ol.size === 2 && (o.title_d || '') + (o.content_d || '')) &&
+					ol.has('title_d') &&
+					ol.has('content_d')) ||
 				ol.size === 0)
 		)
 			return (saving = 0);
@@ -146,6 +148,7 @@
 		const k = id(p);
 		if (isPublish) v._p = isPublish;
 		lastTime = Date.now();
+		const curTime = lastTime;
 		const r =
 			(await (now ? save : delaySave)({ ...v })
 				.catch((e) => {
@@ -155,20 +158,10 @@
 				.finally(() => {
 					saving = 0;
 				})) || {};
-		const n = { ...ori, ...p, ...r };
 		if (v._tag) await loadTag();
-		originPost.update((u) => {
-			if (k === id(u) && Date.now() < lastTime) {
-				return n;
-			}
-			return u;
-		});
-		editPost.update((u) => {
-			if (k === id(u)) {
-				return n;
-			}
-			return u;
-		});
+		const n = { ...ori, ...p, ...r };
+		if (id(get(originPost)) === k) originPost.set(n);
+		if (curTime !== lastTime && id(get(editPost)) === k) editPost.set(n);
 		return 1;
 	};
 
