@@ -37,8 +37,12 @@
 	const tUnPub = {
 		name: 'UnPublish',
 		action: () => {
-			saveNow.set(1);
-			editPost.update((p) => ({ ...p, published: 0 }));
+			confirm('revoke publish?').then((a) => {
+				if (a) {
+					saveNow.set(1);
+					editPost.update((p) => ({ ...p, published: 0 }));
+				}
+			});
 		},
 		className: 'icon i-draft',
 		title: 'revoke publish'
@@ -118,6 +122,7 @@
 	};
 	let saving = 0;
 	const id = (a) => a._ || a.id;
+	let lastTime = Date.now();
 	export const autoSave = async (p, isPublish) => {
 		if (saving) return;
 		const now = get(saveNow);
@@ -140,6 +145,7 @@
 		}
 		const k = id(p);
 		if (isPublish) v._p = isPublish;
+		lastTime = Date.now();
 		const r =
 			(await (now ? save : delaySave)({ ...v })
 				.catch((e) => {
@@ -152,7 +158,7 @@
 		const n = { ...ori, ...p, ...r };
 		if (v._tag) await loadTag();
 		originPost.update((u) => {
-			if (k === id(u)) {
+			if (k === id(u) && Date.now() < lastTime) {
 				return n;
 			}
 			return u;
@@ -174,7 +180,7 @@
 			const { id, save, published, modify, title: _title, content } = p;
 			cid = id;
 			const up = modify || 0;
-			const hasDraft = save > up;
+			const hasDraft = !published || save > up;
 			const t = [];
 			t.push(tSet);
 			if ((_title || content) && (title !== _title || draft !== content)) t.push(tDiscard);

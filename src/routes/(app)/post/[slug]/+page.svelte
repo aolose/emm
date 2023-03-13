@@ -117,10 +117,10 @@
 		border-radius: 4px;
 		overflow: hidden;
 		background: $bg;
-		padding: 60px;
+		padding: 60px 80px;
 		box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
 		@include s() {
-			padding: 20px;
+			padding: 20px 40px;
 			margin: 0;
 			min-height: 67vh;
 		}
@@ -240,6 +240,10 @@
 		font-weight: 100;
 		text-align: center;
 		font-size: 48px;
+		@include s() {
+			max-height: 90%;
+			font-size: 32px;
+		}
 	}
 
 	.bk {

@@ -2,12 +2,15 @@
 	import { onMount } from 'svelte';
 	import './easymde.scss';
 	import { filesUpload, selectFile } from '$lib/store';
-	import { createFileMd, createUrl, file2Md } from '$lib/utils';
+	import { createFileMd, createUrl, file2Md, watch } from '$lib/utils';
 
 	let e = '';
 	let editor;
 	export let value = '';
+
 	export let toolbar = [];
+	const wb = watch(toolbar);
+	const wv = watch(value);
 	let ts = '';
 	const base = [
 		'bold',
@@ -34,6 +37,7 @@
 	let tools;
 	$: tools = base.concat(toolbar);
 	const changeTools = () => {
+		if (!editor) return;
 		const bar = editor.toolbar_div;
 		const cm = editor.codemirror;
 		cm.off('cursorActivity');
@@ -52,14 +56,12 @@
 		editor.createToolbar(tools);
 	};
 	$: {
-		if (editor && value !== editor.value()) editor.value(value);
-		const s = JSON.stringify(toolbar);
-		if (editor) {
-			if (ts !== s) {
-				ts = s;
-				changeTools();
+		wv(() => {
+			if (editor && value !== editor.value()) {
+				editor.value(value);
 			}
-		}
+		}, value);
+		wb(changeTools, tools);
 	}
 
 	onMount(async () => {
@@ -99,6 +101,7 @@
 		editor?.codemirror?.on('change', () => {
 			value = editor.value();
 		});
+		editor.value(value);
 	});
 </script>
 
