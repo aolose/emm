@@ -140,10 +140,11 @@
 					font-size: 14px;
 					box-shadow: rgba(0, 0, 0, 0.4) 0 2px 8px -5px;
 					white-space: pre-wrap;
+					color: darkolivegreen;
 
 					&:after {
 						content: '';
-						border: 3px solid rgba(188, 255, 148, 0.55);
+						border: 2px solid rgba(188, 255, 148, 0.55);
 						border-radius: 50%;
 						position: absolute;
 						top: 12px;
@@ -151,7 +152,8 @@
 					}
 
 					&:before {
-						padding: 0 0 0 25px;
+						color: var(--darkgrey-h);
+						padding: 0 0 0 23px;
 						font-size: 12px;
 						content: attr(name);
 						height: 30px;
