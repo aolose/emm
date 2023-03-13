@@ -280,7 +280,7 @@
 		//bottom: 0;
 		background: url('../../../../lib/components/img/1.jpg') center no-repeat;
 		background-size: cover;
-		animation: bg 120s linear infinite alternate-reverse;
+		animation: bg 360s linear infinite alternate-reverse;
 		@include s() {
 			position: relative;
 			border-bottom: none;
