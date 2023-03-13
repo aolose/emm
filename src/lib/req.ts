@@ -1,6 +1,7 @@
 import {
 	body2query,
 	decryptBuf,
+	delay,
 	encryptHeader,
 	fetchOpt,
 	getErr,
@@ -262,42 +263,35 @@ export const saveCache = (
 	saveCacheToStorage();
 };
 
-const delayPms = new Map<string, Promise<reqData>>();
-const delayMap = new Map<string, [number, reqParams?]>();
-
+const delayMap = new Map<string, [Promise<reqData>, (params?: reqParams) => void]>();
 export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 	const done = cfg?.done;
-	const delay = cfg?.delay;
-	if (browser && delay) {
+	const dly = cfg?.delay;
+	if (browser && dly) {
 		const delayKey = reqKey(url, params, cfg?.method, cfg?.delayKey || cfg?.delay);
-		delayMap.set(delayKey, [Date.now() + delay, params]);
-		let p = delayPms.get(delayKey);
-		if (!p) {
-			p = new Promise<reqData>((resolve, reject) => {
-				const run = () =>
-					requestAnimationFrame(() => {
-						const dt = delayMap.get(delayKey);
-						if (dt) {
-							if (Date.now() > dt[0]) {
-								const c = { ...(cfg || {}) };
-								delete c.delay;
-								req(url, dt[1], c)
-									.then((r) => resolve(r))
-									.catch((e) => reject(e));
-							} else {
-								run();
-								return;
-							}
-						}
-					});
-				run();
-			}).finally(() => {
-				delayMap.delete(delayKey);
-				delayPms.delete(delayKey);
+		const w = delayMap.get(delayKey);
+		if (w) {
+			w[1](params);
+			return w[0];
+		} else {
+			const o = [Promise.resolve(), () => void 0] as [
+				Promise<reqData>,
+				(params?: reqParams) => void
+			];
+			o[0] = new Promise((resolve, reject) => {
+				o[1] = delay((params?: reqParams) => {
+					delete cfg?.delay;
+					req(url, params, cfg)
+						.then((a) => resolve(a))
+						.catch((e) => reject(e))
+						.finally(() => {
+							delayMap.delete(delayKey);
+						});
+				}, dly);
 			});
-			delayPms.set(delayKey, p);
+			delayMap.set(delayKey, o);
+			return o[0];
 		}
-		return p;
 	}
 	const key = reqKey(url, params, cfg?.method, cfg?.key);
 	if (cfg?.group) addGroupKey(cfg.group, key);
