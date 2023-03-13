@@ -328,7 +328,7 @@
 		margin: 0 auto;
 		padding-bottom: 50px;
 		@include s() {
-		  padding-bottom: 0;
+			padding-bottom: 0;
 		}
 	}
 </style>

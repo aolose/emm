@@ -80,7 +80,7 @@ const fixContent = (c: string) => {
 			} else
 				return `<x-file name="${o.name}" size="${o.size}" src="/res/${getRes(b)}" type="${
 					o.type
-				}"/>`;
+				}"></x-file>`;
 		});
 };
 const getRes = (m: string) => db.get(model(Res, { md5: m }))?.id || -1;

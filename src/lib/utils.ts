@@ -8,7 +8,6 @@ import { goto } from '$app/navigation';
 import type { reqParams } from './types';
 import JSZip from 'jszip';
 import { confirm, statueSys } from '$lib/store';
-import { get } from 'svelte/store';
 
 const { subtle } = crypto;
 let genKey: CryptoKeyPair;
@@ -326,9 +325,9 @@ export const arrFilter = <T extends Model>(o: T[], keys: (keyof T)[], nullAble =
 	return o.map((v) => filter(v, keys, nullAble));
 };
 
-export const getExt = (f: fView|File) => {
+export const getExt = (f: fView | File) => {
 	if (!f) return;
-	const t =f.type.split('/')[1];
+	const t = f.type.split('/')[1];
 	if (t) {
 		const match = (/^(x-)?([a-z0-9]+)/.exec(t) || [])[2];
 		if (match) return match.toString();
@@ -337,7 +336,7 @@ export const getExt = (f: fView|File) => {
 	return f.name.substring(d);
 };
 
-export function fileSize(size: number) {
+export function fileSize(size = 0) {
 	const m = ['B', 'KB', 'MB', 'GB'];
 	let n = 0;
 	while (size > 512 && n < 3) {
@@ -366,7 +365,7 @@ export function createFileMd(f: fView | File, u = '') {
 	if (type.startsWith('video/')) {
 		return `<label class="x-video">${name}<video controls><source src="${u}" type="${type}"></video></label>`;
 	}
-	return `<x-file name="${name}" type="${getExt(f)}" size="${size}" src="${u}"/>`;
+	return `<x-file name="${name}" type="${getExt(f)}" size="${size}" src="${u}"></x>`;
 }
 
 export function file2Md(f: fView[] | File[]) {
@@ -843,5 +842,3 @@ export const clientRestore =
 		}
 		done();
 	};
-
-
