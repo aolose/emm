@@ -121,6 +121,7 @@
 		});
 	};
 	let saving = 0;
+	let i=0
 	const id = (a) => a._ || a.id;
 	let lastTime = Date.now();
 	export const autoSave = async (p, isPublish) => {
@@ -131,15 +132,11 @@
 		const ori = get(originPost);
 		const o = diffObj(ori, p);
 		const ol = o && new Set(Object.keys(o));
-		if (
-			!isPublish &&
+		if (!isPublish &&
 			(!o ||
-				(!(ol.size === 2 && (o.title_d || '') + (o.content_d || '')) &&
-					ol.has('title_d') &&
-					ol.has('content_d')) ||
-				ol.size === 0)
-		)
-			return (saving = 0);
+				(!(ol.size === 2 && !o.title_d &&!o.content_d)
+					&& ol.has('title_d') && ol.has('content_d'))
+				|| ol.size === 0)) return (saving = 0);
 		const _ = p._;
 		const v = { ...o, _ };
 		if (p.id) {
@@ -149,8 +146,7 @@
 		if (isPublish) v._p = isPublish;
 		lastTime = Date.now();
 		const curTime = lastTime;
-		const r =
-			(await (now ? save : delaySave)({ ...v })
+		const r = (await (now ? save : delaySave)({ ...v })
 				.catch((e) => {
 					confirm('save fail: ' + getErr(e), null, 'ok');
 					throw e;
@@ -161,7 +157,13 @@
 		if (v._tag) await loadTag();
 		const n = { ...ori, ...p, ...r };
 		if (id(get(originPost)) === k) originPost.set(n);
-		if (curTime !== lastTime && id(get(editPost)) === k) editPost.set(n);
+		if (id(get(editPost)) === k) {
+			if(curTime !== lastTime){
+        n.content_d = get(editPost).content_d
+        n.title_d = get(editPost).title_d
+			}
+			editPost.set(n);
+		}
 		return 1;
 	};
 
