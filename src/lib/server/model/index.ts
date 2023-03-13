@@ -42,7 +42,7 @@ export class Tag {
 	desc = TEXT;
 	createAt = INT;
 	userId = INT;
-	banner = TEXT;
+	banner = INT;
 	_posts?: string | { id: number; title: string }[];
 }
 
