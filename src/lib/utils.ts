@@ -300,7 +300,6 @@ export const delay = (fn: (...params: never[]) => void, ms = 0) => {
 		timer = setTimeout(fn, ms, ...params);
 	};
 };
-
 export const filter = <T extends object>(o: Obj<T>, keys: (keyof T)[], nullAble = true) => {
 	if (!o) return o;
 	o = { ...o };

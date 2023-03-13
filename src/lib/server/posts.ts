@@ -43,7 +43,7 @@ export const pubPostList = (
 		})
 	);
 	if (!tagInfo) return o;
-	const e = o as { total: number; items: Post[]; bn?: string; desc?: string };
+	const e = o as { total: number; items: Post[]; bn?: number; desc?: string };
 	if (bn) e.bn = bn;
 	if (desc) e.desc = desc;
 	return e;

@@ -279,7 +279,13 @@ export const combine =
 export const patchPostTags = (ps: Post[]) =>
 	ps.map((a) => {
 		const tags = tagPostCache.getTags(a.id);
-		if (tags.length) a._tag = tags.map((n) => n.name).join();
+		if (tags.length) {
+			a._tag = tags.map((n) => n.name).join();
+			if (!a.banner) {
+				const b = tags.find((a) => a.banner)?.banner;
+				if (b) a.banner = b;
+			}
+		}
 		return a;
 	});
 export const patchPostReqs = (ps: Post[]) =>
