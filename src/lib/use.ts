@@ -63,16 +63,24 @@ export const inner = (node: HTMLElement, child: unknown) => {
 		}
 	};
 };
-export const highlight = delay(async (n: HTMLElement) => {
-	const r = new Set<string>();
-	for (const a of n.querySelectorAll('code')) {
-		let lang = (a.className || '').replace('language-', '') || 'common';
-		a.setAttribute('name', lang);
+const regLang = new Set<string>();
+export const highlight = async (n: string) => {
+	const lan = new Set<string>();
+	const str = n.replace(/<pre><code( class="language-(\w+)")?>/g, (_, a, b) => {
+		let o = 'text';
+		let s = 'common';
+		if (b) {
+			o = b;
+			s = b.replace(/js/g, 'javascript');
+			lan.add(s);
+		}
+		return `<pre><code class="language-${s}" name="${o}">`;
+	});
+	for (const a of lan) {
 		let reg;
-		if (!r.has(lang)) {
-			switch (lang) {
-				case 'js':
-					lang = 'javascript';
+		if (!regLang.has(a)) {
+			switch (a) {
+				case 'javascript':
 					reg = await import('highlight.js/lib/languages/javascript');
 					break;
 				case 'css':
@@ -103,12 +111,17 @@ export const highlight = delay(async (n: HTMLElement) => {
 					break;
 			}
 			if (reg) {
-				hjs.registerLanguage(lang, reg.default);
+				hjs.registerLanguage(a, reg.default);
 			}
 		}
-		a.innerHTML = hjs.highlightAuto(a.innerText).value;
 	}
-}, 60);
+	return str.replace(
+		/(<pre><code class="language-\w+" name="\w+">)((.|\n)+?)<\/code><\/pre>/g,
+		(_, a, b) => {
+			return `${a}${hjs.highlightAuto(b).value}</code></pre>`;
+		}
+	);
+};
 
 export function clipboard(n: HTMLElement, cb: () => void) {
 	let c: Clipboard;

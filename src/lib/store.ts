@@ -13,6 +13,7 @@ import type {
 } from '$lib/types';
 
 import { randNum } from '$lib/utils';
+import type { SvelteComponent } from 'svelte';
 
 const user = writable({
 	token: 'test'
@@ -164,3 +165,6 @@ export const expand = writable(0);
 export const small = writable(0);
 export const statueSys = writable(0);
 export const seo = writable<headInfo>({ key: '', title: '', desc: '' });
+export const elmCpm: { [key: string]: SvelteComponent } = {};
+export const elmProps = writable({});
+export const elmTmpl = writable<{ [key: string]: HTMLElement }>({});

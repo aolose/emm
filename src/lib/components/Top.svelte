@@ -14,7 +14,7 @@
 			let top = 0;
 			const sc = () => {
 				const o = p.scrollTop;
-				if (o < top && o > h/4) a = 1;
+				if (o < top && o > h / 4) a = 1;
 				else b = 0;
 				top = o;
 			};

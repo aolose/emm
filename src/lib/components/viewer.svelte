@@ -1,45 +1,47 @@
 <script>
 	import { marked } from 'marked';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import { editPost } from '$lib/store';
 	import { fade } from 'svelte/transition';
 	import { highlight } from '../use';
-	import { watch } from '$lib/utils';
-	import { regElement } from "$lib/components/customent/reg";
-	import File from "$lib/components/post/File.svelte";
-  regElement('x-file',File)
+	import { delay, watch } from '$lib/utils';
+	import { regElement } from '$lib/components/customent/reg';
+	import File from '$lib/components/post/File.svelte';
+
+	regElement('x-file', File);
 	let el;
-	let patchMod = false;
-	let rd;
 	export let ctx = {};
 	export let close;
 	export let preview = false;
 	let title = '';
 	let content = '';
+	const fx = (s) => s && s.replace(/<(\w+-\w+)( ?(.|\n)*?)\/>/g, '<$1$2></$1>');
 	if (!preview) {
 		title = ctx.title;
-		content = ctx.content;
+		content = fx(ctx.content);
 	}
-	let v;
+	const md = () => `<div class="${el?.className}">${marked.parse(content || '')}</div>`;
+	let v = md();
 	const vw = watch(v);
-	$: v = `<div class="${el?.className}">${marked.parse(content || '')}</div>`;
+	const wc = watch('');
+	const rd = async () => highlight(md()).then((a) => (v = a));
+	const dRd = delay(rd, 100);
 	$: {
-		if (patchMod && el && rd) {
-			rd(el, v);
-		}
-		vw(async () => {
-			await tick();
-			if (el) highlight(el);
+		wc(async () => {
+			if (preview) dRd();
+			else await rd();
+		}, content);
+		vw(() => {
+			if (el) {
+				el.innerHTML = v;
+			}
 		}, v);
 	}
 	onMount(async () => {
 		if (preview) {
-			const d = await import('morphdom');
-			rd = d.default;
-			patchMod = true;
 			return editPost.subscribe((p) => {
 				title = p.title_d;
-				content = p.content_d;
+				content = fx(p.content_d);
 			});
 		}
 	});
@@ -62,6 +64,7 @@
 		</div>
 	</div>
 {/if}
+
 <style lang="scss">
 	@import '../../lib/break';
 
@@ -76,6 +79,7 @@
 			* {
 				line-height: 2;
 			}
+
 			p {
 				white-space: pre-wrap;
 			}
@@ -113,6 +117,7 @@
 				color: #b4ab82;
 				background: rgba(10, 20, 40, 0.4);
 			}
+
 			pre {
 				& > code {
 					border: rgba(0, 0, 0, 0.1) 1px solid;
@@ -123,6 +128,7 @@
 					font-size: 14px;
 					box-shadow: rgba(0, 0, 0, 0.4) 0 2px 8px -5px;
 					white-space: pre-wrap;
+
 					&:after {
 						content: '';
 						border: 3px solid rgba(188, 255, 148, 0.55);
@@ -161,6 +167,7 @@
 				border-radius: 6px;
 				border: 2px solid rgba(3, 169, 244, 0.08);
 			}
+
 			.hljs-section {
 				color: #2196f3;
 			}
@@ -223,10 +230,12 @@
 		:global {
 			a {
 				color: cornflowerblue;
+
 				&:visited {
 					color: #90ace0;
 				}
 			}
+
 			h1,
 			h2,
 			h3,
@@ -269,6 +278,7 @@
 
 			thead {
 				background: rgba(80, 100, 150, 0.1);
+
 				th {
 					color: #acb7cb;
 					font-weight: 200;
