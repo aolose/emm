@@ -17,7 +17,9 @@
 
 <div class="a" style:color style:width={`${size}px`} style:height={`${size * 1.2}px`}>
 	<div class="b" />
-	<span style:font-size={`${(8 + size / 5).toFixed(1)}px`}>{type}</span>
+	<span style:font-size={`${(size / Math.min(3, Math.max(type.length * 1, 2))).toFixed(1)}px`}
+		>{type}</span
+	>
 </div>
 
 <style lang="scss">
@@ -41,5 +43,6 @@
 		bottom: 8%;
 		left: 8%;
 		opacity: 0.8;
+		line-height: 1 !important;
 	}
 </style>

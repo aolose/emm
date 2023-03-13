@@ -21,11 +21,12 @@
 <style lang="scss">
 	.a {
 		border-radius: 5px;
-		padding: 8px 10px;
+		padding: 4px 10px;
 		width: 200px;
 		align-items: center;
 		display: flex;
 		background: linear-gradient(rgba(80, 100, 150, 0.3), rgba(80, 100, 150, 0.2));
+		margin: 10px;
 	}
 	.i {
 		margin-right: 20px;
@@ -45,7 +46,6 @@
 	a {
 		padding: 10px;
 		font-size: 19px;
-		line-height: 1;
 		display: block;
 		text-decoration: none !important;
 	}

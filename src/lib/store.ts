@@ -166,5 +166,5 @@ export const small = writable(0);
 export const statueSys = writable(0);
 export const seo = writable<headInfo>({ key: '', title: '', desc: '' });
 export const elmCpm: { [key: string]: SvelteComponent } = {};
-export const elmProps = writable({});
+export const elmProps = writable<{ [key: string]: object }>({});
 export const elmTmpl = writable<{ [key: string]: HTMLElement }>({});

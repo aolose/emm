@@ -8,6 +8,7 @@
 	import { regElement } from '$lib/components/customent/reg';
 	import File from '$lib/components/post/File.svelte';
 
+	marked.setOptions({ headerIds: true });
 	regElement('x-file', File);
 	let el;
 	export let ctx = {};
@@ -15,12 +16,19 @@
 	export let preview = false;
 	let title = '';
 	let content = '';
-	const fx = (s) => s && s.replace(/<(\w+-\w+)( ?(.|\n)*?)\/>/g, '<$1$2></$1>');
+	const fx = (s) =>
+		s &&
+		s
+			.replace(/<(\w+-\w+)( ?(.|\n)*?)\/>/g, '<$1$2></$1>')
+			.replace(
+				/<(h\d) id="(.+?)">(.+?)<\/\1>/g,
+				'<a class=\'head\' href="#$2" id="$2"><$1>$3</$1></a>'
+			);
 	if (!preview) {
 		title = ctx.title;
-		content = fx(ctx.content);
+		content = ctx.content;
 	}
-	const md = () => `<div class="${el?.className}">${marked.parse(content || '')}</div>`;
+	const md = () => fx(`${marked.parse(content || '')}`);
 	let v = md();
 	const vw = watch(v);
 	const wc = watch('');
@@ -32,7 +40,7 @@
 			else await rd();
 		}, content);
 		vw(() => {
-			if (el) {
+			if (el && preview) {
 				el.innerHTML = v;
 			}
 		}, v);
@@ -70,7 +78,7 @@
 
 	.a {
 		overflow: auto;
-		padding: 20px;
+		padding: 20px 0;
 		display: flex;
 		height: 100%;
 		flex-direction: column;
@@ -80,8 +88,12 @@
 				line-height: 2;
 			}
 
+			.head {
+				text-decoration: none;
+			}
+
 			p {
-				white-space: pre-wrap;
+				//white-space: pre-wrap;
 			}
 
 			p,
@@ -191,13 +203,13 @@
 				color: #1c93ff;
 				font-size: 32px;
 				right: -8px;
+				align-self: flex-start;
 			}
 		}
 	}
 
 	.p {
 		background: var(--bg1);
-		padding: 10px 10px 60px;
 		overflow: hidden;
 		@include s() {
 			padding: 0;
@@ -224,10 +236,21 @@
 	h1 {
 		font-weight: 200;
 		font-size: 40px;
+		margin: auto;
+		@include s() {
+			margin: 0;
+		}
 	}
 
 	.c {
 		:global {
+			& > p::first-letter {
+				padding-left: 2em;
+
+				* {
+					text-indent: 0;
+				}
+			}
 			a {
 				color: cornflowerblue;
 
@@ -242,9 +265,15 @@
 			h4,
 			h5,
 			h6 {
-				color: #ccc;
+				color: #aaa;
+				font-weight: 400;
 				line-height: 2;
 				margin: 10px 0;
+				&:before {
+					content: '#';
+					padding-right: 5px;
+					opacity: 0.5;
+				}
 			}
 
 			ul,
