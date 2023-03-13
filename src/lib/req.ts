@@ -289,6 +289,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 						});
 				}, dly);
 			});
+			o[1](params)
 			delayMap.set(delayKey, o);
 			return o[0];
 		}
