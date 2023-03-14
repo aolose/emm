@@ -1,10 +1,12 @@
 import { get } from 'svelte/store';
 import { tags } from '$lib/server/store';
-import { combine, patchPostTags, tagPostCache } from '$lib/server/cache';
-import { pageBuilder, sqlFields } from '$lib/server/utils';
+import { combine, patchPostReqs, patchPostTags, tagPostCache } from '$lib/server/cache';
+import { model, pageBuilder, resp, sqlFields } from '$lib/server/utils';
 import { Post } from '$lib/server/model';
 import { getPain } from '$lib/utils';
-
+import { db } from '$lib/server/index';
+import { DiffMatchPatch } from 'diff-match-patch-typescript';
+const dmp = new DiffMatchPatch();
 export const pubPostList = (
 	page: number,
 	size: number,
@@ -47,4 +49,51 @@ export const pubPostList = (
 	if (bn) e.bn = bn;
 	if (desc) e.desc = desc;
 	return e;
+};
+
+let patchMap: Map<number, string>;
+let curPost: number;
+export const postList = (page: number, size: number, where?: [string, ...unknown[]]) => {
+	const o = pageBuilder(
+		page,
+		size,
+		Post,
+		['createAt desc'],
+		undefined,
+		where,
+		combine(patchPostTags, patchPostReqs)
+	);
+	return o;
+};
+
+export const postPatch = (id: number, ver: number, patch: string) => {
+	if (!id || !patch) return resp('error patch', 500);
+	if (curPost !== id) {
+		curPost = id;
+		patchMap = new Map();
+		if (ver) return 0;
+	}
+	const p = model(Post, { id });
+	if (!db.get(p)) return resp('post not exist', 404);
+	if (ver === 0) {
+		p.content_d = patch;
+	} else {
+		const content = patchMap.get(ver);
+		if (content !== undefined) {
+			const [r, status = []] = dmp.patch_apply(dmp.patch_fromText(patch), content);
+			const err = status.find((a) => !a);
+			if (err) return resp(0, 200);
+			const nc = r;
+			p.content_d = nc;
+			for (const [v] of patchMap) {
+				if (v < ver) patchMap.delete(v);
+			}
+		} else {
+			return 0;
+		}
+	}
+	db.save(p);
+	ver++;
+	patchMap.set(ver, p.content_d);
+	return [ver, p.save].join();
 };
