@@ -59,7 +59,7 @@ import {
 import { versionStrPatch } from '$lib/setStrPatchFn';
 import { NULL } from '$lib/server/enum';
 import { cmManager } from '$lib/server/comment';
-import { pubPostList } from '$lib/server/posts';
+import { postList, postPatch, pubPostList } from '$lib/server/posts';
 import { restore } from '$lib/server/restore';
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
@@ -606,15 +606,7 @@ const apis: APIRoutes = {
 				}
 			}
 			if (w.length) where = [w.join(' and '), ...v];
-			return pageBuilder(
-				page,
-				size,
-				Post,
-				['createAt desc'],
-				undefined,
-				where,
-				combine(patchPostTags, patchPostReqs)
-			);
+			return postList(page, size, where);
 		})
 	},
 	slug: {
@@ -653,6 +645,26 @@ const apis: APIRoutes = {
 		delete: auth(Admin, async (req) => {
 			const i = new Uint8Array(await req.arrayBuffer());
 			return db.delByPk(Post, [...i]).changes;
+		}),
+		patch: auth(Admin, async (req) => {
+			const t = await req.text();
+			const data: string[] = [];
+			let start = 0;
+			const max = t.length;
+			for (let end = 0; end < max && data.length < 2; end++) {
+				if (t[end] === ',') {
+					data.push(t.slice(start, end));
+					start = end + 1;
+				}
+			}
+			if (start < max) {
+				data.push(t.slice(start));
+			}
+			if (data.length === 3) {
+				return postPatch(+data[0], +data[1], data[2]);
+			} else {
+				return resp('patch error', 500);
+			}
 		}),
 		post: auth(Admin, async (req) => {
 			const [flag, id] = curPostFlag;

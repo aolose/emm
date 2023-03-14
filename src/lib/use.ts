@@ -3,7 +3,6 @@ import Viewer from 'viewerjs';
 import 'viewerjs/dist/viewer.css';
 import hjs from 'highlight.js/lib/common';
 import 'highlight.js/styles/github-dark.css';
-import { delay } from '$lib/utils';
 import Clipboard from 'clipboard';
 
 Viewer.setDefaults({
@@ -118,7 +117,7 @@ export const highlight = async (n: string) => {
 	return str.replace(
 		/(<pre><code class="language-\w+" name="\w+">)((.|\n)+?)<\/code><\/pre>/g,
 		(_, a, b) => {
-			return `${a}${hjs.highlightAuto(b).value.replace(/&amp;/g,'&')}</code></pre>`;
+			return `${a}${hjs.highlightAuto(b).value.replace(/&amp;/g, '&')}</code></pre>`;
 		}
 	);
 };

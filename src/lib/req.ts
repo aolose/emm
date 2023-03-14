@@ -146,11 +146,16 @@ const reqCache = (key: string, run: (re?: cacheRecord) => Promise<reqData>): Pro
 	return r[2];
 };
 
-const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise<reqData> => {
-	let uu = url as string;
+const getHooks = (url: string, method = 0) => {
 	const hks = hooks[url] || {};
-	const mth = reqMethod[cfg?.method || 0].toLowerCase() as keyof typeof hks;
-	const { before } = hks[mth] || {};
+	const mh = reqMethod[method].toLowerCase() as keyof typeof hks;
+	return hks[mh] || {};
+};
+
+const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise<reqData> => {
+	const oriParams = typeof params === 'object' ? { ...params } : params;
+	let uu = url as string;
+	const { before, after, proxy } = getHooks(url, cfg?.method);
 	// global hook
 	if (before) {
 		const b = before(params);
@@ -161,6 +166,13 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 		if (b) params = b;
 		if (u) uu = u;
 	}
+
+	const px = proxy || cfg?.proxy;
+	if (px) {
+		const res = await px(params, cfg);
+		if (res) return res;
+	}
+
 	const enc = browser && cfg?.encrypt;
 
 	if (cfg?.method === method.GET && params) {
@@ -202,13 +214,13 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 		} else {
 			switch (t) {
 				case dataType.json:
-					ru = r.json();
+					ru = await r.json();
 					break;
 				case dataType.text:
-					ru = r.text();
+					ru = await r.text();
 					break;
 				default:
-					ru = r.arrayBuffer();
+					ru = await r.arrayBuffer();
 			}
 		}
 		if (fal) {
@@ -216,6 +228,10 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 				status: r.status,
 				data: await ru
 			};
+		}
+		if (after) {
+			const r = after(oriParams, ru);
+			if (r) ru = r;
 		}
 		return ru;
 	});
@@ -279,8 +295,8 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 				(params?: reqParams) => void
 			];
 			o[0] = new Promise((resolve, reject) => {
+				delete cfg?.delay;
 				o[1] = delay((params?: reqParams) => {
-					delete cfg?.delay;
 					req(url, params, cfg)
 						.then((a) => resolve(a))
 						.catch((e) => reject(e))
@@ -289,7 +305,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 						});
 				}, dly);
 			});
-			o[1](params)
+			o[1](params);
 			delayMap.set(delayKey, o);
 			return o[0];
 		}

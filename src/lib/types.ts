@@ -57,14 +57,16 @@ export type reqOption = {
 	headers?: Headers;
 	encrypt?: boolean;
 	ctx?: unknown;
+	proxy?(data?: unknown, cfg?: reqOption): Promise<reqData>;
 	before?(data: unknown, url?: string, ctx?: unknown): [unknown, string | undefined, Headers?];
 	done?(result: unknown, ctx?: unknown): void;
 	fail?(result: unknown, req: Response, ctx?: unknown): void;
 };
 
 export type apiHook = {
+	proxy?: (param: reqParams, cfg?: reqOption) => Promise<reqData> | reqData | undefined;
 	before?: (param: reqParams) => reqParams | void;
-	after?: (result: never) => unknown;
+	after?: (param: reqParams, result: unknown) => unknown;
 };
 export type apiHooks = {
 	[key: ApiName]: {
