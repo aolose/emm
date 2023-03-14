@@ -47,7 +47,7 @@ export const hooks: apiHooks = {
 					const ori = get(originPost);
 					const old = ori.content_d || ori.content;
 					if (old && ori.id === postId) {
-						const patch = [postId, postVer, content];
+						const patch = [postId, postVer, content.length, content];
 						if (postVer) {
 							const diff = dmp.diff_main(old, content, true);
 							if (diff.length > 2) {
@@ -56,9 +56,15 @@ export const hooks: apiHooks = {
 							const patchList = dmp.patch_make(old, content, diff);
 							const patchText = dmp.patch_toText(patchList);
 							// no diff
-							if(!patchText)return p
+							if (!patchText) return p;
 							if (patchText.length > content.length) return;
-							patch[2] = patchText;
+							patch[3] = patchText;
+							console.clear();
+							console.log('---------debug patch client--------------');
+							console.log('ver:', postVer);
+							console.log('old', old);
+							console.log('new', content);
+							console.log('patch', patchText);
 						}
 						return req('post', patch.join(), { method: method.PATCH });
 					}
