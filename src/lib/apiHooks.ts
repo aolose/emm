@@ -1,6 +1,6 @@
 import type { apiHooks, Obj } from '$lib/types';
 import type { Post, Tag, Comment } from '$lib/server/model';
-import { modelArr2Str } from '$lib/utils';
+import { getErr, modelArr2Str } from '$lib/utils';
 import { DiffMatchPatch } from 'diff-match-patch-typescript';
 import { originPost } from '$lib/store';
 import { get } from 'svelte/store';
@@ -59,14 +59,14 @@ export const hooks: apiHooks = {
 							if (!patchText) return p;
 							if (patchText.length > content.length) return;
 							patch[3] = patchText;
-							console.clear();
-							console.log('---------debug patch client--------------');
-							console.log('ver:', postVer);
-							console.log('old', old);
-							console.log('new', content);
-							console.log('patch', patchText);
 						}
-						return req('post', patch.join(), { method: method.PATCH });
+						return req('post', patch.join(), { method: method.PATCH }).catch((e) => {
+							if (getErr(e).startsWith('patch content length miss match')) {
+								// full send to sync content
+								postVer = 0;
+								return req('post',[postId, postVer, content.length, content].join(),{ method: method.PATCH });
+							}
+						});
 					}
 				}
 			},

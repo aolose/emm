@@ -93,12 +93,6 @@ export const postPatch = (id: number, ver: number, length: number, patch: string
 			if (r.length === length) {
 				p.content_d = r;
 			} else {
-				console.clear();
-				console.log('---------debug patch server--------------');
-				console.log('ver:', ver);
-				console.log('old', content);
-				console.log('new', r);
-				console.log('patch', patch);
 				return resp(`patch content length miss match ${r.length}:${length}`, 500);
 			}
 		} else {
