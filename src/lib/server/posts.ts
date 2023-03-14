@@ -66,30 +66,43 @@ export const postList = (page: number, size: number, where?: [string, ...unknown
 	return o;
 };
 
-export const postPatch = (id: number, ver: number, patch: string) => {
+export const postPatch = (id: number, ver: number, length: number, patch: string) => {
 	if (!id || !patch) return resp('error patch', 500);
 	if (curPost !== id) {
 		curPost = id;
 		patchMap = new Map();
-		if (ver) return 0;
+		if (ver) return resp('patch ver error', 500);
 	}
 	const p = model(Post, { id });
 	if (!db.get(p)) return resp('post not exist', 404);
 	if (ver === 0) {
+		if (patch.length !== length) return resp('patch length miss match', 400);
 		p.content_d = patch;
 	} else {
+		for (const [v] of patchMap) {
+			if (v < ver) patchMap.delete(v);
+		}
 		const content = patchMap.get(ver);
 		if (content !== undefined) {
 			const [r, status = []] = dmp.patch_apply(dmp.patch_fromText(patch), content);
 			const err = status.find((a) => !a);
-			if (err) return resp(0, 200);
-			const nc = r;
-			p.content_d = nc;
-			for (const [v] of patchMap) {
-				if (v < ver) patchMap.delete(v);
+			if (err) {
+				console.log('patch content:', patch, content);
+				return resp('patch fail', 500);
+			}
+			if (r.length === length) {
+				p.content_d = r;
+			} else {
+				console.clear();
+				console.log('---------debug patch server--------------');
+				console.log('ver:', ver);
+				console.log('old', content);
+				console.log('new', r);
+				console.log('patch', patch);
+				return resp(`patch content length miss match ${r.length}:${length}`, 500);
 			}
 		} else {
-			return 0;
+			return resp('patch ver not found', 500);
 		}
 	}
 	db.save(p);

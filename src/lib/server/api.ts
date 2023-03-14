@@ -651,7 +651,7 @@ const apis: APIRoutes = {
 			const data: string[] = [];
 			let start = 0;
 			const max = t.length;
-			for (let end = 0; end < max && data.length < 2; end++) {
+			for (let end = 0; end < max && data.length < 3; end++) {
 				if (t[end] === ',') {
 					data.push(t.slice(start, end));
 					start = end + 1;
@@ -660,8 +660,8 @@ const apis: APIRoutes = {
 			if (start < max) {
 				data.push(t.slice(start));
 			}
-			if (data.length === 3) {
-				return postPatch(+data[0], +data[1], data[2]);
+			if (data.length === 4) {
+				return postPatch(+data[0], +data[1], +data[2], data[3]);
 			} else {
 				return resp('patch error', 500);
 			}
