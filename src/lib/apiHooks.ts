@@ -55,6 +55,8 @@ export const hooks: apiHooks = {
 							}
 							const patchList = dmp.patch_make(old, content, diff);
 							const patchText = dmp.patch_toText(patchList);
+							// no diff
+							if(!patchText)return p
 							if (patchText.length > content.length) return;
 							patch[2] = patchText;
 						}
