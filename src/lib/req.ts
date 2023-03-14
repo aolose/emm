@@ -280,8 +280,7 @@ export const saveCache = (
 	reqCacheMap.set(key, r);
 	saveCacheToStorage();
 };
-
-const delayMap = new Map<string, [connectFn, (params?: reqParams) => void]>();
+const delayMap = new Map<string, [connectFn, (params?: reqParams) => void, boolean]>();
 export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 	const done = cfg?.done;
 	const dly = cfg?.delay;
@@ -289,28 +288,37 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 		const delayKey = reqKey(url, params, cfg?.method, cfg?.delayKey || cfg?.delay);
 		const w = delayMap.get(delayKey);
 		if (w) {
-			w[1](params);
-			return new Promise(w[0]);
-		} else {
-			const connect = {} as PromiseConnector;
-			const connectFn: connectFn = (resolve, reject) => {
-				connect.resolve = resolve;
-				connect.reject = reject;
-			};
-			const cf = { ...(cfg || {}) };
-			delete cf.delay;
-			const delayReq = delay((params?: reqParams) => {
-				req(url, params, cf)
-					.then((a: reqData) => connect.resolve(a))
-					.catch((e: reqData) => connect.reject(e))
-					.finally(() => {
-						delayMap.delete(delayKey);
-					});
-			}, dly);
-			delayMap.set(delayKey, [connectFn, delayReq]);
-			delayReq(params);
-			return new Promise(connectFn);
+			if (w[2]) {
+				// drop pending request
+				w[0]();
+				delayMap.delete(delayKey);
+			} else {
+				w[1](params);
+				return new Promise(w[0]);
+			}
 		}
+		const connect = {} as PromiseConnector;
+		const connectFn: connectFn = (resolve, reject) => {
+			connect.resolve = resolve;
+			connect.reject = reject;
+		};
+		const cf = { ...(cfg || {}) };
+		delete cf.delay;
+		const delayReq = delay((params?: reqParams) => {
+			const rec = delayMap.get(delayKey);
+			if (!rec)return
+			rec[2] = true;
+			req(url, params, cf)
+				.then((a: reqData) => connect.resolve?.(a))
+				.catch((e: reqData) => connect.reject?.(e)).finally(()=>{
+			    // request finish
+					// make reusable
+					rec[2]=false
+			});
+		}, dly);
+		delayMap.set(delayKey, [connectFn, delayReq, false]);
+		delayReq(params);
+		return new Promise(connectFn);
 	}
 	const key = reqKey(url, params, cfg?.method, cfg?.key);
 	if (cfg?.group) addGroupKey(cfg.group, key);
