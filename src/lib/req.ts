@@ -15,7 +15,9 @@ import { browser } from '$app/environment';
 import type {
 	ApiName,
 	cacheRecord,
+	connectFn,
 	MethodNumber,
+	PromiseConnector,
 	reqCache,
 	reqData,
 	reqOption,
@@ -279,7 +281,7 @@ export const saveCache = (
 	saveCacheToStorage();
 };
 
-const delayMap = new Map<string, [Promise<reqData>, (params?: reqParams) => void]>();
+const delayMap = new Map<string, [connectFn, (params?: reqParams) => void]>();
 export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 	const done = cfg?.done;
 	const dly = cfg?.delay;
@@ -288,26 +290,26 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 		const w = delayMap.get(delayKey);
 		if (w) {
 			w[1](params);
-			return w[0];
+			return new Promise(w[0]);
 		} else {
-			const o = [Promise.resolve(), () => void 0] as [
-				Promise<reqData>,
-				(params?: reqParams) => void
-			];
-			o[0] = new Promise((resolve, reject) => {
-				delete cfg?.delay;
-				o[1] = delay((params?: reqParams) => {
-					req(url, params, cfg)
-						.then((a) => resolve(a))
-						.catch((e) => reject(e))
-						.finally(() => {
-							delayMap.delete(delayKey);
-						});
-				}, dly);
-			});
-			o[1](params);
-			delayMap.set(delayKey, o);
-			return o[0];
+			const connect = {} as PromiseConnector;
+			const connectFn: connectFn = (resolve, reject) => {
+				connect.resolve = resolve;
+				connect.reject = reject;
+			};
+			const cf = { ...(cfg || {}) };
+			delete cf.delay;
+			const delayReq = delay((params?: reqParams) => {
+				req(url, params, cf)
+					.then((a: reqData) => connect.resolve(a))
+					.catch((e: reqData) => connect.reject(e))
+					.finally(() => {
+						delayMap.delete(delayKey);
+					});
+			}, dly);
+			delayMap.set(delayKey, [connectFn, delayReq]);
+			delayReq(params);
+			return new Promise(connectFn);
 		}
 	}
 	const key = reqKey(url, params, cfg?.method, cfg?.key);
