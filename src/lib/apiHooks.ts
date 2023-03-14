@@ -39,8 +39,7 @@ export const hooks: apiHooks = {
 				const o = p as Obj<Post>;
 				const keys = Object.keys(o);
 				const content = o.content_d;
-				if (keys.length === 2 && o.id) {
-					if (!content) return { id: o.id };
+				if (keys.length === 2 && o.id && 'content_d' in o && content) {
 					if (o.id !== postId) {
 						postId = o.id;
 						postVer = 0;

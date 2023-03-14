@@ -117,6 +117,7 @@ export const highlight = async (n: string) => {
 	return str.replace(
 		/(<pre><code class="language-\w+" name="\w+">)((.|\n)+?)<\/code><\/pre>/g,
 		(_, a, b) => {
+			console.log('xxx', a, b);
 			return `${a}${hjs.highlightAuto(b).value.replace(/&amp;/g, '&')}</code></pre>`;
 		}
 	);
