@@ -143,5 +143,5 @@ export type PatchFn<T> = (data: T, add?: T, del?: T) => T;
 export type DiffFn<T> = (old: T, cur: T) => { add: T; del: T };
 export type func<T> = (this: T, ...params: unknown[]) => unknown;
 type pmsFn = (r: reqData | PromiseLike<reqData>) => void;
-export type PromiseConnector = { resolve: pmsFn; reject: pmsFn };
-export type connectFn = (resolve: pmsFn, reject: pmsFn) => void;
+export type PromiseConnector = { resolve?: pmsFn; reject?: pmsFn };
+export type connectFn = (resolve?: pmsFn, reject?: pmsFn) => void;
