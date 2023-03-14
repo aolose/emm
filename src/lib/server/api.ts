@@ -677,7 +677,9 @@ const apis: APIRoutes = {
 			const d = model(Post, o) as { id: number };
 			db.save(d);
 			if (o._) curPostFlag = [o._, d.id];
-			return filter(diffObj(o as Post, d) as Obj<Post>, [], false);
+			const v = diffObj(o as Post, d) as Obj<Post>;
+			if (v) delete v.content;
+			return filter(v, [], false);
 		})
 	},
 	res: {
