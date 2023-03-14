@@ -11,6 +11,9 @@
 	marked.setOptions({ headerIds: true });
 	regElement('x-file', File);
 	let el;
+	let mor;
+	let patchMod = false;
+
 	export let ctx = {};
 	export let close;
 	export let preview = false;
@@ -41,12 +44,17 @@
 		}, content);
 		vw(() => {
 			if (el && preview) {
-				el.innerHTML = v;
+				if (patchMod && el && mor) {
+					mor(el, `<div class="${el.className}">${v}</div>`);
+				} else el.innerHTML = v;
 			}
 		}, v);
 	}
 	onMount(async () => {
 		if (preview) {
+			const d = await import('morphdom');
+			mor = d.default;
+			patchMod = true;
 			return editPost.subscribe((p) => {
 				title = p.title_d;
 				content = fx(p.content_d);
