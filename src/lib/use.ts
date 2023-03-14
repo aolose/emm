@@ -1,8 +1,7 @@
 import { page } from '$app/stores';
 import Viewer from 'viewerjs';
 import 'viewerjs/dist/viewer.css';
-import hjs from 'highlight.js/lib/common';
-import 'highlight.js/styles/github-dark.css';
+import hjs from 'highlight.js';
 import Clipboard from 'clipboard';
 
 Viewer.setDefaults({
@@ -63,6 +62,13 @@ export const inner = (node: HTMLElement, child: unknown) => {
 	};
 };
 const regLang = new Set<string>();
+const unEscape = (str:string)=>{
+	return str.replace(/&lt;/g , "<")
+		.replace(/&gt;/g , ">")
+		.replace(/&quot;/g , "\"")
+		.replace(/&#39;/g , "'")
+		.replace(/&amp;/g , "&")
+}
 export const highlight = async (n: string) => {
 	const lan = new Set<string>();
 	const str = n.replace(/<pre><code( class="language-(\w+)")?>/g, (_, a, b) => {
@@ -70,7 +76,7 @@ export const highlight = async (n: string) => {
 		let s = 'common';
 		if (b) {
 			o = b;
-			s = b.replace(/js/g, 'javascript');
+			s = b.replace(/js/g, 'javascript').replace('html','xml');
 			lan.add(s);
 		}
 		return `<pre><code class="language-${s}" name="${o}">`;
@@ -117,12 +123,18 @@ export const highlight = async (n: string) => {
 	return str.replace(
 		/(<pre><code class="language-\w+" name="\w+">)((.|\n)+?)<\/code><\/pre>/g,
 		(_, a, b) => {
-			console.log('xxx', a, b);
-			return `${a}${hjs.highlightAuto(b).value.replace(/&amp;/g, '&')}</code></pre>`;
+			let i = 1
+			let l = b.length
+			const num = [i]
+			while (l--){
+				if(b[l]==='\n')num.push(++i)
+			}
+			const len = (i+'').length
+			const line = `<div class="line" style="width:${len+1}em">${num.map(a=>`<div>${a}</div>`).join('')}</div>`
+			return `${a}${line}<div class="code">${hjs.highlightAuto(unEscape(b)).value}</div></code></pre>`;
 		}
 	);
 };
-
 export function clipboard(n: HTMLElement, cb: () => void) {
 	let c: Clipboard;
 	const r = (n: HTMLElement, cb: () => void) => {
