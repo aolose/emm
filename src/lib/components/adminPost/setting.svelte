@@ -37,7 +37,7 @@
 		setting.set(0);
 		selectFile(1, 'image/*')
 			.then((a) => {
-				post = { ...post, banner: a[0].id + '' };
+				if (a) post = { ...post, banner: a[0].id + '' };
 			})
 			.finally(() => setting.set(1));
 	};

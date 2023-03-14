@@ -83,7 +83,7 @@
 
 <style lang="scss">
 	@import '../../lib/break';
-  @import 'highlight.js/styles/github-dark.css';
+	@import 'highlight.js/styles/github-dark.css';
 	.a {
 		overflow: auto;
 		padding: 20px 0;
@@ -147,26 +147,28 @@
 					font-size: 14px;
 					box-shadow: rgba(0, 0, 0, 0.4) 0 2px 8px -5px;
 					white-space: pre-wrap;
-          background: rgba(7,8,10,.4);
+					background: rgba(7, 8, 10, 0.4);
 					padding: 32px 0 3px;
 					display: flex;
-					.code{
-						padding:  0 10px;
+					.code {
+						padding: 0 10px;
 					}
-					.line{
-						background: rgba(0,0,0,.5);
-						border-right: 1px solid rgba(100,120,150,.1);
+					.line {
+						background: rgba(0, 0, 0, 0.5);
+						border-right: 1px solid rgba(100, 120, 150, 0.2);
 						display: flex;
 						flex-direction: column;
 						user-select: none;
-						div{
+						justify-content: center;
+						align-items: center;
+						div {
+							padding-top: 3px;
 							user-select: none;
-							color: rgba(100,120,150,.8);
+							color: rgba(100, 120, 150, 0.8);
 							justify-content: flex-end;
-							align-items: center;
+							align-items: flex-start;
 							display: flex;
 							font-size: 12px;
-							padding-right: 0.7em;
 							flex: 1;
 						}
 					}
