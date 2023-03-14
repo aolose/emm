@@ -306,15 +306,16 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 		delete cf.delay;
 		const delayReq = delay((params?: reqParams) => {
 			const rec = delayMap.get(delayKey);
-			if (!rec)return
+			if (!rec) return;
 			rec[2] = true;
 			req(url, params, cf)
 				.then((a: reqData) => connect.resolve?.(a))
-				.catch((e: reqData) => connect.reject?.(e)).finally(()=>{
-			    // request finish
+				.catch((e: reqData) => connect.reject?.(e))
+				.finally(() => {
+					// request finish
 					// make reusable
-					rec[2]=false
-			});
+					rec[2] = false;
+				});
 		}, dly);
 		delayMap.set(delayKey, [connectFn, delayReq, false]);
 		delayReq(params);

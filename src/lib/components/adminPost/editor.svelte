@@ -59,8 +59,11 @@
 		name: 'Discard',
 		action: () => {
 			editPost.update((p) => {
-				const { title, content } = p;
-				return { ...p, title_d: title, content_d: content };
+				confirm('replace draft with latest published post?').then((a) => {
+					if (!a) return;
+					const { title, content } = p;
+					return { ...p, title_d: title, content_d: content };
+				});
 			});
 		},
 		className: 'icon i-drop',
@@ -158,7 +161,7 @@
 				})) || {};
 		if (v._tag) await loadTag();
 		const n = { ...ori, ...p, ...r };
-		if (id(get(originPost)) === k) originPost.set(n);
+		if (id(get(originPost)) === k) originPost.set({ ...n });
 		else {
 			const ps = get(posts);
 			const p = ps.find((a) => a.id === k);
@@ -170,7 +173,7 @@
 		if (id(get(editPost)) === k) {
 			n.content_d = get(editPost).content_d;
 			n.title_d = get(editPost).title_d;
-			editPost.set(n);
+			editPost.set({ ...n });
 		}
 		return 1;
 	};
