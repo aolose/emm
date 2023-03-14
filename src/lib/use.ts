@@ -62,13 +62,14 @@ export const inner = (node: HTMLElement, child: unknown) => {
 	};
 };
 const regLang = new Set<string>();
-const unEscape = (str:string)=>{
-	return str.replace(/&lt;/g , "<")
-		.replace(/&gt;/g , ">")
-		.replace(/&quot;/g , "\"")
-		.replace(/&#39;/g , "'")
-		.replace(/&amp;/g , "&")
-}
+const unEscape = (str: string) => {
+	return str
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&quot;/g, '"')
+		.replace(/&#39;/g, "'")
+		.replace(/&amp;/g, '&');
+};
 export const highlight = async (n: string) => {
 	const lan = new Set<string>();
 	const str = n.replace(/<pre><code( class="language-(\w+)")?>/g, (_, a, b) => {
@@ -76,7 +77,7 @@ export const highlight = async (n: string) => {
 		let s = 'common';
 		if (b) {
 			o = b;
-			s = b.replace(/js/g, 'javascript').replace('html','xml');
+			s = b.replace(/js/g, 'javascript').replace('html', 'xml');
 			lan.add(s);
 		}
 		return `<pre><code class="language-${s}" name="${o}">`;
@@ -123,15 +124,19 @@ export const highlight = async (n: string) => {
 	return str.replace(
 		/(<pre><code class="language-\w+" name="\w+">)((.|\n)+?)<\/code><\/pre>/g,
 		(_, a, b) => {
-			let i = 1
-			let l = b.length
-			const num = [i]
-			while (l--){
-				if(b[l]==='\n')num.push(++i)
+			let i = 1;
+			let l = b.length;
+			const num = [i];
+			while (l--) {
+				if (b[l] === '\n') num.push(++i);
 			}
-			const len = (i+'').length
-			const line = `<div class="line" style="width:${len+1}em">${num.map(a=>`<div>${a}</div>`).join('')}</div>`
-			return `${a}${line}<div class="code">${hjs.highlightAuto(unEscape(b)).value}</div></code></pre>`;
+			const len = (i + '').length;
+			const line = `<div class="line" style="width:${len + 1}em">${num
+				.map((a) => `<div>${a}</div>`)
+				.join('')}</div>`;
+			return `${a}${line}<div class="code">${
+				hjs.highlightAuto(unEscape(b)).value
+			}</div></code></pre>`;
 		}
 	);
 };
