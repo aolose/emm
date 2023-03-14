@@ -65,7 +65,7 @@ export const hooks: apiHooks = {
 								// full send to sync content
 								postVer = 0;
 								return req('post',[postId, postVer, content.length, content].join(),{ method: method.PATCH });
-							}
+							}else throw e
 						});
 					}
 				}
