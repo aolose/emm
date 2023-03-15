@@ -5,6 +5,7 @@ import { regHjs } from "$lib/hjs";
 
 export const load = apiLoad('post', ({ params: { slug } }) => slug, {
   method: method.GET,
+  cache: 1e3 * 3600 * 3,
   async done(result) {
     const p = result as Post
     const lang = new Set((p.content.match(/```[a-z0-9]+/g)||[]).map(a=>a.slice(3)))
