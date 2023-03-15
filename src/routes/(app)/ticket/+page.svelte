@@ -12,7 +12,7 @@
 	import { permission } from '$lib/enum';
 	import Post from './post.svelte';
 	import Head from '$lib/components/Head.svelte';
-	import { seo } from '$lib/store';
+	import { h } from '$lib/store';
 
 	let a;
 	let sc;
@@ -91,7 +91,7 @@
 	let idx;
 </script>
 
-<Head title={`${$seo.title} - Ticket`} />
+<Head title={`${$h.title} - Ticket`} />
 <UpDownScroll bind:down={a} />
 <svelte:window on:sveltekit:navigation-end={scTop} />
 <Canvas type={1} />

@@ -1,11 +1,10 @@
 import { saveCache, apiLoad } from '$lib/req';
 import { method } from '$lib/enum';
-import { seo, statueSys, status } from '$lib/store';
+import { statueSys, status ,h} from '$lib/store';
 import type { headInfo } from '$lib/types';
 import { redirect } from '@sveltejs/kit';
 import type { Page } from '@sveltejs/kit';
 import { page } from '$app/stores';
-import { h } from './head';
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 
@@ -25,7 +24,7 @@ const jump = async () => {
 		} else throw redirect(307, rd);
 	}
 };
-
+let loaded=0
 type saveData = headInfo & { statue: number; sys: number };
 let cacheData = {} as saveData;
 let sys = 0;
@@ -39,14 +38,10 @@ const ps = (p: Page) => {
 	routId = p.route?.id || '';
 	pathname = p.url?.pathname || '';
 };
-const ss = (a: headInfo) => {
-	const cur = a[routId] as headInfo;
-	const { title, key, desc } = { ...a, ...cur } as { title: string; key: string; desc: string };
-	h.set({ title, key, desc });
-};
 
 const save = (a: saveData) => {
 	cacheData = { ...cacheData, ...a };
+	if(!loaded)return
 	saveCache('statue', undefined, cacheData, cacheTime);
 };
 
@@ -57,25 +52,23 @@ const su = async (s: number) => {
 
 if (browser) {
 	page.subscribe(ps);
-	seo.subscribe(ss);
 	status.subscribe(su);
 }
-
 export const load = apiLoad('statue', undefined, {
 	cache: cacheTime,
 	method: method.GET,
-	done(d: unknown, ctx) {
+	async done(d: unknown, ctx) {
+		loaded=1
 		cacheData = d as headInfo & { statue: number; sys: number };
 		pathname = (ctx as { url: URL }).url.pathname;
 		sys = cacheData.sys;
 		stu = cacheData.statue;
+		h.set(cacheData)
 		if (browser) {
-			seo.update((a) => ({ ...a, ...cacheData }));
 			statueSys.set(sys);
 			status.set(stu);
 		} else {
-			ss(cacheData);
-			su(stu);
+			await su(stu);
 		}
 	}
 });

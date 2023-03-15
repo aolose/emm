@@ -1,5 +1,5 @@
 <script>
-	import { bgColor, goBack, time } from '$lib/utils';
+	import { bgColor, goBack, time,getPain } from '$lib/utils';
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
 	import PF from '$lib/components/post/pf.svelte';
@@ -15,7 +15,9 @@
 	const p = data.p;
 	let sly = '';
 	let style;
+	let desc
 	$: {
+		desc = d.desc||getPain(d.content).slice(0,80)+'...'
 		if (d.createAt)
 			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
 		if (d.banner) {
@@ -24,10 +26,10 @@
 	}
 </script>
 
-<Head title={d.title} description={d.desc}>
+<Head title={d.title} description={desc}>
 	<meta name="og:type" content="article" />
 	<meta name="og:title" content={d.title} />
-	<meta name="og:description" content={d.desc} />
+	<meta name="og:description" content={desc} />
 	<meta name="og:url" content={d.slug} />
 	<meta name="article:published_time" content={time(d.createAt)} />
 	<meta name="article:tag" content={d._tag} />

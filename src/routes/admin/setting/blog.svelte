@@ -5,8 +5,7 @@
 	import Ipt from './Ipt.svelte';
 	import { getErr, trim } from '$lib/utils';
 	import { req } from '$lib/req';
-	import { seo } from '$lib/store';
-
+    import {h} from '$lib/store'
 	let nm;
 	let bio;
 	let msg;
@@ -43,7 +42,7 @@
 				sys.update((a) => ({ ...a, ...o }));
 				err = 0;
 				msg = 'update success';
-				seo.update((a) => ({ ...a, title: nm, key: key, desc: desc }));
+				h.set({title: nm, key: key, desc: desc });
 			})
 			.catch((e) => {
 				act = 1;

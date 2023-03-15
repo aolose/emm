@@ -3,7 +3,7 @@
 	import Canvas from '$lib/components/ctx.svelte';
 	import { bubbles, getColor } from '$lib/utils';
 	import UpDownScroll from '$lib/components/upDownScroll.svelte';
-	import { expand, seo } from '$lib/store';
+	import { expand, h } from '$lib/store';
 	import { fade } from 'svelte/transition';
 	import Head from '$lib/components/Head.svelte';
 
@@ -12,7 +12,7 @@
 	const d = data.d.split(',').filter((a) => a);
 </script>
 
-<Head title={`${$seo.title} - tags`} />
+<Head title={`${$h.title} - tags`} />
 <UpDownScroll bind:down={a} />
 <Canvas type={2} />
 <div class="o" class:e={$expand} transition:fade>

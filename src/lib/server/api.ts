@@ -121,6 +121,17 @@ const apis: APIRoutes = {
 					if (c.ok(permission.Admin) || c.ok(permission.Read)) s = 1;
 				}
 			}
+			console.log('ssss',filter(
+				{
+					statue: s,
+					sys: sysStatue,
+					key: sys?.seoKey,
+					desc: sys?.seoDesc,
+					title: sys?.blogName
+				},
+				[],
+				false
+			))
 			return filter(
 				{
 					statue: s,
