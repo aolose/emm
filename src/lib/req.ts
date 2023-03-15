@@ -336,8 +336,8 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 			}
 			return d;
 		})
-			.then((d) => {
-				if (done) done(d, cfg?.ctx);
+			.then(async (d) => {
+				if (done) await done(d, cfg?.ctx);
 				return d;
 			})
 			.catch((e) => {
