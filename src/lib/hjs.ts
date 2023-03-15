@@ -17,6 +17,13 @@ export async function regHjs (lan:Set<string>){
 			case 'css':
 				reg = await import('highlight.js/lib/languages/css');
 				break;
+			case 'lua':
+				reg = await import('highlight.js/lib/languages/lua');
+				break;
+			case 'sh':
+			case 'bash':
+				reg = await import('highlight.js/lib/languages/bash');
+				break;
 			case 'scss':
 				reg = await import('highlight.js/lib/languages/scss');
 				break;
