@@ -1,12 +1,12 @@
 <script>
 	import Menu from './sideMenu.svelte';
-	import { seo } from '$lib/store';
+	import { h } from '$lib/store';
 	import Head from '$lib/components/Head.svelte';
 
 	export let data;
 </script>
 
-<Head title={`${$seo.title} - Admin`} />
+<Head title={`${$h.title} - Admin`} />
 <div class="a">
 	<div class="b">
 		<Menu />

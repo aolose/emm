@@ -2,8 +2,9 @@
 	import Bird from '$lib/components/brid.svelte';
 	import { slidLeft } from '$lib/transition';
 	import Ctx from '$lib/components/ctx.svelte';
+	import Head from "$lib/components/Head.svelte";
 </script>
-
+<Head/>
 <Ctx />
 <div class="b">
 	<div class="bb">

@@ -21,6 +21,11 @@ const user = writable({
 
 const confirmCfg = {} as cfOpt;
 const fileManagerCfg = {} as fileSelectCfg;
+export const h = writable({
+	title: '',
+	key: '',
+	desc: ''
+});
 
 export const fileManagerStore = writable(fileManagerCfg);
 export const confirmStore = writable({ ...confirmCfg });
@@ -164,7 +169,6 @@ export const msg = writable('');
 export const expand = writable(0);
 export const small = writable(0);
 export const statueSys = writable(0);
-export const seo = writable<headInfo>({ key: '', title: '', desc: '' });
 export const elmCpm: { [key: string]: SvelteComponent } = {};
 export const elmProps = writable<{ [key: string]: object }>({});
 export const elmTmpl = writable<{ [key: string]: HTMLElement }>({});

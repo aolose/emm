@@ -33,18 +33,10 @@ export type Model =
 export type Obj<T extends object> = {
 	[key in keyof T]?: T[key];
 };
-type _h =
-	| {
-			title: string;
-			desc: string;
-			key: string;
-	  }
-	| string;
 export type headInfo = {
-	title: _h;
-	desc: _h;
-	key: _h;
-	[key: string]: _h;
+	title: string;
+	desc: string;
+	key: string;
 };
 export type reqOption = {
 	cache?: number;

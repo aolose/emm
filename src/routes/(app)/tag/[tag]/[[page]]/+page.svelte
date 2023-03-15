@@ -3,7 +3,7 @@
 	import Posts from '$lib/components/post/list.svelte';
 	import { onMount } from 'svelte';
 	import Head from '$lib/components/Head.svelte';
-	import { seo } from '$lib/store';
+	import { h } from '$lib/store';
 
 	export let data;
 	const { d } = data;
@@ -16,7 +16,7 @@
 	});
 </script>
 
-<Head title={`${$seo.title} - ${tag}`} />
+<Head title={`${$h.title} - ${tag}`} />
 <Posts {d} name={`tag/${tag}`}>
 	<a href="/tags">{tag}</a>
 </Posts>
