@@ -150,6 +150,7 @@
 					background: rgba(7, 8, 10, 0.4);
 					padding: 32px 0 3px;
 					display: flex;
+					word-break: break-all;
 					.code {
 						padding: .1em 10px .5em;
 					}
