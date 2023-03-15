@@ -155,6 +155,7 @@
 						padding: .1em 10px .5em;
 					}
 					.line {
+						flex-shrink: 0;
 						background: rgba(0, 0, 0, 0.5);
 						border-right: 1px solid rgba(100, 120, 150, 0.2);
 						display: flex;
