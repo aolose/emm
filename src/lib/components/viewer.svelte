@@ -151,7 +151,7 @@
 					padding: 32px 0 3px;
 					display: flex;
 					.code {
-						padding: 0 10px;
+						padding: .1em 10px .5em;
 					}
 					.line {
 						background: rgba(0, 0, 0, 0.5);
@@ -161,6 +161,7 @@
 						user-select: none;
 						justify-content: center;
 						align-items: center;
+						padding: .1em 0 .5em;
 						div {
 							padding-top: 3px;
 							user-select: none;
