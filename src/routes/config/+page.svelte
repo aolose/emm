@@ -239,12 +239,6 @@
 <style lang="scss">
 	@import '../../lib/break';
 
-	:global {
-		* {
-			//font-family: 'Architects Daughter', -apple-system;
-		}
-	}
-
 	.o {
 		background: url('$lib/components/img/fav.png') left center no-repeat;
 		background-size: contain;
@@ -252,7 +246,7 @@
 		width: 300px;
 		margin-bottom: 30px;
 		padding-left: 70px;
-		font-family: 'Architects Daughter', -apple-system;
+		font-family: 'Architects Daughter';
 		color: #fff;
 		font-size: 20px;
 		display: flex;

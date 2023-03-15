@@ -1,12 +1,6 @@
 @import url(./font/icon.css);
 @import url(./font/fas.css);
 @import url(./font/font.css);
-@font-face {
-	font-family: 'hp';
-	font-weight: 300;
-	src: url('font/hp.woff2') format('woff2'), url('font/hp.woff') format('woff');
-	font-display: swap;
-}
 a {
 	text-decoration: none;
 }
@@ -34,7 +28,7 @@ a {
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
-	font-family: hp, 'Helvetica Neue', Helvetica, STHeiTi, sans-serif;
+	font-family: -apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif;
 	position: relative;
 	background: none;
 	border: none;
