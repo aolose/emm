@@ -84,12 +84,12 @@
 		font-size: 30px;
 		align-items: center;
 		justify-content: center;
-		font-family: 'Architects Daughter', -apple-system;
+		font-family: 'Architects Daughter';
 	}
 
 	p {
 		font-size: 18px;
-		font-family: 'Architects Daughter', -apple-system;
+		font-family: 'Architects Daughter';
 		top: 55%;
 		transform: translateY(-50%);
 		position: absolute;

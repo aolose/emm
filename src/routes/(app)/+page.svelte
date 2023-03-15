@@ -29,8 +29,7 @@
 		text-align: left;
 		display: block;
 		font-size: 20px;
-		font-family: 'Architects Daughter', -apple-system, BlinkMacSystemFont, PingFang SC,
-			Helvetica Neue, STHeiti, Microsoft Yahei, Tahoma, Simsun, sans-serif;
+		font-family: 'Architects Daughter';
 		position: relative;
 		opacity: 0.8;
 		white-space: nowrap;
@@ -62,8 +61,6 @@
 		bottom: 30px;
 		left: 30px;
 		color: #fff;
-		font-family: -apple-system, BlinkMacSystemFont, PingFang SC, Helvetica Neue, STHeiti,
-			Microsoft Yahei, Tahoma, Simsun, sans-serif;
 		font-size: 13px;
 		border: 1px solid;
 		padding: 5px 15px;

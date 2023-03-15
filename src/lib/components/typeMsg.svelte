@@ -55,8 +55,7 @@
 <style lang="scss">
 	p {
 		font-size: inherit;
-		font-family: 'Architects Daughter', -apple-system, BlinkMacSystemFont, PingFang SC,
-			Helvetica Neue, STHeiti, Microsoft Yahei, Tahoma, Simsun, sans-serif;
+		font-family: 'Architects Daughter';
 		color: inherit;
 		text-align: inherit;
 	}
