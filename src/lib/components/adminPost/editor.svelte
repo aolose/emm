@@ -137,9 +137,7 @@
 		if (
 			!isPublish &&
 			(!o ||
-				(!(ol.size === 2 && !o.title_d && !o.content_d) &&
-					ol.has('title_d') &&
-					ol.has('content_d')) ||
+				(ol.size === 2 && !o.title_d && !o.content_d && ol.has('title_d') && ol.has('content_d')) ||
 				ol.size === 0)
 		)
 			return (saving = 0);
