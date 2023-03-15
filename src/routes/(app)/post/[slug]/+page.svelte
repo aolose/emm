@@ -4,7 +4,7 @@
 	import Viewer from '$lib/components/viewer.svelte';
 	import PF from '$lib/components/post/pf.svelte';
 	import Tag from '$lib/components/post/tag.svelte';
-	import { expand } from '$lib/store';
+	import { expand ,small } from '$lib/store';
 	import { imageViewer } from '$lib/use';
 	import Comment from '$lib/components/comment/index.svelte';
 	import Head from '$lib/components/Head.svelte';
@@ -39,12 +39,13 @@
 {#if d}
 	<div class={'bk icon i-close'} on:click={() => goBack()} />
 	<div class="pg">
-		<Top />
+		{#if $small}<Top />{/if}
 		<div class="bg" style={sly}>
 			<div class="ft" {style} />
 			<div class="fc" />
 		</div>
 		<div class="co" class:ex={$expand}>
+			{#if !$small}<Top />{/if}
 			<Ctx>
 				<div class="v">
 					<div class="h">
