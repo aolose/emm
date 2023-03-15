@@ -69,10 +69,11 @@ export const highlight =  (n: string) => {
     (_, a, b) => {
       let i = 1;
       let l = b.length;
-      const num = [i];
+      const num = [];
       while (l--) {
-        if (b[l] === '\n') num.push(++i);
+        if (b[l] === '\n') num.push(i++);
       }
+			if(num.length===0)num.push(1)
       const len = (i + '').length;
       const line = `<div class="line" style="width:${len + 1}em">${num
         .map((a) => `<div>${a}</div>`)
