@@ -68,12 +68,12 @@ export const highlight =  (n: string) => {
     /(<pre><code class="language-\w+" name="\w+">)((.|\n)+?)<\/code><\/pre>/g,
     (_, a, b) => {
       let i = 1;
-      let l = b.length;
+      let l = b.length-1;
       const num = [];
+			if(b[l]!=='\b')num.push(i++)
       while (l--) {
         if (b[l] === '\n') num.push(i++);
       }
-			if(num.length===0)num.push(1)
       const len = (i + '').length;
       const line = `<div class="line" style="width:${len + 1}em">${num
         .map((a) => `<div>${a}</div>`)
