@@ -6,6 +6,10 @@ export async function regHjs (lan:Set<string>){
 	if (!ls.has(a)) {
 		ls.add(a)
 		switch (a) {
+			case 'ts':
+			case 'typescript':
+				reg = await import('highlight.js/lib/languages/typescript');
+				break;
 			case 'js':
 			case 'javascript':
 				reg = await import('highlight.js/lib/languages/javascript');
@@ -58,7 +62,9 @@ export const highlight =  (n: string) => {
     let s = 'common';
     if (b) {
       o = b;
-      s = b.replace(/js/g, 'javascript').replace('html', 'xml');
+      s = b.replace(/js/g, 'javascript')
+				.replace(/ts/g, 'typescript')
+				.replace('html', 'xml');
       lan.add(s);
     }
     return `<pre><code class="language-${s}" name="${o}">`;
