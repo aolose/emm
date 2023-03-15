@@ -1,5 +1,5 @@
 <script>
-	import { watch } from '$lib/utils';
+  import { watch } from "$lib/utils";
 	import { onMount } from 'svelte';
 
 	let h = 99999;
@@ -14,9 +14,11 @@
 			let top = 0;
 			const sc = () => {
 				const o = p.scrollTop;
-				if (o < top && o > h / 4) a = 1;
-				else b = 0;
-				top = o;
+        if(Math.abs(o-top)<20)return
+        if(o>top)b=0
+        else if(o>h/5)a=1
+        else b=0
+        top=o
 			};
 			const p = btn.parentElement;
 			btn.onclick = () => p.scrollTo(0, 0);
@@ -28,28 +30,27 @@
 		wa(() => {
 			if (a) {
 				clearTimeout(t);
-				t = setTimeout(() => (b = a), 100);
+				t = setTimeout(() => (b = 1), 50);
 			}
 		}, a);
 		wb(() => {
 			if (!b) {
 				clearTimeout(t);
 				t = setTimeout(() => {
-					a = b;
-				}, 530);
+					a = 0;
+				}, 300);
 			}
 		}, b);
 	}
 </script>
 
 <svelte:window bind:innerHeight={h} />
-<button class="t" class:a class:b bind:this={btn}> ↑ </button>
-
+<button class="t" class:a class:b bind:this={btn}> ↑  </button>
 <style lang="scss">
 	@import '../break';
 
 	.t {
-		transition: 0.5s ease-in-out;
+		transition: 0.2s ease-in-out;
 		border-radius: 50%;
 		line-height: 1;
 		font-size: 20px;
