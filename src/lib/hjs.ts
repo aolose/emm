@@ -71,7 +71,7 @@ export const highlight =  (n: string) => {
       let l = b.length-1;
       const num = [i];
       while (l--) {
-        if (b[l] === '\n') num.push(i++);
+        if (b[l] === '\n') num.push(++i);
       }
       const len = (i + '').length;
       const line = `<div class="line" style="width:${len + 1}em">${num
