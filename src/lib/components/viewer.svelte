@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { editPost } from '$lib/store';
 	import { fade } from 'svelte/transition';
-	import { highlight } from '../use';
+	import { highlight } from '../hjs';
 	import { delay, watch } from '$lib/utils';
 	import { regElement } from '$lib/components/customent/reg';
 	import File from '$lib/components/post/File.svelte';
@@ -35,7 +35,7 @@
 	let v = md();
 	const vw = watch(v);
 	const wc = watch('');
-	const rd = async () => highlight(md()).then((a) => (v = a));
+	const rd = () => v = highlight(md());
 	const dRd = delay(rd, 100);
 	$: {
 		wc(async () => {
