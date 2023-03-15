@@ -6,6 +6,8 @@ import { Post } from '$lib/server/model';
 import { getPain } from '$lib/utils';
 import { db } from '$lib/server/index';
 import { DiffMatchPatch } from 'diff-match-patch-typescript';
+import type { PatchObject } from 'diff-match-patch-typescript';
+
 const dmp = new DiffMatchPatch();
 export const pubPostList = (
 	page: number,
@@ -76,7 +78,6 @@ export const postPatch = (id: number, ver: number, length: number, patch: string
 	const p = model(Post, { id });
 	if (!db.get(p)) return resp('post not exist', 404);
 	if (ver === 0) {
-		if (patch.length !== length) return resp('patch length miss match', 400);
 		p.content_d = patch;
 	} else {
 		for (const [v] of patchMap) {
@@ -84,10 +85,25 @@ export const postPatch = (id: number, ver: number, length: number, patch: string
 		}
 		const content = patchMap.get(ver);
 		if (content !== undefined) {
-			const [r, status = []] = dmp.patch_apply(dmp.patch_fromText(patch), content);
+			const patchList: PatchObject[] = [];
+			const [infText, ...diff] = patch.split('\x01');
+			const infList = infText.split(',').map((a) => +a);
+			const l = diff.length;
+			let dataStart = l * 4;
+			for (let i = 0; i < l; i++) {
+				const [start1, start2, length1, length2] = infList.slice(i * 4, i * 4 + 4);
+				const diffs: [number, string][] = [];
+				const data = diff[i].split('\x00');
+				if (data.length) {
+					for (const s of data) {
+						diffs.push([1 - infList[dataStart++], s]);
+					}
+				}
+				patchList.push({ start1, start2, length1, length2, diffs });
+			}
+			const [r, status = []] = dmp.patch_apply(patchList, content);
 			const err = status.find((a) => !a);
 			if (err) {
-				console.log('patch content:', patch, content);
 				return resp('patch fail', 500);
 			}
 			if (r.length === length) {

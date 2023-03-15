@@ -54,11 +54,23 @@ export const hooks: apiHooks = {
 								dmp.diff_cleanupSemantic(diff);
 							}
 							const patchList = dmp.patch_make(old, content, diff);
-							const patchText = dmp.patch_toText(patchList);
+							let patchText = '';
+							const inf = [];
+							const dif = [];
+							for (const { diffs, start1, start2, length1, length2 } of patchList) {
+								inf.push(start1, start2, length1, length2);
+								const str: string[] = [];
+								diffs.forEach(([a, b]) => {
+									inf.push(-a + 1 || '');
+									str.push(b);
+								});
+								dif.push(str.join('\x00'));
+							}
+							patchText = inf.join() + '\x01' + dif.join('\x01');
 							// no diff
 							if (!patchText) return p;
-							if (patchText.length > content.length) return;
-							patch[3] = patchText;
+							if (patchText.length >= content.length) patch[2] = patch[1] = postVer = 0;
+							else patch[3] = patchText;
 						}
 						return req('post', patch.join(), { method: method.PATCH }).catch((e) => {
 							if (getErr(e).startsWith('patch content length miss match')) {

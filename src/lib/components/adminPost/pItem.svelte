@@ -100,6 +100,7 @@
 		p {
 			opacity: 0.5;
 			font-size: 12px;
+			word-break: break-all;
 		}
 
 		div {
