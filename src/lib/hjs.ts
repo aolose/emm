@@ -69,8 +69,7 @@ export const highlight =  (n: string) => {
     (_, a, b) => {
       let i = 1;
       let l = b.length-1;
-      const num = [];
-			if(b[l]!=='\n')num.push(i++)
+      const num = [i];
       while (l--) {
         if (b[l] === '\n') num.push(i++);
       }
