@@ -1,6 +1,6 @@
 import { saveCache, apiLoad } from '$lib/req';
 import { method } from '$lib/enum';
-import { statueSys, status ,h} from '$lib/store';
+import { statueSys, status, h } from '$lib/store';
 import type { headInfo } from '$lib/types';
 import { redirect } from '@sveltejs/kit';
 import type { Page } from '@sveltejs/kit';
@@ -24,7 +24,7 @@ const jump = async () => {
 		} else throw redirect(307, rd);
 	}
 };
-let loaded=0
+let loaded = 0;
 type saveData = headInfo & { statue: number; sys: number };
 let cacheData = {} as saveData;
 let sys = 0;
@@ -41,7 +41,7 @@ const ps = (p: Page) => {
 
 const save = (a: saveData) => {
 	cacheData = { ...cacheData, ...a };
-	if(!loaded)return
+	if (!loaded) return;
 	saveCache('statue', undefined, cacheData, cacheTime);
 };
 
@@ -58,12 +58,12 @@ export const load = apiLoad('statue', undefined, {
 	cache: cacheTime,
 	method: method.GET,
 	async done(d: unknown, ctx) {
-		loaded=1
+		loaded = 1;
 		cacheData = d as headInfo & { statue: number; sys: number };
 		pathname = (ctx as { url: URL }).url.pathname;
 		sys = cacheData.sys;
 		stu = cacheData.statue;
-		h.set(cacheData)
+		h.set(cacheData);
 		if (browser) {
 			statueSys.set(sys);
 			status.set(stu);

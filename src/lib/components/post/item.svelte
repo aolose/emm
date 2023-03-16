@@ -2,6 +2,7 @@
 	import { bgColor } from '$lib/utils';
 
 	export let p = {};
+	export let path;
 	const { banner, slug, title, desc, content, createAt } = p;
 	const sty = banner ? `background-image:url(/res/${banner})` : '';
 	const tm = new Date(createAt);
@@ -21,7 +22,7 @@
 		{m}/{d}
 		{#if showY} {y}{/if}
 	</div>
-	<a class="f" href={`/post/${slug}`}>
+	<a class="f" href={`/post${path}/${slug}`}>
 		<div class="c" class:ex={!banner} />
 		<h3>{title}</h3>
 		<h3>{title}</h3>

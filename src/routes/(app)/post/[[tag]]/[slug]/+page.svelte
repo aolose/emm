@@ -1,28 +1,40 @@
 <script>
-	import { bgColor, goBack, time,getPain } from '$lib/utils';
+	import { bgColor, goBack, time, getPain, watch } from '$lib/utils';
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
 	import PF from '$lib/components/post/pf.svelte';
 	import Tag from '$lib/components/post/tag.svelte';
-	import { expand ,small } from '$lib/store';
+	import { expand, small } from '$lib/store';
 	import { imageViewer } from '$lib/use';
 	import Comment from '$lib/components/comment/index.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Top from '$lib/components/Top.svelte';
+	import { goto } from '$app/navigation';
 
 	export let data;
-	const d = data.d;
-	const p = data.p;
+	let d, p, o, c;
 	let sly = '';
-	let style;
-	let desc
+	let style, tag;
+	let desc, prev, next;
+	let slug = data.p.slug;
+	const wc = watch(slug);
 	$: {
-		desc = d.desc||getPain(d.content).slice(0,80)+'...'
+		d = data.d;
+		p = data.p;
+		slug = p.slug;
+		wc(() => {
+			if ($small) o.scrollTo(0, 0);
+			else c.scrollTo(0, 0);
+		}, slug);
+		prev = d._u;
+		next = d._n;
+		tag = p.tag;
+		desc = d.desc || getPain(d.content).slice(0, 80) + '...';
 		if (d.createAt)
 			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
 		if (d.banner) {
 			sly = `background-image:url(/res/${d.banner})`;
-		}
+		} else sly = '';
 	}
 </script>
 
@@ -40,13 +52,13 @@
 
 {#if d}
 	<div class={'bk icon i-close'} on:click={() => goBack()} />
-	<div class="pg">
+	<div class="pg" bind:this={o}>
 		{#if $small}<Top />{/if}
 		<div class="bg" style={sly}>
 			<div class="ft" {style} />
 			<div class="fc" />
 		</div>
-		<div class="co" class:ex={$expand}>
+		<div class="co" class:ex={$expand} bind:this={c}>
 			{#if !$small}<Top />{/if}
 			<Ctx>
 				<div class="v">
@@ -67,7 +79,22 @@
 								<Tag t={d._tag} />
 							{/if}
 						</div>
-						<h1 />
+						<div class="sl">
+							{#if prev}<p>
+									<span>newer:</span><button
+										on:click={() =>
+											goto(`/post/${tag ? `${tag}/` : ''}${prev.slug}`, { replaceState: true })}
+										>{prev.title}</button
+									>
+								</p>{:else}<p></p>{/if}
+							{#if next}<p>
+									<span>older:</span><button
+										on:click={() =>
+											goto(`/post/${tag ? `${tag}/` : ''}${next.slug}`, { replaceState: true })}
+										>{next.title}</button
+									>
+								</p>{/if}
+						</div>
 						<div class="cm">
 							{#if d._cm}
 								<Comment slug={p.slug} />
@@ -81,7 +108,7 @@
 {/if}
 
 <style lang="scss">
-	@import '../../../../lib/break';
+	@import '../../../../../lib/break';
 
 	$bg: var(--bg6);
 	$bg2: var(--bg7);
@@ -93,7 +120,36 @@
 			background-position: 100% 100%;
 		}
 	}
-
+	.sl {
+		padding: 20px 0;
+		display: flex;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		p {
+			display: flex;
+			align-items: center;
+			padding: 3px 10px;
+			color: var(--darkgrey);
+			@include s() {
+				width: 100%;
+				justify-content: space-between;
+			}
+		}
+		span {
+			font-size: 14px;
+		}
+		button {
+			color: var(--darkgrey-h);
+			margin-left: 10px;
+			&:hover {
+				color: #b1bbc5;
+				text-decoration: underline;
+			}
+			@include s() {
+				color: #758caf !important;
+			}
+		}
+	}
 	.i-tags {
 		color: #2b4d77;
 		font-size: 18px;
@@ -281,7 +337,7 @@
 		max-height: 100%;
 		min-height: 400px;
 		//bottom: 0;
-		background: url('../../../../lib/components/img/1.jpg') center no-repeat;
+		background: url('$lib/components/img/1.jpg') center no-repeat;
 		background-size: cover;
 		animation: bg 360s linear infinite alternate-reverse;
 		@include s() {

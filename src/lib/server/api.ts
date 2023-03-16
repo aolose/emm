@@ -50,6 +50,7 @@ import {
 	codeTokens,
 	combine,
 	eTags,
+	getPostSibling,
 	noAccessPosts,
 	patchPostReqs,
 	patchPostTags,
@@ -621,7 +622,7 @@ const apis: APIRoutes = {
 	},
 	post: {
 		get: async (req) => {
-			const slug = req.url.replace(/.*?\?/, '');
+			const [slug, tag] = req.url.replace(/.*?\?/, '').split(',');
 			if (slug) {
 				const p = db.get(model(Post, { slug }));
 				if (p) {
@@ -633,9 +634,13 @@ const apis: APIRoutes = {
 						}
 					}
 					p._cm = +(sys.comment && !(p.disCm || 0));
+					const skips = noAccessPosts(getClient(req));
+					const [pre, next] = getPostSibling(p.id, p.createAt, decodeURI(tag), skips || []);
+					if (pre) p._u = pre;
+					if (next) p._n = next;
 					return filter(
 						patchPostTags([p])[0],
-						['banner', '_cm', 'desc', 'content', 'createAt', '_tag', 'title'],
+						['banner', '_cm', 'desc', 'content', 'createAt', '_tag', 'title', '_u', '_n'],
 						false
 					);
 				}

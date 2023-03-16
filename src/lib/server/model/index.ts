@@ -63,6 +63,8 @@ export class Post {
 	published = 0;
 	disCm = INT;
 	_cm = INT;
+	_u?: { slug: string; title: string };
+	_n?: { slug: string; title: string };
 	title = TEXT;
 	content = TEXT;
 	title_d = TEXT;
