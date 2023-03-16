@@ -21,7 +21,6 @@
 <style lang="scss">
 	.a {
 		border-radius: 5px;
-		padding: 4px 10px;
 		width: 200px;
 		align-items: center;
 		display: flex;
@@ -29,14 +28,19 @@
 		margin: 10px;
 	}
 	.i {
-		margin-right: 20px;
+		padding: 10px;
 	}
 	.b {
 		font-size: 13px;
 		flex: 1;
+		padding: 10px 10px 4px;
 		flex-direction: column;
 		b {
-			color: #1c93ff;
+			font-weight: 200;
+			display: block;
+			line-height: 1.4;
+			color: #dddddd;
+
 		}
 
 		span {
@@ -44,9 +48,12 @@
 		}
 	}
 	a {
-		padding: 10px;
-		font-size: 19px;
+		opacity: .5;
+		color: #dddddd!important;
 		display: block;
+		border-left: 1px solid rgba(255,255,255,.2);
+		padding: 10px 14px;
+		font-size: 19px;
 		text-decoration: none !important;
 	}
 </style>
