@@ -14,11 +14,15 @@
 				const d = a.split(/\n+/).filter((a) => !!a);
 				const l = d.length;
 				if (l) {
-					let i = 0;
-					const t = setInterval(() => {
-						if (stop) return clearInterval(t);
-						msg.set(d[i++ % l]);
-					}, 8e3);
+					const m = (ls,i)=>{
+						if(stop)return
+						const s = ls[(i++)%ls.length]
+						msg.set(s)
+						setTimeout(()=>{
+							m(ls,i)
+						},s.length*240+1e3)
+					}
+					m(d,0)
 				}
 			}
 		});
