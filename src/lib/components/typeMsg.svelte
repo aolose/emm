@@ -32,7 +32,7 @@
 		let u;
 		const getMsg = () =>
 			(u = msg.subscribe((m) => {
-				if(m)autoText(m);
+				if (m) autoText(m);
 			}));
 		let r;
 		if (defaultText) {

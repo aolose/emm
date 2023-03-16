@@ -86,7 +86,7 @@
 											goto(`/post/${tag ? `${tag}/` : ''}${prev.slug}`, { replaceState: true })}
 										>{prev.title}</button
 									>
-								</p>{:else}<p></p>{/if}
+								</p>{:else}<p />{/if}
 							{#if next}<p>
 									<span>older:</span><button
 										on:click={() =>

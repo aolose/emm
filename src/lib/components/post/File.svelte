@@ -40,7 +40,6 @@
 			display: block;
 			line-height: 1.4;
 			color: #dddddd;
-
 		}
 
 		span {
@@ -48,10 +47,10 @@
 		}
 	}
 	a {
-		opacity: .5;
-		color: #dddddd!important;
+		opacity: 0.5;
+		color: #dddddd !important;
 		display: block;
-		border-left: 1px solid rgba(255,255,255,.2);
+		border-left: 1px solid rgba(255, 255, 255, 0.2);
 		padding: 10px 14px;
 		font-size: 19px;
 		text-decoration: none !important;
