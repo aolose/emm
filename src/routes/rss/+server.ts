@@ -25,7 +25,7 @@ const render = (base: string, posts: Obj<Post>[]) => `<?xml version="1.0" encodi
 <atom:link href="${base}/rss" rel="self" type="application/rss+xml" />
 <title>${sys.blogName || ''}</title>
 <link>${base}</link>
-<description>${sys.blogBio || ''}</description>
+<description>${sys.seoDesc || ''}</description>
 ${posts
 	.map(
 		(post) => `<item>
