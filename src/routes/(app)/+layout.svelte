@@ -18,7 +18,7 @@
 
 	:global {
 		* {
-			color: #808fa9;
+			color: #8d9cb5;
 		}
 
 		*::-webkit-scrollbar-thumb {

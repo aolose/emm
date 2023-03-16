@@ -25,8 +25,10 @@
 	}
 
 	span {
+		top: 1px;
 		transition: 0.2s ease-in-out;
 		color: #415967;
+		font-size: 15px;
 	}
 
 	.a {
