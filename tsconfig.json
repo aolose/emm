@@ -1,7 +1,7 @@
 {
 	"extends": "./.svelte-kit/tsconfig.json",
 	"compilerOptions": {
-		"lib": ["WebWorker", "ESNext"],
+		"lib": ["WebWorker", "ESNext","dom.iterable"],
 		"experimentalDecorators": true,
 		"allowJs": true,
 		"checkJs": true,

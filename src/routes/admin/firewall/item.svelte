@@ -40,7 +40,7 @@
 			class:i-no={exp}
 		/>
 		{#each hd as [k, v]}
-			<div transition:slide>
+			<div class="h" >
 				<span>{k}:</span>
 				<span>{v}</span>
 			</div>
