@@ -103,6 +103,15 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 	}
 };
 
+export const patchDetailIpInfo = (d: log[]) => {
+	const v: log[] = [];
+	d.forEach((a) => {
+		const n: log = [...a];
+		n[5] = ipInfo(a[1]).full || '';
+		v.push(n);
+	});
+	return v;
+};
 export const fw2log = (l: FwLog) => {
 	return [
 		l.save,

@@ -3,15 +3,15 @@
 	import { slidLeft } from '$lib/transition';
 	import Ctx from '$lib/components/ctx.svelte';
 	import Head from '$lib/components/Head.svelte';
-	export let data
-	const d = data.d
+	export let data;
+	const d = data.d;
 </script>
 
 <Head />
 <Ctx />
 <div class="b">
 	<div class="bb">
-		<Bird {d}/>
+		<Bird {d} />
 	</div>
 	<a class="rs" href="/rss">RSS</a>
 	<div class="mu">

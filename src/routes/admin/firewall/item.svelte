@@ -71,7 +71,7 @@
 		div {
 			flex-grow: 1;
 			transition: 0.3s ease-in-out;
-			padding: 5px 10px;
+			padding: 7px 10px 0;
 			white-space: normal;
 			word-break: break-all;
 			height: 100%;
@@ -115,6 +115,7 @@
 		span {
 			font-size: 12px;
 			color: #717d8c;
+			white-space: nowrap;
 		}
 	}
 
@@ -126,6 +127,7 @@
 		width: 120px;
 
 		span {
+			white-space: nowrap;
 			color: #72849b;
 		}
 	}
@@ -140,6 +142,9 @@
 
 	.r6 {
 		width: 50px;
+		span{
+			white-space: nowrap;
+		}
 	}
 
 	.r5 {
@@ -150,7 +155,9 @@
 			position: absolute;
 			left: 10px;
 			padding: 7px 10px;
-
+     @include s() {
+			 left: 3px;
+		 }
 			&:hover {
 				color: #fff;
 			}

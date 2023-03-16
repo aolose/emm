@@ -205,9 +205,10 @@
 		}
 
 		span {
+			height: 100%;
 			cursor: pointer;
 			transition: 0.1s ease-in-out;
-			font-size: 13px;
+			font-size: 12px;
 			display: flex;
 			align-items: center;
 			justify-content: center;

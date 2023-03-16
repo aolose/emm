@@ -40,10 +40,11 @@ import {
 	fw2log,
 	logCache,
 	lsRules,
+	patchDetailIpInfo,
 	ruleHit,
 	rules
 } from '$lib/server/firewall';
-import { geoClose, geoStatue, loadGeoDb } from '$lib/server/ipLite';
+import { geoClose, geoStatue, ipInfo, loadGeoDb } from '$lib/server/ipLite';
 import { publishedPost, tagPatcher, tags } from '$lib/server/store';
 import { get } from 'svelte/store';
 import {
@@ -392,7 +393,7 @@ const apis: APIRoutes = {
 				return t.t ? a[0] > t.t : 1;
 			});
 			if (t) {
-				return { total, data: d };
+				return { total, data: patchDetailIpInfo(d) };
 			}
 		})
 	},

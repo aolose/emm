@@ -3,22 +3,22 @@
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { msg } from '$lib/store';
-  export let d
+	export let d;
 	onMount(() => {
 		let stop;
 		if (d) {
 			const c = d.split(/\n+/).filter((a) => !!a);
 			const l = c.length;
 			if (l) {
-				const m = (ls,i)=>{
-					if(stop)return
-					const s = ls[(i++)%ls.length]
-					msg.set(s)
-					setTimeout(()=>{
-						m(ls,i)
-					},s.length*240+1e3)
-				}
-				m(c,0)
+				const m = (ls, i) => {
+					if (stop) return;
+					const s = ls[i++ % ls.length];
+					msg.set(s);
+					setTimeout(() => {
+						m(ls, i);
+					}, s.length * 240 + 1e3);
+				};
+				m(c, 0);
 			}
 		}
 		return () => (stop = 1);
