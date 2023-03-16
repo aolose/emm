@@ -48,6 +48,7 @@
 			});
 		});
 	};
+  let ta=0
 
 	let ls = [];
 
@@ -59,7 +60,11 @@
 <div class="a">
 	<div class="b">
 		<div class="d">
-			<h1>Rules</h1>
+			<div class="t">
+				<button class:act={!ta} on:click={()=>ta=0}>Rules</button>
+				<button class:act={ta} on:click={()=>ta=1}>BlackList</button>
+			</div>
+			<s/>
 			<button on:click={add} class="icon i-add" />
 			<button on:click={close} class="icon i-close" />
 		</div>
@@ -97,7 +102,7 @@
 			</div>
 		{/each}
 	</div>
-	<Pg {total} {go} />
+		<Pg {total} {go} />
 </div>
 
 <style lang="scss">
@@ -108,6 +113,27 @@
 			display: block;
 		}
 	}
+	.t{
+		background: var(--bg2);
+		border-radius: 6px;
+		button{
+			color: var(--darkgrey-h);
+			transition: .2s ease-in-out;
+			font-size: 14px;
+			line-height: 1;
+			height: 40px;
+			padding: 3px 15px!important;
+			border-radius: inherit;
+		}
+		.act{
+			color: #eee;
+			background: #26548c;
+		}
+	}
+	s{
+		flex: 1;
+	}
+
 	.i-set {
 		background: rgba(0, 0, 0, 0.1);
 	}
