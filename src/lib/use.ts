@@ -1,20 +1,5 @@
 import { page } from '$app/stores';
-import Viewer from 'viewerjs';
-import 'viewerjs/dist/viewer.css';
-
-import Clipboard from 'clipboard';
-
-Viewer.setDefaults({
-	button: true,
-	navbar: false,
-	title: false,
-	toolbar: false,
-	keyboard: false,
-	minWidth: 400,
-	loop: false,
-	minHeight: 200,
-	minZoomRatio: 0.1
-});
+import type Clipboard from 'clipboard'
 export const act = (node: HTMLAnchorElement, exact = true) => {
 	const cls = 'act';
 	const u = page.subscribe((p) => {
@@ -32,7 +17,20 @@ export const act = (node: HTMLAnchorElement, exact = true) => {
 	};
 };
 
-export const imageViewer = (node: HTMLElement) => {
+export const imageViewer =async (node: HTMLElement) => {
+	const Viewer = (await import('viewerjs')).default;
+	Viewer.setDefaults({
+		button: true,
+		navbar: false,
+		title: false,
+		toolbar: false,
+		keyboard: false,
+		minWidth: 400,
+		loop: false,
+		minHeight: 200,
+		minZoomRatio: 0.1
+	});
+
 	const t = setTimeout(() => new Viewer(node), 1e3);
 	return {
 		destroy: () => clearTimeout(t)
@@ -62,11 +60,12 @@ export const inner = (node: HTMLElement, child: unknown) => {
 	};
 };
 
-export function clipboard(n: HTMLElement, cb: () => void) {
+export async function clipboard(n: HTMLElement, cb: () => void) {
+	const C = (await import('clipboard')).default;
 	let c: Clipboard;
 	const r = (n: HTMLElement, cb: () => void) => {
 		if (c) c.destroy();
-		c = new Clipboard(n, {
+		c = new C(n, {
 			text(target) {
 				return target.getAttribute('data-text') || '';
 			}
@@ -77,7 +76,7 @@ export function clipboard(n: HTMLElement, cb: () => void) {
 	return {
 		update: r,
 		destroy() {
-			if (c) c.destroy();
+			if (c)c.destroy();
 		}
 	};
 }

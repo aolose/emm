@@ -84,6 +84,7 @@
 <style lang="scss">
 	@import '../../lib/break';
 	@import 'highlight.js/styles/github-dark.css';
+	@import 'viewerjs/dist/viewer.css';
 	.a {
 		overflow: auto;
 		padding: 20px 0;
@@ -134,7 +135,7 @@
 				border-radius: 4px;
 				overflow: hidden;
 				padding: 0 5px;
-				color: #b4ab82;
+				color: #659a62;
 				background: rgba(10, 20, 40, 0.4);
 			}
 
@@ -298,7 +299,7 @@
 			h4,
 			h5,
 			h6 {
-				color: #aaa;
+				color: #668cc2;
 				font-weight: 400;
 				line-height: 2;
 				margin: 10px 0;
