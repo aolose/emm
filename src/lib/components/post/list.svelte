@@ -12,7 +12,7 @@
 	import { afterNavigate } from '$app/navigation';
 
 	let a = 0;
-
+	export let path = '';
 	async function scTop({ from, to }) {
 		if (from?.route?.id !== to?.route?.id) return;
 		await tick();
@@ -45,7 +45,7 @@
 		<Ctx>
 			<div class="c" bind:offsetHeight={ih}>
 				{#each ls as p, i (p.slug)}
-					<Item {p} n={i} />
+					<Item {p} n={i} {path} />
 				{/each}
 			</div>
 			{#if !ls.length}

@@ -87,7 +87,7 @@ function now() {
 
 export const Log = {
 	debug(label: string, ...params: unknown[]) {
-		// if (is_dev) console.log(now(), '\x1b[36m', label, '\x1b[0m', ...params);
+		if (is_dev) console.log(now(), '\x1b[36m', label, '\x1b[0m', ...params);
 	},
 	info(label: string, ...params: unknown[]) {
 		console.log(now(), '\x1b[30m', label, '\x1b[0m', ...params);

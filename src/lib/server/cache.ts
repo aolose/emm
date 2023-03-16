@@ -276,6 +276,26 @@ export const combine =
 		fns.forEach((fn) => (items = fn(items)));
 		return items;
 	};
+export const getPostSibling = (id: number, create: number, tag: string, skips: number[]) => {
+	const pn: { slug: string; title: string }[] = [];
+	let ids: number[] | undefined;
+	if (tag) {
+		const tagId = tagPostCache.getTags(id).find((a) => a.name === tag)?.id;
+		if (!tagId) return [];
+		const s = new Set(skips);
+		ids = tagPostCache.getPostIds(tagId).filter((a) => a !== id && !s.has(a));
+		if (!ids.length) return [];
+	}
+	const sql = ` and published=? and id ${ids ? '' : 'not'} in (${sqlFields(
+		(ids || skips).length
+	)}) order by createAt `;
+	const fields = [create, 1, ...(ids || skips)];
+	const n = db.get(model(Post), 'createAt>?' + sql + 'asc  limit 1', ...fields);
+	const p = db.get(model(Post), 'createAt<?' + sql + 'desc  limit 1', ...fields);
+	if (n) pn[0] = { title: n.title, slug: n.slug };
+	if (p) pn[1] = { title: p.title, slug: p.slug };
+	return pn;
+};
 export const patchPostTags = (ps: Post[]) =>
 	ps.map((a) => {
 		const tags = tagPostCache.getTags(a.id);

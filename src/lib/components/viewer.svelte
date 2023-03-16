@@ -35,7 +35,7 @@
 	let v = md();
 	const vw = watch(v);
 	const wc = watch('');
-	const rd = () => v = highlight(md());
+	const rd = () => (v = highlight(md()));
 	const dRd = delay(rd, 100);
 	$: {
 		wc(async () => {
@@ -153,7 +153,7 @@
 					display: flex;
 					word-break: break-all;
 					.code {
-						padding: .1em 10px .5em;
+						padding: 0.1em 10px 0.5em;
 					}
 					.line {
 						flex-shrink: 0;
@@ -164,7 +164,7 @@
 						user-select: none;
 						justify-content: center;
 						align-items: center;
-						padding: .1em 0 .5em;
+						padding: 0.1em 0 0.5em;
 						div {
 							padding-top: 3px;
 							user-select: none;

@@ -1,5 +1,5 @@
 import { page } from '$app/stores';
-import type Clipboard from 'clipboard'
+import type Clipboard from 'clipboard';
 export const act = (node: HTMLAnchorElement, exact = true) => {
 	const cls = 'act';
 	const u = page.subscribe((p) => {
@@ -17,7 +17,7 @@ export const act = (node: HTMLAnchorElement, exact = true) => {
 	};
 };
 
-export const imageViewer =async (node: HTMLElement) => {
+export const imageViewer = async (node: HTMLElement) => {
 	const Viewer = (await import('viewerjs')).default;
 	Viewer.setDefaults({
 		button: true,
@@ -76,7 +76,7 @@ export async function clipboard(n: HTMLElement, cb: () => void) {
 	return {
 		update: r,
 		destroy() {
-			if (c)c.destroy();
+			if (c) c.destroy();
 		}
 	};
 }

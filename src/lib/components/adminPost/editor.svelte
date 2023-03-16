@@ -27,7 +27,7 @@
 		name: 'publish',
 		action: () => {
 			confirm('sure to publish?', 'publish').then((a) => {
-				if(!a)return
+				if (!a) return;
 				saveNow.set(1);
 				autoSave(get(editPost), 1);
 			});
