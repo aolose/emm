@@ -2,30 +2,25 @@
 	import Msg from '$lib/components/typeMsg.svelte';
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
-	import { req } from '$lib/req';
-	import { method } from '$lib/enum';
 	import { msg } from '$lib/store';
-
+  export let d
 	onMount(() => {
 		let stop;
-		req('bio', undefined, { method: method.GET }).then((a) => {
-			if (stop) return;
-			if (a) {
-				const d = a.split(/\n+/).filter((a) => !!a);
-				const l = d.length;
-				if (l) {
-					const m = (ls,i)=>{
-						if(stop)return
-						const s = ls[(i++)%ls.length]
-						msg.set(s)
-						setTimeout(()=>{
-							m(ls,i)
-						},s.length*240+1e3)
-					}
-					m(d,0)
+		if (d) {
+			const c = d.split(/\n+/).filter((a) => !!a);
+			const l = c.length;
+			if (l) {
+				const m = (ls,i)=>{
+					if(stop)return
+					const s = ls[(i++)%ls.length]
+					msg.set(s)
+					setTimeout(()=>{
+						m(ls,i)
+					},s.length*240+1e3)
 				}
+				m(c,0)
 			}
-		});
+		}
 		return () => (stop = 1);
 	});
 </script>
