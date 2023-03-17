@@ -100,7 +100,7 @@
 				{:else}
 					<div class="u" class:act={r.active}>
 						<div class="i">
-							{#if r.ip}
+							{#if r.ip&&!r.trigger}
 								<div class="icon i-ip"><span>{r.ip}</span></div>
 							{/if}
 							{#if r.status}
@@ -109,7 +109,7 @@
 							{#if r.path}
 								<div class="icon i-target"><span>{r.path}</span></div>
 							{/if}
-							{#if r.country}
+							{#if r.country&&!r.trigger}
 								<div class="icon i-geo"><span>{r.country}</span></div>
 							{/if}
 							{#if r.headers}
@@ -119,10 +119,10 @@
 							{/if}
 						</div>
 						<div class="r">
-							{#if r.log}
+							{#if r.log&&!r.trigger}
 								<span class="icon i-log" />
 							{/if}
-							{#if r.forbidden}
+							{#if r.forbidden||r.trigger}
 								<span class="icon i-fbi" />
 							{/if}
 							<span class="m">{r.mark || ''}</span>
