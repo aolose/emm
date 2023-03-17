@@ -6,6 +6,7 @@ import type { DB } from '$lib/server/db/sqlite3';
 import { publishedPost } from '$lib/server/store';
 import type { Obj } from '$lib/types';
 import { reqPostCache, tagPostCache } from '$lib/server/cache';
+import { sitemap } from "$lib/sitemap";
 
 const { INT, TEXT } = NULL;
 
@@ -143,9 +144,12 @@ export class Post {
 				a.delete(id);
 				return new Set([...a]);
 			});
-		if (this._tag && id) {
+		if ('_tag' in this && id) {
 			const tags = this._tag.split(',').filter((a) => a);
 			tagPostCache.setTags(id, tags);
+		}
+		if(this._p||this.published === 0||this.published&&('_tag' in this)){
+			sitemap.refresh()
 		}
 		return !df;
 	}

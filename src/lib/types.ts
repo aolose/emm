@@ -14,6 +14,11 @@ export interface dbHooks {
 	onDel?: (db: DB, now?: number) => boolean | void;
 }
 
+export type siteMapRecord = {
+	url:string,
+	lastMod:number
+}
+
 export type Model =
 	| models.System
 	| models.Tag

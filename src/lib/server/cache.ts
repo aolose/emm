@@ -1,11 +1,11 @@
 import type { Require } from '$lib/server/model';
 import { Post, PostTag, RequireMap, Tag, TkTick, TokenInfo } from '$lib/server/model';
 import { Client } from '$lib/server/client';
-import { DBProxy, model, sqlFields } from '$lib/server/utils';
+import { DBProxy, getClient, model, sqlFields } from "$lib/server/utils";
 import { db } from '$lib/server/index';
 import { requireType } from '$lib/server/enum';
 import type { DiffFn, Model, Obj, Timer } from '$lib/types';
-import { tags } from '$lib/server/store';
+import { publishedPost, tags } from "$lib/server/store";
 import { diffStrSet } from '$lib/setStrPatchFn';
 import { get } from 'svelte/store';
 import { arrFilter, rndPick } from '$lib/utils';
@@ -327,3 +327,17 @@ export const noAccessPosts = (cli?: Client) => {
 	const s = all.length;
 	return s ? all.map((a) => a.targetId) : undefined;
 };
+
+export const getPubTags = (cli?:Client)=>{
+	const ps = get(publishedPost);
+	const ids = new Set(noAccessPosts(cli) || []);
+	return tagPostCache
+		.getTags([...ps])
+		.filter((a) => {
+			const ia = new Set(tagPostCache.getPostIds(a.id));
+			for (const i of ia) {
+				if (ids.has(i)) ia.delete(i);
+			}
+			return ia.size;
+		})
+}
