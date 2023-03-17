@@ -23,6 +23,10 @@
 	}
 
 	export const setTag = (a) => {
+		if(!a){
+			show=false
+			return;
+		}
 		const n = { ...a };
 		d = { ...a };
 		show = !!a;

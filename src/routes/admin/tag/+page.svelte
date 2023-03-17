@@ -62,6 +62,8 @@
 	function del(id) {
 		req('tag', id, { method: method.DELETE }).then(() => {
 			ls = ls.filter((a) => a.id !== id);
+			sel={}
+			setTag()
 		});
 	}
 </script>
