@@ -20,6 +20,31 @@ export const hooks: apiHooks = {
 			before: (o) => modelArr2Str(o as Tag, '_posts')
 		}
 	},
+	rule: {
+		post: {
+			before(a) {
+				if (typeof a === 'object') {
+					const d = { ...a } as {
+						forbidden?: boolean;
+						trigger?: boolean;
+						status?: string;
+						method?: string;
+						country?: string;
+						times?: number;
+					};
+					if (d.trigger) {
+						delete d.country;
+						delete d.method;
+					} else {
+						delete d.trigger;
+						delete d.status;
+						delete d.times;
+					}
+					return d;
+				}
+			}
+		}
+	},
 	post: {
 		patch: {
 			after(p, r) {

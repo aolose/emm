@@ -9,21 +9,22 @@ import { reqPostCache, tagPostCache } from '$lib/server/cache';
 
 const { INT, TEXT } = NULL;
 
-
 export class BlackList {
 	@primary
 	id = INT;
-	ip=TEXT
-	_geo?:string
-	createAt=INT
-	toRule(){
-		const r = new FWRule()
-		r.id=-this.id
-		r.ip=this.ip
-		r.forbidden=true
-		r.mark='blacklist'
-		r.createAt=this.createAt
-		return r
+	ip = TEXT;
+	_geo?: string;
+	createAt = INT;
+
+	toRule() {
+		return model(FWRule, {
+			active: true,
+			id: this.id,
+			ip: this.ip,
+			forbidden: true,
+			mark: 'blacklist',
+			createAt: this.createAt
+		}) as FWRule;
 	}
 }
 
@@ -265,9 +266,9 @@ export class FWRule {
 	country = TEXT;
 	active = true;
 	_match?: number[];
-	status=INT
-	times=INT
-	trigger=false
+	status = TEXT;
+	times = INT;
+	trigger = false;
 }
 
 export class FwLog {
