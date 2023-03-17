@@ -23,11 +23,11 @@ export const addRule = (fr: FWRule) => {
 	const iu = rules.findIndex((a) => a.id === fr.id);
 	if (!isTrigger) {
 		if (ir !== -1) triggers.splice(ir, 1);
-		else if (iu === -1) rules.push(fr);
+		else if (iu === -1) rules=[fr].concat(rules);
 		else rules[iu] = fr;
 	} else {
 		if (iu !== -1) rules.splice(iu, 1);
-		else if (ir === -1) triggers.push(fr);
+		else if (ir === -1) [fr].concat(triggers);
 		else triggers[ir] = fr;
 	}
 	sort();
@@ -112,6 +112,7 @@ export const ruleHit = (
 };
 export const lsRules = (page: number, size: number) => {
 	const r = rules.concat(triggers).filter((a) => a.id > 0);
+	r.sort((a, b) => b.createAt - a.createAt);
 	return r.slice(size * (page - 1), size * page);
 };
 export const delRule = (ids: number[]) => {

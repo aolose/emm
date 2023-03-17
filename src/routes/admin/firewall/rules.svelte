@@ -103,6 +103,9 @@
 							{#if r.ip}
 								<div class="icon i-ip"><span>{r.ip}</span></div>
 							{/if}
+							{#if r.status}
+								<div class="icon i-status"><span>{r.status}</span></div>
+							{/if}
 							{#if r.path}
 								<div class="icon i-target"><span>{r.path}</span></div>
 							{/if}
@@ -111,7 +114,7 @@
 							{/if}
 							{#if r.headers}
 								<div class="icon i-set">
-									<pre>{r.headers}</pre>
+									<pre>{r.headers.replace(/:/g,': ')}</pre>
 								</div>
 							{/if}
 						</div>
@@ -266,7 +269,6 @@
 	}
 
 	.m {
-		margin: 0 10px;
 		font-size: 13px;
 		flex: 1;
 	}
