@@ -31,10 +31,12 @@ export const hooks: apiHooks = {
 						method?: string;
 						country?: string;
 						times?: number;
+						ip?: number;
 					};
 					if (d.trigger) {
 						delete d.country;
 						delete d.method;
+						delete d.ip;
 					} else {
 						delete d.trigger;
 						delete d.status;
