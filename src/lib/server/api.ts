@@ -324,7 +324,7 @@ const apis: APIRoutes = {
 			const params = new URL(req.url).searchParams;
 			const page = +(params.get('page') || 1);
 			const name = params.get('name');
-			const type = params.get('type');
+			const type = decodeURI(params.get('type')||'');
 			const where: string[] = [];
 			const pm: unknown[] = [];
 			if (name) {
@@ -592,7 +592,7 @@ const apis: APIRoutes = {
 			const params = new URL(req.url).searchParams;
 			const page = +(params.get('page') || 1);
 			const size = +(params.get('size') || 10);
-			const tag = params.get('tag');
+			const tag = decodeURI(params.get('tag')||'');
 			const tagInfo = !!params.get('inf');
 			const skips = noAccessPosts(getClient(req));
 			return pubPostList(page, size, tag, skips, tagInfo);
@@ -636,7 +636,7 @@ const apis: APIRoutes = {
 	},
 	post: {
 		get: async (req) => {
-			const [slug, tag] = req.url.replace(/.*?\?/, '').split(',');
+			const [slug, tag] = decodeURI(req.url).replace(/.*?\?/, '').split(',');
 			if (slug) {
 				const p = db.get(model(Post, { slug }));
 				if (p) {

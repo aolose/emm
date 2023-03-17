@@ -200,7 +200,7 @@ const blackListCheck = (r: {
 export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
 	// skip admin
 	const ip = getClientAddr(event);
-	if(!debugMode&&getClient(event.request)?.ok(permission.Admin)||ip==='127.0.0.1')return;
+	if(!debugMode&&(getClient(event.request)?.ok(permission.Admin)||ip==='127.0.0.1'))return;
 	const path = event.url.pathname;
 	const method = event.request.method;
 	const ua = hds2Str(event.request.headers);
