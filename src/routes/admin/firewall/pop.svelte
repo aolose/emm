@@ -21,12 +21,12 @@
 		d.times = +d.times || 1;
 		d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 		hasV = trim(
-			d.ip ||
-				(d.trigger && d.status) ||
+			(d.trigger?'':d.ip)||
+				(d.trigger ? d.status:'') ||
 				d.path ||
 				d.headers ||
 				d.mark ||
-				(!d.trigger && d.country) ||
+				(d.trigger?'': d.country) ||
 				''
 		);
 	}
@@ -81,10 +81,12 @@
 				</div>
 			{/if}
 			<div class="f0">
-				<label>
-					<span>IP:</span>
-					<input bind:value={d.ip} />
-				</label>
+				{#if !d.trigger}
+					<label transition:slide>
+						<span>IP:</span>
+						<input bind:value={d.ip} />
+					</label>
+				{/if}
 				<label>
 					<span>path:</span>
 					<input bind:value={d.path} />
