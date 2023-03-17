@@ -35,7 +35,7 @@ const load = () => {
   page("/posts/", pMap.size, 10);
   allTags.forEach(a => {
     const posts = tagPostCache.getPostIds(a.id).filter(a => allPSet.has(a));
-    page("/tag/" + a.name, posts.length, 10);
+    page("/tag/" + a.name+'/', posts.length, 10);
     posts.forEach(a => {
       const p = pMap.get(a);
       if (p) urls.push({ url: "/post/" + a + "/" + p.slug, lastMod: p.last });

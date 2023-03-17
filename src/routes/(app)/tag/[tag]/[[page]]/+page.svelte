@@ -5,8 +5,11 @@
 	import { h } from '$lib/store';
 
 	export let data;
-	const { d, p } = data;
-	const { tag } = p;
+	let tag,d,p
+	$:{
+		({d,p}=data)
+		tag = p.tag
+	}
 
 	onMount(() => {
 		sessionStorage.hasBack = 1;
