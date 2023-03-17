@@ -6,7 +6,7 @@ import { filter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
 import { debugMode, getClient, getClientAddr, model } from "$lib/server/utils";
 import { ipInfo } from '$lib/server/ipLite';
-import { permission } from "$lib/components/post/rList.svelte";
+import { permission } from "$lib/enum";
 
 export let triggers: FWRule[];
 export let rules: FWRule[];
