@@ -34,7 +34,9 @@ import fs from 'fs';
 import { genToken } from '$lib/server/token';
 import {
 	addRule,
+	blackLists,
 	blockIp,
+	delBlackList,
 	delRule,
 	filterLog,
 	fw2log,
@@ -409,8 +411,26 @@ const apis: APIRoutes = {
 	rule: {
 		post: auth(Admin, async (req) => {
 			const r = model(FWRule, await req.json());
+			if (r.ip === '127.0.0.1' || r.ip === req.headers.get('x-forwarded-for') || '') {
+				return resp('invalid ip', 500);
+			}
 			addRule(r as FWRule);
 			return r.id;
+		})
+	},
+	blk: {
+		post: auth(Read, async (req) => {
+			const r = new Uint8Array(await req.arrayBuffer());
+			const p = r[0];
+			const s = r[1];
+			return blackLists(p, s);
+		}),
+		delete: auth(Admin, async (req) => {
+			const ids = (await req.text())
+				.split(',')
+				.filter((a) => a)
+				.map((v) => +v);
+			delBlackList(...ids);
 		})
 	},
 	rules: {
@@ -436,6 +456,9 @@ const apis: APIRoutes = {
 					'country',
 					'log',
 					'active',
+					'trigger',
+					'status',
+					'times',
 					'forbidden'
 				]),
 				total: Math.ceil(rules.length / s)

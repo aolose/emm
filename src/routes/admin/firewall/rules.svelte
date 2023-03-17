@@ -4,16 +4,29 @@
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
 	import { onMount } from 'svelte';
+	import { watch, time } from '$lib/utils';
+	import Ld from '$lib/components/loading.svelte';
 	export let close;
 	let total = 1;
 	let p = 1;
 	export let pop;
+	let ta = 0;
+	let ld = 0;
+	const wa = watch(ta);
+	$: wa(() => {
+		ls = [];
+		go(1);
+	}, ta);
 	let go = (n) => {
 		p = n;
-		req('rules', new Uint8Array([p, 20])).then((d) => {
-			ls = d.items;
-			total = d.total;
-		});
+		const api = ['rules', 'blk'][ta];
+		ld = 1;
+		req(api, new Uint8Array([p, 20]))
+			.then((d) => {
+				ls = d.items;
+				total = d.total;
+			})
+			.finally(() => (ld = 0));
 	};
 	const add = () => {
 		pop(2).then((d) => {
@@ -28,6 +41,7 @@
 	const del = (id) => {
 		confirm('sure to delete?').then((ok) => {
 			if (ok) {
+				const api = ['rules', 'blk'][ta];
 				req('rules', id, { method: method.DELETE }).then(() => {
 					ls = ls.filter((a) => a.id !== id);
 				});
@@ -48,8 +62,6 @@
 			});
 		});
 	};
-  let ta=0
-
 	let ls = [];
 
 	onMount(() => {
@@ -61,76 +73,99 @@
 	<div class="b">
 		<div class="d">
 			<div class="t">
-				<button class:act={!ta} on:click={()=>ta=0}>Rules</button>
-				<button class:act={ta} on:click={()=>ta=1}>BlackList</button>
+				<button class:act={!ta} on:click={() => (ta = 0)}>rules</button>
+				<button class:act={ta} on:click={() => (ta = 1)}>blackList</button>
 			</div>
-			<s/>
-			<button on:click={add} class="icon i-add" />
+			<s />
+			{#if !ta}<button on:click={add} class="icon i-add" />{/if}
 			<button on:click={close} class="icon i-close" />
 		</div>
 	</div>
-	<div class="c">
-		{#each ls as r}
-			<div class="u" class:act={r.active}>
-				<div class="i">
-					{#if r.ip}
-						<div class="icon i-ip"><span>{r.ip}</span></div>
-					{/if}
-					{#if r.path}
-						<div class="icon i-target"><span>{r.path}</span></div>
-					{/if}
-					{#if r.country}
-						<div class="icon i-geo"><span>{r.country}</span></div>
-					{/if}
-					{#if r.headers}
-						<div class="icon i-set">
-							<pre>{r.headers}</pre>
+	<div class="e">
+		<div class="c">
+			{#each ls as r}
+				{#if ta}
+					<div class="u act">
+						<div class="i">
+							<div class="icon i-ip"><span>{r.ip}</span></div>
+							<div class="icon i-geo"><span>{r._geo}</span></div>
 						</div>
-					{/if}
-				</div>
-				<div class="r">
-					{#if r.log}
-						<span class="icon i-log" />
-					{/if}
-					{#if r.forbidden}
-						<span class="icon i-fbi" />
-					{/if}
-					<span class="m">{r.mark || ''}</span>
-					<button class="icon i-del" on:click={() => del(r.id)} />
-					<button class="icon i-ed" on:click={() => edit(r)} />
-				</div>
-			</div>
-		{/each}
-	</div>
+						<div class="r">
+							<span class="icon i-fbi" />
+							<p>{time(r.createAt)}</p>
+							<s />
+							<button class="icon i-del" on:click={() => del(r.id)} />
+						</div>
+					</div>
+				{:else}
+					<div class="u" class:act={r.active}>
+						<div class="i">
+							{#if r.ip}
+								<div class="icon i-ip"><span>{r.ip}</span></div>
+							{/if}
+							{#if r.path}
+								<div class="icon i-target"><span>{r.path}</span></div>
+							{/if}
+							{#if r.country}
+								<div class="icon i-geo"><span>{r.country}</span></div>
+							{/if}
+							{#if r.headers}
+								<div class="icon i-set">
+									<pre>{r.headers}</pre>
+								</div>
+							{/if}
+						</div>
+						<div class="r">
+							{#if r.log}
+								<span class="icon i-log" />
+							{/if}
+							{#if r.forbidden}
+								<span class="icon i-fbi" />
+							{/if}
+							<span class="m">{r.mark || ''}</span>
+							<button class="icon i-del" on:click={() => del(r.id)} />
+							<button class="icon i-ed" on:click={() => edit(r)} />
+						</div>
+					</div>
+				{/if}
+			{/each}
+		</div>
 		<Pg {total} {go} />
+		<Ld act={ld} />
+	</div>
 </div>
 
 <style lang="scss">
 	@import '../../../lib/break';
+	.e {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+	}
 	.i-close {
 		display: none;
 		@include s() {
 			display: block;
 		}
 	}
-	.t{
+	.t {
 		background: var(--bg2);
 		border-radius: 6px;
-		button{
+		button {
 			color: var(--darkgrey-h);
-			transition: .2s ease-in-out;
-			font-size: 14px;
+			transition: 0.2s ease-in-out;
+			font-size: 13px;
 			line-height: 1;
-			height: 40px;
-			padding: 3px 15px!important;
+			height: 30px;
+			padding: 0 15px !important;
 			border-radius: inherit;
 		}
-		.act{
+		.act {
 			color: #eee;
 			background: #26548c;
 		}
 	}
-	s{
+	s {
 		flex: 1;
 	}
 
@@ -143,7 +178,6 @@
 		overflow: hidden;
 		border-radius: 2px;
 		background: var(--bg0);
-
 		button {
 			opacity: 0.5;
 
@@ -226,6 +260,9 @@
 		height: 30px;
 		display: flex;
 		padding: 0 10px;
+		p {
+			font-size: 13px;
+		}
 	}
 
 	.m {

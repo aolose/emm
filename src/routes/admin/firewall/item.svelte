@@ -40,7 +40,7 @@
 			class:i-no={exp}
 		/>
 		{#each hd as [k, v]}
-			<div class="h" >
+			<div class="h">
 				<span>{k}:</span>
 				<span>{v}</span>
 			</div>
@@ -142,7 +142,7 @@
 
 	.r6 {
 		width: 50px;
-		span{
+		span {
 			white-space: nowrap;
 		}
 	}
@@ -155,9 +155,9 @@
 			position: absolute;
 			left: 10px;
 			padding: 7px 10px;
-     @include s() {
-			 left: 3px;
-		 }
+			@include s() {
+				left: 3px;
+			}
 			&:hover {
 				color: #fff;
 			}

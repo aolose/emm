@@ -1,5 +1,6 @@
 <script>
 	import { slide } from 'svelte/transition';
+	import { onDestroy } from 'svelte';
 
 	export let value = '';
 	export let items = [];
@@ -11,18 +12,30 @@
 		else s.add(v);
 		value = [...s].filter((a) => a).join();
 	};
+	const fn = () => {
+		if (e) {
+			window.removeEventListener('click', fn);
+			e = 0;
+		} else {
+			e = 1;
+			window.addEventListener('click', fn);
+		}
+	};
+	onDestroy(() => {
+		window.removeEventListener('click', fn);
+	});
 	$: {
 		if (!value) value = '';
 		s = new Set(value.split(','));
 	}
 </script>
 
-<div class="a" class:c={e} on:click={() => (e = !e)}>
+<div class="a" class:c={e} on:click|stopPropagation={fn}>
 	<span>{value}</span>
 	{#if e}
 		<div transition:slide class="b">
 			{#each items as k}
-				<div class:s={s.has(k)} on:click={ck(k)}>
+				<div class:s={s.has(k)} on:click|stopPropagation={ck(k)}>
 					{k}
 				</div>
 			{/each}
