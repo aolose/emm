@@ -99,7 +99,7 @@
 						<input bind:value={d.status} />
 					</label>
 					<label transition:slide>
-						<span>times:</span>
+						<span>times per hour:</span>
 						<input bind:value={d.times} />
 					</label>
 				{:else}
