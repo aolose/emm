@@ -640,6 +640,9 @@ const apis: APIRoutes = {
 			if (slug) {
 				const p = db.get(model(Post, { slug }));
 				if (p) {
+					if(tag){
+						if(!tagPostCache.getTags(p.id).find(a=>a.name===tag))return resp('tag not exist',404)
+					}
 					const rp = reqPostCache.get({ postId: p.id }).map((a) => a.reqId);
 					if (rp.length) {
 						const cli = getClient(req);

@@ -36,9 +36,9 @@ const load = () => {
   allTags.forEach(a => {
     const posts = tagPostCache.getPostIds(a.id).filter(a => allPSet.has(a));
     page("/tag/" + a.name+'/', posts.length, 10);
-    posts.forEach(a => {
-      const p = pMap.get(a);
-      if (p) urls.push({ url: "/post/" + a + "/" + p.slug, lastMod: p.last });
+    posts.forEach(n => {
+      const p = pMap.get(n);
+      if (p) urls.push({ url: "/post/" + a.name + "/" + p.slug, lastMod: p.last });
     });
   });
   urls.sort((a,b)=>{
