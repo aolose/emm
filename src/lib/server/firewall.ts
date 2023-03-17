@@ -4,8 +4,9 @@ import { db, sys } from '$lib/server/index';
 import { BlackList, FwLog, FWRule } from '$lib/server/model';
 import { filter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
-import { debugMode, getClientAddr, model } from '$lib/server/utils';
+import { debugMode, getClient, getClientAddr, model } from "$lib/server/utils";
 import { ipInfo } from '$lib/server/ipLite';
+import { permission } from "$lib/components/post/rList.svelte";
 
 export let triggers: FWRule[];
 export let rules: FWRule[];
@@ -197,10 +198,11 @@ const blackListCheck = (r: {
 };
 
 export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
+	// skip admin
+	if(!debugMode&&getClient(event.request)?.ok(permission.Admin))return;
 	const ip = getClientAddr(event);
 	const path = event.url.pathname;
 	const method = event.request.method;
-	if (!debugMode && path === '/api/log') return;
 	const ua = hds2Str(event.request.headers);
 	const r = [Date.now(), ip, path, ua, status, ipInfo(ip)?.short || '', fr?.mark, method] as log;
 	const rq = logToReq(r);
