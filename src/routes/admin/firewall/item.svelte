@@ -139,7 +139,10 @@
 	}
 
 	.r4 {
-		flex: 1;
+		flex-grow: 1;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.r6 {
