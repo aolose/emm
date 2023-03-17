@@ -42,8 +42,9 @@ export const tagPostCache = (() => {
 			const ids = new Set<number>();
 			const pSet = new Set(([] as number[]).concat(postId || []));
 			const tSet = new Set(([] as number[]).concat(tagId || []));
+			if(!pSet.size&&!tSet.size)return
 			tps.forEach(({ postId, tagId, id }) => {
-				if (!pSet.size || pSet.has(postId) || !tSet.size || tSet.has(tagId)) {
+				if ((!pSet.size || pSet.has(postId)) && (!tSet.size || tSet.has(tagId))) {
 					ids.add(id);
 				}
 			});
@@ -254,6 +255,7 @@ export const reqPostCache = (() => {
 			const { postId, reqId } = rq;
 			const pSet = new Set(([] as number[]).concat(postId || []));
 			const rSet = new Set(([] as number[]).concat(reqId || []));
+			if(pSet.size+rSet.size===0)return
 			const ks: number[] = [];
 			c = c.filter((a) => {
 				if ((!postId || pSet.has(a.targetId)) && (!reqId || rSet.has(a.reqId))) {
