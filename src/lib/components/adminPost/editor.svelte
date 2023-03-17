@@ -3,7 +3,7 @@
 	import Editor from '$lib/components/editor.svelte';
 	import { confirm, editPost, originPost, patchedTag, posts, saveNow, setting } from '$lib/store';
 	import { api, req } from '$lib/req';
-	import { diffObj, getErr, watch } from '$lib/utils';
+	import { diffObj, getErr, watch,time } from '$lib/utils';
 	import { get } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import { method } from '$lib/enum';
@@ -213,6 +213,9 @@
 		<div class="e">
 			{#key $editPost._ || $editPost.id}
 				<Editor bind:value={draft} toolbar={tools} />
+				{#if $editPost.save}
+					<span class="tm">save at {time($editPost.save).slice(9)}</span>
+				{/if}
 			{/key}
 		</div>
 	</div>
@@ -220,7 +223,14 @@
 
 <style lang="scss">
 	@import '../../break';
-
+  .tm{
+		line-height: 2;
+		position: absolute;
+		font-size: 12px;
+		bottom: 0;
+	  left: 30px;
+		padding: 0 10px 9px;
+	}
 	.a {
 		height: 100%;
 		display: flex;
