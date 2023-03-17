@@ -21,7 +21,7 @@
 <div class="r" class:act={sel.has(tm + ip)} on:click={ck(tm + ip)}>
 	<div class="r0"><span>{time(tm)}</span></div>
 	<div class="r1"><span>{ip}</span></div>
-	<div class="r6"><span>{(mt || '').toUpperCase()}</span></div>
+	<div class="r6"><span title={mt}>{(mt || '').toUpperCase()}</span></div>
 	{#if st}
 		<div class="r3">
 			<span class:c0={col(st, 0)} class:c1={col(st, 1)} class:c2={col(st, 2)} class:c3={col(st, 3)}
@@ -29,8 +29,8 @@
 			>
 		</div>
 	{/if}
-	<div class="r2"><span>{ph}</span></div>
-	<div class="r6"><span>{ct}</span></div>
+	<div class="r2"><span title={ph}>{ph}</span></div>
+	<div class="r6"><span >{ct}</span></div>
 	<div class="r4"><span>{mk || ''}</span></div>
 	<div class="r5">
 		<button
@@ -125,7 +125,9 @@
 
 	.r2 {
 		width: 120px;
-
+    overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 		span {
 			white-space: nowrap;
 			color: #72849b;
@@ -141,6 +143,8 @@
 	}
 
 	.r6 {
+		overflow: hidden;
+		text-overflow: ellipsis;
 		width: 50px;
 		span {
 			white-space: nowrap;

@@ -50,7 +50,7 @@
 		const s = new Set();
 		ls.forEach((a) => {
 			if (a && a.length) {
-				const k = a[0] + a[1];
+				const k = a[0] + a[1]+a[2];
 				if (s.has(k)) return;
 				s.add(k);
 				l.push(a);
@@ -130,7 +130,7 @@
 			</div>
 			<div class="e">
 				<div class="b">
-					{#each ls as d (d[0] + d[1] + tab)}
+					{#each ls as d (d[0] + d[1] +d[2] +tab)}
 						<Itm {ck} data={d} {sel} isDb={tab} />
 					{/each}
 				</div>

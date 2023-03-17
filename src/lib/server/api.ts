@@ -53,13 +53,13 @@ import {
 	codeTokens,
 	combine,
 	eTags,
-	getPostSibling,
+	getPostSibling, getPubTags,
 	noAccessPosts,
 	patchPostReqs,
 	patchPostTags,
 	reqPostCache,
 	tagPostCache
-} from '$lib/server/cache';
+} from "$lib/server/cache";
 import { versionStrPatch } from '$lib/setStrPatchFn';
 import { NULL } from '$lib/server/enum';
 import { cmManager } from '$lib/server/comment';
@@ -574,17 +574,7 @@ const apis: APIRoutes = {
 	},
 	tags: {
 		get: async (req) => {
-			const ps = get(publishedPost);
-			const ids = new Set(noAccessPosts(getClient(req)) || []);
-			return tagPostCache
-				.getTags([...ps])
-				.filter((a) => {
-					const ia = new Set(tagPostCache.getPostIds(a.id));
-					for (const i of ia) {
-						if (ids.has(i)) ia.delete(i);
-					}
-					return ia.size;
-				})
+		   return getPubTags(getClient(req))
 				.map((a) => a.name)
 				.join();
 		},
