@@ -5,13 +5,31 @@
 	import Ck from './ck.svelte';
 	import Sel from './sel.svelte';
 	import { trim } from '$lib/utils';
+	import { slide } from 'svelte/transition';
 
 	let d = {};
 	let show = 0;
 	let tp = 0; // 0- filter 1-editor 2-create
 	let ok = () => 0;
 	let cancel = () => 0;
-	$: hasV = trim(d.ip || d.path || d.headers || d.mark || d.country || '');
+	let hasV;
+	$: {
+		d.ip = trim(d.ip);
+		d.mark = trim(d.mark, true);
+		d.country = trim(d.country);
+		d.path = trim(d.path);
+		d.times = +d.times || 1;
+		d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
+		hasV = trim(
+			d.ip ||
+				(d.trigger && d.status) ||
+				d.path ||
+				d.headers ||
+				d.mark ||
+				(!d.trigger && d.country) ||
+				''
+		);
+	}
 	export const pop = (type, data = {}) => {
 		tp = type;
 		if (tp === 2) {
@@ -45,12 +63,21 @@
 					<label>
 						<Ck bind:value={d.active}>activate</Ck>
 					</label>
-					<label>
-						<Ck bind:value={d.log}>log</Ck>
-					</label>
-					<label>
-						<Ck bind:value={d.forbidden}>forbidden</Ck>
-					</label>
+					{#if tp}
+						<label>
+							<Ck bind:value={d.trigger}>trigger</Ck>
+						</label>
+					{/if}
+					{#if !d.trigger}
+						<label transition:slidLeft>
+							<Ck bind:value={d.log}>log</Ck>
+						</label>
+						<label transition:slidLeft>
+							<Ck bind:value={d.forbidden}>forbidden</Ck>
+						</label>
+					{:else}
+						<s />
+					{/if}
 				</div>
 			{/if}
 			<div class="f0">
@@ -63,23 +90,34 @@
 					<input bind:value={d.path} />
 				</label>
 				<label>
-					<span>method:</span>
-					<Sel
-						items={['', 'GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS']}
-						bind:value={d.method}
-					/>
+					<span>header:</span>
+					<HdsIpt bind:value={d.headers} />
 				</label>
-				<label>
-					<span>country:</span>
-					<input bind:value={d.country} />
-				</label>
+				{#if d.trigger}
+					<label transition:slide>
+						<span>status:</span>
+						<input bind:value={d.status} />
+					</label>
+					<label transition:slide>
+						<span>times:</span>
+						<input bind:value={d.times} />
+					</label>
+				{:else}
+					<label transition:slide>
+						<span>method:</span>
+						<Sel
+							items={['', 'GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS']}
+							bind:value={d.method}
+						/>
+					</label>
+					<label transition:slide>
+						<span>country:</span>
+						<input bind:value={d.country} />
+					</label>
+				{/if}
 				<label>
 					<span>mark:</span>
 					<input bind:value={d.mark} />
-				</label>
-				<label>
-					<span>header:</span>
-					<HdsIpt bind:value={d.headers} />
 				</label>
 			</div>
 			<div class="fn">
@@ -94,6 +132,10 @@
 
 <style lang="scss">
 	@import '../../../lib/break';
+
+	s {
+		flex: 1;
+	}
 
 	h1 {
 		width: 100%;
@@ -204,7 +246,6 @@
 	}
 
 	label {
-		width: 100%;
 		font-size: 15px;
 		align-items: flex-start;
 
@@ -263,6 +304,7 @@
 		}
 
 		@include s() {
+			flex-wrap: wrap;
 			label {
 				white-space: nowrap;
 				width: auto;

@@ -1,51 +1,103 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import ipRangeCheck from 'ip-range-check';
 import { db, sys } from '$lib/server/index';
-import { FwLog, FWRule } from '$lib/server/model';
+import { BlackList, FwLog, FWRule } from '$lib/server/model';
 import { filter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
-import { getClientAddr, model } from '$lib/server/utils';
+import { debugMode, getClientAddr, model } from '$lib/server/utils';
 import { ipInfo } from '$lib/server/ipLite';
 
+export let triggers: FWRule[];
 export let rules: FWRule[];
+export let blackList: BlackList[];
 
 function sort() {
+	triggers.sort((a, b) => b.createAt - a.createAt);
 	rules.sort((a, b) => b.createAt - a.createAt);
 }
 
 export const addRule = (fr: FWRule) => {
 	db.save(fr);
-	const r = rules.findIndex((a) => a.id === fr.id);
-	if (r === -1) {
-		rules.push(fr);
-	} else rules[r] = fr;
+	const isTrigger = fr.trigger;
+	const ir = triggers.findIndex((a) => a.id === fr.id);
+	const iu = rules.findIndex((a) => a.id === fr.id);
+	if (!isTrigger) {
+		if (ir !== -1) triggers.splice(ir, 1);
+		else if (iu === -1) rules.push(fr);
+		else rules[iu] = fr;
+	} else {
+		if (iu !== -1) rules.splice(iu, 1);
+		else if (ir === -1) triggers.push(fr);
+		else triggers[ir] = fr;
+	}
 	sort();
 };
 
-export const ruleHit = (r: { ip?: string; path?: string; method?: string; headers?: Headers }) => {
-	const { path = '', ip = '', method = '', headers } = r;
-	let o: Obj<FWRule> | undefined;
-	for (const k of rules) {
-		if (!k.active) continue;
-		if (k.path && !match(k.path, path)) continue;
-		if (k.method) {
-			const ms = k.method
-				.toLowerCase()
-				.split(',')
-				.filter((a) => a);
-			const mms = new Set(ms);
-			if (!mms.has(method.toLowerCase())) continue;
-		}
-		if (k.headers && !matchHeader(k.headers, headers || new Headers())) continue;
-		if (k.ip) {
-			if (!ipRangeCheck(ip, k.ip)) continue;
-			if (k.country) {
-				const f = ipInfo(ip);
-				if (f && f.short) {
-					if (!match(k.country, f.short)) continue;
+const isInRange = (str: string, num: number | undefined) => {
+	if (num) {
+		const group = str.split(/['; ]+/);
+		for (const g of group) {
+			const [a, b] = g.split(/[-~]/, 2);
+			if (/\d+/g.test(a)) {
+				if (num >= +a) {
+					if (/\d+/g.test(b)) {
+						if (num > +b) return false;
+					}
+					return true;
 				}
 			}
 		}
+	}
+	return false;
+};
+const hitRule = (
+	r: {
+		ip?: string;
+		path?: string;
+		method?: string;
+		status?: number;
+		headers?: Headers;
+	},
+	k: FWRule
+) => {
+	const { path = '', ip = '', method = '', headers, status } = r;
+	if (!k.active) return false;
+	if (k.path && !match(k.path, path)) return false;
+	if (k.status && !isInRange(k.status, status)) return false;
+	if (k.method) {
+		const ms = k.method
+			.toLowerCase()
+			.split(',')
+			.filter((a) => a);
+		const mms = new Set(ms);
+		if (!mms.has(method.toLowerCase())) return false;
+	}
+	if (k.headers && !matchHeader(k.headers, headers || new Headers())) return false;
+	if (k.ip) {
+		if (!ipRangeCheck(ip, k.ip)) return false;
+		if (k.country) {
+			const f = ipInfo(ip);
+			if (f && f.short) {
+				if (!match(k.country, f.short)) return false;
+			}
+		}
+	}
+	return true;
+};
+export const ruleHit = (
+	r: {
+		ip?: string;
+		path?: string;
+		method?: string;
+		status?: number;
+		headers?: Headers;
+	},
+	rs = rules
+) => {
+	let o: Obj<FWRule> | undefined;
+	console.log(rs);
+	for (const k of rs) {
+		if (!hitRule(r, k)) continue;
 		if (!o) o = { mark: '', _match: [] };
 		o._match?.push(k.id);
 		if (k.mark)
@@ -58,15 +110,27 @@ export const ruleHit = (r: { ip?: string; path?: string; method?: string; header
 	}
 	return o;
 };
-export const lsRules = (page: number, size: number) => rules.slice(size * (page - 1), size * page);
+export const lsRules = (page: number, size: number) => {
+	const r = rules.concat(triggers).filter((a) => a.id > 0);
+	return r.slice(size * (page - 1), size * page);
+};
 export const delRule = (ids: number[]) => {
 	db.delByPk(FWRule, ids);
 	rules = rules.filter((a) => ids.indexOf(a.id) === -1);
+	triggers = triggers.filter((a) => ids.indexOf(a.id) === -1);
 };
 let t: Timer;
-
 export function loadRules() {
-	rules = db.all(model(FWRule));
+	rules = [];
+	triggers = [];
+	db.all(model(FWRule)).forEach((a) => {
+		if (a.trigger) triggers.push(a);
+		else rules.push(a);
+	});
+	blackList = db.all(model(BlackList)).map((a) => model(BlackList, a) as BlackList);
+	blackList.forEach((a) => {
+		rules.push(a.toRule());
+	});
 	sort();
 	clearTimeout(t);
 	t = setTimeout(loadRules, 1e3 * 3600 * 72);
@@ -75,13 +139,73 @@ export function loadRules() {
 type log = [number, string, string, string, number, string, string, string];
 export let logCache: log[] = [];
 const max = 1000;
+
+const addBlackListRule = (ip: string) => {
+	if (blackList.find((a) => a.ip === ip)) return;
+	const b = model(BlackList, { ip }) as BlackList;
+	db.save(b);
+	blackList.push(b);
+	rules.push(b.toRule());
+};
+
+export const delBlackList = (...id: number[]) => {
+	const ids = new Set(id);
+	if (!ids.size) return;
+	db.delByPk(BlackList, id);
+	blackList = blackList.filter((a) => !ids.has(a.id));
+	rules = rules.filter((r) => !ids.has(-r.id));
+};
+
+export const blackLists = (page = 1, size = 20) => {
+	const bs = blackList.slice(size * (page - 1), size * page).map((a) => {
+		a._geo = ipInfo(a.ip).full;
+		return a;
+	});
+	return {
+		total: Math.ceil(blackList.length / size),
+		items: bs
+	};
+};
+const blackListCheck = (r: {
+	ip: string;
+	path?: string;
+	method?: string;
+	status?: number;
+	headers?: Headers;
+}) => {
+	const ts = triggers.filter((a) => hitRule(r, a));
+	const times = ts.map((a) => a.times);
+	if (ts.length) {
+		const dur = 1e3 * 3600;
+		const after = Date.now() - dur;
+		for (let i = logCache.length - 1; i > -1; i--) {
+			const log = logToReq(logCache[i]);
+			if (log.createAt < after || log.ip !== r.ip) return;
+			for (let i = 0; i < ts.length; i++) {
+				const t = ts[i];
+				if (hitRule(log, t)) {
+					const n = times[i] - 1;
+					if (!n) {
+						ts.slice(i, 1);
+						return addBlackListRule(r.ip);
+					} else times[i] = n;
+				}
+			}
+		}
+	}
+};
+
 export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
 	const ip = getClientAddr(event);
 	const path = event.url.pathname;
 	const method = event.request.method;
-	if (path === '/api/log') return;
+	if (!debugMode && path === '/api/log') return;
 	const ua = hds2Str(event.request.headers);
 	const r = [Date.now(), ip, path, ua, status, ipInfo(ip)?.short || '', fr?.mark, method] as log;
+	const rq = logToReq(r);
+	if (!fr?._match?.find((a) => a < 0) && triggers.find((a) => hitRule(rq, a))) {
+		blackListCheck(rq);
+	}
 	logCache.push(r);
 	const l = logCache.length;
 	if (l > max) logCache = logCache.slice(l - max);
@@ -124,6 +248,19 @@ export const fw2log = (l: FwLog) => {
 		l.method
 	] as log;
 };
+
+const logToReq = (l: log) => {
+	const [createAt, ip, path, headers, status, , , method] = l;
+	return {
+		createAt,
+		ip,
+		path,
+		headers: new Headers(str2Hds(headers)),
+		status,
+		method
+	};
+};
+
 export const filterLog = (logs: log[], t: FWRule) => {
 	return logs.filter((a) => {
 		if (t.headers && !matchHeader(t.headers, new Headers(str2Hds(a[3])))) return;
@@ -175,10 +312,11 @@ function matchHeader(h: string, hs: Headers) {
 	return true;
 }
 
-export const fwFilter = (event: RequestEvent): Obj<FWRule> | undefined => {
+export const fwFilter = (event: RequestEvent, rs = rules): Obj<FWRule> | undefined => {
 	if (!db) return;
-	if (!rules || !rules.length) loadRules();
+	if (!rs || !rs.length) loadRules();
 	const ip = getClientAddr(event);
+	if (ip === '127.0.0.1' && !debugMode) return;
 	const path = event.url.pathname;
 	const headers = event.request.headers;
 	const method = event.request.method.toLowerCase();
