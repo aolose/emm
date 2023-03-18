@@ -191,7 +191,7 @@ export const encryptResp = async (params: ApiData, keyNum: number, code = 200) =
 			}
 		}
 	}
-	return resp('', 403);
+	return resp('', 500);
 };
 export const getIp = (req: Request) => req.headers.get('x-forwarded-for');
 export const apiHandle = async (event: RequestEvent): Promise<Response> => {

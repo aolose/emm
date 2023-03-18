@@ -77,7 +77,7 @@ export const postPatch = (id: number, ver: number, length: number, patch: string
 		if (ver) return resp('patch ver error', 500);
 	}
 	const p = model(Post, { id });
-	if (!db.get(p)) return resp('post not exist', 404);
+	if (!db.get(p)) return resp('post not exist', 500);
 	if (ver === 0) {
 		p.content_d = patch;
 	} else {
