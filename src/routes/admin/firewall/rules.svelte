@@ -83,55 +83,57 @@
 	</div>
 	<div class="e">
 		<div class="c">
-			{#each ls as r}
-				{#if ta}
-					<div class="u act">
-						<div class="i">
-							<div class="icon i-ip"><span>{r.ip}</span></div>
-							<div class="icon i-geo"><span>{r._geo}</span></div>
-						</div>
-						<div class="r">
-							<span class="icon i-fbi" />
-							<p>{time(r.createAt)}</p>
-							<s />
-							<button class="icon i-del" on:click={() => del(r.id)} />
-						</div>
-					</div>
-				{:else}
-					<div class="u" class:act={r.active}>
-						<div class="i">
-							{#if r.ip&&!r.trigger}
+			<div class="q">
+				{#each ls as r}
+					{#if ta}
+						<div class="u act">
+							<div class="i">
 								<div class="icon i-ip"><span>{r.ip}</span></div>
-							{/if}
-							{#if r.status}
-								<div class="icon i-status"><span>{r.status}</span></div>
-							{/if}
-							{#if r.path}
-								<div class="icon i-target"><span>{r.path}</span></div>
-							{/if}
-							{#if r.country&&!r.trigger}
-								<div class="icon i-geo"><span>{r.country}</span></div>
-							{/if}
-							{#if r.headers}
-								<div class="icon i-set">
-									<pre>{r.headers.replace(/:/g,': ')}</pre>
-								</div>
-							{/if}
-						</div>
-						<div class="r">
-							{#if r.log&&!r.trigger}
-								<span class="icon i-log" />
-							{/if}
-							{#if r.forbidden||r.trigger}
+								<div class="icon i-geo"><span>{r._geo}</span></div>
+							</div>
+							<div class="r">
 								<span class="icon i-fbi" />
-							{/if}
-							<span class="m">{r.mark || ''}</span>
-							<button class="icon i-del" on:click={() => del(r.id)} />
-							<button class="icon i-ed" on:click={() => edit(r)} />
+								<p>{time(r.createAt)}</p>
+								<s />
+								<button class="icon i-del" on:click={() => del(r.id)} />
+							</div>
 						</div>
-					</div>
-				{/if}
-			{/each}
+					{:else}
+						<div class="u" class:act={r.active}>
+							<div class="i">
+								{#if r.ip&&!r.trigger}
+									<div class="icon i-ip"><span>{r.ip}</span></div>
+								{/if}
+								{#if r.status}
+									<div class="icon i-status"><span>{r.status}</span></div>
+								{/if}
+								{#if r.path}
+									<div class="icon i-target"><span>{r.path}</span></div>
+								{/if}
+								{#if r.country&&!r.trigger}
+									<div class="icon i-geo"><span>{r.country}</span></div>
+								{/if}
+								{#if r.headers}
+									<div class="icon i-set">
+										<pre>{r.headers.replace(/:/g,': ')}</pre>
+									</div>
+								{/if}
+							</div>
+							<div class="r">
+								{#if r.log&&!r.trigger}
+									<span class="icon i-log" />
+								{/if}
+								{#if r.forbidden||r.trigger}
+									<span class="icon i-fbi" />
+								{/if}
+								<span class="m">{r.mark || ''}</span>
+								<button class="icon i-del" on:click={() => del(r.id)} />
+								<button class="icon i-ed" on:click={() => edit(r)} />
+							</div>
+						</div>
+					{/if}
+				{/each}
+			</div>
 		</div>
 		<Pg {total} {go} />
 		<Ld act={ld} />
@@ -140,6 +142,14 @@
 
 <style lang="scss">
 	@import '../../../lib/break';
+	.q {
+		overflow: auto;
+	  position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+	}
 	.e {
 		display: flex;
 		flex-direction: column;
@@ -304,7 +314,7 @@
 
 	.a {
 		border-left: 1px solid #141e28;
-		padding: 0 0 20px;
+		padding: 0 0 10px;
 		height: 100%;
 		display: flex;
 		flex-direction: column;
@@ -318,5 +328,6 @@
 
 	.c {
 		flex: 1;
+		margin-bottom: 10px;
 	}
 </style>
