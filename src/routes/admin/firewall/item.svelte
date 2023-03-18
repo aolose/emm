@@ -1,6 +1,5 @@
 <script>
 	import { str2Hds, time } from '$lib/utils';
-	import { slide } from 'svelte/transition';
 
 	export let data = [];
 	const [tm, ip, ph, hds, st, ct, mk, mt] = data;
@@ -30,7 +29,7 @@
 		</div>
 	{/if}
 	<div class="r2"><span title={ph}>{ph}</span></div>
-	<div class="r6"><span>{ct}</span></div>
+	<div class="r6"><span title={ct}>{ct}</span></div>
 	<div class="r4"><span>{mk || ''}</span></div>
 	<div class="r5">
 		<button

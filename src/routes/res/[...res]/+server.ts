@@ -1,6 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import fs from 'fs';
-import { model, resp } from '$lib/server/utils';
+import { resp } from '$lib/server/utils';
 import path from 'path';
 import { sys, db } from '$lib/server';
 import { Res } from '$lib/server/model';

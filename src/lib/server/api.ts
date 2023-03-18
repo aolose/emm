@@ -68,17 +68,17 @@ import { postList, postPatch, pubPostList } from '$lib/server/posts';
 import { restore } from '$lib/server/restore';
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
-	if (!sysStatue) return resp('system uninitialized', 403);
+	if (!sysStatue) return resp('system uninitialized', 500);
 	if (!debugMode) {
 		const requires = new Set(([] as permission[]).concat(ps));
 		const client = getClient(req);
 		if (requires.size) {
-			if (!client) return resp('empty token', 403);
+			if (!client) return resp('invalid token', 401);
 			if (!client.ok(Admin)) {
 				for (const p of requires) {
 					const s = client.ok(p);
 					if (s) continue;
-					else return resp('no permission', 403);
+					else return resp('no permission', 401);
 				}
 			}
 		}
@@ -240,7 +240,7 @@ const apis: APIRoutes = {
 					codeTokens.delete({ code });
 				}
 			}
-			return resp('invalid code', 403);
+			return resp('invalid code', 500);
 		}
 	},
 	code: {
@@ -468,7 +468,7 @@ const apis: APIRoutes = {
 	},
 	login: {
 		post: async (req) => {
-			if (sysStatue < 2) return resp(-1, 403);
+			if (sysStatue < 2) return resp(-1, 500);
 			const tryTimes = 3;
 			const base = 1e4;
 			const ip = req.headers.get('x-forwarded-for') || '';
@@ -649,7 +649,7 @@ const apis: APIRoutes = {
 					if (rp.length) {
 						const cli = getClient(req);
 						if (!cli || !cli.has({ type: permission.Post, _reqs: rp })) {
-							return resp('You do not have permission to view this post', 403);
+							return resp('You do not have permission to view this post', 401);
 						}
 					}
 					p._cm = +(sys.comment && !(p.disCm || 0));
@@ -795,7 +795,7 @@ const apis: APIRoutes = {
 		async post(req) {
 			const cli = getClient(req);
 			const isAdm = cli?.ok(Admin);
-			if (!isAdm && (!sys || (sys.admUsr && sys.admPwd))) return resp('', 403);
+			if (!isAdm && (!sys || (sys.admUsr && sys.admPwd))) return resp('', 401);
 			const d = await getReqJson(req);
 			const { usr, pwd } = d;
 			if (usr && pwd) {
@@ -806,7 +806,7 @@ const apis: APIRoutes = {
 				if (!isAdm) setToken(req, res, genToken(Admin));
 				return res;
 			} else {
-				return resp('username or password is empty', 500);
+				return resp('username or password is empty', 400);
 			}
 		}
 	},
@@ -878,7 +878,7 @@ const apis: APIRoutes = {
 	},
 	backup: {
 		post: async (req) => {
-			if (sysStatue > 1 && !getClient(req)?.ok(Admin)) return resp('no permission', 403);
+			if (sysStatue > 1 && !getClient(req)?.ok(Admin)) return resp('no permission', 401);
 			const data = await req.arrayBuffer();
 			return await restore(data);
 		},

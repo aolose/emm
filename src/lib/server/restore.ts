@@ -23,7 +23,7 @@ export const restore = async (data: ArrayBuffer) => {
 	const db = new better(Buffer.from(dbBuf));
 	let { thumbDir, uploadDir } = db.prepare('select thumbDir,uploadDir from System').get() || {};
 	db.close();
-	if (!thumbDir || !uploadDir) return resp('sSome directories are missing', 500);
+	if (!thumbDir || !uploadDir) return resp('some directories are missing', 500);
 	thumbDir = fix(thumbDir);
 	uploadDir = fix(uploadDir);
 	server.stop();
