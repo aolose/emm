@@ -31,16 +31,15 @@ export const hooks: apiHooks = {
 						method?: string;
 						country?: string;
 						times?: number;
-						ip?: number;
+						ip?: string;
 					};
 					if (d.trigger) {
-						delete d.country;
-						delete d.method;
-						delete d.ip;
+						if (d.country) d.country = '';
+						if (d.method) d.method = '';
+						if (d.ip) d.ip = '';
 					} else {
-						delete d.trigger;
-						delete d.status;
-						delete d.times;
+						if (d.status) d.status = '';
+						if (d.times) d.times = -1;
 					}
 					return d;
 				}

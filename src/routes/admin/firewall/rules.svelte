@@ -4,7 +4,7 @@
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
 	import { onMount } from 'svelte';
-	import { watch, time } from '$lib/utils';
+	import { watch, time, diffObj } from '$lib/utils';
 	import Ld from '$lib/components/loading.svelte';
 	export let close;
 	let total = 1;
@@ -50,10 +50,11 @@
 	};
 
 	const edit = (da) => {
-		pop(1, da).then((d) => {
+		pop(1, { ...da }).then((d) => {
 			if (!d) return;
-			d.id = da.id;
-			req('rule', d).then(() => {
+			const df = diffObj(da, d);
+			df.id = da.id;
+			req('rule', df).then(() => {
 				const idx = ls.indexOf(da);
 				if (idx > -1) {
 					ls = [...ls];
@@ -101,7 +102,7 @@
 					{:else}
 						<div class="u" class:act={r.active}>
 							<div class="i">
-								{#if r.ip&&!r.trigger}
+								{#if r.ip && !r.trigger}
 									<div class="icon i-ip"><span>{r.ip}</span></div>
 								{/if}
 								{#if r.status}
@@ -110,20 +111,20 @@
 								{#if r.path}
 									<div class="icon i-target"><span>{r.path}</span></div>
 								{/if}
-								{#if r.country&&!r.trigger}
+								{#if r.country && !r.trigger}
 									<div class="icon i-geo"><span>{r.country}</span></div>
 								{/if}
 								{#if r.headers}
 									<div class="icon i-set">
-										<pre>{r.headers.replace(/:/g,': ')}</pre>
+										<pre>{r.headers.replace(/:/g, ': ')}</pre>
 									</div>
 								{/if}
 							</div>
 							<div class="r">
-								{#if r.log&&!r.trigger}
+								{#if r.log && !r.trigger}
 									<span class="icon i-log" />
 								{/if}
-								{#if r.forbidden||r.trigger}
+								{#if r.forbidden || r.trigger}
 									<span class="icon i-fbi" />
 								{/if}
 								<span class="m">{r.mark || ''}</span>
@@ -144,7 +145,7 @@
 	@import '../../../lib/break';
 	.q {
 		overflow: auto;
-	  position: absolute;
+		position: absolute;
 		top: 0;
 		bottom: 0;
 		left: 0;

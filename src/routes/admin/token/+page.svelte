@@ -81,7 +81,7 @@
 			{ name: 'create at', cell: ({ createAt }) => time(createAt) },
 			{ name: 'times', cell: ({ times }) => (times === -1 || !times ? '∞' : times) },
 			{ name: 'share', cell: ({ share }) => (share ? 'Y' : 'N') },
-			{ name: 'used',key:'used' },
+			{ name: 'used', key: 'used' },
 			{ detail: '_reqs', btn: btnClick }
 		]
 	][ta];

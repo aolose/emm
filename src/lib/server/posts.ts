@@ -22,10 +22,10 @@ export const pubPostList = (
 	let desc = null;
 	if (tag) {
 		const tg = get(tags).find((a) => a.name === tag);
-		if(!tg)return resp('tag not exist',404)
+		if (!tg) return resp('tag not exist', 404);
 		bn = tg.banner;
 		desc = tg.desc;
-		const ps =  tagPostCache.getPostIds(tg.id);
+		const ps = tagPostCache.getPostIds(tg.id);
 		if (ps.length) {
 			where.push(`id in (${sqlFields(ps.length)})`);
 			values.push(...ps);

@@ -4,9 +4,9 @@ import { db, sys } from '$lib/server/index';
 import { BlackList, FwLog, FWRule } from '$lib/server/model';
 import { filter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
-import { debugMode, getClient, getClientAddr, model } from "$lib/server/utils";
+import { debugMode, getClient, getClientAddr, model } from '$lib/server/utils';
 import { ipInfo } from '$lib/server/ipLite';
-import { permission } from "$lib/enum";
+import { permission } from '$lib/enum';
 
 export let triggers: FWRule[];
 export let rules: FWRule[];
@@ -24,7 +24,7 @@ export const addRule = (fr: FWRule) => {
 	const iu = rules.findIndex((a) => a.id === fr.id);
 	if (!isTrigger) {
 		if (ir !== -1) triggers.splice(ir, 1);
-		else if (iu === -1) rules=[fr].concat(rules);
+		else if (iu === -1) rules = [fr].concat(rules);
 		else rules[iu] = fr;
 	} else {
 		if (iu !== -1) rules.splice(iu, 1);
@@ -200,7 +200,7 @@ const blackListCheck = (r: {
 export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
 	// skip admin
 	const ip = getClientAddr(event);
-	if(!debugMode&&(getClient(event.request)?.ok(permission.Admin)||ip==='127.0.0.1'))return;
+	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || ip === '127.0.0.1')) return;
 	const path = event.url.pathname;
 	const method = event.request.method;
 	const ua = hds2Str(event.request.headers);

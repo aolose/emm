@@ -21,12 +21,12 @@
 		d.times = +d.times || 1;
 		d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 		hasV = trim(
-			(d.trigger?'':d.ip)||
-				(d.trigger ? d.status:'') ||
+			(d.trigger ? '' : d.ip) ||
+				(d.trigger ? d.status : '') ||
 				d.path ||
 				d.headers ||
 				d.mark ||
-				(d.trigger?'': d.country) ||
+				(d.trigger ? '' : d.country) ||
 				''
 		);
 	}
