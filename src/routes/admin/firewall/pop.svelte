@@ -128,7 +128,7 @@
 					</label>
 				{/if}
 				{#if !d.forbidden || d.trigger}
-					<label>
+					<label transition:slide>
 						<span>redirect:</span>
 						<input bind:value={d.redirect} />
 					</label>
