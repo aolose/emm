@@ -1,11 +1,11 @@
 import type { Require } from '$lib/server/model';
 import { Post, PostTag, RequireMap, Tag, TkTick, TokenInfo } from '$lib/server/model';
 import { Client } from '$lib/server/client';
-import { DBProxy, getClient, model, sqlFields } from "$lib/server/utils";
+import { DBProxy, getClient, model, sqlFields } from '$lib/server/utils';
 import { db } from '$lib/server/index';
 import { requireType } from '$lib/server/enum';
 import type { DiffFn, Model, Obj, Timer } from '$lib/types';
-import { publishedPost, tags } from "$lib/server/store";
+import { publishedPost, tags } from '$lib/server/store';
 import { diffStrSet } from '$lib/setStrPatchFn';
 import { get } from 'svelte/store';
 import { arrFilter, rndPick } from '$lib/utils';
@@ -42,7 +42,7 @@ export const tagPostCache = (() => {
 			const ids = new Set<number>();
 			const pSet = new Set(([] as number[]).concat(postId || []));
 			const tSet = new Set(([] as number[]).concat(tagId || []));
-			if(!pSet.size&&!tSet.size)return
+			if (!pSet.size && !tSet.size) return;
 			tps.forEach(({ postId, tagId, id }) => {
 				if ((!pSet.size || pSet.has(postId)) && (!tSet.size || tSet.has(tagId))) {
 					ids.add(id);
@@ -255,7 +255,7 @@ export const reqPostCache = (() => {
 			const { postId, reqId } = rq;
 			const pSet = new Set(([] as number[]).concat(postId || []));
 			const rSet = new Set(([] as number[]).concat(reqId || []));
-			if(pSet.size+rSet.size===0)return
+			if (pSet.size + rSet.size === 0) return;
 			const ks: number[] = [];
 			c = c.filter((a) => {
 				if ((!postId || pSet.has(a.targetId)) && (!reqId || rSet.has(a.reqId))) {
@@ -330,16 +330,14 @@ export const noAccessPosts = (cli?: Client) => {
 	return s ? all.map((a) => a.targetId) : undefined;
 };
 
-export const getPubTags = (cli?:Client)=>{
+export const getPubTags = (cli?: Client) => {
 	const ps = get(publishedPost);
 	const ids = new Set(noAccessPosts(cli) || []);
-	return tagPostCache
-		.getTags([...ps])
-		.filter((a) => {
-			const ia = new Set(tagPostCache.getPostIds(a.id));
-			for (const i of ia) {
-				if (ids.has(i)) ia.delete(i);
-			}
-			return ia.size;
-		})
-}
+	return tagPostCache.getTags([...ps]).filter((a) => {
+		const ia = new Set(tagPostCache.getPostIds(a.id));
+		for (const i of ia) {
+			if (ids.has(i)) ia.delete(i);
+		}
+		return ia.size;
+	});
+};

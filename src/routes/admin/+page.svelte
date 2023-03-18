@@ -7,7 +7,7 @@
 	import Setting from '$lib/components/adminPost/setting.svelte';
 	import FileWin from '$lib/components/fileManager.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
-	import { editPost, originPost, posts, setting, small ,medium} from '$lib/store';
+	import { editPost, originPost, posts, setting, small, medium } from '$lib/store';
 	import { api } from '$lib/req';
 	import { onMount } from 'svelte';
 	import { trim, watch } from '$lib/utils';
@@ -76,8 +76,13 @@
 	});
 	let sty;
 	$: {
-		sty = $small ? `transform:translate3d(${((-view * 100) / 3).toFixed(4)}%,0,0)`:
-		  $medium? view?'':`transform:translate3d(400px,0,0)`:''
+		sty = $small
+			? `transform:translate3d(${((-view * 100) / 3).toFixed(4)}%,0,0)`
+			: $medium
+			? view
+				? ''
+				: `transform:translate3d(400px,0,0)`
+			: '';
 		wc(() => {
 			page(1);
 		}, sc);
@@ -125,7 +130,7 @@
 	}
 
 	.m {
-		transition: .3s ease-in-out;
+		transition: 0.3s ease-in-out;
 		display: flex;
 		height: 100%;
 	}
@@ -135,7 +140,7 @@
 		background: var(--bg1);
 		display: flex;
 		flex-direction: column;
-		@include m(){
+		@include m() {
 			z-index: 3;
 			left: -400px;
 			top: 0;
@@ -147,7 +152,7 @@
 	.b {
 		max-width: 1000px;
 		flex: 1;
-		@include m(){
+		@include m() {
 			width: 50%;
 			flex: none;
 		}
@@ -179,7 +184,7 @@
 
 	.c {
 		width: 800px;
-		@include m(){
+		@include m() {
 			width: 50%;
 			flex: none;
 		}

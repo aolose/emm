@@ -1,12 +1,12 @@
 <script>
 	import Q from './mediaQuery.svelte';
-  import { medium, small } from "$lib/store";
+	import { medium, small } from '$lib/store';
 	let mobile = 0;
 	let normal = 0;
 	$: {
 		small.set(mobile);
-    medium.set(normal)
-  }
+		medium.set(normal);
+	}
 </script>
 
 <Q query="only screen and (max-width: 600px)" bind:matches={mobile} />

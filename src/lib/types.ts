@@ -15,9 +15,9 @@ export interface dbHooks {
 }
 
 export type siteMapRecord = {
-	url:string,
-	lastMod:number
-}
+	url: string;
+	lastMod: number;
+};
 
 export type Model =
 	| models.System

@@ -6,7 +6,7 @@ import { loadGeoDb } from '$lib/server/ipLite';
 import { codeTokens, reqPostCache, requireMap, tagPostCache } from '$lib/server/cache';
 // import { readRes } from "$lib/server/back/readRes";
 import { loadRules } from '$lib/server/firewall';
-import { sitemap } from "$lib/sitemap";
+import { sitemap } from '$lib/sitemap';
 
 export let sys: System;
 export let db: DB;
@@ -51,7 +51,7 @@ export const server = {
 		reqPostCache.load();
 		loadRules();
 		checkStatue();
-		sitemap.refresh()
+		sitemap.refresh();
 		// readRes();
 	},
 	stop() {

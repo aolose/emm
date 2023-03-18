@@ -27,7 +27,7 @@
 				/<(h\d) id="(.+?)">(.+?)<\/\1>/g,
 				'<a class=\'head\' href="#$2" id="$2"><$1>$3</$1></a>'
 			);
-	$:{
+	$: {
 		if (!preview) {
 			title = ctx.title;
 			content = ctx.content;

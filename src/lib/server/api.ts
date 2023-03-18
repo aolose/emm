@@ -53,13 +53,14 @@ import {
 	codeTokens,
 	combine,
 	eTags,
-	getPostSibling, getPubTags,
+	getPostSibling,
+	getPubTags,
 	noAccessPosts,
 	patchPostReqs,
 	patchPostTags,
 	reqPostCache,
 	tagPostCache
-} from "$lib/server/cache";
+} from '$lib/server/cache';
 import { versionStrPatch } from '$lib/setStrPatchFn';
 import { NULL } from '$lib/server/enum';
 import { cmManager } from '$lib/server/comment';
@@ -324,7 +325,7 @@ const apis: APIRoutes = {
 			const params = new URL(req.url).searchParams;
 			const page = +(params.get('page') || 1);
 			const name = params.get('name');
-			const type = decodeURI(params.get('type')||'');
+			const type = decodeURI(params.get('type') || '');
 			const where: string[] = [];
 			const pm: unknown[] = [];
 			if (name) {
@@ -574,7 +575,7 @@ const apis: APIRoutes = {
 	},
 	tags: {
 		get: async (req) => {
-		   return getPubTags(getClient(req))
+			return getPubTags(getClient(req))
 				.map((a) => a.name)
 				.join();
 		},
@@ -592,7 +593,7 @@ const apis: APIRoutes = {
 			const params = new URL(req.url).searchParams;
 			const page = +(params.get('page') || 1);
 			const size = +(params.get('size') || 10);
-			const tag = decodeURI(params.get('tag')||'');
+			const tag = decodeURI(params.get('tag') || '');
 			const tagInfo = !!params.get('inf');
 			const skips = noAccessPosts(getClient(req));
 			return pubPostList(page, size, tag, skips, tagInfo);
@@ -640,8 +641,9 @@ const apis: APIRoutes = {
 			if (slug) {
 				const p = db.get(model(Post, { slug }));
 				if (p) {
-					if(tag){
-						if(!tagPostCache.getTags(p.id).find(a=>a.name===tag))return resp('tag not exist',404)
+					if (tag) {
+						if (!tagPostCache.getTags(p.id).find((a) => a.name === tag))
+							return resp('tag not exist', 404);
 					}
 					const rp = reqPostCache.get({ postId: p.id }).map((a) => a.reqId);
 					if (rp.length) {

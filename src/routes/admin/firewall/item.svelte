@@ -30,7 +30,7 @@
 		</div>
 	{/if}
 	<div class="r2"><span title={ph}>{ph}</span></div>
-	<div class="r6"><span >{ct}</span></div>
+	<div class="r6"><span>{ct}</span></div>
 	<div class="r4"><span>{mk || ''}</span></div>
 	<div class="r5">
 		<button
@@ -125,7 +125,7 @@
 
 	.r2 {
 		width: 120px;
-    overflow: hidden;
+		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		span {

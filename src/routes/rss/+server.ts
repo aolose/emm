@@ -9,7 +9,7 @@ import type { Obj } from '$lib/types';
 export const GET: RequestHandler = async ({ request, url }) => {
 	const skips = noAccessPosts();
 	const page = await pubPostList(1, 20, null, skips);
-	if(page instanceof Response) return page
+	if (page instanceof Response) return page;
 	const body = render(url.origin, page.items);
 	const headers = {
 		'Cache-Control': `max-age=0, s-max-age=${600}`,

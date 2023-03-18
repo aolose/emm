@@ -5,10 +5,10 @@
 	import { h } from '$lib/store';
 
 	export let data;
-	let tag,d,p
-	$:{
-		({d,p}=data)
-		tag = p.tag
+	let tag, d, p;
+	$: {
+		({ d, p } = data);
+		tag = p.tag;
 	}
 
 	onMount(() => {
