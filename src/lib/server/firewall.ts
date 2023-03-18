@@ -36,7 +36,7 @@ export const addRule = (fr: FWRule) => {
 
 const isInRange = (str: string, num: number | undefined) => {
 	if (num) {
-		const group = str.split(/['; ]+/);
+		const group = str.split(/[,; ]+/);
 		for (const g of group) {
 			const [a, b] = g.split(/[-~]/, 2);
 			if (/\d+/g.test(a)) {
