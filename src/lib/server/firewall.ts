@@ -206,10 +206,10 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 	const ua = hds2Str(event.request.headers);
 	const r = [Date.now(), ip, path, ua, status, ipInfo(ip)?.short || '', fr?.mark, method] as log;
 	const rq = logToReq(r);
+	logCache.push(r);
 	if (!fr?._match?.find((a) => a < 0) && triggers.find((a) => hitRule(rq, a))) {
 		blackListCheck(rq);
 	}
-	logCache.push(r);
 	const l = logCache.length;
 	if (l > max) logCache = logCache.slice(l - max);
 	if (fr?.log) {
