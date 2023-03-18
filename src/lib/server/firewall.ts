@@ -24,13 +24,13 @@ export const addRule = (fr: FWRule) => {
 	const ir = triggers.findIndex((a) => a.id === fr.id);
 	const iu = rules.findIndex((a) => a.id === fr.id);
 	if (!isTrigger) {
-		if (ir !== -1) Object.assign(triggers[ir], fr);
+		if (ir !== -1) triggers.splice(ir, 1);
 		else if (iu === -1) rules = [fr].concat(rules);
-		else rules[iu] = fr;
+		else Object.assign(rules[iu] , fr);
 	} else {
-		if (iu !== -1) Object.assign(rules[iu], fr);
+		if (iu !== -1) rules.splice(iu, 1);
 		else if (ir === -1) [fr].concat(triggers);
-		else triggers[ir] = fr;
+		else Object.assign(triggers[ir] , fr);
 	}
 	sort();
 };
