@@ -18,16 +18,17 @@ function sort() {
 }
 
 export const addRule = (fr: FWRule) => {
+	if (fr.redirect) new URL(fr.redirect);
 	db.save(fr);
 	const isTrigger = fr.trigger;
 	const ir = triggers.findIndex((a) => a.id === fr.id);
 	const iu = rules.findIndex((a) => a.id === fr.id);
 	if (!isTrigger) {
-		if (ir !== -1) triggers.splice(ir, 1);
+		if (ir !== -1) Object.assign(triggers[ir], fr);
 		else if (iu === -1) rules = [fr].concat(rules);
 		else rules[iu] = fr;
 	} else {
-		if (iu !== -1) rules.splice(iu, 1);
+		if (iu !== -1) Object.assign(rules[iu], fr);
 		else if (ir === -1) [fr].concat(triggers);
 		else triggers[ir] = fr;
 	}
@@ -96,7 +97,6 @@ export const ruleHit = (
 	rs = rules
 ) => {
 	let o: Obj<FWRule> | undefined;
-	console.log(rs);
 	for (const k of rs) {
 		if (!hitRule(r, k)) continue;
 		if (!o) o = { mark: '', _match: [] };
@@ -107,7 +107,7 @@ export const ruleHit = (
 				.concat(k.mark)
 				.filter((a) => trim(a))
 				.join();
-		Object.assign(o, filter({ ...k }, ['forbidden', 'log'], false));
+		Object.assign(o, filter({ ...k }, ['forbidden', 'redirect', 'log'], false));
 	}
 	return o;
 };
@@ -142,9 +142,15 @@ type log = [number, string, string, string, number, string, string, string];
 export let logCache: log[] = [];
 const max = 1000;
 
-const addBlackListRule = (ip: string) => {
+const addBlackListRule = (ip: string, redirect?: string) => {
+	if (redirect)
+		try {
+			new URL(redirect);
+		} catch (e) {
+			redirect = '';
+		}
 	if (blackList.find((a) => a.ip === ip)) return;
-	const b = model(BlackList, { ip }) as BlackList;
+	const b = model(BlackList, { ip, redirect }) as BlackList;
 	db.save(b);
 	blackList.push(b);
 	rules.push(b.toRule());
@@ -188,8 +194,8 @@ const blackListCheck = (r: {
 				if (hitRule(log, t)) {
 					const n = times[i] - 1;
 					if (!n) {
-						ts.slice(i, 1);
-						return addBlackListRule(r.ip);
+						ts.splice(i, 1);
+						return addBlackListRule(r.ip, t.redirect);
 					} else times[i] = n;
 				}
 			}
@@ -206,7 +212,7 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 	const ua = hds2Str(event.request.headers);
 	const r = [Date.now(), ip, path, ua, status, ipInfo(ip)?.short || '', fr?.mark, method] as log;
 	const rq = logToReq(r);
-	logCache.push(r);
+	if (path !== '/api/log') logCache.push(r);
 	if (!fr?._match?.find((a) => a < 0) && triggers.find((a) => hitRule(rq, a))) {
 		blackListCheck(rq);
 	}

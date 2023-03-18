@@ -458,6 +458,7 @@ const apis: APIRoutes = {
 					'log',
 					'active',
 					'trigger',
+					'redirect',
 					'status',
 					'times',
 					'forbidden'

@@ -4,8 +4,9 @@
 	import { slidLeft } from '$lib/transition';
 	import Ck from './ck.svelte';
 	import Sel from './sel.svelte';
-	import { trim } from '$lib/utils';
+	import { getErr, trim } from '$lib/utils';
 	import { slide } from 'svelte/transition';
+	import { confirm } from '$lib/store';
 
 	let d = {};
 	let show = 0;
@@ -19,6 +20,7 @@
 		d.country = trim(d.country);
 		d.path = trim(d.path);
 		d.times = +d.times || 1;
+		d.redirect = trim(d.redirect);
 		d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 		hasV = trim(
 			(d.trigger ? '' : d.ip) ||
@@ -39,6 +41,14 @@
 			show = 1;
 			d = { ...data };
 			ok = () => {
+				if (d.redirect) {
+					try {
+						new URL(d.redirect);
+					} catch (e) {
+						confirm(getErr(e), '', 'ok');
+						return;
+					}
+				}
 				resolve({ ...d });
 				show = 0;
 			};
@@ -115,6 +125,12 @@
 					<label transition:slide>
 						<span>country:</span>
 						<input bind:value={d.country} />
+					</label>
+				{/if}
+				{#if !d.forbidden || d.trigger}
+					<label>
+						<span>redirect:</span>
+						<input bind:value={d.redirect} />
 					</label>
 				{/if}
 				<label>

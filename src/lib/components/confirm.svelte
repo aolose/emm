@@ -55,7 +55,7 @@
 		top: 0;
 		bottom: 0;
 		right: 0;
-		z-index: 99;
+		z-index: 110;
 		backdrop-filter: blur(1px);
 		background: rgba(23, 25, 30, 0.36);
 		display: flex;
