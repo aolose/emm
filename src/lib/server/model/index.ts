@@ -16,13 +16,15 @@ export class BlackList {
 	ip = TEXT;
 	_geo?: string;
 	createAt = INT;
+	redirect = TEXT;
 
 	toRule() {
 		return model(FWRule, {
 			active: true,
-			id: this.id,
+			id: -this.id,
 			ip: this.ip,
-			forbidden: true,
+			forbidden: !this.redirect,
+			redirect: this.redirect,
 			mark: 'blacklist',
 			createAt: this.createAt
 		}) as FWRule;
@@ -267,6 +269,7 @@ export class FWRule {
 	save = INT;
 	log = false;
 	forbidden = false;
+	redirect = TEXT;
 	country = TEXT;
 	active = true;
 	_match?: number[];

@@ -26,6 +26,7 @@ export const hooks: apiHooks = {
 				if (typeof a === 'object') {
 					const d = { ...a } as {
 						forbidden?: boolean;
+						redirect?: string;
 						trigger?: boolean;
 						status?: string;
 						method?: string;
@@ -37,10 +38,12 @@ export const hooks: apiHooks = {
 						if (d.country) d.country = '';
 						if (d.method) d.method = '';
 						if (d.ip) d.ip = '';
+						if(d.forbidden)d.forbidden = false
 					} else {
 						if (d.status) d.status = '';
 						if (d.times) d.times = -1;
 					}
+					if (d.forbidden && d.redirect) d.redirect = '';
 					return d;
 				}
 			}

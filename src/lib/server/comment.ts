@@ -30,7 +30,7 @@ export const cmManager = (() => {
 		}
 		return us;
 	};
-	const errMsg = (msg = '', keepToken: boolean | 0 | 1 = false,status=500) => {
+	const errMsg = (msg = '', keepToken: boolean | 0 | 1 = false, status = 500) => {
 		const r = resp(msg, status);
 		if (!keepToken) delCookie(r, ck);
 		return r;
@@ -98,7 +98,7 @@ export const cmManager = (() => {
 			const p = slug && db.get(model(Post, { slug }));
 			const isAdm = getClient(req)?.ok(permission.Admin);
 			const canView = isAdm || getClient(req)?.ok(permission.Read);
-			if (!p && !canView) return errMsg('post not exist', 1,500);
+			if (!p && !canView) return errMsg('post not exist', 1, 500);
 			const where: string[] = [];
 			const values: unknown[] = [];
 			const tk = getTk(req);
@@ -126,13 +126,13 @@ export const cmManager = (() => {
 			} else {
 				if (topic) {
 					const cm = db.get(model(Comment, { id: topic }));
-					if (!cm) return errMsg('topic not exist', 1,500);
+					if (!cm) return errMsg('topic not exist', 1, 500);
 					return subCm(cm.subCm || '', page, tk, isAdm);
 				} else {
 					where.push('topic is null');
 				}
 				if (status !== -1) {
-					if (!canView) return errMsg('no permission for filter',0,401);
+					if (!canView) return errMsg('no permission for filter', 0, 401);
 					where.push(`state=?`);
 					values.push(status);
 				}
@@ -196,7 +196,7 @@ export const cmManager = (() => {
 					if (!usr) {
 						return errMsg('no permission');
 					}
-					if (usr.exp < now) return errMsg('token expire',0,401);
+					if (usr.exp < now) return errMsg('token expire', 0, 401);
 				}
 			}
 			const q = sqlFields(sz);
@@ -241,7 +241,7 @@ export const cmManager = (() => {
 			if (!isAdm && cm.isAdm) return errMsg('forbidden');
 			if (tk) {
 				const gu = db.get(user) as CmUser;
-				if (!gu || gu.exp < n) return errMsg('invalid cookie',0,401);
+				if (!gu || gu.exp < n) return errMsg('invalid cookie', 0, 401);
 				else {
 					Object.assign(user, gu, user);
 				}
@@ -257,14 +257,14 @@ export const cmManager = (() => {
 					}
 				}
 			} else {
-				if (cm.id && !isAdm) return errMsg('no permission', 1,401);
+				if (cm.id && !isAdm) return errMsg('no permission', 1, 401);
 				user.token = randomUUID();
 			}
 			let top: Comment | undefined;
 			let rp: Comment | undefined;
 			if (cm.topic) {
 				top = db.get(model(Comment, { id: cm.topic }));
-				if (!top) return errMsg('reply comment not exist!', 1,500);
+				if (!top) return errMsg('reply comment not exist!', 1, 500);
 				if (!cm.reply) {
 					rp = top;
 					cm.reply = cm.topic;
@@ -278,7 +278,7 @@ export const cmManager = (() => {
 			if (cm._slug) fp.slug = cm._slug;
 			const p = (fp.slug || fp.id) && db.get(model(Post, fp));
 			if (!p || !p.published) return errMsg('post not exist', 1);
-			if ((p.disCm || !sys.comment) && !isAdm) return errMsg('not allow comment',0,403);
+			if ((p.disCm || !sys.comment) && !isAdm) return errMsg('not allow comment', 0, 403);
 			cm.postId = p.id;
 			cm.state = cmStatus.Approve;
 			if (!cm.isAdm) {
