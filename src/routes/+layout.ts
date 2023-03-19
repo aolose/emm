@@ -7,7 +7,6 @@ import type { Page } from '@sveltejs/kit';
 import { page } from '$app/stores';
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
-
 const jump = async () => {
 	const adm = '/admin';
 	const lg = '/login';
@@ -15,8 +14,13 @@ const jump = async () => {
 	let rd = '';
 	if (pathname === cfg && sys > 1) {
 		rd = '/';
-	} else if (stu && pathname === lg) rd = adm;
-	else if (!stu && pathname.startsWith(adm)) rd = lg;
+	} else if (stu && pathname === lg) {
+		rd = adm;
+		if (browser) {
+			rd = sessionStorage.getItem('bk') || rd;
+			sessionStorage.removeItem('bk');
+		}
+	} else if (!stu && pathname.startsWith(adm)) rd = lg;
 	if (rd) {
 		if (browser) {
 			pathname = rd;
@@ -57,7 +61,7 @@ if (browser) {
 export const load = apiLoad('statue', undefined, {
 	cache: cacheTime,
 	method: method.GET,
-	async done(d: unknown, ctx) {
+	done: async (d: unknown, ctx) => {
 		loaded = 1;
 		cacheData = d as headInfo & { statue: number; sys: number };
 		pathname = (ctx as { url: URL }).url.pathname;
