@@ -2,7 +2,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import ipRangeCheck from 'ip-range-check';
 import { db, sys } from '$lib/server/index';
 import { BlackList, FwLog, FWRule } from '$lib/server/model';
-import { arrFilter, filter, hds2Str, str2Hds, trim } from "$lib/utils";
+import { arrFilter, filter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
 import { debugMode, getClient, getClientAddr, model } from '$lib/server/utils';
 import { ipInfo } from '$lib/server/ipLite';
@@ -24,7 +24,7 @@ export const addRule = (fr: FWRule) => {
 	const iu = rules.findIndex((a) => a.id === fr.id);
 	let o: FWRule = fr;
 	if (ir !== -1) o = Object.assign(triggers[ir], fr);
-	else  if(iu !== -1) o = Object.assign(rules[iu], fr);
+	else if (iu !== -1) o = Object.assign(rules[iu], fr);
 	const isTrigger = o.trigger;
 	if (!isTrigger) {
 		if (ir !== -1) {
@@ -147,7 +147,7 @@ type log = [number, string, string, string, number, string, string, string];
 export let logCache: log[] = [];
 const max = 1000;
 
-const addBlackListRule = (r:{ip: string, redirect?: string,mark?:string}) => {
+const addBlackListRule = (r: { ip: string; redirect?: string; mark?: string }) => {
 	if (r.redirect)
 		try {
 			new URL(r.redirect);
@@ -174,9 +174,10 @@ export const blackLists = (page = 1, size = 20) => {
 		a._geo = ipInfo(a.ip).full;
 		return a;
 	});
+	bs.sort((a, b) => b.createAt - a.createAt);
 	return {
 		total: Math.ceil(blackList.length / size),
-		items: arrFilter(bs,['id','ip','mark','redirect','createAt','_geo'],false)
+		items: arrFilter(bs, ['id', 'ip', 'mark', 'redirect', 'createAt', '_geo'], false)
 	};
 };
 const blackListCheck = (r: {
@@ -201,9 +202,9 @@ const blackListCheck = (r: {
 					if (!n) {
 						ts.splice(i, 1);
 						return addBlackListRule({
-							ip:r.ip,
-							mark:t.mark,
-							redirect:t.redirect
+							ip: r.ip,
+							mark: t.mark,
+							redirect: t.redirect
 						});
 					} else times[i] = n;
 				}

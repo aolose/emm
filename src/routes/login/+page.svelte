@@ -3,11 +3,10 @@
 	import LD from '$lib/components/loading.svelte';
 	import { fade } from 'svelte/transition';
 	import Tm from '$lib/components/typeMsg.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { req } from '$lib/req';
 	import { enc, randNum } from '$lib/utils';
 	import { msg, status } from '$lib/store';
-
 	let wt = 0;
 	let w = 0;
 

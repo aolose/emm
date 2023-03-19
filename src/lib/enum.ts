@@ -9,7 +9,7 @@ export enum method {
 
 export const dataType = {
 	json: 'application/json',
-	text: 'text/pain',
+	text: 'text/plain',
 	binary: 'application/octet-stream'
 };
 

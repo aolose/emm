@@ -33,7 +33,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (!res)
 		res = await resolve(event, {
 			filterSerializedResponseHeaders: (name) =>
-				[contentType, encryptIv, encTypeIndex].indexOf(name.toLowerCase()) > -1
+				[contentType, encryptIv, encTypeIndex, 'location'].indexOf(name.toLowerCase()) > -1
 		});
 	reqRLog(event, res.status, fr);
 	return res;

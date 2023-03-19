@@ -25,7 +25,10 @@ import type {
 } from './types';
 import type { Load, LoadEvent } from '@sveltejs/kit';
 import { hooks } from '$lib/apiHooks';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
+import { confirm, status } from '$lib/store';
+import { get } from 'svelte/store';
+import { goto } from '$app/navigation';
 
 const cacheData = '.d';
 const cacheKey = '.k';
@@ -193,9 +196,18 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 	return ft(`/api/${uu}`, opt).then(async (r) => {
 		let fal = false;
 		if (r.status >= 400) {
+			if (r.status === 401 && get(status) === 1) {
+				if (browser) {
+					sessionStorage.setItem('bk', location.pathname);
+					confirm('token expire!', '', 'ok').then(() => status.set(0));
+				} else throw redirect(307, '/login');
+			}
 			fal = true;
 			cfg = cfg || {};
 			cfg.cache = 0;
+		} else if (r.status > 300) {
+			const lo = await r.headers.get('location');
+			if (lo) throw redirect(r.status as 301, lo);
 		}
 		const e = encryptHeader(r);
 		const t = getHeaderDataType(r.headers);
@@ -372,10 +384,10 @@ export const apiLoad = (
 		return {
 			p: params,
 			d: await req(url, getParams?.(event, cfg), cfg).catch((e) => {
-				if (e.status) {
+				if (e.status >= 400) {
 					throw error(e.status, getErr(e));
 				}
-				return e;
+				throw e;
 			})
 		};
 	};

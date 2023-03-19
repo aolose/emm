@@ -23,7 +23,8 @@
 		d.redirect = trim(d.redirect);
 		d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 		hasV = trim(
-			tp===3|| (d.trigger ? '' : d.ip) ||
+			tp === 3 ||
+				(d.trigger ? '' : d.ip) ||
 				(d.trigger ? d.status : '') ||
 				d.path ||
 				d.headers ||
@@ -63,12 +64,12 @@
 {#if show}
 	<div class="m" transition:fade>
 		<div class="f">
-			<h1>{['Search logs', 'Edit Rule', 'Create Rule','Edit blacklist'][tp]}</h1>
+			<h1>{['Search logs', 'Edit Rule', 'Create Rule', 'Edit blacklist'][tp]}</h1>
 			<button class="clo" on:click={cancel}>
 				<i />
 				<i />
 			</button>
-			{#if tp && tp!==3}
+			{#if tp && tp !== 3}
 				<div class="f1">
 					<label>
 						<Ck bind:value={d.active}>activate</Ck>
@@ -88,14 +89,10 @@
 					{:else}
 						<s />
 					{/if}
-					<label>
-						<span>mark:</span>
-						<input bind:value={d.mark} />
-					</label>
 				</div>
 			{/if}
 			<div class="f0">
-				{#if tp!==3}
+				{#if tp !== 3}
 					{#if !d.trigger}
 						<label transition:slide>
 							<span>IP:</span>
@@ -133,7 +130,7 @@
 						</label>
 					{/if}
 				{/if}
-				{#if !d.forbidden || d.trigger || tp===3}
+				{#if !d.forbidden || d.trigger || tp === 3}
 					<label transition:slide>
 						<span>redirect:</span>
 						<input bind:value={d.redirect} />
@@ -147,7 +144,9 @@
 			<div class="fn">
 				<button on:click={() => (d = {})}>clear</button>
 				{#if !tp || hasV}
-					<button transition:slidLeft on:click={ok}>{['search', 'save', 'create','save'][tp]}</button>
+					<button transition:slidLeft on:click={ok}
+						>{['search', 'save', 'create', 'save'][tp]}</button
+					>
 				{/if}
 			</div>
 		</div>
@@ -297,7 +296,7 @@
 
 	.f {
 		transition: 0.3s ease-in-out;
-		height: 600px;
+		height: 640px;
 		padding: 60px 0 0;
 		display: flex;
 		flex-direction: column;

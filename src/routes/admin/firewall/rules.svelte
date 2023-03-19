@@ -51,12 +51,12 @@
 	};
 
 	const edit = (da) => {
-		pop(3, { ...da }).then((d) => {
+		pop(ta ? 3 : 1, { ...da }).then((d) => {
 			if (!d) return;
 			let df = diffObj(da, d);
 			df.id = da.id;
-			if(ta) df={id:da.id,redirect:df.redirect,mark:df.mark}
-			const api = ['rule','blk'][ta]
+			if (ta) df = { id: da.id, redirect: df.redirect, mark: df.mark };
+			const api = ['rule', 'blk'][ta];
 			req(api, df)
 				.then(() => {
 					const idx = ls.indexOf(da);

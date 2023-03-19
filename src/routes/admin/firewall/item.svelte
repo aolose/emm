@@ -21,14 +21,12 @@
 	<div class="r0"><span>{time(tm)}</span></div>
 	<div class="r1"><span>{ip}</span></div>
 	<div class="r6"><span title={mt}>{(mt || '').toUpperCase()}</span></div>
-	{#if st}
-		<div class="r3">
-			<span class:c0={col(st, 0)} class:c1={col(st, 1)} class:c2={col(st, 2)} class:c3={col(st, 3)}
-				>{st}</span
-			>
-		</div>
-	{/if}
-	<div class="r2"><span title={ph}>{ph}</span></div>
+	<div class="r3">
+		<span class:c0={col(st, 0)} class:c1={col(st, 1)} class:c2={col(st, 2)} class:c3={col(st, 3)}
+			>{st}</span
+		>
+	</div>
+	<div class="r2"><span title={decodeURI(ph)}>{decodeURI(ph)}</span></div>
 	<div class="r6"><span title={ct}>{ct}</span></div>
 	<div class="r4"><span>{mk || ''}</span></div>
 	<div class="r5">
@@ -120,6 +118,7 @@
 
 	.r1 {
 		width: 120px;
+		white-space: nowrap;
 	}
 
 	.r2 {
@@ -127,6 +126,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+
 		span {
 			white-space: nowrap;
 			color: #72849b;
@@ -148,6 +148,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		width: 50px;
+
 		span {
 			white-space: nowrap;
 		}
@@ -164,6 +165,7 @@
 			@include s() {
 				left: 3px;
 			}
+
 			&:hover {
 				color: #fff;
 			}

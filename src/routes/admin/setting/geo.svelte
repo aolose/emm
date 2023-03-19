@@ -62,6 +62,7 @@
 			.catch((e) => {
 				err = 1;
 				msg = getErr(e);
+				act = 1;
 			})
 			.finally(() => (ld = 0));
 	};
