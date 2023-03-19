@@ -26,14 +26,14 @@ import {
 import type { RespHandle } from '$lib/types';
 import sharp from 'sharp';
 import { Buffer } from 'buffer';
-import { FwLog, FWRule, Post, Require, Res, System, Tag, TokenInfo } from '$lib/server/model';
+import { BlackList, FwLog, FWRule, Post, Require, Res, System, Tag, TokenInfo } from "$lib/server/model";
 import { arrFilter, diffObj, enc, filter, trim } from '$lib/utils';
 import { permission } from '$lib/enum';
 import path from 'path';
 import fs from 'fs';
 import { genToken } from '$lib/server/token';
 import {
-	addRule,
+	addRule, blackList,
 	blackLists,
 	blockIp,
 	delBlackList,
@@ -45,7 +45,7 @@ import {
 	patchDetailIpInfo,
 	ruleHit,
 	rules
-} from '$lib/server/firewall';
+} from "$lib/server/firewall";
 import { geoClose, geoStatue, ipInfo, loadGeoDb } from '$lib/server/ipLite';
 import { publishedPost, tagPatcher, tags } from '$lib/server/store';
 import { get } from 'svelte/store';
@@ -66,6 +66,7 @@ import { NULL } from '$lib/server/enum';
 import { cmManager } from '$lib/server/comment';
 import { postList, postPatch, pubPostList } from '$lib/server/posts';
 import { restore } from '$lib/server/restore';
+import res from "../../routes/admin/setting/res.svelte";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
 	if (!sysStatue) return resp('system uninitialized', 500);
@@ -419,12 +420,25 @@ const apis: APIRoutes = {
 			return r.id;
 		})
 	},
-	blk: {
+	bks:{
 		post: auth(Read, async (req) => {
 			const r = new Uint8Array(await req.arrayBuffer());
 			const p = r[0];
 			const s = r[1];
 			return blackLists(p, s);
+		}),
+	},
+	blk: {
+		post: auth(Admin, async (req) => {
+			let b = model(BlackList, await req.json()) as BlackList;
+			if(!b.id)return resp('id not exist',500)
+			db.save(b)
+			const i = blackList.findIndex(a=>a.id===b.id)
+			if(i!==-1){
+				b=Object.assign(blackList[i],b)
+				const n = rules.findIndex(a=>a.id===-b.id)
+				if(n!==-1)Object.assign(rules[n],b.toRule())
+			}
 		}),
 		delete: auth(Admin, async (req) => {
 			const ids = (await req.text())

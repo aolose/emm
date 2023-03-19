@@ -20,7 +20,7 @@
 	}, ta);
 	let go = (n) => {
 		p = n;
-		const api = ['rules', 'blk'][ta];
+		const api = ['rules', 'bks'][ta];
 		ld = 1;
 		req(api, new Uint8Array([p, 20]))
 			.then((d) => {
@@ -51,11 +51,13 @@
 	};
 
 	const edit = (da) => {
-		pop(1, { ...da }).then((d) => {
+		pop(3, { ...da }).then((d) => {
 			if (!d) return;
-			const df = diffObj(da, d);
+			let df = diffObj(da, d);
 			df.id = da.id;
-			req('rule', df)
+			if(ta) df={id:da.id,redirect:df.redirect,mark:df.mark}
+			const api = ['rule','blk'][ta]
+			req(api, df)
 				.then(() => {
 					const idx = ls.indexOf(da);
 					if (idx > -1) {
@@ -104,9 +106,13 @@
 								{#if !r.redirect}
 									<span class="icon i-fbi" />
 								{/if}
+								{#if r.mark}
+									<span class="m">{r.mark}</span>
+								{/if}
 								<p>{time(r.createAt)}</p>
 								<s />
 								<button class="icon i-del" on:click={() => del(r.id)} />
+								<button class="icon i-ed" on:click={() => edit(r)} />
 							</div>
 						</div>
 					{:else}
@@ -227,6 +233,7 @@
 		background: #0f1c38;
 
 		.m {
+			padding-right: 10px;
 			color: #94abc0;
 		}
 

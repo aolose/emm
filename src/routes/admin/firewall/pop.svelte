@@ -23,7 +23,7 @@
 		d.redirect = trim(d.redirect);
 		d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 		hasV = trim(
-			(d.trigger ? '' : d.ip) ||
+			tp===3|| (d.trigger ? '' : d.ip) ||
 				(d.trigger ? d.status : '') ||
 				d.path ||
 				d.headers ||
@@ -63,12 +63,12 @@
 {#if show}
 	<div class="m" transition:fade>
 		<div class="f">
-			<h1>{['Search logs', 'Edit Rule', 'Create Rule'][tp]}</h1>
+			<h1>{['Search logs', 'Edit Rule', 'Create Rule','Edit blacklist'][tp]}</h1>
 			<button class="clo" on:click={cancel}>
 				<i />
 				<i />
 			</button>
-			{#if tp}
+			{#if tp && tp!==3}
 				<div class="f1">
 					<label>
 						<Ck bind:value={d.active}>activate</Ck>
@@ -88,46 +88,52 @@
 					{:else}
 						<s />
 					{/if}
+					<label>
+						<span>mark:</span>
+						<input bind:value={d.mark} />
+					</label>
 				</div>
 			{/if}
 			<div class="f0">
-				{#if !d.trigger}
-					<label transition:slide>
-						<span>IP:</span>
-						<input bind:value={d.ip} />
+				{#if tp!==3}
+					{#if !d.trigger}
+						<label transition:slide>
+							<span>IP:</span>
+							<input bind:value={d.ip} />
+						</label>
+					{/if}
+					<label>
+						<span>path:</span>
+						<input bind:value={d.path} />
 					</label>
+					<label>
+						<span>header:</span>
+						<HdsIpt bind:value={d.headers} />
+					</label>
+					{#if d.trigger}
+						<label transition:slide>
+							<span>status:</span>
+							<input bind:value={d.status} />
+						</label>
+						<label transition:slide>
+							<span title="times per hour">TPH:</span>
+							<input bind:value={d.times} />
+						</label>
+					{:else}
+						<label transition:slide>
+							<span>method:</span>
+							<Sel
+								items={['', 'GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS']}
+								bind:value={d.method}
+							/>
+						</label>
+						<label transition:slide>
+							<span>country:</span>
+							<input bind:value={d.country} />
+						</label>
+					{/if}
 				{/if}
-				<label>
-					<span>path:</span>
-					<input bind:value={d.path} />
-				</label>
-				<label>
-					<span>header:</span>
-					<HdsIpt bind:value={d.headers} />
-				</label>
-				{#if d.trigger}
-					<label transition:slide>
-						<span>status:</span>
-						<input bind:value={d.status} />
-					</label>
-					<label transition:slide>
-						<span title="times per hour">TPH:</span>
-						<input bind:value={d.times} />
-					</label>
-				{:else}
-					<label transition:slide>
-						<span>method:</span>
-						<Sel
-							items={['', 'GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS']}
-							bind:value={d.method}
-						/>
-					</label>
-					<label transition:slide>
-						<span>country:</span>
-						<input bind:value={d.country} />
-					</label>
-				{/if}
-				{#if !d.forbidden || d.trigger}
+				{#if !d.forbidden || d.trigger || tp===3}
 					<label transition:slide>
 						<span>redirect:</span>
 						<input bind:value={d.redirect} />
@@ -141,7 +147,7 @@
 			<div class="fn">
 				<button on:click={() => (d = {})}>clear</button>
 				{#if !tp || hasV}
-					<button transition:slidLeft on:click={ok}>{['search', 'save', 'create'][tp]}</button>
+					<button transition:slidLeft on:click={ok}>{['search', 'save', 'create','save'][tp]}</button>
 				{/if}
 			</div>
 		</div>
