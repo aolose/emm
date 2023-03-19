@@ -17,6 +17,7 @@ export class BlackList {
 	_geo?: string;
 	createAt = INT;
 	redirect = TEXT;
+	mark = TEXT;
 
 	toRule() {
 		return model(FWRule, {
