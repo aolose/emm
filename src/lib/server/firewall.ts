@@ -20,17 +20,22 @@ function sort() {
 export const addRule = (fr: FWRule) => {
 	if (fr.redirect) new URL(fr.redirect);
 	db.save(fr);
-	const isTrigger = fr.trigger;
 	const ir = triggers.findIndex((a) => a.id === fr.id);
 	const iu = rules.findIndex((a) => a.id === fr.id);
+	let o: FWRule = fr;
+	if (ir !== -1) o = Object.assign(triggers[ir], fr);
+	else  if(iu !== -1) o = Object.assign(rules[iu], fr);
+	const isTrigger = o.trigger;
 	if (!isTrigger) {
-		if (ir !== -1) triggers.splice(ir, 1);
-		else if (iu === -1) rules = [fr].concat(rules);
-		else Object.assign(rules[iu] , fr);
+		if (ir !== -1) {
+			rules = [o].concat(rules);
+			triggers.splice(ir, 1);
+		}
 	} else {
-		if (iu !== -1) rules.splice(iu, 1);
-		else if (ir === -1) [fr].concat(triggers);
-		else Object.assign(triggers[ir] , fr);
+		if (iu !== -1) {
+			triggers = [o].concat(triggers);
+			rules.splice(iu, 1);
+		}
 	}
 	sort();
 };

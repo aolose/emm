@@ -38,7 +38,7 @@ export const hooks: apiHooks = {
 						if (d.country) d.country = '';
 						if (d.method) d.method = '';
 						if (d.ip) d.ip = '';
-						if(d.forbidden)d.forbidden = false
+						if (d.forbidden) d.forbidden = false;
 					} else {
 						if (d.status) d.status = '';
 						if (d.times) d.times = -1;
