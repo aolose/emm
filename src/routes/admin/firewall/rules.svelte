@@ -4,7 +4,7 @@
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
 	import { onMount } from 'svelte';
-  import { watch, time, diffObj, getErr } from "$lib/utils";
+	import { watch, time, diffObj, getErr } from '$lib/utils';
 	import Ld from '$lib/components/loading.svelte';
 
 	export let close;
@@ -55,13 +55,15 @@
 			if (!d) return;
 			const df = diffObj(da, d);
 			df.id = da.id;
-			req('rule', df).then(() => {
-				const idx = ls.indexOf(da);
-				if (idx > -1) {
-					ls = [...ls];
-					ls[idx] = { ...da, ...d };
-				}
-			}).catch(e=>confirm(getErr(e),'','ok'));
+			req('rule', df)
+				.then(() => {
+					const idx = ls.indexOf(da);
+					if (idx > -1) {
+						ls = [...ls];
+						ls[idx] = { ...da, ...d };
+					}
+				})
+				.catch((e) => confirm(getErr(e), '', 'ok'));
 		});
 	};
 	let ls = [];
