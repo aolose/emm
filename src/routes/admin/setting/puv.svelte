@@ -44,7 +44,7 @@
 	};
 
 	const cors = ['#8c72ce', '#d3a84b', '#65b9e7', '#bcff94'];
-	const nms = ['valid ip', 'unique valid ip', 'all ip', 'all requests'];
+	const nms = ['valid requests', 'valid ip', 'all ip', 'all requests'];
 	const getD = () => {
 		const ds = n[t];
 		let end = Date.now();
