@@ -17,7 +17,7 @@
 		{#if save}
 			<button on:click={save}>Save</button>
 		{/if}
-		<slot name="btn"></slot>
+		<slot name="btn" />
 	</div>
 	<slot />
 	<Ld act={ld} />
