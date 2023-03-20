@@ -155,7 +155,7 @@
 	onMount(render);
 </script>
 
-<Card title="Analysis">
+<Card title="Analytics">
 	<button class="icon i-refresh" slot="btn" on:click={getD} />
 	<div class="v">
 		<div class="bn">
