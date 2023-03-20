@@ -28,14 +28,14 @@ export const addRule = (fr: FWRule) => {
 	const isTrigger = o.trigger;
 	if (!isTrigger) {
 		if (ir !== -1) {
-			rules = [o].concat(rules);
 			triggers.splice(ir, 1);
 		}
+		rules = [o].concat(rules);
 	} else {
 		if (iu !== -1) {
-			triggers = [o].concat(triggers);
 			rules.splice(iu, 1);
 		}
+		triggers = [o].concat(triggers);
 	}
 	sort();
 };
