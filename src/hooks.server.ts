@@ -4,6 +4,7 @@ import { fwFilter, reqRLog } from '$lib/server/firewall';
 import { checkStatue, sysStatue } from '$lib/server/utils';
 import { checkRedirect } from '$lib/server/utils';
 import { server } from '$lib/server';
+import { ruv } from "$lib/server/puv";
 
 checkStatue();
 export const handle: Handle = async ({ event, resolve }) => {
