@@ -330,7 +330,7 @@ export class TkTick {
 }
 
 export class RPU {
-	@unique
+	@primary
 	id = INT;
 	r = INT;
 	ur = INT;
