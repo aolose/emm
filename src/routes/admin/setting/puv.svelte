@@ -65,7 +65,7 @@
       else return h;
     };
     ld = 1;
-    req("puv", { s:start, e:end, t:type }, { method: method.GET }).then(a => {
+    req("puv", { s:start, e:end, t:type }, { method: method.GET ,delay:300}).then(a => {
       const p = [];
       const u = [];
       const r = [];
@@ -193,6 +193,7 @@
     <Ld act={ld} />
   </div>
 </Card>
+<svelte:window on:resize={getD}/>
 
 <style lang="scss">
   .bn {
@@ -300,7 +301,7 @@
 
   .c {
     width: 0;
-    height: 100%;
+    min-height: 300px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;

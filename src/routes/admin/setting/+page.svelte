@@ -12,11 +12,11 @@
 
 <div class="m">
 	<P />
-	<B />
-	<G />
-	<A />
 	<R />
 	<C />
+	<G />
+	<A />
+	<B />
 </div>
 
 <style lang="scss">
@@ -32,5 +32,9 @@
 		right: 0;
 		overflow: auto;
 		padding: 10px 5px;
+		flex-direction: column;
+		@include s(){
+			flex-direction: row;
+		}
 	}
 </style>
