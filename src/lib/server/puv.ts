@@ -19,10 +19,10 @@ const hour = 3600 * 1e3;
 const day = hour * 24;
 
 const rec = (type: number, time: number) => {
-	const n = time / 1e3 / hour;
+	const n = Math.floor(time / 1e3 / hour);
 	const m = model(RPU, {
 		type,
-		t: Math.floor(n)
+		t: n
 	});
 	if (type) {
 		m.r = rqD;
