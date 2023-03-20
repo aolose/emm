@@ -459,6 +459,7 @@ export const delCookie = (resp: Response, key: string) => {
 };
 
 export const setCookie = (resp: Response, key: string, value: string, expires?: number) => {
+	if (value === undefined) throw new Error('undefined cookie value!');
 	const cf = { ...ckCfg };
 	if (expires) cf.expires = new Date(expires);
 	resp.headers.append('set-cookie', cookie.serialize(key, value, cf));
@@ -555,4 +556,9 @@ export const blogExp = () => {
 	z(sys.uploadDir);
 	z(sys.thumbDir);
 	return zip.generateAsync({ type: 'uint8array' });
+};
+
+export const printSql = (sql: string, value: unknown[]) => {
+	let i = 0;
+	return debugMode ? sql.replace(/\?/g, () => `${value[i++]}`) : '';
 };

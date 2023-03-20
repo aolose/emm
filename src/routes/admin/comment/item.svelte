@@ -49,12 +49,13 @@
 					{d._post?.title}
 				</a>
 				<span
+					title={stu(d.state)}
 					class="s"
-					class:ap={d.statue === cmStatus.Approve}
-					class:re={d.statue === cmStatus.Reject}
-					class:pe={d.statue === cmStatus.Pending}
+					class:ap={d.state === cmStatus.Approve}
+					class:re={d.state === cmStatus.Reject}
+					class:pe={d.state === cmStatus.Pending}
 				>
-					{stu(d.status)}
+					{stu(d.state)[0]}
 				</span>
 			</div>
 		{/if}
@@ -98,7 +99,6 @@
 	.i {
 		flex-grow: 1;
 		height: 100%;
-		flex-direction: column;
 		align-items: flex-end;
 		display: flex;
 		flex-wrap: wrap;
@@ -107,6 +107,7 @@
 			flex-shrink: 0;
 		}
 		span {
+			padding: 0 5px 0 0;
 			white-space: nowrap;
 		}
 	}
@@ -132,7 +133,7 @@
 	}
 
 	.c {
-		max-width: 100px;
+		padding: 10px 0;
 		max-height: 100px;
 		flex-grow: 1;
 		color: #3b4557;
@@ -145,7 +146,7 @@
 		font-size: 12px;
 		color: #637288;
 		display: flex;
-
+		flex-direction: column;
 		p {
 			white-space: pre-wrap;
 			line-height: 2;
@@ -200,10 +201,23 @@
 
 	.s {
 		text-transform: uppercase;
-		font-size: 12px;
 		color: var(--darkgrey-h);
 		background: var(--bg2);
-		padding: 0 5px;
+		padding: 0;
+		width: 16px;
+		height: 16px;
+		line-height: 16px;
+		text-align: center;
+		font-size: 10px !important;
+		&.ap {
+			color: #00bb00;
+		}
+		&.re {
+			color: orange;
+		}
+		&.pe {
+			color: #1c93ff;
+		}
 	}
 
 	.dt {

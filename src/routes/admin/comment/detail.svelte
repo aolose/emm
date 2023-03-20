@@ -13,8 +13,8 @@
 	export let d = {};
 	export let filter;
 	let ban = 0;
-	const wip = watch(d.ip);
-	const wid = watch(d.id);
+	const wip = watch(0);
+	const wid = watch(0);
 	let ls = [];
 	let page = 1;
 	let total = 1;
@@ -70,7 +70,10 @@
 	let el;
 	const del = (id) => () => {
 		confirm('sure to delete?').then((a) => {
-			if (a) req('cm', id, { method: method.DELETE }).then(() => filter(id));
+			if (a) req('cm', id, { method: method.DELETE }).then(() => {
+				filter(id)
+				close()
+			});
 		});
 	};
 	const done = (id) => (a) => {
