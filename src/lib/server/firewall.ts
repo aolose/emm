@@ -7,6 +7,7 @@ import type { Obj, Timer } from '$lib/types';
 import { debugMode, getClient, getClientAddr, model } from '$lib/server/utils';
 import { ipInfo } from '$lib/server/ipLite';
 import { permission } from '$lib/enum';
+import { ruv } from "$lib/server/puv";
 
 export let triggers: FWRule[];
 export let rules: FWRule[];
@@ -26,16 +27,16 @@ export const addRule = (fr: FWRule) => {
 	if (ir !== -1) o = Object.assign(triggers[ir], fr);
 	else if (iu !== -1) o = Object.assign(rules[iu], fr);
 	const isTrigger = o.trigger;
-	if (!isTrigger) {
-		if (ir !== -1) {
-			triggers.splice(ir, 1);
+	if(isTrigger){
+		 if(ir===-1){
+			 if(iu!==-1)rules.splice(iu,1)
+			 triggers = [o].concat(triggers)
+		 }
+	}else {
+		if(iu===-1){
+			if(ir!==-1)triggers.splice(ir,1)
+			rules = [o].concat(rules);
 		}
-		rules = [o].concat(rules);
-	} else {
-		if (iu !== -1) {
-			rules.splice(iu, 1);
-		}
-		triggers = [o].concat(triggers);
 	}
 	sort();
 };
@@ -222,6 +223,7 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 	const ua = hds2Str(event.request.headers);
 	const r = [Date.now(), ip, path, ua, status, ipInfo(ip)?.short || '', fr?.mark, method] as log;
 	const rq = logToReq(r);
+	ruv({ip,path,ua,status})
 	if (path !== '/api/log') logCache.push(r);
 	if (!fr?._match?.find((a) => a < 0) && triggers.find((a) => hitRule(rq, a))) {
 		blackListCheck(rq);
