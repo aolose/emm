@@ -33,7 +33,7 @@
 		overflow: auto;
 		padding: 10px 5px;
 		flex-direction: column;
-		@include s(){
+		@include s() {
 			flex-direction: row;
 		}
 	}

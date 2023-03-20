@@ -18,7 +18,7 @@
 		ls = [];
 		go(1);
 	}, ta);
-	const fix = (d)=>{
+	const fix = (d) => {
 		if (d.trigger) {
 			if (d.country) d.country = '';
 			if (d.method) d.method = '';
@@ -30,7 +30,7 @@
 			if (d.times) d.times = -1;
 		}
 		if (d.forbidden && d.redirect) d.redirect = '';
-	}
+	};
 	let go = (n) => {
 		p = n;
 		const api = ['rules', 'bks'][ta];
@@ -45,7 +45,7 @@
 	const add = () => {
 		pop(2).then((d) => {
 			if (!d) return;
-			fix(d)
+			fix(d);
 			req('rule', d).then((id) => {
 				d.id = id;
 				ls = [{ ...d }, ...ls];
@@ -67,7 +67,7 @@
 	const edit = (da) => {
 		pop(ta ? 3 : 1, { ...da }).then((d) => {
 			if (!d) return;
-			fix(d)
+			fix(d);
 			let df = diffObj(da, d);
 			df.id = da.id;
 			if (ta) df = { id: da.id, redirect: df.redirect, mark: df.mark };

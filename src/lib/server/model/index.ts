@@ -331,11 +331,11 @@ export class TkTick {
 
 export class RPU {
 	@unique
-	id=INT
-	r=INT
-	ur=INT
-	p=INT
-	u=INT
-	t=INT
-	type=INT
+	id = INT;
+	r = INT;
+	ur = INT;
+	p = INT;
+	u = INT;
+	t = INT;
+	type = INT;
 }

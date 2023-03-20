@@ -1,7 +1,7 @@
 <script>
 	import { confirm, selectFile } from '$lib/store';
 	import { fade } from 'svelte/transition';
-	import { diffObj,getErr } from '$lib/utils';
+	import { diffObj, getErr } from '$lib/utils';
 	import { req } from '$lib/req';
 	import Pls from '$lib/components/post/rSelect.svelte';
 	import List from '$lib/components/post/rList.svelte';
