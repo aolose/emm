@@ -88,10 +88,10 @@ export const tagPostCache = (() => {
 				else {
 					tps.push(DBProxy(PostTag, { postId: p, tagId }));
 				}
-				if (pSet.size) {
-					this.delete([...pSet], tagId);
-				}
 			});
+			if (pSet.size) {
+				this.delete([...pSet], tagId);
+			}
 		},
 		getTags(postId: number | number[]) {
 			const ids: Set<number> = new Set();
