@@ -204,7 +204,7 @@ export class DB {
 		const pk = getPrimaryKey(table) as keyof typeof o & string;
 		const wh = [];
 		const va = [];
-		if (pk) {
+		if (pk&& pk in o) {
 			wh.push(`${pk}=?`);
 			va.push(o[pk]);
 		}
