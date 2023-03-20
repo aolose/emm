@@ -20,35 +20,6 @@ export const hooks: apiHooks = {
 			before: (o) => modelArr2Str(o as Tag, '_posts')
 		}
 	},
-	rule: {
-		post: {
-			before(a) {
-				if (typeof a === 'object') {
-					const d = { ...a } as {
-						forbidden?: boolean;
-						redirect?: string;
-						trigger?: boolean;
-						status?: string;
-						method?: string;
-						country?: string;
-						times?: number;
-						ip?: string;
-					};
-					if (d.trigger) {
-						if (d.country) d.country = '';
-						if (d.method) d.method = '';
-						if (d.ip) d.ip = '';
-						if (d.forbidden) d.forbidden = false;
-					} else {
-						if (d.status) d.status = '';
-						if (d.times) d.times = -1;
-					}
-					if (d.forbidden && d.redirect) d.redirect = '';
-					return d;
-				}
-			}
-		}
-	},
 	post: {
 		patch: {
 			after(p, r) {
