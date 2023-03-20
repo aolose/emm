@@ -33,7 +33,7 @@ sw.addEventListener('fetch', (event) => {
 	if (event.request.method !== 'GET') return;
 	const url = new URL(event.request.url);
 	// skip api
-	if(url.pathname.startsWith('/api'))return;
+	if (url.pathname.startsWith('/api')) return;
 	async function respond() {
 		const cache = await caches.open(CACHE);
 		if (ASSETS.includes(url.pathname)) {

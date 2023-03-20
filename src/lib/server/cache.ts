@@ -280,22 +280,29 @@ export const combine =
 	};
 export const getPostSibling = (id: number, create: number, tag: string, skips: number[]) => {
 	const pn: { slug: string; title: string }[] = [];
-	let ids: number[] | undefined;
+	const s = new Set(skips);
+	let ids: Set<number> | undefined;
 	if (tag) {
 		const tagId = tagPostCache.getTags(id).find((a) => a.name === tag)?.id;
 		if (!tagId) return [];
-		const s = new Set(skips);
-		ids = tagPostCache.getPostIds(tagId).filter((a) => a !== id && !s.has(a));
-		if (!ids.length) return [];
+		ids = new Set(tagPostCache.getPostIds(tagId));
+		if (!ids.size) return [];
 	}
-	const sql = ` and published=? and id ${ids ? '' : 'not'} in (${sqlFields(
-		(ids || skips).length
-	)}) order by createAt `;
-	const fields = [create, 1, ...(ids || skips)];
-	const n = db.get(model(Post), 'createAt>?' + sql + 'asc  limit 1', ...fields);
-	const p = db.get(model(Post), 'createAt<?' + sql + 'desc  limit 1', ...fields);
-	if (n) pn[0] = { title: n.title, slug: n.slug };
-	if (p) pn[1] = { title: p.title, slug: p.slug };
+
+	const filter = [...get(publishedPost)].filter((a) => (!ids || ids.has(a)) && !s.has(a));
+	if (filter.length < 2) return [];
+	filter.sort();
+	const idx = filter.indexOf(id);
+	const p = filter[idx - 1];
+	const n = filter[idx + 1];
+	if (n) {
+		const a = db.get(model(Post, { id: n }));
+		if (a) pn[0] = { title: a.title, slug: a.slug };
+	}
+	if (p) {
+		const a = db.get(model(Post, { id: p }));
+		if (a) pn[1] = { title: a.title, slug: a.slug };
+	}
 	return pn;
 };
 export const patchPostTags = (ps: Post[]) =>

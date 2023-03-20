@@ -1,5 +1,5 @@
 import better from 'better-sqlite3';
-import { Log, noNullKeyValues, setKey, sqlFields, sqlVal, val } from '../utils';
+import { Log, noNullKeyValues, printSql, setKey, sqlFields, sqlVal, val } from '../utils';
 import * as models from '../model';
 import { getConstraint, getPrimaryKey, pkMap, primaryKey } from '../model/decorations';
 import type { Class, dbHooks, Model, Obj } from '$lib/types';
@@ -99,11 +99,7 @@ export class DB {
 		const wh = [w, where].filter((a) => a).join(' and ');
 		const s = sql + (wh ? ` WHERE ${wh}` : '').replace(/where order by/i, 'order by');
 		const params = sqlVal([...v, ...values]);
-		let i = 0;
-		Log.debug(
-			'sql',
-			s.replace(/\?/g, (a) => `${values[i++]}`)
-		);
+		Log.debug('sql', printSql(s, params));
 		const paper = this.db.prepare(s);
 		if (one) return paper.get(...params);
 		return paper.all(...params);
@@ -145,7 +141,7 @@ export class DB {
 			p = where?.slice(1) || [];
 		}
 		const sql = s + w + d + l;
-		Log.debug('sql', sql);
+		Log.debug('sql', printSql(sql, p));
 		const r = this.db.prepare(sql).all(...p) as T[];
 		return after ? after(r) : r;
 	}
@@ -176,7 +172,7 @@ export class DB {
 			if (!override_create) setKey(a, 'createAt', now);
 			[sql, values] = insert(o);
 		} else [sql, values] = update(o);
-		Log.debug('save', sql, values);
+		Log.debug('save', printSql(sql, values));
 		if (!sql) {
 			Log.warn('save', table, 'empty sql');
 			return { changes: 0, lastInsertRowid: 0 };
@@ -204,7 +200,7 @@ export class DB {
 		const pk = getPrimaryKey(table) as keyof typeof o & string;
 		const wh = [];
 		const va = [];
-		if (pk&& pk in o) {
+		if (pk && pk in o) {
 			wh.push(`${pk}=?`);
 			va.push(o[pk]);
 		}
@@ -279,13 +275,6 @@ export class DB {
 			}
 		}
 	}
-
-	dropTables() {
-		for (const { name } of tables) {
-			this.db.exec(`DROP TABLE IF EXISTS ${name}`);
-		}
-	}
-
 	tables() {
 		return this.db
 			.prepare(

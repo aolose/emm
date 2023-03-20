@@ -68,6 +68,7 @@
 				const r = [];
 				const i = [];
 				const x = [];
+				if (a.length === 1) a = a.concat(a);
 				a.forEach((o) => {
 					u.push(o.u);
 					r.push(o.r);

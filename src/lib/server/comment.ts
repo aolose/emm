@@ -13,10 +13,18 @@ import {
 import { CmUser, Comment, Post } from '$lib/server/model';
 import { db, sys } from '$lib/server/index';
 import { randomUUID } from 'crypto';
-import { arrFilter, filter, trim } from '$lib/utils';
+import { filter, trim } from '$lib/utils';
 import { cmStatus, permission } from '$lib/enum';
 import type { Obj } from '$lib/types';
-
+const fixOwn = (uid:number,a:Obj<Comment>,isAdm?:boolean)=>{
+  if (uid && uid === a.userId) {
+    a._own = 1;
+  } else if (isAdm) {
+    if (a.isAdm) a._own = 1;
+    else a._own = 2;
+  }
+  if (!a._own && !isAdm) delete (a as { state?: number }).state;
+}
 export const cmManager = (() => {
 	const expire = 1e3 * 3600 * 24; // d
 	const ck = 'cm-tk';
@@ -72,33 +80,52 @@ export const cmManager = (() => {
 			.split(',')
 			.map((a) => +a)
 			.filter((a) => a);
-		const total = Math.ceil(id.length / 5);
-		const idx = 5 * page;
-		const ss = id.slice(idx - 5, idx);
-		const l = ss.length;
-		if (!l) return undefined;
-		const items = arrFilter(
-			db.all(model(Comment), `id in (${sqlFields(l)}) order by createAt asc`, ...ss).map((a) => {
-				if (isAdm) a._own = 2;
-				if (a.userId === userId) a._own = 1;
-				if (a.save === a.createAt) delete (a as Obj<Comment>).save;
-				return patchUserInfo(a);
-			}) as Comment[],
-			['content', 'createAt', 'save', '_name', '_avatar', '_name', '_reply', 'id', '_own', 'isAdm']
+		if (!id.length) return undefined;
+		const ks = [
+			'content',
+			'createAt',
+			'save',
+			'_name',
+			'_avatar',
+			'_name',
+			'_reply',
+			'id',
+			'_own',
+			'isAdm'
+		] as (keyof Comment)[];
+
+		const w = [`id in (${sqlFields(id.length)})`];
+		if (!isAdm && sys.cmCheck) {
+			w.push(`(userId=? or state=?)`);
+			id.push(userId, cmStatus.Approve);
+			ks.push('state');
+		}
+		return pageBuilder(
+			page,
+			5,
+			Comment,
+			['createAt asc'],
+			isAdm ? [] : ks,
+			[w.join(' and '), ...id],
+			(arr) => {
+				return arr.map(a=>{
+          fixOwn(userId,a,isAdm)
+          return patchUserInfo(a)
+        }) as Comment[];
+			}
 		);
-		return { total, items };
 	};
 	return {
 		list: async (req: Request) => {
 			const params = new URL(req.url).searchParams;
 			const topic = +(params.get('topic') || 0);
 			const status = +(params.get('status') || -1);
-			const slug = params.get('slug');
+			const slug = params.get('slug') || '';
 			const page = +(params.get('page') || 1);
 			const p = slug && db.get(model(Post, { slug }));
 			const isAdm = getClient(req)?.ok(permission.Admin);
 			const canView = isAdm || getClient(req)?.ok(permission.Read);
-			if (!p && !canView) return errMsg('post not exist', 1, 500);
+			if (!topic && !p && !canView) return errMsg('post not exist', 1, 500);
 			const where: string[] = [];
 			const values: unknown[] = [];
 			const tk = getTk(req);
@@ -113,23 +140,25 @@ export const cmManager = (() => {
 					const u = db.get(model(CmUser, { token: tk }));
 					if (u && u.exp > Date.now()) uid = u.id;
 				}
-				where.push('topic is null');
-				values.push(cmStatus.Approve);
-				if (sys.cmCheck && uid) {
-					where.push('state=? or (state=? and userid=?)');
-					values.push(cmStatus.Pending, uid);
-				} else {
-					where.push('state=?');
-				}
-				if (sys.cmCheck) ks.push('state');
-				ks.push('id', '_avatar', '_own', 'isAdm', '_name', 'content', 'createAt', '_cms');
+        where.push('topic is null');
+				if(!isAdm){
+          values.push(cmStatus.Approve);
+          if (sys.cmCheck && uid ) {
+            where.push('(state=? or (state=? and userid=?))');
+            values.push(cmStatus.Pending, uid);
+            ks.push('state');
+          } else {
+            where.push('state=?');
+          }
+          ks.push('id', '_avatar', '_own', 'isAdm', '_name', 'content', 'createAt', '_cms');
+        }
 			} else {
 				if (topic) {
 					const cm = db.get(model(Comment, { id: topic }));
 					if (!cm) return errMsg('topic not exist', 1, 500);
 					return subCm(cm.subCm || '', page, tk, isAdm);
 				} else {
-					where.push('topic is null');
+					// where.push("topic is null");
 				}
 				if (status !== -1) {
 					if (!canView) return errMsg('no permission for filter', 0, 401);
@@ -161,13 +190,7 @@ export const cmManager = (() => {
 							a._post = p;
 						}
 					} else {
-						if (uid && uid === a.userId) {
-							a._own = 1;
-						} else if (isAdm) {
-							if (a.isAdm) a._own = 1;
-							else a._own = 2;
-						}
-						if (!a._own && !isAdm) delete (a as { state?: number }).state;
+						fixOwn(uid,a,isAdm)
 					}
 				});
 				return arr;
@@ -185,6 +208,7 @@ export const cmManager = (() => {
 					.filter((a) => a)
 			);
 			const sz = ids.size;
+			const topics = new Map<number, Set<number>>();
 			if (!sz) return;
 			if (!isAdm) {
 				if (!tk || ids.size > 1) return errMsg('no permission');
@@ -203,10 +227,32 @@ export const cmManager = (() => {
 			const u0 = new Set(
 				db.all(model(Comment), `id in (${q}) or topic in (${q})`, ...ids, ...ids).map((a) => {
 					ids.add(a.id);
+					if (ids.has(a.id) && a.topic) {
+						const s = topics.get(a.topic) || new Set<number>();
+						s.add(a.id);
+						topics.set(a.topic, s);
+					}
 					return a.userId;
 				})
 			);
 			db.delByPk(Comment, [...ids]);
+			if (topics.size) {
+				db.all(model(Comment), `id in (${sqlFields(topics.size)})`, ...topics.keys()).map((a) => {
+					const s = new Set(
+						a.subCm
+							?.split(',')
+							.map((a) => +a)
+							.filter((a) => a)
+					);
+					const o = topics.get(a.id);
+					if (o)
+						for (const id of o) {
+							s.delete(id);
+						}
+					a.subCm = [...s].join();
+					db.save(model(Comment,a));
+				});
+			}
 			const u1 = new Set(
 				db.all(model(Comment), `userId in (${sqlFields(u0.size)})`, ...u0).map((a) => a.userId)
 			);
@@ -235,21 +281,23 @@ export const cmManager = (() => {
 			const n = Date.now();
 			const tk = getTk(req);
 			const cm = model(Comment, await req.json());
-			cm.content = cm.content?.slice(0, 512);
+			if (cm.content) cm.content = cm.content?.slice(0, 512);
 			const user = model(CmUser, { token: tk }) as CmUser;
 			const isAdm = getClient(req)?.ok(permission.Admin);
-			if (!isAdm && cm.isAdm) return errMsg('forbidden');
+			if (!isAdm && cm.isAdm) return errMsg('no permission', 1, 401);
 			if (tk) {
-				const gu = db.get(user) as CmUser;
-				if (!gu || gu.exp < n) return errMsg('invalid cookie', 0, 401);
-				else {
-					Object.assign(user, gu, user);
+				if (!isAdm) {
+					const gu = db.get(user) as CmUser;
+					if (!gu || gu.exp < n) return errMsg('invalid cookie', 0, 401);
+					else {
+						Object.assign(user, gu, user);
+					}
 				}
 				if (cm.id) {
 					const c = db.get(model(Comment, { id: cm.id }));
 					if (!c) return errMsg('comment not exist');
 					else {
-						Object.assign(cm, c, cm);
+						delete cm.isAdm;
 						db.save(cm);
 						return {
 							save: cm.save
@@ -282,7 +330,7 @@ export const cmManager = (() => {
 			cm.postId = p.id;
 			cm.state = cmStatus.Approve;
 			if (!cm.isAdm) {
-				if (sys.cmCheck) {
+				if (sys.cmCheck && !isAdm) {
 					cm.state = cmStatus.Pending;
 				}
 				if (cm._avatar) user.avatar = cm._avatar;
@@ -319,7 +367,7 @@ export const cmManager = (() => {
 			}
 			if (sys.cmCheck) o.state = cm.state;
 			const rsp = resp(o);
-			if (!cm.isAdm) setCookie(rsp, ck, user.token, user.exp || expDay(2));
+			if (!cm.isAdm && user.token) setCookie(rsp, ck, user.token, user.exp || expDay(2));
 			return rsp;
 		}
 	};
