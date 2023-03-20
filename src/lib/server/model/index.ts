@@ -329,27 +329,13 @@ export class TkTick {
 	token = TEXT;
 }
 
-class Analysis_visitor {
-	request = INT;
-	uniqueIP = INT;
-	hour = INT;
-}
-
-class Analysis_path {
-	count = INT;
-	path = TEXT;
-	hour = INT;
-}
-
-class Analysis_country {
-	country = TEXT;
-	count = INT;
-	hour = INT;
-}
-
-class Analysis_device {
-	type = TEXT;
-	os = TEXT;
-	count = INT;
-	hour = INT;
+export class RPU {
+	@unique
+	id=INT
+	r=INT
+	ur=INT
+	p=INT
+	u=INT
+	t=INT
+	type=INT
 }

@@ -17,6 +17,7 @@
 		{#if save}
 			<button on:click={save}>Save</button>
 		{/if}
+		<slot name="btn"></slot>
 	</div>
 	<slot />
 	<Ld act={ld} />
@@ -25,6 +26,8 @@
 <style lang="scss">
 	@import '../../../lib/break';
 	.a {
+		display: flex;
+		flex-direction: column;
 		border: 1px solid #000;
 		width: 400px;
 		margin: 10px 0 0 10px;

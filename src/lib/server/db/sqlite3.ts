@@ -99,7 +99,8 @@ export class DB {
 		const wh = [w, where].filter((a) => a).join(' and ');
 		const s = sql + (wh ? ` WHERE ${wh}` : '').replace(/where order by/i, 'order by');
 		const params = sqlVal([...v, ...values]);
-		Log.debug('sql', s);
+		let i=0
+		Log.debug('sql', s.replace(/\?/g,(a)=>`${values[i++]}`));
 		const paper = this.db.prepare(s);
 		if (one) return paper.get(...params);
 		return paper.all(...params);
