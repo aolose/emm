@@ -27,6 +27,8 @@
 	@import '../../../lib/break';
 	.a {
 		display: flex;
+		align-self: flex-start;
+		align-items: stretch;
 		flex-direction: column;
 		border: 1px solid #000;
 		width: 400px;
