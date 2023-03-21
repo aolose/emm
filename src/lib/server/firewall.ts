@@ -218,12 +218,12 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 	// skip admin
 	const ip = getClientAddr(event);
 	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || ip === '127.0.0.1')) return;
-	const path = event.url.pathname;
-	const method = event.request.method;
-	const ua = hds2Str(event.request.headers);
+	const {request:{method,headers},url:{pathname}} = event
+	const path = pathname;
+	const ua = hds2Str(headers);
 	const r = [Date.now(), ip, path, ua, status, ipInfo(ip)?.short || '', fr?.mark, method] as log;
 	const rq = logToReq(r);
-	ruv({ ip, path, ua, status });
+	ruv({ ip, path, ua: headers.get('user-agent')||'', status });
 	if (path !== '/api/log') logCache.push(r);
 	if (!fr?._match?.find((a) => a < 0) && triggers.find((a) => hitRule(rq, a))) {
 		blackListCheck(rq);
