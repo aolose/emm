@@ -53,7 +53,7 @@
 		start = Math.floor(start / x);
 		end = Math.floor(end / x);
 		const time = (a) => {
-			const z = new Date(a);
+			const z = new Date(a * x);
 			const m = z.getMonth() + 1;
 			const d = z.getDate();
 			const h = z.getHours();
