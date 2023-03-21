@@ -32,8 +32,7 @@ sw.addEventListener('activate', (event) => {
 sw.addEventListener('fetch', (event) => {
 	if (event.request.method !== 'GET') return;
 	const url = new URL(event.request.url);
-	// skip api
-	if (url.pathname.startsWith('/api')) return;
+	if (/^\/(api|admin|login)/.test(url.pathname)) return;
 	async function respond() {
 		const cache = await caches.open(CACHE);
 		if (ASSETS.includes(url.pathname)) {

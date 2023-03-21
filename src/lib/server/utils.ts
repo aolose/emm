@@ -560,5 +560,5 @@ export const blogExp = () => {
 
 export const printSql = (sql: string, value: unknown[]) => {
 	let i = 0;
-	return debugMode ? sql.replace(/\?/g, () => `${value[i++]}`) : '';
+	return is_dev ? sql.replace(/\?/g, () => `${value[i++]}`) : '';
 };

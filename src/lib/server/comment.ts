@@ -16,15 +16,15 @@ import { randomUUID } from 'crypto';
 import { filter, trim } from '$lib/utils';
 import { cmStatus, permission } from '$lib/enum';
 import type { Obj } from '$lib/types';
-const fixOwn = (uid:number,a:Obj<Comment>,isAdm?:boolean)=>{
-  if (uid && uid === a.userId) {
-    a._own = 1;
-  } else if (isAdm) {
-    if (a.isAdm) a._own = 1;
-    else a._own = 2;
-  }
-  if (!a._own && !isAdm) delete (a as { state?: number }).state;
-}
+const fixOwn = (uid: number, a: Obj<Comment>, isAdm?: boolean) => {
+	if (uid && uid === a.userId) {
+		a._own = 1;
+	} else if (isAdm) {
+		if (a.isAdm) a._own = 1;
+		else a._own = 2;
+	}
+	if (!a._own && !isAdm) delete (a as { state?: number }).state;
+};
 export const cmManager = (() => {
 	const expire = 1e3 * 3600 * 24; // d
 	const ck = 'cm-tk';
@@ -108,10 +108,10 @@ export const cmManager = (() => {
 			isAdm ? [] : ks,
 			[w.join(' and '), ...id],
 			(arr) => {
-				return arr.map(a=>{
-          fixOwn(userId,a,isAdm)
-          return patchUserInfo(a)
-        }) as Comment[];
+				return arr.map((a) => {
+					fixOwn(userId, a, isAdm);
+					return patchUserInfo(a);
+				}) as Comment[];
 			}
 		);
 	};
@@ -140,18 +140,18 @@ export const cmManager = (() => {
 					const u = db.get(model(CmUser, { token: tk }));
 					if (u && u.exp > Date.now()) uid = u.id;
 				}
-        where.push('topic is null');
-				if(!isAdm){
-          values.push(cmStatus.Approve);
-          if (sys.cmCheck && uid ) {
-            where.push('(state=? or (state=? and userid=?))');
-            values.push(cmStatus.Pending, uid);
-            ks.push('state');
-          } else {
-            where.push('state=?');
-          }
-          ks.push('id', '_avatar', '_own', 'isAdm', '_name', 'content', 'createAt', '_cms');
-        }
+				where.push('topic is null');
+				if (!isAdm) {
+					values.push(cmStatus.Approve);
+					if (sys.cmCheck && uid) {
+						where.push('(state=? or (state=? and userid=?))');
+						values.push(cmStatus.Pending, uid);
+						ks.push('state');
+					} else {
+						where.push('state=?');
+					}
+					ks.push('id', '_avatar', '_own', 'isAdm', '_name', 'content', 'createAt', '_cms');
+				}
 			} else {
 				if (topic) {
 					const cm = db.get(model(Comment, { id: topic }));
@@ -190,7 +190,7 @@ export const cmManager = (() => {
 							a._post = p;
 						}
 					} else {
-						fixOwn(uid,a,isAdm)
+						fixOwn(uid, a, isAdm);
 					}
 				});
 				return arr;
@@ -250,7 +250,7 @@ export const cmManager = (() => {
 							s.delete(id);
 						}
 					a.subCm = [...s].join();
-					db.save(model(Comment,a));
+					db.save(model(Comment, a));
 				});
 			}
 			const u1 = new Set(

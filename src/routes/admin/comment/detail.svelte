@@ -70,10 +70,11 @@
 	let el;
 	const del = (id) => () => {
 		confirm('sure to delete?').then((a) => {
-			if (a) req('cm', id, { method: method.DELETE }).then(() => {
-				filter(id)
-				close()
-			});
+			if (a)
+				req('cm', id, { method: method.DELETE }).then(() => {
+					filter(id);
+					close();
+				});
 		});
 	};
 	const done = (id) => (a) => {

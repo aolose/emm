@@ -1,24 +1,16 @@
 import { writable, get, readable } from 'svelte/store';
 import { Upload } from 'upload';
 import Compressor from 'compressorjs';
-import type {
-	fView,
-	fileInfo,
-	fInfo,
-	Timer,
-	fileSelectCfg,
-	cfOpt,
-	curPost,
-	headInfo
-} from '$lib/types';
+import type { fView, fileInfo, fInfo, Timer, fileSelectCfg, cfOpt, curPost } from '$lib/types';
 
 import { randNum } from '$lib/utils';
 import type { SvelteComponent } from 'svelte';
+import type { BeforeNavigate } from '@sveltejs/kit';
 
 const user = writable({
 	token: 'test'
 });
-
+export const navStore = writable<BeforeNavigate>();
 const confirmCfg = {} as cfOpt;
 const fileManagerCfg = {} as fileSelectCfg;
 export const h = writable({

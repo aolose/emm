@@ -2,6 +2,7 @@
 	import { permission } from '$lib/enum';
 	import { clipboard } from '$lib/use';
 	import { time, watch } from '$lib/utils';
+	import { goto } from '$app/navigation';
 
 	export let d = {};
 	export let view;
@@ -47,6 +48,7 @@
 		<span><b>times</b>{times ? times : 'unlimited'}</span>
 	</div>
 </div>
+<button class="icon i-sys" on:click={() => goto('/admin', { replaceState: true })} />
 
 <style lang="scss">
 	.i {
@@ -108,5 +110,12 @@
 		display: block;
 		flex: 1;
 		padding-right: 10px;
+	}
+	.i-sys {
+		position: fixed;
+		bottom: 10px;
+		right: 0;
+		opacity: 0.2;
+		width: auto;
 	}
 </style>
