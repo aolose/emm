@@ -1,5 +1,6 @@
 <script>
 	import { confirm } from '$lib/store';
+	import { getErr } from '$lib/utils';
 
 	export let d = {};
 	export let sel = false;

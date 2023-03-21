@@ -77,11 +77,11 @@
 			{ check: true },
 			{ name: 'code', key: 'code' },
 			{ name: 'type', cell: ({ type }) => pmsName[permission[type]] },
-			{ name: 'expire', cell: ({ expire }) => (!expire ? '∞' : time(expire)) },
+			{ name: 'expire', cell: ({ expire }) => (expire > 0 ? time(expire) : '∞') },
 			{ name: 'create at', cell: ({ createAt }) => time(createAt) },
-			{ name: 'times', cell: ({ times }) => (times === -1 || !times ? '∞' : times) },
+			{ name: 'times', cell: ({ times }) => (times > 0 ? times : '∞') },
 			{ name: 'share', cell: ({ share }) => (share ? 'Y' : 'N') },
-			{ name: 'used', key: 'used' },
+			{ name: 'used', cell: ({ used }) => used || 0 },
 			{ detail: '_reqs', btn: btnClick }
 		]
 	][ta];

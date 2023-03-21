@@ -5,8 +5,8 @@
 	import { req } from '$lib/req';
 	import { onMount } from 'svelte';
 	import { method } from '$lib/enum';
-	import { small } from '$lib/store';
-	import { trim } from '$lib/utils';
+	import { confirm, small } from '$lib/store';
+	import { getErr, trim } from '$lib/utils';
 
 	let ls = [];
 	let name = '';
@@ -60,11 +60,13 @@
 	let setTag;
 
 	function del(id) {
-		req('tag', id, { method: method.DELETE }).then(() => {
-			ls = ls.filter((a) => a.id !== id);
-			sel = {};
-			setTag();
-		});
+		req('tag', id, { method: method.DELETE })
+			.then(() => {
+				ls = ls.filter((a) => a.id !== id);
+				sel = {};
+				setTag();
+			})
+			.catch((e) => confirm(getErr(e), '', 'ok'));
 	}
 </script>
 

@@ -7,9 +7,9 @@
 	import { onMount } from 'svelte';
 	import { req } from '$lib/req';
 	import Loading from '$lib/components/loading.svelte';
-	import { watch } from '$lib/utils';
+	import { getErr, watch } from "$lib/utils";
 	import Detail from './detail.svelte';
-	import { small } from '$lib/store';
+	import { confirm, small } from "$lib/store";
 
 	let view = 0;
 	let sty = '';
@@ -18,7 +18,7 @@
 	let page = 1;
 	let allowCm = 0;
 	let checkCm = 0;
-	const cmWatch = watch(allowCm, checkCm);
+	let cmWatch;
 	let ld = 0;
 	let sel;
 	const cStatus = [
@@ -55,6 +55,7 @@
 		req('alCm', undefined, { method: method.GET }).then((a) => {
 			allowCm = +a[0];
 			checkCm = +a[1];
+			cmWatch=watch(allowCm, checkCm)
 		});
 		go();
 	});
@@ -63,9 +64,14 @@
 		ftWatch(() => {
 			go();
 		}, status);
-		cmWatch(
-			() => {
-				req('alCm', '' + +allowCm + +checkCm);
+		if(cmWatch)cmWatch(
+			(cancel,_allowCm,_checkCm) => {
+				req('alCm', '' + +allowCm + +checkCm).catch(e=>{
+					cancel()
+					confirm(getErr(e),'','ok')
+					allowCm=_allowCm
+					checkCm=_checkCm
+				});
 			},
 			allowCm,
 			checkCm

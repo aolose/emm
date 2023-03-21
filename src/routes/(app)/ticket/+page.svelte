@@ -12,19 +12,14 @@
 	import { permission } from '$lib/enum';
 	import Post from './post.svelte';
 	import Head from '$lib/components/Head.svelte';
-	import { h } from '$lib/store';
+	import { h, status } from '$lib/store';
 
 	let a;
 	let sc;
 	export let data;
-	const { admin, read, post } = data.d;
+	let { admin, read, post } = data.d;
 	let { share = [] } = data.d;
-	let inf = [
-		[1, 'leave a comment'],
-		[post, 'show secret posts', 1],
-		[read, 'view backstage system', 2],
-		[admin, 'full admin privileges', 2]
-	];
+	let inf = [];
 
 	async function scTop() {
 		await tick();
@@ -42,6 +37,16 @@
 	let e = 0;
 	const we = watch(err);
 	$: {
+		inf = [
+			[1, 'leave a comment'],
+			[post, 'show secret posts', 1],
+			[read, 'view backstage system', 2],
+			[admin, 'full admin privileges', 2]
+		];
+		let s = 0;
+		if (admin) s = 1;
+		if (read) s = 2;
+		status.set(s);
 		we(() => {
 			clearTimeout(tm);
 			e = !!err;
@@ -68,12 +73,12 @@
 				const mx = (a = 0, b = -1) => (a === b ? a : a === -1 ? a : b === -1 ? b : a > b ? a : b);
 				switch (a.type) {
 					case permission.Admin:
-						return (inf[3][0] = mx(admin, expire));
+						return (admin = mx(admin, expire));
 					case permission.Read:
-						return (inf[2][0] = mx(read, expire));
+						return (read = mx(read, expire));
 					case permission.Post:
 						clearGroup('posts');
-						return (inf[1][0] = mx(post, expire));
+						return (post = mx(post, expire));
 				}
 				share = [...share];
 				inf = [...inf];
