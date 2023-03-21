@@ -291,7 +291,7 @@ export const getPostSibling = (id: number, create: number, tag: string, skips: n
 
 	const filter = [...get(publishedPost)].filter((a) => (!ids || ids.has(a)) && !s.has(a));
 	if (filter.length < 2) return [];
-	filter.sort();
+	filter.sort((a,b)=>a-b);
 	const idx = filter.indexOf(id);
 	const p = filter[idx - 1];
 	const n = filter[idx + 1];
