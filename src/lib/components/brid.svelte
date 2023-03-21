@@ -15,7 +15,7 @@
 					const s = ls[i++ % ls.length];
 					msg.set(s);
 					setTimeout(() => {
-						if(stop) return
+						if (stop) return;
 						m(ls, i);
 					}, s.length * 240 + 1e3);
 				};
@@ -23,9 +23,9 @@
 			}
 		}
 		return () => {
-			msg.set('')
+			msg.set('');
 			stop = 1;
-		}
+		};
 	});
 </script>
 

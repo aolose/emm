@@ -7,6 +7,7 @@ import { codeTokens, reqPostCache, requireMap, tagPostCache } from '$lib/server/
 // import { readRes } from "$lib/server/back/readRes";
 import { loadRules } from '$lib/server/firewall';
 import { sitemap } from '$lib/sitemap';
+import { loadPuv } from '$lib/server/puv';
 
 export let sys: System;
 export let db: DB;
@@ -52,6 +53,7 @@ export const server = {
 		loadRules();
 		checkStatue();
 		sitemap.refresh();
+		loadPuv();
 		// readRes();
 	},
 	stop() {
