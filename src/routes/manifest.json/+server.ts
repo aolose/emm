@@ -10,12 +10,12 @@ export const GET: RequestHandler = () => {
 		background_color: '#0f1319',
 		scope: '/',
 		theme_color: '#0f1319',
-		description: sys.description,
+		description: sys.seoDesc,
 		shortcuts: [
 			{
 				name: sys.blogName,
 				short_name: sys.blogName,
-				description: sys.description,
+				description: sys.seoDesc,
 				icons: [
 					{
 						src: '/ico-192.png',

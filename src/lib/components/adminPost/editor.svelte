@@ -75,14 +75,18 @@
 		action: () => {
 			confirm('sure to delete?').then((ok) => {
 				if (!ok) return;
-				req('post', new Uint8Array([cid]), { method: method.DELETE }).then((a) => {
-					if (a) {
-						posts.update((u) => {
-							return u.filter((u) => u.id !== cid);
-						});
-						close && close();
-					}
-				});
+				req('post', new Uint8Array([cid]), { method: method.DELETE })
+					.then((a) => {
+						if (a) {
+							posts.update((u) => {
+								return u.filter((u) => u.id !== cid);
+							});
+							close && close();
+						}
+					})
+					.catch((e) => {
+						confirm(getErr(e), '', 'ok');
+					});
 			});
 		},
 		className: 'icon i-del',

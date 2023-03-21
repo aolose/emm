@@ -1,13 +1,13 @@
-import { req } from './req';
-import { contentType, dataType, encryptIv, encTypeIndex, getIndexType } from './enum';
-import type { ApiData, ApiBodyData, fView, Model, Obj, Timer, reqOption } from './types';
-import pinyin from 'tiny-pinyin';
-import { marked } from 'marked';
-import { convert } from 'html-to-text';
-import { goto } from '$app/navigation';
-import type { reqParams } from './types';
-import JSZip from 'jszip';
-import { confirm, statueSys } from '$lib/store';
+import { req } from "./req";
+import { contentType, dataType, encryptIv, encTypeIndex, getIndexType, method } from "./enum";
+import type { ApiBodyData, ApiData, fView, Model, Obj, reqOption, reqParams, Timer } from "./types";
+import pinyin from "tiny-pinyin";
+import { marked } from "marked";
+import { convert } from "html-to-text";
+import { goto } from "$app/navigation";
+import JSZip from "jszip";
+import { confirm, status } from "$lib/store";
+import { get } from "svelte/store";
 
 const { subtle } = crypto;
 let genKey: CryptoKeyPair;
@@ -765,11 +765,19 @@ export const sort = <T extends object>(target: T[], key?: (keyof T)[] | keyof T,
 
 export const watch = (...args: unknown[]) => {
 	let keys = JSON.stringify(args);
-	return (fn: () => void, ...args: unknown[]) => {
+	return (fn: (cancel:()=>void,...old:unknown[]) => void|1|true, ...args: unknown[]) => {
 		const nk = JSON.stringify(args);
 		if (keys !== nk) {
-			keys = nk;
-			fn();
+			let skip=0
+			const old = keys
+			const cancel = ()=>{
+				// for async
+			  keys=old
+				// for sync
+				skip=1
+			}
+			fn(cancel,...JSON.parse(keys))
+			if(!skip)keys = nk;
 		}
 	};
 };
@@ -816,6 +824,7 @@ export const clientRestore =
 		const file = ipt.files?.[0];
 		ipt.value = '';
 		if (!ok) return;
+		if (get(status) !== 1) return err('no permission');
 		if (file) {
 			const buf = await file.arrayBuffer();
 			const e = await restoreVerify(buf);
@@ -841,3 +850,9 @@ export const clientRestore =
 		}
 		done();
 	};
+
+export const syncStatus = async ()=>{
+	let s = get(status)
+	if(s)s=await req('check',undefined,{method:method.GET,delay:300}) as number
+	return s
+}

@@ -75,6 +75,7 @@
 		t = type;
 		show = 1;
 		d = { ...(data || {}) };
+		hasExp = d.expire > 0;
 		return new Promise((rs) => {
 			ok = () => {
 				const o = { ...d };

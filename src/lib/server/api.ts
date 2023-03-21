@@ -125,6 +125,15 @@ const apis: APIRoutes = {
 			return res;
 		}
 	},
+	check:{get:req=>{
+			const c = getClient(req);
+			let s=0
+			if (c) {
+				if (c.ok(permission.Read)) s = 2;
+				if (c.ok(permission.Admin)) s = 1;
+			}
+			return s
+		}},
 	statue: {
 		get: (req) => {
 			checkStatue();
