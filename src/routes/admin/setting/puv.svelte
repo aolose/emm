@@ -21,7 +21,7 @@
 	let rv = [];
 	let nx = [];
 	let ny = [];
-	let pre = [];
+	let avg = [];
 	let total = [];
 	let h;
 	let w;
@@ -44,16 +44,16 @@
 	};
 
 	const cors = ['#8c72ce', '#d3a84b', '#65b9e7', '#bcff94'];
-	const nms = ['valid requests', 'valid ip', 'all ip', 'all requests'];
+	const nms = ['valid requests', 'valid ip', 'ip', 'requests'];
 	const getD = () => {
 		const ds = n[t];
 		let end = Date.now();
 		let start = end - d * ds;
-		const x = 3600 * 1000;
+		const x = 3600 * 1000 * (type ? 24 : 1);
 		start = Math.floor(start / x);
 		end = Math.floor(end / x);
 		const time = (a) => {
-			const z = new Date(a * x);
+			const z = new Date(a);
 			const m = z.getMonth() + 1;
 			const d = z.getDate();
 			const h = z.getHours();
@@ -86,7 +86,7 @@
 	};
 	const line = (color, w, h, max, min, ...d) => {
 		ctx.strokeStyle = ctx.fillStyle = color;
-		const ry = (h - 40) / (max - min);
+		const ry = (h - 40) / (max - min || 1);
 		const sy = 20;
 		const sx = 20;
 		const step = (w - sx * 2) / (d.length - 1);
@@ -127,15 +127,15 @@
 		}
 		nny.push(max);
 		if (JSON.stringify(nny) !== JSON.stringify(ny)) ny = nny;
-		pre.length = 0;
+		avg.length = 0;
 		total.length = 0;
 		data.forEach((a, i) => {
 			const t = a.reduce((a, b) => a + b, 0);
-			const p = Math.floor(t / a.length);
-			pre[i] = p;
+			const p = Math.ceil(t / a.length);
+			avg[i] = p;
 			total[i] = t;
 		});
-		pre = [...pre];
+		avg = [...avg];
 		total = [...total];
 		draw();
 	};
@@ -185,7 +185,7 @@
 			{#each nms as n, index}
 				<div>
 					<span>{n}</span>
-					<span>{pre[index] || 0} / {type ? 'd' : 'h'} total: {total[index] || 0}</span>
+					<span>{avg[index] || 0} / {type ? 'd' : 'h'} total: {total[index] || 0}</span>
 					<b style={`color:${cors[index]}`} />
 				</div>
 			{/each}
