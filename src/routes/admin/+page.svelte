@@ -183,7 +183,8 @@
 	}
 
 	.c {
-		width: 800px;
+		flex: 1;
+		max-width: 800px;
 		@include m() {
 			width: 50%;
 			flex: none;
