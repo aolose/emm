@@ -113,7 +113,13 @@
 			</div>
 		</div>
 		{#if sel}
-			<Detail d={sel} {filter} close={() => {sel = view = 0}}/>
+			<Detail
+				d={sel}
+				{filter}
+				close={() => {
+					sel = view = 0;
+				}}
+			/>
 		{/if}
 	</div>
 </div>

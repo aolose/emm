@@ -15,13 +15,17 @@
 					const s = ls[i++ % ls.length];
 					msg.set(s);
 					setTimeout(() => {
+						if(stop) return
 						m(ls, i);
 					}, s.length * 240 + 1e3);
 				};
 				m(c, 0);
 			}
 		}
-		return () => (stop = 1);
+		return () => {
+			msg.set('')
+			stop = 1;
+		}
 	});
 </script>
 
