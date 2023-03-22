@@ -5,6 +5,7 @@
 	import { delay, watch } from '$lib/utils';
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
+	import Ck from '$lib/components/check.svelte'
 
 	let type;
 	let start;
@@ -42,7 +43,7 @@
 		}
 		return [s, ...v, e];
 	};
-
+  const ck = {0:1,1:1,2:1,3:1}
 	const cors = ['#8c72ce', '#d3a84b', '#65b9e7', '#bcff94'];
 	const nms = ['valid requests', 'valid ip', 'ip', 'requests'];
 	const getD = () => {
@@ -117,7 +118,9 @@
 		ctx = cvs.getContext('2d');
 		const [w, h] = [cvs.width, cvs.height];
 		ctx.clearRect(0, 0, w, h);
-		data.forEach((a, i) => line(cors[i], w, h - 20, max, min, ...a));
+		data.forEach((a, i) => {
+			if(ck[i])line(cors[i], w, h - 20, max, min, ...a)
+		});
 	}, 100);
 	const render = async () => {
 		const nny = [];
@@ -142,8 +145,14 @@
 
 	$: {
 		data = [pv, uv, ur, rv];
-		min = uv.length ? Math.min(...uv) : 0;
-		max = rv.length ? Math.max(...rv) : 0;
+		const s = []
+		data.forEach((a,i)=>{
+			if(ck[i]){
+				s.push(...a)
+			}
+		})
+		min = s.length ? Math.min(...s) : 0;
+		max = s.length ? Math.max(...s) : 0;
 		const n = Date.now();
 		type = +!!t;
 		start = n - (t + 1) * d;
@@ -183,11 +192,11 @@
 		</div>
 		<div class="i">
 			{#each nms as n, index}
-				<div>
+				<button class:act={ck[index]} on:click={()=>ck[index]=1-ck[index]}>
 					<span>{n}</span>
 					<span>{avg[index] || 0} / {type ? 'd' : 'h'} total: {total[index] || 0}</span>
 					<b style={`color:${cors[index]}`} />
-				</div>
+				</button>
 			{/each}
 		</div>
 		<Ld act={ld} />
@@ -229,21 +238,27 @@
 
 	.i {
 		margin-top: 10px;
-
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
 		span {
+			color: rgba(130,140,180,1);
 			display: block;
 			padding: 0 3px;
 			font-size: 13px;
 		}
-
-		div {
+	  button{
+			opacity: .5;
 			margin-bottom: 3px;
 			justify-content: flex-end;
 			align-items: center;
 			font-size: 13px;
 			display: flex;
+			background: none;
 		}
-
+    .act{
+			opacity: 1;
+		}
 		b {
 			margin-left: 10px;
 			height: 10px;
