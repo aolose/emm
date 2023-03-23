@@ -11,7 +11,7 @@ const fix = (a: string) => {
 };
 
 export const restore = async (data: ArrayBuffer) => {
-	const JSZip = (await import('jszip')).default
+	const JSZip = (await import('jszip')).default;
 	const zip = await JSZip.loadAsync(data);
 	const cfgPath = '.dbCfg';
 	const cfg = zip.file(cfgPath);

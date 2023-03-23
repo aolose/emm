@@ -64,8 +64,8 @@ export const filesUpload = async (files: FileList | File[], cb?: (f: fView) => v
 			file: f
 		};
 		if (t.startsWith('image/') && f.size > 1000) {
-			import('compressorjs').then(a=>{
-				const Compressor = a.default
+			import('compressorjs').then((a) => {
+				const Compressor = a.default;
 				new Compressor(f, {
 					quality: 0.8,
 					mimeType: 'image/webp',
@@ -78,7 +78,7 @@ export const filesUpload = async (files: FileList | File[], cb?: (f: fView) => v
 						await up(o, cb);
 					}
 				});
-			})
+			});
 		} else await up(o, cb);
 	}
 };
@@ -88,7 +88,7 @@ const up = async (info: fInfo, cb?: (f: fView) => void) => {
 	const token = get(user).token;
 	const f = new FormData();
 	Object.entries(info).forEach(([k, v]) => f.set(k, v));
-	const {Upload} = (await import('upload'))
+	const { Upload } = await import('upload');
 	const up = new Upload({
 		url: '/api/up',
 		form: f,

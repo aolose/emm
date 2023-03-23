@@ -1,7 +1,6 @@
 import { req } from './req';
 import { contentType, dataType, encryptIv, encTypeIndex, getIndexType, method } from './enum';
 import type { ApiBodyData, ApiData, fView, Model, Obj, reqOption, reqParams, Timer } from './types';
-import pinyin from 'tiny-pinyin';
 
 import { goto } from '$app/navigation';
 import { confirm, status } from '$lib/store';
@@ -398,10 +397,6 @@ export function diffObj<T extends object>(origin: T, change: T) {
 	if (ch) return d;
 }
 
-export function slugGen(title: string) {
-	return pinyin.convertToPinyin(title, '', true).replace(/ /g, '-');
-}
-
 let _id = 0;
 
 export function idGen() {
@@ -523,8 +518,8 @@ export const getColor = (a: number | string, opacity = 1) => {
 };
 
 export const getPain = async (src?: string) => {
-	const {marked} = await import('marked')
-	const {convert} = await import('html-to-text')
+	const { marked } = await import('marked');
+	const { convert } = await import('html-to-text');
 	return src
 		? convert(marked.parse(src), {
 				selectors: [
@@ -804,7 +799,7 @@ export const getErr = (e: Error | { data: { message: string } | string }) => {
 };
 
 export const restoreVerify = async (data: ArrayBuffer) => {
-	const JSZip=(await import('JSZip')).default
+	const JSZip = (await import('JSZip')).default;
 	const zip = await JSZip.loadAsync(data);
 	const cfg = zip.file('.dbCfg');
 	if (!cfg) return '.dbCfg is missing';
