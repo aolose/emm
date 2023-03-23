@@ -40,15 +40,19 @@
 	const rd = () => (v = highlight(md()));
 	const dRd = delay(rd, 100);
 	$: {
-		wc(async () => {
+		wc(() => {
 			if (preview) dRd();
-			else await rd();
+			else rd();
 		}, content);
 		vw(() => {
 			if (el && preview) {
 				if (patchMod && el && mor) {
-					mor(el, `<div class="${el.className}">${v}</div>`);
-				} else el.innerHTML = v;
+					try {
+						mor(el, `<div class="${el.className}">${v}</div>`);
+						return
+					}catch (e) {console.error(e)}
+				}
+				el.innerHTML = v;
 			}
 		}, v);
 	}
