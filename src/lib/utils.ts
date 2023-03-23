@@ -799,9 +799,7 @@ export const getErr = (e: Error | { data: { message: string } | string }) => {
 };
 
 export const restoreVerify = async (data: ArrayBuffer) => {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const JSZip = await import('JSZip/dist/jszip.min');
+	const JSZip = await import('jszip');
 	const zip = await JSZip.loadAsync(data);
 	const cfg = zip.file('.dbCfg');
 	if (!cfg) return '.dbCfg is missing';
