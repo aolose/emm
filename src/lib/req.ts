@@ -8,8 +8,9 @@ import {
 	getHeaderDataType,
 	randNum,
 	shareKey,
-	syncShareKey, syncStatus
-} from "./utils";
+	syncShareKey,
+	syncStatus
+} from './utils';
 import { dataType, method, reqMethod } from './enum';
 import { browser } from '$app/environment';
 import type {
@@ -197,11 +198,11 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 		let fal = false;
 		if (r.status >= 400) {
 			if (r.status === 401) {
-				let s = get(status)
+				let s = get(status);
 				// read mode
-				if(s===2)s = await syncStatus()
-				else s = 0
-				if(!s){
+				if (s === 2) s = await syncStatus();
+				else s = 0;
+				if (!s) {
 					if (browser) {
 						sessionStorage.setItem('bk', location.pathname);
 						confirm('token expire!', '', 'ok').then(() => status.set(0));

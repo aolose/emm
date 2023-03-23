@@ -113,11 +113,11 @@ export const ruleHit = (
 				.concat(k.mark)
 				.filter((a) => trim(a))
 				.join();
-		if(k.redirect)o.redirect=k.redirect
-		if(k.forbidden)o.forbidden=k.forbidden
-		if(k.log)o.log=k.log
+		if (k.redirect) o.redirect = k.redirect;
+		if (k.forbidden) o.forbidden = k.forbidden;
+		if (k.log) o.log = k.log;
 	}
-	console.log('xxxx',o)
+	console.log('xxxx', o);
 	return o;
 };
 export const lsRules = (page: number, size: number) => {
@@ -209,7 +209,7 @@ const blackListCheck = (r: {
 							mark: t.mark,
 							redirect: t.redirect
 						});
-						return {...t,forbidden:!t.redirect};
+						return { ...t, forbidden: !t.redirect };
 					} else times[i] = n;
 				}
 			}
@@ -220,7 +220,8 @@ const blackListCheck = (r: {
 export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
 	// skip admin
 	const ip = getClientAddr(event);
-	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(ip))) return;
+	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(ip)))
+		return;
 	const {
 		request: { method, headers },
 		url: { pathname }
@@ -233,14 +234,14 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 	if (path !== '/api/log') logCache.push(r);
 	if (!fr?._match?.find((a) => a < 0) && triggers.find((a) => hitRule(rq, a))) {
 		const o = blackListCheck(rq);
-		if(o){
-			if(fr){
-				fr._match?.push(o.id)
-				if(o.forbidden)fr.forbidden=true
-				if(o.redirect)fr.redirect=o.redirect
-			}else {
-				fr=o
-				fr._match=[o.id]
+		if (o) {
+			if (fr) {
+				fr._match?.push(o.id);
+				if (o.forbidden) fr.forbidden = true;
+				if (o.redirect) fr.redirect = o.redirect;
+			} else {
+				fr = o;
+				fr._match = [o.id];
 			}
 		}
 	}

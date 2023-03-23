@@ -93,15 +93,15 @@ const save = () => {
 	if (hDur > hour) {
 		uvH.clear();
 		_uvH.clear();
-		rqH=0
-		pvH=0
+		rqH = 0;
+		pvH = 0;
 		hStart = now;
 	}
 	if (dDur > day) {
 		uvD.clear();
 		_uvD.clear();
-		rqD=0
-		pvD=0
+		rqD = 0;
+		pvD = 0;
 		dStart = now;
 	}
 };

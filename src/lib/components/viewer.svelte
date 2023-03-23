@@ -49,8 +49,10 @@
 				if (patchMod && el && mor) {
 					try {
 						mor(el, `<div class="${el.className}">${v}</div>`);
-						return
-					}catch (e) {console.error(e)}
+						return;
+					} catch (e) {
+						console.error(e);
+					}
 				}
 				el.innerHTML = v;
 			}

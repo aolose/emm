@@ -7,9 +7,9 @@
 	import { onMount } from 'svelte';
 	import { req } from '$lib/req';
 	import Loading from '$lib/components/loading.svelte';
-	import { getErr, watch } from "$lib/utils";
+	import { getErr, watch } from '$lib/utils';
 	import Detail from './detail.svelte';
-	import { confirm, small } from "$lib/store";
+	import { confirm, small } from '$lib/store';
 
 	let view = 0;
 	let sty = '';
@@ -55,7 +55,7 @@
 		req('alCm', undefined, { method: method.GET }).then((a) => {
 			allowCm = +a[0];
 			checkCm = +a[1];
-			cmWatch=watch(allowCm, checkCm)
+			cmWatch = watch(allowCm, checkCm);
 		});
 		go();
 	});
@@ -64,18 +64,19 @@
 		ftWatch(() => {
 			go();
 		}, status);
-		if(cmWatch)cmWatch(
-			(cancel,_allowCm,_checkCm) => {
-				req('alCm', '' + +allowCm + +checkCm).catch(e=>{
-					cancel()
-					confirm(getErr(e),'','ok')
-					allowCm=_allowCm
-					checkCm=_checkCm
-				});
-			},
-			allowCm,
-			checkCm
-		);
+		if (cmWatch)
+			cmWatch(
+				(cancel, _allowCm, _checkCm) => {
+					req('alCm', '' + +allowCm + +checkCm).catch((e) => {
+						cancel();
+						confirm(getErr(e), '', 'ok');
+						allowCm = _allowCm;
+						checkCm = _checkCm;
+					});
+				},
+				allowCm,
+				checkCm
+			);
 	}
 </script>
 

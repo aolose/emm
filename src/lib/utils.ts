@@ -1,13 +1,13 @@
-import { req } from "./req";
-import { contentType, dataType, encryptIv, encTypeIndex, getIndexType, method } from "./enum";
-import type { ApiBodyData, ApiData, fView, Model, Obj, reqOption, reqParams, Timer } from "./types";
-import pinyin from "tiny-pinyin";
-import { marked } from "marked";
-import { convert } from "html-to-text";
-import { goto } from "$app/navigation";
-import JSZip from "jszip";
-import { confirm, status } from "$lib/store";
-import { get } from "svelte/store";
+import { req } from './req';
+import { contentType, dataType, encryptIv, encTypeIndex, getIndexType, method } from './enum';
+import type { ApiBodyData, ApiData, fView, Model, Obj, reqOption, reqParams, Timer } from './types';
+import pinyin from 'tiny-pinyin';
+import { marked } from 'marked';
+import { convert } from 'html-to-text';
+import { goto } from '$app/navigation';
+import JSZip from 'jszip';
+import { confirm, status } from '$lib/store';
+import { get } from 'svelte/store';
 
 const { subtle } = crypto;
 let genKey: CryptoKeyPair;
@@ -765,19 +765,19 @@ export const sort = <T extends object>(target: T[], key?: (keyof T)[] | keyof T,
 
 export const watch = (...args: unknown[]) => {
 	let keys = JSON.stringify(args);
-	return (fn: (cancel:()=>void,...old:unknown[]) => void|1|true, ...args: unknown[]) => {
+	return (fn: (cancel: () => void, ...old: unknown[]) => void | 1 | true, ...args: unknown[]) => {
 		const nk = JSON.stringify(args);
 		if (keys !== nk) {
-			let skip=0
-			const old = keys
-			const cancel = ()=>{
+			let skip = 0;
+			const old = keys;
+			const cancel = () => {
 				// for async
-			  keys=old
+				keys = old;
 				// for sync
-				skip=1
-			}
-			fn(cancel,...JSON.parse(keys))
-			if(!skip)keys = nk;
+				skip = 1;
+			};
+			fn(cancel, ...JSON.parse(keys));
+			if (!skip) keys = nk;
 		}
 	};
 };
@@ -851,8 +851,8 @@ export const clientRestore =
 		done();
 	};
 
-export const syncStatus = async ()=>{
-	let s = get(status)
-	if(s)s=await req('check',undefined,{method:method.GET,delay:300}) as number
-	return s
-}
+export const syncStatus = async () => {
+	let s = get(status);
+	if (s) s = (await req('check', undefined, { method: method.GET, delay: 300 })) as number;
+	return s;
+};
