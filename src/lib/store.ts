@@ -1,5 +1,4 @@
 import { writable, get, readable } from 'svelte/store';
-import { Upload } from 'upload';
 import type { fView, fileInfo, fInfo, Timer, fileSelectCfg, cfOpt, curPost } from '$lib/types';
 
 import { randNum } from '$lib/utils';
@@ -57,7 +56,7 @@ export const getProgress = (f: fileInfo) => {
 };
 export const upFiles = writable([] as fileInfo[]);
 const upDonSet = new Set<number>();
-export const filesUpload = (files: FileList | File[], cb?: (f: fView) => void) => {
+export const filesUpload = async (files: FileList | File[], cb?: (f: fView) => void) => {
 	for (const f of files) {
 		const t = f.type;
 		const o: fInfo = {
@@ -70,25 +69,26 @@ export const filesUpload = (files: FileList | File[], cb?: (f: fView) => void) =
 				new Compressor(f, {
 					quality: 0.8,
 					mimeType: 'image/webp',
-					success(file: File | Blob) {
+					async success(file: File | Blob) {
 						o.file = file;
-						up(o, cb);
+						await up(o, cb);
 					},
-					error(e) {
+					async error(e) {
 						console.error(e);
-						up(o, cb);
+						await up(o, cb);
 					}
 				});
 			})
-		} else up(o, cb);
+		} else await up(o, cb);
 	}
 };
 
 let cTimer: Timer;
-const up = (info: fInfo, cb?: (f: fView) => void) => {
+const up = async (info: fInfo, cb?: (f: fView) => void) => {
 	const token = get(user).token;
 	const f = new FormData();
 	Object.entries(info).forEach(([k, v]) => f.set(k, v));
+	const {Upload} = (await import('upload'))
 	const up = new Upload({
 		url: '/api/up',
 		form: f,
