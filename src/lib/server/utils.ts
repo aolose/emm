@@ -1,6 +1,6 @@
 import { NULL } from './enum';
 import { contentType, dataType, encryptIv, encTypeIndex, geTypeIndex, permission } from '../enum';
-import { convertToPinyin } from 'tiny-pinyin';
+import Pinyin from 'tiny-pinyin';
 import cookie from 'cookie';
 import type { CookieSerializeOptions } from 'cookie';
 import type { Api, ApiData, ApiName, Class, Model, Obj, Timer } from '../types';
@@ -140,7 +140,7 @@ export const getShareKey = (req: Request) => {
 	}
 };
 export function slugGen(title: string) {
-	return convertToPinyin(title, '', true).replace(/ /g, '-');
+	return Pinyin.convertToPinyin(title, '', true).replace(/ /g, '-');
 }
 export const uniqSlug = (id: number, slug: string) => {
 	const params = [`slug%`] as unknown[];
