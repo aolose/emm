@@ -44,7 +44,7 @@ const reqKey = (url: string, params: reqParams, method?: MethodNumber, key?: str
 	let rk = `${url}${method || 0}`;
 	if (key) return `${rk}${key}`;
 	if (params !== undefined) {
-		const k = JSON.stringify(params).replace(/[^{}()-_'"\\/?: ]/gi, '');
+		const k = JSON.stringify(params).replace(/[,.^{}()\-_'"\\/?:]/gi, '');
 		rk = `${url}_${k.length}_${Array.from(k).reduce((a, b) => a + b.charCodeAt(0), 0)}`;
 	}
 	return rk;
@@ -380,17 +380,25 @@ export const api = (url: ApiName, cfg?: reqOption) => {
 };
 export const apiLoad = (
 	url: ApiName,
-	getParams?: (event: LoadEvent, cfg: reqOption) => reqParams,
+	params?: reqParams | ((event: LoadEvent, cfg: reqOption) => reqParams),
 	cfg?: reqOption | ((event: LoadEvent) => reqOption)
 ): Load =>
 	async function (event) {
-		const { fetch, params, url: u } = event;
+		const { fetch, params:ps, url: u } = event;
 		if (typeof cfg === 'function') cfg = cfg(event);
 		(cfg = cfg || {}).fetch = fetch;
 		cfg.ctx = { url: u };
+		let pm:reqParams
+		if(params){
+			if(params){
+				if(typeof params==='function'){
+					pm=params(event,cfg)
+				}else pm=params
+			}
+		}
 		return {
-			p: params,
-			d: await req(url, getParams?.(event, cfg), cfg).catch((e) => {
+			p: ps,
+			d: await req(url,pm,cfg).catch((e) => {
 				if (e.status >= 400) {
 					throw error(e.status, getErr(e));
 				}
