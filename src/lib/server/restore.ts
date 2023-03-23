@@ -1,5 +1,6 @@
 import { resp } from '$lib/server/utils';
 import better from 'better-sqlite3';
+import JSZip from 'jszip';
 import fs from 'fs';
 import path from 'path';
 import { server } from '$lib/server/index';
@@ -11,7 +12,6 @@ const fix = (a: string) => {
 };
 
 export const restore = async (data: ArrayBuffer) => {
-	const JSZip = (await import('jszip')).default;
 	const zip = await JSZip.loadAsync(data);
 	const cfgPath = '.dbCfg';
 	const cfg = zip.file(cfgPath);

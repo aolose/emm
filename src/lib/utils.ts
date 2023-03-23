@@ -799,7 +799,7 @@ export const getErr = (e: Error | { data: { message: string } | string }) => {
 };
 
 export const restoreVerify = async (data: ArrayBuffer) => {
-	const JSZip = (await import('JSZip')).default;
+	const JSZip = await import('JSZip');
 	const zip = await JSZip.loadAsync(data);
 	const cfg = zip.file('.dbCfg');
 	if (!cfg) return '.dbCfg is missing';
