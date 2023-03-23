@@ -4,7 +4,6 @@ import type { ApiBodyData, ApiData, fView, Model, Obj, reqOption, reqParams, Tim
 import pinyin from 'tiny-pinyin';
 
 import { goto } from '$app/navigation';
-import JSZip from 'jszip';
 import { confirm, status } from '$lib/store';
 import { get } from 'svelte/store';
 
@@ -805,6 +804,7 @@ export const getErr = (e: Error | { data: { message: string } | string }) => {
 };
 
 export const restoreVerify = async (data: ArrayBuffer) => {
+	const JSZip=(await import('JSZip')).default
 	const zip = await JSZip.loadAsync(data);
 	const cfg = zip.file('.dbCfg');
 	if (!cfg) return '.dbCfg is missing';
