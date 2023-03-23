@@ -5,7 +5,7 @@
 	import { delay, watch } from '$lib/utils';
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
-	import Ck from '$lib/components/check.svelte'
+	import Ck from '$lib/components/check.svelte';
 
 	let type;
 	let start;
@@ -43,7 +43,7 @@
 		}
 		return [s, ...v, e];
 	};
-  const ck = {0:1,1:1,2:0,3:0}
+	const ck = { 0: 1, 1: 1, 2: 0, 3: 0 };
 	const cors = ['#8c72ce', '#d3a84b', '#65b9e7', '#bcff94'];
 	const nms = ['valid requests', 'valid ip', 'ip', 'requests'];
 	const getD = () => {
@@ -119,7 +119,7 @@
 		const [w, h] = [cvs.width, cvs.height];
 		ctx.clearRect(0, 0, w, h);
 		data.forEach((a, i) => {
-			if(ck[i])line(cors[i], w, h - 20, max, min, ...a)
+			if (ck[i]) line(cors[i], w, h - 20, max, min, ...a);
 		});
 	}, 100);
 	const render = async () => {
@@ -145,12 +145,12 @@
 
 	$: {
 		data = [pv, uv, ur, rv];
-		const s = []
-		data.forEach((a,i)=>{
-			if(ck[i]){
-				s.push(...a)
+		const s = [];
+		data.forEach((a, i) => {
+			if (ck[i]) {
+				s.push(...a);
 			}
-		})
+		});
 		min = s.length ? Math.min(...s) : 0;
 		max = s.length ? Math.max(...s) : 0;
 		const n = Date.now();
@@ -192,7 +192,7 @@
 		</div>
 		<div class="i">
 			{#each nms as n, index}
-				<button class:act={ck[index]} on:click={()=>ck[index]=1-ck[index]}>
+				<button class:act={ck[index]} on:click={() => (ck[index] = 1 - ck[index])}>
 					<span>{n}</span>
 					<span>{avg[index] || 0} / {type ? 'd' : 'h'} total: {total[index] || 0}</span>
 					<b style={`color:${cors[index]}`} />
@@ -244,13 +244,13 @@
 		flex-direction: column;
 		justify-content: flex-end;
 		span {
-			color: rgba(130,140,180,1);
+			color: rgba(130, 140, 180, 1);
 			display: block;
 			padding: 0 3px;
 			font-size: 13px;
 		}
-	  button{
-			opacity: .5;
+		button {
+			opacity: 0.5;
 			margin-bottom: 3px;
 			justify-content: flex-end;
 			align-items: center;
@@ -258,7 +258,7 @@
 			display: flex;
 			background: none;
 		}
-    .act{
+		.act {
 			opacity: 1;
 		}
 		b {

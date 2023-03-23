@@ -1,13 +1,13 @@
 <script>
 	import Menu from './sideMenu.svelte';
-	import { h } from '$lib/store';
+	import { h, full } from '$lib/store';
 	import Head from '$lib/components/Head.svelte';
 
 	export let data;
 </script>
 
 <Head title={`${$h.title} - Admin`} />
-<div class="a">
+<div class="a" class:full={$full}>
 	<div class="b">
 		<Menu />
 	</div>
@@ -49,8 +49,28 @@
 			flex-direction: column;
 		}
 		.b {
+			transition: 0.3s linear;
 			width: 100%;
 			height: 48px;
+			overflow: hidden;
+		}
+		:global {
+			.editor-toolbar {
+				transition: 0.3s linear;
+				height: 90px;
+				overflow: hidden;
+			}
+		}
+		.full {
+			.b {
+				height: 0;
+			}
+			:global {
+				.editor-toolbar {
+					height: 0;
+					padding: 0;
+				}
+			}
 		}
 	}
 </style>

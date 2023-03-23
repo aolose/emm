@@ -11,6 +11,13 @@
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
+.i-shrink:before {
+	content: '\e676';
+}
+
+.i-full:before {
+	content: '\e675';
+}
 
 .i-auto:before {
 	content: '\e674';

@@ -18,7 +18,7 @@ export const h = writable({
 	key: '',
 	desc: ''
 });
-
+export const full = writable(0);
 export const fileManagerStore = writable(fileManagerCfg);
 export const confirmStore = writable({ ...confirmCfg });
 

@@ -5,7 +5,7 @@
 </script>
 
 <div class="b" style={b}>
-	<div class="nv ">
+	<div class="nv">
 		<Nav />
 	</div>
 	<div class="g" class:ex={$expand}>

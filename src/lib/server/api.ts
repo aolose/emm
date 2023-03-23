@@ -125,15 +125,17 @@ const apis: APIRoutes = {
 			return res;
 		}
 	},
-	check:{get:req=>{
+	check: {
+		get: (req) => {
 			const c = getClient(req);
-			let s=0
+			let s = 0;
 			if (c) {
 				if (c.ok(permission.Read)) s = 2;
 				if (c.ok(permission.Admin)) s = 1;
 			}
-			return s
-		}},
+			return s;
+		}
+	},
 	statue: {
 		get: (req) => {
 			checkStatue();
@@ -432,7 +434,11 @@ const apis: APIRoutes = {
 	rule: {
 		post: auth(Admin, async (req) => {
 			const r = model(FWRule, await req.json());
-			if (r.ip&&/^(::1|127\.0)/.test(r.ip) || r.ip === req.headers.get('x-forwarded-for') || '') {
+			if (
+				(r.ip && /^(::1|127\.0)/.test(r.ip)) ||
+				r.ip === req.headers.get('x-forwarded-for') ||
+				''
+			) {
 				return resp('invalid ip', 500);
 			}
 			addRule(r as FWRule);

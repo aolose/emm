@@ -1,7 +1,16 @@
 <script>
 	import { onMount } from 'svelte';
 	import Editor from '$lib/components/editor.svelte';
-	import { confirm, editPost, originPost, patchedTag, posts, saveNow, setting } from '$lib/store';
+	import {
+		confirm,
+		editPost,
+		full,
+		originPost,
+		patchedTag,
+		posts,
+		saveNow,
+		setting
+	} from '$lib/store';
 	import { api, req } from '$lib/req';
 	import { diffObj, getErr, watch, time } from '$lib/utils';
 	import { get } from 'svelte/store';
@@ -22,6 +31,14 @@
 		},
 		className: 'icon i-sys',
 		title: 'setting'
+	};
+	const tFull = {
+		name: 'full screen',
+		action: () => {
+			full.set(1);
+		},
+		className: 'icon i-full',
+		title: 'full screen'
 	};
 	const tPub = {
 		name: 'publish',
@@ -203,18 +220,20 @@
 			if (tools.join() !== t.join()) {
 				tools = t;
 			}
+			t.push(tFull);
 			autoSave(p);
 		});
 	});
 </script>
 
 {#if $editPost._ || $editPost.id}
-	<div class="a" transition:fade>
+	<div class="a" class:fu={$full} transition:fade>
 		<div class="t">
 			<input bind:value={title} />
 			<button class="icon i-close" on:click={close} />
 		</div>
 		<div class="e">
+			<button on:click={() => full.set(0)} class="icon i-shrink" />
 			{#key $editPost._ || $editPost.id}
 				<Editor bind:value={draft} toolbar={tools} />
 				{#if $editPost.save}
@@ -227,6 +246,29 @@
 
 <style lang="scss">
 	@import '../../break';
+	:global {
+		.editor-toolbar .icon.i-full {
+			display: none;
+			@include s() {
+				display: inline;
+			}
+		}
+	}
+	.i-shrink {
+		display: none;
+		@include s() {
+			transition: opacity 0.3s;
+			opacity: 0;
+			padding: 3px;
+			font-size: 23px;
+			position: absolute;
+			pointer-events: none;
+			z-index: -1;
+			display: block;
+			top: 10px;
+			right: 7px;
+		}
+	}
 	.tm {
 		line-height: 2;
 		position: absolute;
@@ -243,9 +285,9 @@
 	}
 
 	.e {
+		transition: 0.3s ease-in-out;
 		flex: 1;
 	}
-
 	.t {
 		display: flex;
 		align-items: center;
@@ -253,10 +295,13 @@
 		padding: 10px 8%;
 		margin-top: 20px;
 		@include s() {
+			height: 62px;
+			transition: 0.3s linear;
 			width: 76%;
 			margin: 0 auto 0 8%;
 			border-bottom: 1px solid rgba(80, 100, 150, 0.3);
 			padding: 0;
+			transform: translate3d(0, 0, 0);
 		}
 
 		input {
@@ -304,7 +349,26 @@
 			line-height: 2;
 		}
 	}
-
+	.fu {
+		@include s() {
+			.t {
+				margin-bottom: -62px;
+				opacity: 0;
+				pointer-events: none;
+				transform: translate3d(0, -100%, 0);
+			}
+			.i-shrink {
+				pointer-events: auto;
+				opacity: 1;
+				z-index: 10;
+			}
+			:global {
+				.CodeMirror-scroll {
+					padding-top: 10px;
+				}
+			}
+		}
+	}
 	:global {
 		.editor-toolbar .i-view {
 			display: none;
