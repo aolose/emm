@@ -33,7 +33,7 @@ ${posts
 <guid>${base}/post/${post.slug}</guid>
 <title>${post.title}</title>
 <link>${base}/post/${post.slug}</link>
-<description>${(post?.desc || post?.content || '').substring(0, 140)}</description>
+<description>${post?.desc}</description>
 <pubDate>${time(post?.publish)}</pubDate>
 </item>`
 	)

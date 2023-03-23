@@ -1,5 +1,5 @@
 <script>
-	import { bgColor, goBack, time, getPain, watch } from '$lib/utils';
+	import { bgColor, goBack, time, watch } from '$lib/utils';
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
 	import PF from '$lib/components/post/pf.svelte';
@@ -29,7 +29,7 @@
 		prev = d._u;
 		next = d._n;
 		tag = p.tag;
-		desc = d.desc || getPain(d.content).slice(0, 80) + '...';
+		desc = d.desc;
 		if (d.createAt)
 			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
 		if (d.banner) {

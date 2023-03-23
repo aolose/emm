@@ -2,8 +2,7 @@ import { req } from './req';
 import { contentType, dataType, encryptIv, encTypeIndex, getIndexType, method } from './enum';
 import type { ApiBodyData, ApiData, fView, Model, Obj, reqOption, reqParams, Timer } from './types';
 import pinyin from 'tiny-pinyin';
-import { marked } from 'marked';
-import { convert } from 'html-to-text';
+
 import { goto } from '$app/navigation';
 import JSZip from 'jszip';
 import { confirm, status } from '$lib/store';
@@ -524,7 +523,9 @@ export const getColor = (a: number | string, opacity = 1) => {
 	return c;
 };
 
-export const getPain = (src?: string) => {
+export const getPain = async (src?: string) => {
+	const {marked} = await import('marked')
+	const {convert} = await import('html-to-text')
 	return src
 		? convert(marked.parse(src), {
 				selectors: [

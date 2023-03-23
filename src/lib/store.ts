@@ -1,6 +1,5 @@
 import { writable, get, readable } from 'svelte/store';
 import { Upload } from 'upload';
-import Compressor from 'compressorjs';
 import type { fView, fileInfo, fInfo, Timer, fileSelectCfg, cfOpt, curPost } from '$lib/types';
 
 import { randNum } from '$lib/utils';
@@ -66,18 +65,21 @@ export const filesUpload = (files: FileList | File[], cb?: (f: fView) => void) =
 			file: f
 		};
 		if (t.startsWith('image/') && f.size > 1000) {
-			new Compressor(f, {
-				quality: 0.8,
-				mimeType: 'image/webp',
-				success(file: File | Blob) {
-					o.file = file;
-					up(o, cb);
-				},
-				error(e) {
-					console.error(e);
-					up(o, cb);
-				}
-			});
+			import('compressorjs').then(a=>{
+				const Compressor = a.default
+				new Compressor(f, {
+					quality: 0.8,
+					mimeType: 'image/webp',
+					success(file: File | Blob) {
+						o.file = file;
+						up(o, cb);
+					},
+					error(e) {
+						console.error(e);
+						up(o, cb);
+					}
+				});
+			})
 		} else up(o, cb);
 	}
 };

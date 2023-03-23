@@ -9,7 +9,7 @@ import { DiffMatchPatch } from 'diff-match-patch-typescript';
 import type { PatchObject } from 'diff-match-patch-typescript';
 
 const dmp = new DiffMatchPatch();
-export const pubPostList = (
+export const pubPostList = async (
 	page: number,
 	size: number,
 	tag: string | null,
@@ -42,11 +42,12 @@ export const pubPostList = (
 		['createAt desc'],
 		['banner', 'desc', 'publish', 'content', 'createAt', '_tag', 'title', 'slug'],
 		[where.join(' and '), ...values],
-		combine(patchPostTags, (arr) => {
-			arr.forEach((a) => (a.content = getPain(a.content)));
-			return arr;
-		})
+		patchPostTags
 	);
+	for (const a of o.items) {
+		a.desc = (a.desc||await getPain(a.content)).substring(0, 140)
+		delete a.content
+	}
 	if (!tagInfo) return o;
 	const e = o as { total: number; items: Post[]; bn?: number; desc?: string };
 	if (bn) e.bn = bn;
