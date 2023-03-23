@@ -432,7 +432,7 @@ const apis: APIRoutes = {
 	rule: {
 		post: auth(Admin, async (req) => {
 			const r = model(FWRule, await req.json());
-			if (r.ip === '127.0.0.1' || r.ip === req.headers.get('x-forwarded-for') || '') {
+			if (r.ip&&/^(::1|127\.0)/.test(r.ip) || r.ip === req.headers.get('x-forwarded-for') || '') {
 				return resp('invalid ip', 500);
 			}
 			addRule(r as FWRule);

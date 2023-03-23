@@ -71,7 +71,7 @@ export const load = apiLoad('statue', undefined, {
 		pathname = (ctx as { url: URL }).url.pathname;
 		sys = cacheData.sys;
 		stu = cacheData.statue;
-		h.set(cacheData);
+		h.update(a=>({...a,...cacheData}));
 		if (browser) {
 			statueSys.set(sys);
 			status.set(stu);
