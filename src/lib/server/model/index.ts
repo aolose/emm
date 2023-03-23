@@ -1,7 +1,7 @@
 import { NULL } from '../enum';
 import { noNull, primary, unique } from './decorations';
-import { model, setNull, uniqSlug } from '$lib/server/utils';
-import { diffObj, filter, slugGen } from '$lib/utils';
+import { model, setNull, uniqSlug, slugGen } from '$lib/server/utils';
+import { diffObj, filter } from '$lib/utils';
 import type { DB } from '$lib/server/db/sqlite3';
 import { publishedPost } from '$lib/server/store';
 import type { Obj } from '$lib/types';

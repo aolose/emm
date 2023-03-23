@@ -1,5 +1,6 @@
 import { NULL } from './enum';
 import { contentType, dataType, encryptIv, encTypeIndex, geTypeIndex, permission } from '../enum';
+import { convertToPinyin } from 'tiny-pinyin';
 import cookie from 'cookie';
 import type { CookieSerializeOptions } from 'cookie';
 import type { Api, ApiData, ApiName, Class, Model, Obj, Timer } from '../types';
@@ -138,7 +139,9 @@ export const getShareKey = (req: Request) => {
 		return keyPool.get(num)?.[0];
 	}
 };
-
+export function slugGen(title: string) {
+	return convertToPinyin(title, '', true).replace(/ /g, '-');
+}
 export const uniqSlug = (id: number, slug: string) => {
 	const params = [`slug%`] as unknown[];
 	let sql = `select slug from post where slug like ?`;

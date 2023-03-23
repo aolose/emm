@@ -45,8 +45,8 @@ export const pubPostList = async (
 		patchPostTags
 	);
 	for (const a of o.items) {
-		a.desc = (a.desc||await getPain(a.content)).substring(0, 140)
-		delete a.content
+		a.desc = (a.desc || (await getPain(a.content))).substring(0, 140);
+		delete a.content;
 	}
 	if (!tagInfo) return o;
 	const e = o as { total: number; items: Post[]; bn?: number; desc?: string };
