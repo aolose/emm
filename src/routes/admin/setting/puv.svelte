@@ -43,7 +43,7 @@
 		}
 		return [s, ...v, e];
 	};
-  const ck = {0:1,1:1,2:1,3:1}
+  const ck = {0:0,1:1,2:1,3:0}
 	const cors = ['#8c72ce', '#d3a84b', '#65b9e7', '#bcff94'];
 	const nms = ['valid requests', 'valid ip', 'ip', 'requests'];
 	const getD = () => {
@@ -202,15 +202,17 @@
 		<Ld act={ld} />
 	</div>
 </Card>
-<svelte:window on:resize={getD} />
+<svelte:window on:resize={render} />
 
 <style lang="scss">
 	.bn {
 		padding: 0 20px;
 		margin-bottom: 20px;
+		display: flex;
 	}
 
 	button {
+		flex: 1;
 		border-radius: 3px;
 		font-size: 12px;
 		padding: 1px 8px;

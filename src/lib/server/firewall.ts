@@ -113,8 +113,11 @@ export const ruleHit = (
 				.concat(k.mark)
 				.filter((a) => trim(a))
 				.join();
-		Object.assign(o, filter({ ...k }, ['forbidden', 'redirect', 'log'], false));
+		if(k.redirect)o.redirect=k.redirect
+		if(k.forbidden)o.forbidden=k.forbidden
+		if(k.log)o.log=k.log
 	}
+	console.log('xxxx',o)
 	return o;
 };
 export const lsRules = (page: number, size: number) => {
@@ -201,12 +204,12 @@ const blackListCheck = (r: {
 				if (hitRule(log, t)) {
 					const n = times[i] - 1;
 					if (!n) {
-						ts.splice(i, 1);
-						return addBlackListRule({
+						addBlackListRule({
 							ip: r.ip,
 							mark: t.mark,
 							redirect: t.redirect
 						});
+						return {...t,forbidden:!t.redirect};
 					} else times[i] = n;
 				}
 			}
@@ -217,7 +220,7 @@ const blackListCheck = (r: {
 export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
 	// skip admin
 	const ip = getClientAddr(event);
-	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || ip === '127.0.0.1')) return;
+	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(ip))) return;
 	const {
 		request: { method, headers },
 		url: { pathname }
@@ -229,7 +232,17 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 	ruv({ ip, path, ua: headers.get('user-agent') || '', status });
 	if (path !== '/api/log') logCache.push(r);
 	if (!fr?._match?.find((a) => a < 0) && triggers.find((a) => hitRule(rq, a))) {
-		blackListCheck(rq);
+		const o = blackListCheck(rq);
+		if(o){
+			if(fr){
+				fr._match?.push(o.id)
+				if(o.forbidden)fr.forbidden=true
+				if(o.redirect)fr.redirect=o.redirect
+			}else {
+				fr=o
+				fr._match=[o.id]
+			}
+		}
 	}
 	const l = logCache.length;
 	if (l > max) logCache = logCache.slice(l - max);
@@ -340,7 +353,7 @@ export const fwFilter = (event: RequestEvent, rs = rules): Obj<FWRule> | undefin
 	if (!db) return;
 	if (!rs || !rs.length) loadRules();
 	const ip = getClientAddr(event);
-	if (ip === '127.0.0.1' && !debugMode) return;
+	if (/^(::1|127\.0)/.test(ip) && !debugMode) return;
 	const path = event.url.pathname;
 	const headers = event.request.headers;
 	const method = event.request.method.toLowerCase();
