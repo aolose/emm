@@ -43,7 +43,7 @@
 		}
 		return [s, ...v, e];
 	};
-  const ck = {0:0,1:1,2:1,3:0}
+  const ck = {0:1,1:1,2:0,3:0}
 	const cors = ['#8c72ce', '#d3a84b', '#65b9e7', '#bcff94'];
 	const nms = ['valid requests', 'valid ip', 'ip', 'requests'];
 	const getD = () => {
