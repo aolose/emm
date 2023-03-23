@@ -18,34 +18,21 @@ export const GET: RequestHandler = () => {
 				description: sys.seoDesc,
 				icons: [
 					{
-						src: '/ico-192.png',
-						sizes: '192x192'
+						src: '/i192.png',
+						sizes: '192x192',
+						purpose: "any maskable"
 					}
 				]
 			}
 		],
-		icons: [
-			{
-				src: '/favicon.ico',
-				sizes: '32x32',
-				type: 'image/png'
-			},
-			{
-				src: '/apple-touch-icon.png',
-				sizes: '180x180',
-				type: 'image/png'
-			},
-			{
-				src: '/ico-256.png',
-				sizes: '256x256',
-				type: 'image/png'
-			},
-			{
-				src: '/ico-512.png',
-				sizes: '512x512',
-				type: 'image/png'
+		icons: [48,72,96,128,192,384,512].map(a=>{
+			return 	{
+				src: `i${a}.png`,
+				sizes: `${a}x${a}`,
+				type: 'image/png',
+				purpose: "any maskable"
 			}
-		]
+		})
 	};
 	const headers = {
 		'Content-Type': 'text/plain'
