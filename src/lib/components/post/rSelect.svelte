@@ -27,6 +27,7 @@
 		width: 100%;
 		flex-grow: 1;
 		background: var(--bg2);
+		align-content: flex-start;
 		border-bottom: 1px solid #16212a;
 
 		&.i {
@@ -34,7 +35,6 @@
 			height: auto;
 			width: 0;
 			min-height: 34px;
-			max-height: 150px;
 			border: 1px solid rgba(140, 181, 236, 0.1);
 			background: var(--bg3);
 		}

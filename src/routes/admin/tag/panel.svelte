@@ -106,11 +106,12 @@
 <style lang="scss">
 	@import '../../../lib/break';
 	.b {
+		display: flex;
+		flex-direction: column;
 		flex: 1;
 		max-width: 600px;
 		height: 100%;
 		background: var(--bg2);
-
 		:global {
 			.a {
 				.t {
@@ -164,6 +165,8 @@
 	}
 
 	.c {
+		overflow-y: auto;
+		padding-bottom: 20px;
 		padding-top: 40px;
 	}
 
