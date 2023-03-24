@@ -384,21 +384,21 @@ export const apiLoad = (
 	cfg?: reqOption | ((event: LoadEvent) => reqOption)
 ): Load =>
 	async function (event) {
-		const { fetch, params:ps, url: u } = event;
+		const { fetch, params: ps, url: u } = event;
 		if (typeof cfg === 'function') cfg = cfg(event);
 		(cfg = cfg || {}).fetch = fetch;
 		cfg.ctx = { url: u };
-		let pm:reqParams
-		if(params){
-			if(params){
-				if(typeof params==='function'){
-					pm=params(event,cfg)
-				}else pm=params
+		let pm: reqParams;
+		if (params) {
+			if (params) {
+				if (typeof params === 'function') {
+					pm = params(event, cfg);
+				} else pm = params;
 			}
 		}
 		return {
 			p: ps,
-			d: await req(url,pm,cfg).catch((e) => {
+			d: await req(url, pm, cfg).catch((e) => {
 				if (e.status >= 400) {
 					throw error(e.status, getErr(e));
 				}

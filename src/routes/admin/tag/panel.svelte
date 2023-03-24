@@ -116,7 +116,7 @@
 			.a {
 				.t {
 					height: 75px;
-					@include s(){
+					@include s() {
 						height: auto;
 					}
 				}
