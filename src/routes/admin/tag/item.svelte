@@ -67,10 +67,9 @@
 		border: 1px solid transparent;
 		width: 46%;
 		min-width: 200px;
-		min-height: 100px;
+		min-height: 50px;
 		margin: 10px;
 		background: var(--bg2);
-		padding-bottom: 20px;
 		@include s() {
 			margin: 5px;
 			min-width: 0;
@@ -83,7 +82,7 @@
 
 		.b {
 			filter: grayscale(0);
-			opacity: 0.2;
+			opacity: 0.3;
 		}
 	}
 
@@ -109,6 +108,6 @@
 		opacity: 0.1;
 		background: center;
 		background-size: cover;
-		filter: grayscale(1);
+		filter: grayscale(.5);
 	}
 </style>

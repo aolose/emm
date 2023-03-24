@@ -35,7 +35,7 @@
 			if (e) e.stopPropagation();
 			if (sel === n) sel = {};
 			else t = sel = n;
-			setTag(t).then((d) => {
+			setTag(t)?.then((d) => {
 				if (d) {
 					const t = ls.find((a) => a.id === d.id);
 					if (t) {
