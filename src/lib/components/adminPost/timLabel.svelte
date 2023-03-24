@@ -13,6 +13,6 @@
 <style lang="scss">
 	span {
 		padding-left: 5px;
-		line-height: 2;
+		line-height: 1.6;
 	}
 </style>

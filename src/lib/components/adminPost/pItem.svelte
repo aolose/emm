@@ -24,7 +24,7 @@
 		<h5 transition:slide|local>{title_d}</h5>
 	{/if}
 	<p>{desc}</p>
-	<div>
+	<div class="i">
 		<Date name="create" value={p.createAt} />
 		<Date name="update" value={p.modify} />
 		<Date name="publish" value={p.publish} />
@@ -69,7 +69,7 @@
 		min-height: 100px;
 		max-width: 100%;
 		direction: ltr;
-
+		padding: 10px 10% 20px;
 		&:not(.act):hover {
 			background: var(--bg0);
 		}
@@ -82,10 +82,12 @@
 
 		h3 {
 			color: #667085;
-			height: 56px;
-			padding-right: 80px;
-			line-height: 3;
+			line-height: 1.4;
+			padding: 3px 80px 16px 0;
 			font-weight: 200;
+			@include s(){
+				padding: 10px 50px 10px 0;
+			}
 		}
 
 		h5 {
@@ -95,25 +97,19 @@
 			color: #3574a8;
 		}
 
-		padding: 10px 10%;
-
 		p {
 			opacity: 0.5;
 			font-size: 12px;
+			line-height: 1.7;
 			word-break: break-all;
 		}
 
-		div {
+		.i {
 			padding: 10px 0;
 			font-size: 12px;
 			display: flex;
 			justify-content: space-between;
 			flex-wrap: wrap;
-			line-height: 1.5;
-
-			span {
-				padding-left: 5px;
-			}
 		}
 	}
 	@include s() {
