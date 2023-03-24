@@ -227,8 +227,10 @@
 		border-radius: 10px;
 		display: flex;
 		flex-direction: column;
-		width: 400px;
-		height: 500px;
+		width: 500px;
+		max-width: 100%;
+		height: 700px;
+		max-height: 100%;
 		background: var(--bg1);
 		box-shadow: var(--bg3) 0 20px 50px -30px;
 		@include s() {

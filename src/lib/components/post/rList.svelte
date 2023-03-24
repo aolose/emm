@@ -5,9 +5,11 @@
 	import { fade } from 'svelte/transition';
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
+	import { delay, trim, watch } from "$lib/utils";
 
 	export let type;
 	export let permission;
+	let sc=''
 	let s = [];
 	let page = 1;
 	let total = 1;
@@ -18,6 +20,7 @@
 	let cancel;
 	let init = 0;
 	let clear = () => (s = []);
+	const ws = watch(sc)
 	export const select = (d) => {
 		hide = 1;
 		s = [...(d || [])];
@@ -28,21 +31,14 @@
 			hide = 0;
 		});
 	};
-
-	$: {
-		if (hide)
-			if (!init) {
-				init = 1;
-				go();
-			}
-	}
-
 	function go(n = 1) {
 		page = n;
 		ld = 1;
 		items = [];
 		let q = 'posts';
-		const o = { page: n, size: 10 };
+		const k = trim(sc)
+		const o = { page: n, size: 30 };
+		if(k)o.sc=k
 		const c = {};
 		if (type) {
 			q = 'require';
@@ -60,6 +56,7 @@
 			});
 	}
 
+	const delayGo = delay(go,600)
 	function ch(it) {
 		return () => {
 			const x = !s.find((a) => a.id === it.id);
@@ -71,6 +68,18 @@
 				s = s.filter((a) => a.id !== it.id);
 			}
 		};
+	}
+
+	$: {
+		sc=trim(sc,true)
+		ws(()=>{
+			delayGo()
+		},sc)
+		if (hide)
+			if (!init) {
+				init = 1;
+				go();
+			}
 	}
 </script>
 
@@ -86,6 +95,9 @@
 		</div>
 		<div class="c">
 			<S bind:items={s} />
+		</div>
+		<div class="s icon i-search"  class:act={sc}>
+			<input placeholder="search posts" bind:value={sc}/>
 		</div>
 		<div class="b">
 			<div class="p m">
@@ -109,6 +121,29 @@
 {/if}
 
 <style lang="scss">
+	.s{
+		display: flex;
+		padding:  2px 1.5em 0 .8em;
+		align-items: center;
+		color: var(--darkgrey);
+		&.act{
+			color: #1c93ff;
+		}
+		input{
+			&::placeholder{
+				color: var(--darkgrey);
+			}
+			color: var(--darkgrey-h);
+			padding: 0 25px;
+			border-radius: 100px;
+			line-height: 40px;
+			margin-left: 7px;
+			width: 0;
+			flex: 1;
+			border: 0;
+			background: var(--bg2);
+		}
+	}
 	.p {
 		display: flex;
 		align-items: center;
@@ -159,6 +194,8 @@
 	}
 
 	.c {
+		flex: 1;
+		flex-direction: column;
 		display: flex;
 		align-items: center;
 	}
