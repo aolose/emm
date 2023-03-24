@@ -36,6 +36,7 @@ export type Model =
 	| models.Require
 	| models.BlackList
 	| models.RPU
+	| models.RPUCache
 	| models.RequireMap;
 
 export type Obj<T extends object> = {

@@ -222,6 +222,7 @@
 	}
 
 	.icon {
+		flex: none;
 		cursor: pointer;
 		opacity: 1;
 		padding: 3px;
