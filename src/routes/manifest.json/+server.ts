@@ -19,14 +19,6 @@ export const GET: RequestHandler = () => {
 		scope: '/',
 		theme_color: '#000',
 		description: sys.seoDesc,
-		shortcuts: [
-			{
-				name: sys.blogName,
-				short_name: sys.blogName,
-				description: sys.seoDesc,
-				icons: icons
-			}
-		],
 		icons: icons
 	};
 	const headers = {
