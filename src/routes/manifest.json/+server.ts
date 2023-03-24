@@ -1,14 +1,14 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { sys } from '$lib/server';
 export const GET: RequestHandler = () => {
-	const icons = [48,72,96,128,192,384,512].map(a=>{
-		return 	{
+	const icons = [48, 72, 96, 128, 192, 384, 512].map((a) => {
+		return {
 			src: `/i${a}.png`,
 			sizes: `${a}x${a}`,
 			type: 'image/png',
-			purpose: "any maskable"
-		}
-	})
+			purpose: 'any maskable'
+		};
+	});
 	const data = {
 		$schema: 'https://json.schemastore.org/web-manifest-combined.json',
 		name: sys.blogName,

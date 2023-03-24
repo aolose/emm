@@ -85,7 +85,7 @@
 			line-height: 1.4;
 			padding: 3px 80px 16px 0;
 			font-weight: 200;
-			@include s(){
+			@include s() {
 				padding: 10px 50px 10px 0;
 			}
 		}

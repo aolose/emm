@@ -108,6 +108,6 @@
 		opacity: 0.1;
 		background: center;
 		background-size: cover;
-		filter: grayscale(.5);
+		filter: grayscale(0.5);
 	}
 </style>

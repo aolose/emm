@@ -641,7 +641,7 @@ const apis: APIRoutes = {
 		post: auth(Read, async (req) => {
 			const d = await req.json();
 			let { sc = '' } = d;
-			const { page, size, ft=1} = d;
+			const { page, size, ft = 1 } = d;
 			const w = [];
 			const v = [];
 			let where: [string, ...unknown[]] | undefined;
