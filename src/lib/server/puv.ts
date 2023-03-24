@@ -1,5 +1,5 @@
 import { model } from '$lib/server/utils';
-import { RPU } from '$lib/server/model';
+import { RPU, RPUCache } from '$lib/server/model';
 import isbot from 'isbot';
 import { db } from '$lib/server/index';
 import { arrFilter } from '$lib/utils';
@@ -27,33 +27,19 @@ export const loadPuv = () => {
 	if (od) {
 		rqD = od.r;
 		pvD = od.p;
-		let u = od.u;
-		let r = od.ur;
 		uvD.clear();
 		_uvD.clear();
+		(db.get(model(RPUCache, { id: 1 }))?.value || '').split(',').forEach((a) => uvD.add(a));
+		(db.get(model(RPUCache, { id: 2 }))?.value || '').split(',').forEach((a) => _uvD.add(a));
 		// fill width fake data all because all ip lost
-		while (u--) {
-			uvD.add(u + '');
-			_uvD.add(-u + '');
-		}
-		while (r--) {
-			_uvD.add(r + '');
-		}
 	}
 	if (op) {
 		rqH = op.r;
 		pvH = op.p;
-		let u = op.u;
-		let r = op.ur;
 		uvH.clear();
 		_uvH.clear();
-		while (u--) {
-			uvH.add(u + '');
-			_uvH.add(-u + '');
-		}
-		while (r--) {
-			_uvH.add(r + '');
-		}
+		(db.get(model(RPUCache, { id: 3 }))?.value || '').split(',').forEach((a) => uvH.add(a));
+		(db.get(model(RPUCache, { id: 4 }))?.value || '').split(',').forEach((a) => _uvH.add(a));
 	}
 };
 
@@ -104,6 +90,10 @@ const save = () => {
 		pvD = 0;
 		dStart = now;
 	}
+	db.save(model(RPUCache, { id: 1, value: [...uvD].join() }));
+	db.save(model(RPUCache, { id: 2, value: [..._uvD].join() }));
+	db.save(model(RPUCache, { id: 3, value: [...uvH].join() }));
+	db.save(model(RPUCache, { id: 4, value: [..._uvH].join() }));
 };
 let changed = 1;
 export const ruv = ({

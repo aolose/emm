@@ -339,3 +339,9 @@ export class RPU {
 	t = INT;
 	type = INT;
 }
+
+export class RPUCache {
+	@primary
+	id = INT;
+	value = TEXT;
+}
