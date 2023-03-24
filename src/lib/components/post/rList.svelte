@@ -241,7 +241,7 @@
 		color: transparent;
 		cursor: pointer;
 		margin-right: 20px;
-
+    padding: 0!important;
 		&.s {
 			color: #fff;
 		}

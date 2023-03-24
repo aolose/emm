@@ -241,6 +241,7 @@
 	}
 
 	.b {
+		overflow-y: auto;
 		padding: 10px 0;
 		flex: 1;
 		background: var(--bg2);
