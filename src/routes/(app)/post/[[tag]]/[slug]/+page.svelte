@@ -33,7 +33,7 @@
 		if (d.createAt)
 			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
 		if (d.banner) {
-			sly = `background-image:url(/res/${d.banner})`;
+			sly = `background-image:url(/res/${$small?'_'+d.banner:d.banner})`;
 		} else sly = '';
 	}
 </script>
@@ -45,7 +45,7 @@
 	<meta name="og:url" content={d.slug} />
 	<meta name="article:published_time" content={time(d.createAt)} />
 	<meta name="article:tag" content={d._tag} />
-	<meta name="og:image" content={`/res/_${d.banner}`} />
+	{#if d.banner}<meta name="og:image" content={`/res/_${d.banner}`} />{/if}
 	<meta name="og:image:width" content="600" />
 	<meta name="og:image:height" content="400" />
 </Head>
