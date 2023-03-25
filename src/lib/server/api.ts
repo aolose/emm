@@ -689,7 +689,7 @@ const apis: APIRoutes = {
 					if (rp.length) {
 						const cli = getClient(req);
 						if (!cli || !cli.has({ type: permission.Post, _reqs: rp })) {
-							return resp('You do not have permission to view this post', 401);
+							return resp('You do not have permission to view this post', 403);
 						}
 					}
 					p._cm = +(sys.comment && !(p.disCm || 0));
