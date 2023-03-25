@@ -24,8 +24,8 @@
 	</div>
 	<a class="f" href={`/post${path}/${slug}`}>
 		<div class="c" class:ex={!banner} />
-		<h3>{title}</h3>
-		<h3>{title}</h3>
+		<h1>{title}</h1>
+		<h1>{title}</h1>
 		<div class="ss" />
 		<p>{ds}...</p>
 	</a>
@@ -67,10 +67,10 @@
 		}
 
 		&:hover {
-			h3 {
+			h1 {
 				opacity: 0;
 
-				& + h3 {
+				& + h1 {
 					opacity: 1;
 				}
 			}
@@ -86,7 +86,7 @@
 		}
 	}
 
-	h3 {
+	h1 {
 		transform: translate3d(0, 0, 0);
 		transition: 0.5s ease-in-out;
 		font-size: 24px;
@@ -98,7 +98,7 @@
 		right: 90px;
 		top: 20px;
 		word-break: break-all;
-		& + h3 {
+		& + h1 {
 			opacity: 0;
 			font-size: 30px;
 			width: 80%;
