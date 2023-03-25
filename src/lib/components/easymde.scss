@@ -338,11 +338,16 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 	font-variant-ligatures: contextual;
 }
 
-.CodeMirror-wrap pre.CodeMirror-line,
-.CodeMirror-wrap pre.CodeMirror-line-like {
-	word-wrap: break-word;
-	white-space: pre-wrap;
-	word-break: normal;
+.CodeMirror-wrap{
+	&>div[style^="overflow:"][style~="hidden;"]{
+		transform: translateY(1.2em);
+	}
+	pre.CodeMirror-line,
+	pre.CodeMirror-line-like {
+		word-wrap: break-word;
+		white-space: pre-wrap;
+		word-break: normal;
+	}
 }
 
 .CodeMirror-linebackground {
@@ -457,7 +462,6 @@ span.CodeMirror-selectedtext {
 		flex-direction: row;
 		flex-wrap: wrap;
 	}
-
 	.CodeMirror {
 		box-sizing: border-box;
 		height: auto;
