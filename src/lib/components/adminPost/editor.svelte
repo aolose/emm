@@ -169,6 +169,7 @@
 			v.id = p.id;
 		}
 		const k = id(p);
+		const saveAt = p.save
 		if (isPublish) v._p = isPublish;
 		const r =
 			(await (now ? save : delaySave)({ ...v })
@@ -179,6 +180,8 @@
 				.finally(() => {
 					saving = 0;
 				})) || {};
+		// drop
+		if('save' in r && r.save<saveAt)return;
 		if (v._tag) await loadTag();
 		const n = { ...ori, ...p, ...r };
 		if (id(get(originPost)) === k) originPost.set({ ...n });
@@ -195,7 +198,6 @@
 			n.title_d = get(editPost).title_d;
 			editPost.set({ ...n });
 		}
-		return 1;
 	};
 
 	onMount(async () => {
@@ -217,10 +219,10 @@
 			if (hasDraft) t.push(tPub);
 			if (id) t.push(tDel);
 			t.push(tView);
+			t.push(tFull);
 			if (tools.join() !== t.join()) {
 				tools = t;
 			}
-			t.push(tFull);
 			autoSave(p);
 		});
 	});
