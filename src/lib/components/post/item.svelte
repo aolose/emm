@@ -4,7 +4,7 @@
 	export let p = {};
 	export let path;
 	const { banner, slug, title, desc, content, createAt } = p;
-	const sty = banner ? `background-image:url(/res/${banner})` : '';
+	const sty = banner ? `background-image:url(/res/_${banner})` : '';
 	const tm = new Date(createAt);
 	const y = tm.getFullYear();
 	const m = tm.getMonth() + 1;
