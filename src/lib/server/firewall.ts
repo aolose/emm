@@ -2,16 +2,16 @@ import type { RequestEvent } from '@sveltejs/kit';
 import ipRangeCheck from 'ip-range-check';
 import { db, sys } from '$lib/server/index';
 import { BlackList, FwLog, FWRule } from '$lib/server/model';
-import { arrFilter, filter, hds2Str, str2Hds, trim } from '$lib/utils';
+import { arrFilter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
 import { debugMode, getClient, getClientAddr, model } from '$lib/server/utils';
 import { ipInfo } from '$lib/server/ipLite';
 import { permission } from '$lib/enum';
 import { ruv } from '$lib/server/puv';
 
-export let triggers: FWRule[];
-export let rules: FWRule[];
-export let blackList: BlackList[];
+let triggers: FWRule[];
+let rules: FWRule[];
+let blackList: BlackList[];
 
 function sort() {
 	triggers.sort((a, b) => b.createAt - a.createAt);
@@ -123,7 +123,10 @@ export const ruleHit = (
 export const lsRules = (page: number, size: number) => {
 	const r = rules.concat(triggers).filter((a) => a.id > 0);
 	r.sort((a, b) => b.createAt - a.createAt);
-	return r.slice(size * (page - 1), size * page);
+	return {
+		items:r.slice(size * (page - 1), size * page),
+		total:Math.ceil(r.length/size)
+	};
 };
 export const delRule = (ids: number[]) => {
 	db.delByPk(FWRule, ids);
@@ -165,6 +168,15 @@ const addBlackListRule = (r: { ip: string; redirect?: string; mark?: string }) =
 	rules.push(b.toRule());
 };
 
+export const saveBlackList = (b:BlackList)=>{
+	db.save(b);
+	const i = blackList.findIndex((a) => a.id === b.id);
+	if (i !== -1) {
+		b = Object.assign(blackList[i], b);
+		const n = rules.findIndex((a) => a.id === -b.id);
+		if (n !== -1) Object.assign(rules[n], b.toRule());
+	}
+}
 export const delBlackList = (...id: number[]) => {
 	const ids = new Set(id);
 	if (!ids.size) return;
@@ -174,11 +186,11 @@ export const delBlackList = (...id: number[]) => {
 };
 
 export const blackLists = (page = 1, size = 20) => {
+	blackList.sort((a, b) => b.createAt - a.createAt);
 	const bs = blackList.slice(size * (page - 1), size * page).map((a) => {
 		a._geo = ipInfo(a.ip).full;
 		return a;
 	});
-	bs.sort((a, b) => b.createAt - a.createAt);
 	return {
 		total: Math.ceil(blackList.length / size),
 		items: arrFilter(bs, ['id', 'ip', 'mark', 'redirect', 'createAt', '_geo'], false)

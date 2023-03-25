@@ -44,7 +44,6 @@ import fs from 'fs';
 import { genToken } from '$lib/server/token';
 import {
 	addRule,
-	blackList,
 	blackLists,
 	blockIp,
 	delBlackList,
@@ -55,8 +54,8 @@ import {
 	lsRules,
 	patchDetailIpInfo,
 	ruleHit,
-	rules
-} from '$lib/server/firewall';
+	saveBlackList
+} from "$lib/server/firewall";
 import { geoClose, geoStatue, loadGeoDb } from '$lib/server/ipLite';
 import { tagPatcher, tags } from '$lib/server/store';
 import { get } from 'svelte/store';
@@ -455,15 +454,9 @@ const apis: APIRoutes = {
 	},
 	blk: {
 		post: auth(Admin, async (req) => {
-			let b = model(BlackList, await req.json()) as BlackList;
+			const b = model(BlackList, await req.json()) as BlackList;
 			if (!b.id) return resp('id not exist', 500);
-			db.save(b);
-			const i = blackList.findIndex((a) => a.id === b.id);
-			if (i !== -1) {
-				b = Object.assign(blackList[i], b);
-				const n = rules.findIndex((a) => a.id === -b.id);
-				if (n !== -1) Object.assign(rules[n], b.toRule());
-			}
+			saveBlackList(b)
 		}),
 		delete: auth(Admin, async (req) => {
 			const ids = (await req.text())
@@ -486,24 +479,23 @@ const apis: APIRoutes = {
 			const r = new Uint8Array(await req.arrayBuffer());
 			const p = r[0];
 			const s = r[1];
-			return {
-				items: arrFilter(lsRules(p, s), [
-					'id',
-					'path',
-					'headers',
-					'ip',
-					'mark',
-					'country',
-					'log',
-					'active',
-					'trigger',
-					'redirect',
-					'status',
-					'times',
-					'forbidden'
-				]),
-				total: Math.ceil(rules.length / s)
-			};
+			const o = lsRules(p, s)
+			o.items=arrFilter(o.items, [
+				'id',
+				'path',
+				'headers',
+				'ip',
+				'mark',
+				'country',
+				'log',
+				'active',
+				'trigger',
+				'redirect',
+				'status',
+				'times',
+				'forbidden'
+			]) as FWRule[]
+			return o
 		})
 	},
 	login: {
