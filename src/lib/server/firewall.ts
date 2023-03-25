@@ -113,11 +113,16 @@ export const ruleHit = (
 				.concat(k.mark)
 				.filter((a) => trim(a))
 				.join();
-		if (k.redirect) o.redirect = k.redirect;
-		if (k.forbidden) o.forbidden = k.forbidden;
 		if (k.log) o.log = k.log;
+		if (k.redirect) {
+			o.redirect = k.redirect;
+			break
+		}
+		if (k.forbidden) {
+			o.forbidden = k.forbidden;
+			break
+		}
 	}
-	console.log('xxxx', o);
 	return o;
 };
 export const lsRules = (page: number, size: number) => {
@@ -155,13 +160,13 @@ export let logCache: log[] = [];
 const max = 1000;
 
 const addBlackListRule = (r: { ip: string; redirect?: string; mark?: string }) => {
+	if (blackList.find((a) => a.ip === r.ip)) return;
 	if (r.redirect)
 		try {
 			new URL(r.redirect);
 		} catch (e) {
 			r.redirect = '';
 		}
-	if (blackList.find((a) => a.ip === r.ip)) return;
 	const b = model(BlackList, r) as BlackList;
 	db.save(b);
 	blackList.push(b);
