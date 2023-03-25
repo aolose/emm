@@ -32,7 +32,9 @@ export const GET: RequestHandler = ({ params, request }) => {
 				if (fs.existsSync(u)) f = fs.readFileSync(u);
 			}
 			const desc = 'content-disposition';
-			const h = new Headers();
+			const h = new Headers({
+				'cache-control': 'max-age=31536000'
+			});
 			if (r.md5) {
 				h.set('etag', r.md5);
 				eTags.set(r.md5, r.id);
