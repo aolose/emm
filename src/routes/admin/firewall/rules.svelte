@@ -1,6 +1,6 @@
 <script>
 	import Pg from '$lib/components/pg.svelte';
-	import { confirm } from '$lib/store';
+	import { confirm, fwRespLs } from '$lib/store';
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
 	import { onMount } from 'svelte';
@@ -15,40 +15,51 @@
 	let ld = 0;
 	const wa = watch(ta);
 	$: wa(() => {
-		ls = [];
+		ls = ta === 2 ? $fwRespLs : [];
 		go(1);
 	}, ta);
 	const fix = (d) => {
-		if (d.trigger) {
-			if (d.country) d.country = '';
-			if (d.method) d.method = '';
-			if (d.ip) d.ip = '';
-			if (d.log) d.log = '';
-			if (d.forbidden) d.forbidden = false;
-		} else {
-			if (d.status) d.status = '';
-			if (d.times) d.times = -1;
+		if (ta !== 2) {
+			if (d.trigger) {
+				if (d.country) d.country = '';
+				if (d.method) d.method = '';
+				if (d.ip) d.ip = '';
+				if (d.log) d.log = '';
+			} else {
+				if (d.status) d.status = '';
+				if (d.times) d.times = -1;
+			}
+      if(d.respId===0)d.respId=-1;
 		}
-		if (d.forbidden && d.redirect) d.redirect = '';
 	};
 	let go = (n) => {
 		p = n;
-		const api = ['rules', 'bks'][ta];
+		const api = ['rules', 'bks', 'fwRsp'][ta];
 		ld = 1;
-		req(api, new Uint8Array([p, 20]))
+		const isRsp = ta === 2;
+		req(api, isRsp ? undefined : new Uint8Array([p, 20]), {
+			method: isRsp ? method.GET : method.POST
+		})
 			.then((d) => {
-				ls = d.items;
-				total = d.total;
+				if (isRsp) {
+					fwRespLs.set(d);
+					ls = d;
+				} else {
+					ls = d.items;
+					total = d.total;
+				}
 			})
 			.finally(() => (ld = 0));
 	};
 	const add = () => {
-		pop(2).then((d) => {
+		pop(ta ? 4 : 2).then((d) => {
 			if (!d) return;
 			fix(d);
-			req('rule', d).then((id) => {
+			const api = ta ? 'fwRsp' : 'rule';
+			req(api, d).then((id) => {
 				d.id = id;
 				ls = [{ ...d }, ...ls];
+				if (ta === 2) fwRespLs.set(ls);
 			});
 		});
 	};
@@ -56,22 +67,23 @@
 	const del = (id) => {
 		confirm('sure to delete?').then((ok) => {
 			if (ok) {
-				const api = ['rules', 'blk'][ta];
+				const api = ['rules', 'blk', 'fwRsp'][ta];
 				req(api, id, { method: method.DELETE }).then(() => {
 					ls = ls.filter((a) => a.id !== id);
+          if(ta===2)fwRespLs.set(ls)
 				});
 			}
 		});
 	};
 
 	const edit = (da) => {
-		pop(ta ? 3 : 1, { ...da }).then((d) => {
+		pop(ta ? (ta === 2 ? 5 : 3) : 1, { ...da }).then((d) => {
 			if (!d) return;
 			fix(d);
 			let df = diffObj(da, d);
 			df.id = da.id;
-			if (ta) df = { id: da.id, redirect: df.redirect, mark: df.mark };
-			const api = ['rule', 'blk'][ta];
+			if (ta === 1) df = { id: da.id, respId: df.respId, mark: df.mark };
+			const api = ['rule', 'blk', 'fwRsp'][ta];
 			req(api, df)
 				.then(() => {
 					const idx = ls.indexOf(da);
@@ -79,12 +91,13 @@
 						ls = [...ls];
 						ls[idx] = { ...da, ...d };
 					}
+					if (ta === 2) fwRespLs.set(ls);
 				})
 				.catch((e) => confirm(getErr(e), '', 'ok'));
 		});
 	};
 	let ls = [];
-
+	const rspName = (id) => $fwRespLs.find((a) => a.id === id)?.name || '';
 	onMount(() => {
 		go(1);
 	});
@@ -95,10 +108,11 @@
 		<div class="d">
 			<div class="t">
 				<button class:act={!ta} on:click={() => (ta = 0)}>rules</button>
-				<button class:act={ta} on:click={() => (ta = 1)}>blackList</button>
+				<button class:act={ta === 1} on:click={() => (ta = 1)}>blackList</button>
+				<button class:act={ta === 2} on:click={() => (ta = 2)}>response</button>
 			</div>
 			<s />
-			{#if !ta}
+			{#if !ta || ta === 2}
 				<button on:click={add} class="icon i-add" />
 			{/if}
 			<button on:click={close} class="icon i-close" />
@@ -108,19 +122,16 @@
 		<div class="c">
 			<div class="q">
 				{#each ls as r}
-					{#if ta}
+					{#if ta === 1}
 						<div class="u act">
 							<div class="i">
 								<div class="icon i-ip"><span>{r.ip}</span></div>
 								<div class="icon i-geo"><span>{r._geo}</span></div>
-								{#if r.redirect}
-									<div class="icon i-drop"><span>{r.redirect}</span></div>
+								{#if r.respId}
+									<div class="icon i-drop"><span>{rspName(r.respId)}</span></div>
 								{/if}
 							</div>
 							<div class="r">
-								{#if !r.redirect}
-									<span class="icon i-fbi" />
-								{/if}
 								{#if r.mark}
 									<span class="m">{r.mark}</span>
 								{/if}
@@ -130,9 +141,25 @@
 								<button class="icon i-ed" on:click={() => edit(r)} />
 							</div>
 						</div>
+					{:else if ta === 2}
+						<div class="u">
+							<div class="i">
+								<div class="icon i-tag"><span>{r.name}</span></div>
+								<div class="icon i-target"><span>{r.status}</span></div>
+							</div>
+							<div class="r">
+								<p>{r.headers || ''}</p>
+								<s />
+								<button class="icon i-del" on:click={() => del(r.id)} />
+								<button class="icon i-ed" on:click={() => edit(r)} />
+							</div>
+						</div>
 					{:else}
 						<div class="u" class:act={r.active} class:tr={r.trigger}>
 							<div class="i">
+								{#if r.respId}
+									<div class="icon i-drop"><span>{rspName(r.respId)}</span></div>
+								{/if}
 								{#if r.ip && !r.trigger}
 									<div class="icon i-ip"><span>{r.ip}</span></div>
 								{/if}
@@ -141,9 +168,6 @@
 								{/if}
 								{#if r.path}
 									<div class="icon i-target"><span>{r.path}</span></div>
-								{/if}
-								{#if r.redirect}
-									<div class="icon i-drop"><span>{r.redirect}</span></div>
 								{/if}
 								{#if r.country && !r.trigger}
 									<div class="icon i-geo"><span>{r.country}</span></div>
@@ -157,9 +181,6 @@
 							<div class="r">
 								{#if r.log && !r.trigger}
 									<span class="icon i-log" />
-								{/if}
-								{#if !r.redirect && (r.forbidden || r.trigger)}
-									<span class="icon i-fbi" />
 								{/if}
 								<span class="m">{r.mark || ''}</span>
 								<button class="icon i-del" on:click={() => del(r.id)} />

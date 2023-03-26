@@ -33,7 +33,7 @@
 		if (d.createAt)
 			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
 		if (d.banner) {
-			sly = `background-image:url(/res/${$small?'_'+d.banner:d.banner})`;
+			sly = `background-image:url(/res/${$small ? '_' + d.banner : d.banner})`;
 		} else sly = '';
 	}
 </script>

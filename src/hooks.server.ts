@@ -1,6 +1,6 @@
 import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { contentType, encryptIv, encTypeIndex } from '$lib/enum';
-import { fwFilter, reqRLog } from '$lib/server/firewall';
+import { fwFilter, getFwResp, reqRLog } from '$lib/server/firewall';
 import { checkStatue, sysStatue } from '$lib/server/utils';
 import { checkRedirect } from '$lib/server/utils';
 import { server } from '$lib/server';
@@ -11,15 +11,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const pn = event.url.pathname;
 	let res: Response | undefined;
 	const fr = fwFilter(event);
-	if (fr?.redirect) {
-		res = new Response('', {
-			status: 301,
-			headers: new Headers({
-				location: fr.redirect
-			})
-		});
-	} else if (fr?.forbidden) res = new Response('', { status: 403 });
-	else if (!/^\/(api|res|font|src)/.test(pn)) {
+	if (fr?.respId) {
+		res = getFwResp(fr.respId);
+	} else if (!/^\/(api|res|font|src)/.test(pn)) {
 		const p = checkRedirect(sysStatue, pn, event.request);
 		if (p) {
 			res = new Response('', {
