@@ -169,7 +169,7 @@
 			v.id = p.id;
 		}
 		const k = id(p);
-		const saveAt = p.save
+		const saveAt = p.save;
 		if (isPublish) v._p = isPublish;
 		const r =
 			(await (now ? save : delaySave)({ ...v })
@@ -181,7 +181,7 @@
 					saving = 0;
 				})) || {};
 		// drop
-		if('save' in r && r.save<saveAt)return;
+		if ('save' in r && r.save < saveAt) return;
 		if (v._tag) await loadTag();
 		const n = { ...ori, ...p, ...r };
 		if (id(get(originPost)) === k) originPost.set({ ...n });

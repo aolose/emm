@@ -234,7 +234,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 	height: 100%;
 	outline: 0;
 	z-index: 0;
-	min-height: 0!important;
+	min-height: 0 !important;
 	padding: 4px 8%;
 }
 
@@ -338,8 +338,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 	font-variant-ligatures: contextual;
 }
 
-.CodeMirror-wrap{
-	&>div[style^="overflow:"][style~="hidden;"]{
+.CodeMirror-wrap {
+	& > div[style^='overflow:'][style~='hidden;'] {
 		transform: translateY(1.2em);
 	}
 	pre.CodeMirror-line,

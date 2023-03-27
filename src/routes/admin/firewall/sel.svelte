@@ -2,15 +2,25 @@
 	import { slide } from 'svelte/transition';
 	import { onDestroy } from 'svelte';
 
-	export let value = '';
+	export let getValue;
+	export let getText;
+	export let defaultValue = '';
+	export let multiply = true;
+	export let value = defaultValue;
 	export let items = [];
 	let s = new Set();
 	let e;
-	const ck = (v) => (e) => {
-		e.stopPropagation();
-		if (s.has(v)) s.delete(v);
-		else s.add(v);
-		value = [...s].filter((a) => a).join();
+	const ck = (v) => (ev) => {
+		ev.stopPropagation();
+		if (multiply) {
+			if (s.has(v)) s.delete(v);
+			else s.add(v);
+			value = [...s].filter((a) => a).join();
+		} else {
+			value = getValue ? getValue(v) : v;
+			window.removeEventListener('click', fn);
+		}
+		if (!multiply) e = 0;
 	};
 	const fn = () => {
 		if (e) {
@@ -25,18 +35,21 @@
 		window.removeEventListener('click', fn);
 	});
 	$: {
-		if (!value) value = '';
-		s = new Set(value.split(','));
+		if (!value) value = defaultValue;
+		if (multiply) s = new Set(value.split(','));
 	}
 </script>
 
 <div class="a" class:c={e} on:click|stopPropagation={fn}>
-	<span>{value}</span>
+	<span>{getText ? getText(items.find((a) => getValue(a) === value)) : value}</span>
 	{#if e}
 		<div transition:slide class="b">
 			{#each items as k}
-				<div class:s={s.has(k)} on:click|stopPropagation={ck(k)}>
-					{k}
+				<div
+					class:s={multiply ? s.has(k) : value === getValue ? getValue(k) : k}
+					on:click|stopPropagation={ck(k)}
+				>
+					{getText ? getText(k) : k}
 				</div>
 			{/each}
 		</div>
