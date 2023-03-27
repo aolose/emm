@@ -20,7 +20,7 @@
 			d.mark = trim(d.mark, true);
 			d.country = trim(d.country);
 			d.path = trim(d.path);
-			d.times = +d.times || 1;
+			if(tp)d.times = +d.times || 1;
 			d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 			hasV = trim(
 				tp === 3 ||
@@ -76,7 +76,7 @@
 				<i />
 				<i />
 			</button>
-			{#if tp < 4 && tp !== 3}
+			{#if tp < 4 && tp && tp !== 3}
 				<div class="f1">
 					<label>
 						<Ck bind:value={d.active}>activate</Ck>
@@ -135,20 +135,28 @@
 							</label>
 						{/if}
 					{/if}
-					<label transition:slide>
-						<span>response:</span>
-						<Sel
-							defaultValue={0}
-							items={[{ name: 'empty', id: 0 }].concat($fwRespLs)}
-							getValue={(a) => a?.id}
-							getText={(a) => a?.name||'empty'}
-							multiply={false}
-							bind:value={d.respId}
-						/>
-					</label>
+					{#if tp}
+						<label transition:slide>
+							<span>response:</span>
+							<Sel
+								defaultValue={0}
+								items={[{ name: 'empty', id: 0 }].concat($fwRespLs)}
+								getValue={(a) => a?.id}
+								getText={(a) => a?.name||'empty'}
+								multiply={false}
+								bind:value={d.respId}
+							/>
+						</label>
+					{/if}
 					<label>
 						<span>mark:</span>
 						<input bind:value={d.mark} />
+					</label>
+				{/if}
+				{#if !tp}
+					<label>
+						<span>status:</span>
+						<input bind:value={d.status} />
 					</label>
 				{/if}
 				{#if tp >= 4}

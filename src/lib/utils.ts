@@ -5,6 +5,7 @@ import type { ApiBodyData, ApiData, fView, Model, Obj, reqOption, reqParams, Tim
 import { goto } from '$app/navigation';
 import { confirm, status } from '$lib/store';
 import { get } from 'svelte/store';
+import type { FWRule } from "$lib/server/model";
 
 const { subtle } = crypto;
 let genKey: CryptoKeyPair;
@@ -852,3 +853,9 @@ export const syncStatus = async () => {
 	if (s) s = (await req('check', undefined, { method: method.GET, delay: 300 })) as number;
 	return s;
 };
+
+
+export const hasFwRuleFilter = (t:FWRule)=>{
+	const ks = new Set(['mark','ip','path','method','headers','country','status'])
+	return !!Object.keys(t).find(a=>ks.has(a))
+}

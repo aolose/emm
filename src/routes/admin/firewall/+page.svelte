@@ -7,7 +7,7 @@
 	import Ld from '$lib/components/loading.svelte';
 	import Ft from './pop.svelte';
 	import Ru from './rules.svelte';
-	import { watch } from '$lib/utils';
+	import { watch,hasFwRuleFilter } from '$lib/utils';
 	import { fwRespLs, small } from '$lib/store';
 	import { method } from '$lib/enum';
 
@@ -24,8 +24,7 @@
 	let total;
 	let ld = false;
 	let filter = {};
-	let hasF = 0;
-	const lsWatch = watch(tab, p);
+	const lsWatch = watch(tab, p,filter);
 	$: {
 		sty = $small ? `transform:translate3d(${(-view * 100) / 2}%,0,0)` : '';
 		lsWatch(
@@ -34,7 +33,8 @@
 				ls = [];
 			},
 			tab,
-			p
+			p,
+			filter
 		);
 	}
 
@@ -108,7 +108,11 @@
 	function search() {
 		pop(0, filter).then((d) => {
 			if (!d) return;
-			filter = d;
+			 const s = new Set(['mark','ip','path','method','headers','country','status'])
+			Object.keys(d).forEach(a=>{
+				if(!s.has(a)||d[a]===''||d[a]===undefined)delete d[a]
+			})
+			filter = {...d};
 			loadLog(1);
 		});
 	}
@@ -128,7 +132,7 @@
 					</div>
 					<Ck name="auto" bind:value={loop} />
 					<button on:click={() => loadLog()} class="icon i-refresh" />
-					<button class="icon i-filter" class:act={hasF} on:click={search} />
+					<button class="icon i-filter" class:act={hasFwRuleFilter(filter)} on:click={search} />
 					<button class="icon i-set" on:click={() => (view = 1)} />
 				</div>
 			</div>

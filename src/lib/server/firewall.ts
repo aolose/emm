@@ -2,7 +2,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import {matches} from 'ip-matching'
 import { db, sys } from '$lib/server/index';
 import { BlackList, FwLog, FwResp, FWRule } from '$lib/server/model';
-import { arrFilter, hds2Str, str2Hds, trim } from '$lib/utils';
+import { arrFilter, hasFwRuleFilter, hds2Str, str2Hds, trim } from "$lib/utils";
 import type { Obj, Timer } from '$lib/types';
 import { debugMode, getClient, getClientAddr, model } from '$lib/server/utils';
 import { ipInfo } from '$lib/server/ipLite';
@@ -299,7 +299,14 @@ export const patchDetailIpInfo = (d: log[]) => {
 	const v: log[] = [];
 	d.forEach((a) => {
 		const n: log = [...a];
-		n[5] = ipInfo(a[1]).full || '';
+		const geo =ipInfo(a[1])
+		let g0=''
+		let g1=''
+		if(geo){
+			g0=geo.region||geo.short||''
+			if(geo.full!==g0)g1=','+geo.short
+		}
+		n[5] = g0+g1;
 		v.push(n);
 	});
 	return v;
@@ -330,14 +337,7 @@ const logToReq = (l: log) => {
 };
 
 export const filterLog = (logs: log[], t: FWRule) => {
-	return logs.filter((a) => {
-		if (t.headers && !matchHeader(t.headers, new Headers(str2Hds(a[3])))) return;
-		if (t.path && !match(t.path, a[2])) return;
-		if (t.ip && !matches(a[1], t.ip)) return;
-		if (t.country && !match(t.country, a[5])) return;
-		if (t.method && a[6].toLowerCase() !== t.method.toLowerCase()) return;
-		return true;
-	});
+	return hasFwRuleFilter(t)?logs.filter(a=>hitRule(logToReq(a),{...t,active:true})):logs
 };
 
 /**
