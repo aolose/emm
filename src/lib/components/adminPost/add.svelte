@@ -25,8 +25,9 @@
 </script>
 
 <div class="a">
-	<input placeholder="write a new story..." bind:value={a} />
-	<button class="icon i-add" class:act={a} on:click={add} />
+	<input placeholder="start a new story..." bind:value={a} />
+	<div class="l" />
+	<button class="icon i-pub" class:act={a} on:click={add} />
 </div>
 
 <style lang="scss">
@@ -36,36 +37,46 @@
 		width: 300px;
 		display: flex;
 		margin: 20px auto;
+		border-bottom: 1px solid var(--darkgrey);
 		@include s() {
 			width: 80%;
 		}
+	}
+	.l {
+		position: absolute;
+		bottom: 0;
+		right: 50%;
+		transition: 0.3s ease-in-out;
+		transform: translateX(50%);
+		height: 1px;
+		background: #394f62;
+		width: 0;
 	}
 
 	input {
 		height: 40px;
 		flex: 1;
 		border: none;
-		background: rgba(0, 0, 0, 0.2);
 		outline: none;
-	}
-
-	button {
-		opacity: 0.9;
-		transition: 0.2s;
-		margin-left: 4px;
-		border-radius: 4px;
-		height: 40px;
-		width: 40px;
-		background: var(--darkgrey);
-		color: #fff;
-		cursor: pointer;
-
-		&:hover {
-			opacity: 1;
+		&::placeholder{
+			color: #4d6783;
+		}
+		&:focus + .l {
+			width: 100%;
 		}
 	}
-
+	.icon {
+		color: #5e8cab;
+		font-size: 16px;
+		transition: 0.3s ease-in-out;
+		cursor: pointer;
+    width: 32px;
+		height: 32px;
+		margin-top: 4px;
+		border-radius: 3px;
+	}
 	.act {
-		background: var(--blue);
+		background: #2881cc;
+		color: #fff;
 	}
 </style>

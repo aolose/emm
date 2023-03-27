@@ -36,12 +36,13 @@
 	}
 
 	let sc = '';
+	let el
 	let ft = 1;
 	const wc = watch(sc);
 	const wt = watch(ft);
 
 	function page(n = 1) {
-		const o = { page: n, size: 10 };
+		const o = { page: n, size: 30 };
 		if (sc) {
 			o.sc = sc;
 			o.ft = ft;
@@ -69,8 +70,12 @@
 
 	onMount(() => {
 		page();
+		const un = posts.subscribe(()=>{
+			if(el)el.scrollTo(0,0)
+		})
 		return () => {
 			sel();
+			un();
 			setting.set(0);
 		};
 	});
@@ -96,10 +101,10 @@
 	<div class="m" style={sty}>
 		<div class="a">
 			<div class="h">
-				<Search change={ch} />
 				<AddPost done={() => (view = 1)} />
+				<Search change={ch} />
 			</div>
-			<div class="ls">
+			<div class="ls" bind:this={el}>
 				{#each $posts as p (p._ || p.id)}
 					<PItem {p} {sel} />
 				{/each}
