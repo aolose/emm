@@ -942,7 +942,7 @@ const apis: APIRoutes = {
 	fwRsp: {
 		get: auth(Read, () => fwRespLis()),
 		post: auth(Admin, async (req) => {
-			setFwResp(model(FwResp, await req.json()));
+			return setFwResp(model(FwResp, await req.json()));
 		}),
 		delete: auth(Admin, async (req) => {
 			const id = +(await req.text());

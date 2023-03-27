@@ -11,9 +11,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const pn = event.url.pathname;
 	let res: Response | undefined;
 	const fr = fwFilter(event);
-	if (fr?.respId) {
+	if (fr?.respId&&fr.respId>0) {
 		res = getFwResp(fr.respId);
-	} else if (!/^\/(api|res|font|src)/.test(pn)) {
+		// match blacklist but no response
+	} else if(fr?._match?.find(a=>a<0)){
+		res = new Response('',{status:403})
+	}else if (!/^\/(api|res|font|src)/.test(pn)) {
 		const p = checkRedirect(sysStatue, pn, event.request);
 		if (p) {
 			res = new Response('', {

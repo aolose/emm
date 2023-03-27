@@ -35,7 +35,7 @@
 		} else {
 			d.name = trim(d.name, true);
 			d.status = +d.status || 403;
-			if (d.status < 200 || d.status > 510) d.status = 403;
+			if (d.status < 0 || d.status > 510) d.status = 403;
 			hasV = trim(d.name) && d.status;
 		}
 	}
@@ -140,8 +140,8 @@
 						<Sel
 							defaultValue={0}
 							items={[{ name: 'empty', id: 0 }].concat($fwRespLs)}
-							getValue={(a) => a.id}
-							getText={(a) => a.name}
+							getValue={(a) => a?.id}
+							getText={(a) => a?.name||'empty'}
 							multiply={false}
 							bind:value={d.respId}
 						/>

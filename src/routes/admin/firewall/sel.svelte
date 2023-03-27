@@ -18,6 +18,7 @@
 			value = [...s].filter((a) => a).join();
 		} else {
 			value = getValue ? getValue(v) : v;
+			window.removeEventListener('click', fn);
 		}
 		if (!multiply) e = 0;
 	};
