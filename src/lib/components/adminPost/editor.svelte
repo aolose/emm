@@ -198,6 +198,8 @@
 			n.title_d = get(editPost).title_d;
 			editPost.set({ ...n });
 		}
+		// trigger sitting ok
+		return  1
 	};
 
 	onMount(async () => {
