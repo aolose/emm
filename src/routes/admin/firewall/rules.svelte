@@ -127,7 +127,7 @@
 							<div class="i">
 								<div class="icon i-ip"><span>{r.ip}</span></div>
 								<div class="icon i-geo"><span>{r._geo}</span></div>
-								{#if r.respId}
+								{#if r.respId>0}
 									<div class="icon i-drop"><span>{rspName(r.respId)}</span></div>
 								{/if}
 							</div>
@@ -157,7 +157,7 @@
 					{:else}
 						<div class="u" class:act={r.active} class:tr={r.trigger}>
 							<div class="i">
-								{#if r.respId}
+								{#if r.respId>0}
 									<div class="icon i-drop"><span>{rspName(r.respId)}</span></div>
 								{/if}
 								{#if r.ip && !r.trigger}

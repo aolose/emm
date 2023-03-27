@@ -1,5 +1,5 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import ipRangeCheck from 'ip-range-check';
+import {matches} from 'ip-matching'
 import { db, sys } from '$lib/server/index';
 import { BlackList, FwLog, FwResp, FWRule } from '$lib/server/model';
 import { arrFilter, hds2Str, str2Hds, trim } from '$lib/utils';
@@ -101,7 +101,7 @@ const hitRule = (
 	}
 	if (k.headers && !matchHeader(k.headers, headers || new Headers())) return false;
 	if (k.ip) {
-		if (!ipRangeCheck(ip, k.ip)) return false;
+		if (!matches(ip, k.ip)) return false;
 		if (k.country) {
 			const f = ipInfo(ip);
 			if (f && f.short) {
@@ -138,6 +138,8 @@ export const ruleHit = (
 			o.respId = k.respId;
 			break;
 		}
+		// match blacklist
+		if(k.id<0)break
 	}
 	return o;
 };
@@ -331,7 +333,7 @@ export const filterLog = (logs: log[], t: FWRule) => {
 	return logs.filter((a) => {
 		if (t.headers && !matchHeader(t.headers, new Headers(str2Hds(a[3])))) return;
 		if (t.path && !match(t.path, a[2])) return;
-		if (t.ip && !ipRangeCheck(a[1], t.ip)) return;
+		if (t.ip && !matches(a[1], t.ip)) return;
 		if (t.country && !match(t.country, a[5])) return;
 		if (t.method && a[6].toLowerCase() !== t.method.toLowerCase()) return;
 		return true;
