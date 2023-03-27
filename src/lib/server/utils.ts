@@ -140,7 +140,9 @@ export const getShareKey = (req: Request) => {
 	}
 };
 export function slugGen(title: string) {
-	return Pinyin.convertToPinyin(title, '', true).replace(/ /g, '-');
+	return Pinyin.convertToPinyin(title, "", true)
+		.replace(/[^0-9a-z!@#$&*()_\-+=~]+/gi, "-")
+		.replace(/_+$/,'');
 }
 export const uniqSlug = (id: number, slug: string) => {
 	const params = [`slug%`] as unknown[];
