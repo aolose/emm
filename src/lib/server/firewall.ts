@@ -1,7 +1,7 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import ipRangeCheck from 'ip-range-check';
+import {matches} from 'ip-matching'
 import { db, sys } from '$lib/server/index';
-import { BlackList, FwLog, FWRule } from '$lib/server/model';
+import { BlackList, FwLog, FwResp, FWRule } from '$lib/server/model';
 import { arrFilter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
 import { debugMode, getClient, getClientAddr, model } from '$lib/server/utils';
@@ -12,14 +12,33 @@ import { ruv } from '$lib/server/puv';
 let triggers: FWRule[];
 let rules: FWRule[];
 let blackList: BlackList[];
+const fwResp = new Map<number, FwResp>();
 
 function sort() {
 	triggers.sort((a, b) => b.createAt - a.createAt);
 	rules.sort((a, b) => b.createAt - a.createAt);
 }
 
+export const delFwResp = (id: number) => {
+	db.delByPk(FwResp, [id]);
+	fwResp.delete(id);
+};
+export const setFwResp = (r: Obj<FwResp>) => {
+	const exist = r.id;
+	if (r.id) {
+		const o = fwResp.get(r.id);
+		if (o) Object.assign(o, r);
+	}
+	db.save(r);
+	if (!exist && r.id) fwResp.set(r.id, r as FwResp);
+	return r.id;
+};
+export const fwRespLis = () => {
+	const ls = [...fwResp.values()];
+	ls.sort((a, b) => b.createAt - a.createAt);
+	return arrFilter(ls, ['id', 'name', 'headers', 'status']);
+};
 export const addRule = (fr: FWRule) => {
-	if (fr.redirect) new URL(fr.redirect);
 	db.save(fr);
 	const ir = triggers.findIndex((a) => a.id === fr.id);
 	const iu = rules.findIndex((a) => a.id === fr.id);
@@ -82,7 +101,7 @@ const hitRule = (
 	}
 	if (k.headers && !matchHeader(k.headers, headers || new Headers())) return false;
 	if (k.ip) {
-		if (!ipRangeCheck(ip, k.ip)) return false;
+		if (!matches(ip, k.ip)) return false;
 		if (k.country) {
 			const f = ipInfo(ip);
 			if (f && f.short) {
@@ -92,6 +111,7 @@ const hitRule = (
 	}
 	return true;
 };
+export const getFwResp = (id?: number) => (id ? fwResp.get(id)?.toResp() : undefined);
 export const ruleHit = (
 	r: {
 		ip?: string;
@@ -114,14 +134,12 @@ export const ruleHit = (
 				.filter((a) => trim(a))
 				.join();
 		if (k.log) o.log = k.log;
-		if (k.redirect) {
-			o.redirect = k.redirect;
-			break
+		if (k.respId && fwResp.has(k.respId)) {
+			o.respId = k.respId;
+			break;
 		}
-		if (k.forbidden) {
-			o.forbidden = k.forbidden;
-			break
-		}
+		// match blacklist
+		if(k.id<0)break
 	}
 	return o;
 };
@@ -129,8 +147,8 @@ export const lsRules = (page: number, size: number) => {
 	const r = rules.concat(triggers).filter((a) => a.id > 0);
 	r.sort((a, b) => b.createAt - a.createAt);
 	return {
-		items:r.slice(size * (page - 1), size * page),
-		total:Math.ceil(r.length/size)
+		items: r.slice(size * (page - 1), size * page),
+		total: Math.ceil(r.length / size)
 	};
 };
 export const delRule = (ids: number[]) => {
@@ -153,27 +171,24 @@ export function loadRules() {
 	sort();
 	clearTimeout(t);
 	t = setTimeout(loadRules, 1e3 * 3600 * 72);
+	fwResp.clear();
+	db.all(model(FwResp)).forEach((a) => fwResp.set(a.id, model(FwResp, a) as FwResp));
 }
 
 type log = [number, string, string, string, number, string, string, string];
 export let logCache: log[] = [];
 const max = 1000;
 
-const addBlackListRule = (r: { ip: string; redirect?: string; mark?: string }) => {
+const addBlackListRule = (r: { ip: string; respId: number; mark?: string }) => {
 	if (blackList.find((a) => a.ip === r.ip)) return;
-	if (r.redirect)
-		try {
-			new URL(r.redirect);
-		} catch (e) {
-			r.redirect = '';
-		}
 	const b = model(BlackList, r) as BlackList;
+	if (!fwResp.has(r.respId)) b.respId = 0;
 	db.save(b);
 	blackList.push(b);
 	rules.push(b.toRule());
 };
 
-export const saveBlackList = (b:BlackList)=>{
+export const saveBlackList = (b: BlackList) => {
 	db.save(b);
 	const i = blackList.findIndex((a) => a.id === b.id);
 	if (i !== -1) {
@@ -181,7 +196,7 @@ export const saveBlackList = (b:BlackList)=>{
 		const n = rules.findIndex((a) => a.id === -b.id);
 		if (n !== -1) Object.assign(rules[n], b.toRule());
 	}
-}
+};
 export const delBlackList = (...id: number[]) => {
 	const ids = new Set(id);
 	if (!ids.size) return;
@@ -198,7 +213,7 @@ export const blackLists = (page = 1, size = 20) => {
 	});
 	return {
 		total: Math.ceil(blackList.length / size),
-		items: arrFilter(bs, ['id', 'ip', 'mark', 'redirect', 'createAt', '_geo'], false)
+		items: arrFilter(bs, ['id', 'ip', 'mark', 'respId', 'createAt', '_geo'], false)
 	};
 };
 const blackListCheck = (r: {
@@ -223,10 +238,9 @@ const blackListCheck = (r: {
 					if (!n) {
 						addBlackListRule({
 							ip: r.ip,
-							mark: t.mark,
-							redirect: t.redirect
+							respId: t.respId
 						});
-						return { ...t, forbidden: !t.redirect };
+						return t;
 					} else times[i] = n;
 				}
 			}
@@ -254,8 +268,7 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 		if (o) {
 			if (fr) {
 				fr._match?.push(o.id);
-				if (o.forbidden) fr.forbidden = true;
-				if (o.redirect) fr.redirect = o.redirect;
+				if (o.respId && fwResp.has(o.respId)) fr.respId = o.respId;
 			} else {
 				fr = o;
 				fr._match = [o.id];
@@ -320,7 +333,7 @@ export const filterLog = (logs: log[], t: FWRule) => {
 	return logs.filter((a) => {
 		if (t.headers && !matchHeader(t.headers, new Headers(str2Hds(a[3])))) return;
 		if (t.path && !match(t.path, a[2])) return;
-		if (t.ip && !ipRangeCheck(a[1], t.ip)) return;
+		if (t.ip && !matches(a[1], t.ip)) return;
 		if (t.country && !match(t.country, a[5])) return;
 		if (t.method && a[6].toLowerCase() !== t.method.toLowerCase()) return;
 		return true;

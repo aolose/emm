@@ -4,6 +4,7 @@ import type { fView, fileInfo, fInfo, Timer, fileSelectCfg, cfOpt, curPost } fro
 import { randNum } from '$lib/utils';
 import type { SvelteComponent } from 'svelte';
 import type { BeforeNavigate } from '@sveltejs/kit';
+import type { FwResp } from '$lib/server/model';
 
 const user = writable({
 	token: 'test'
@@ -16,6 +17,7 @@ export const h = writable({
 	key: '',
 	desc: ''
 });
+export const fwRespLs = writable<FwResp[]>([]);
 export const full = writable(0);
 export const fileManagerStore = writable(fileManagerCfg);
 export const confirmStore = writable({ ...confirmCfg });

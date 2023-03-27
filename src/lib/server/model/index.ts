@@ -1,7 +1,7 @@
 import { NULL } from '../enum';
 import { noNull, primary, unique } from './decorations';
 import { model, setNull, uniqSlug, slugGen } from '$lib/server/utils';
-import { diffObj, filter } from '$lib/utils';
+import { diffObj, filter, str2Hds } from '$lib/utils';
 import type { DB } from '$lib/server/db/sqlite3';
 import { publishedPost } from '$lib/server/store';
 import type { Obj } from '$lib/types';
@@ -9,28 +9,6 @@ import { reqPostCache, tagPostCache } from '$lib/server/cache';
 import { sitemap } from '$lib/sitemap';
 
 const { INT, TEXT } = NULL;
-
-export class BlackList {
-	@primary
-	id = INT;
-	ip = TEXT;
-	_geo?: string;
-	createAt = INT;
-	redirect = TEXT;
-	mark = TEXT;
-
-	toRule() {
-		return model(FWRule, {
-			active: true,
-			id: -this.id,
-			ip: this.ip,
-			forbidden: !this.redirect,
-			redirect: this.redirect,
-			mark: 'blacklist',
-			createAt: this.createAt
-		}) as FWRule;
-	}
-}
 
 export class Res {
 	@primary
@@ -269,14 +247,53 @@ export class FWRule {
 	createAt = INT;
 	save = INT;
 	log = false;
-	forbidden = false;
-	redirect = TEXT;
 	country = TEXT;
 	active = true;
 	_match?: number[];
-	status = TEXT;
 	times = INT;
 	trigger = false;
+	status = TEXT;
+	respId = INT;
+}
+
+export class FwResp {
+	@primary
+	id = INT;
+	status = INT;
+	@unique
+	name = TEXT;
+	headers = TEXT;
+	body = TEXT;
+	createAt = INT;
+	toResp() {
+		const body = this.body === '-' || !this.body ? null : this.body;
+		const hds = this.headers === '-' || !this.headers ? '' : this.headers;
+		return new Response(body, {
+			status: this.status || 403,
+			headers: new Headers(str2Hds(hds))
+		});
+	}
+}
+
+export class BlackList {
+	@primary
+	id = INT;
+	ip = TEXT;
+	_geo?: string;
+	createAt = INT;
+	mark = TEXT;
+	respId = INT;
+
+	toRule() {
+		return model(FWRule, {
+			active: true,
+			id: -this.id,
+			ip: this.ip,
+			mark: this.mark || 'blacklist',
+			createAt: this.createAt,
+			respId: this.respId
+		}) as FWRule;
+	}
 }
 
 export class FwLog {

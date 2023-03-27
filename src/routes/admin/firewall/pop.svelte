@@ -4,9 +4,9 @@
 	import { slidLeft } from '$lib/transition';
 	import Ck from './ck.svelte';
 	import Sel from './sel.svelte';
-	import { getErr, trim } from '$lib/utils';
+	import { trim } from '$lib/utils';
 	import { slide } from 'svelte/transition';
-	import { confirm } from '$lib/store';
+	import { fwRespLs } from '$lib/store';
 
 	let d = {};
 	let show = 0;
@@ -15,23 +15,29 @@
 	let cancel = () => 0;
 	let hasV;
 	$: {
-		d.ip = trim(d.ip);
-		d.mark = trim(d.mark, true);
-		d.country = trim(d.country);
-		d.path = trim(d.path);
-		d.times = +d.times || 1;
-		d.redirect = trim(d.redirect);
-		d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
-		hasV = trim(
-			tp === 3 ||
-				(d.trigger ? '' : d.ip) ||
-				(d.trigger ? d.status : '') ||
-				d.path ||
-				d.headers ||
-				d.mark ||
-				(d.trigger ? '' : d.country) ||
-				''
-		);
+		if (tp < 4) {
+			d.ip = trim(d.ip);
+			d.mark = trim(d.mark, true);
+			d.country = trim(d.country);
+			d.path = trim(d.path);
+			d.times = +d.times || 1;
+			d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
+			hasV = trim(
+				tp === 3 ||
+					(d.trigger ? '' : d.ip) ||
+					(d.trigger ? d.status : '') ||
+					d.path ||
+					d.headers ||
+					d.mark ||
+					(d.trigger ? '' : d.country) ||
+					''
+			);
+		} else {
+			d.name = trim(d.name, true);
+			d.status = +d.status || 403;
+			if (d.status < 0 || d.status > 510) d.status = 403;
+			hasV = trim(d.name) && d.status;
+		}
 	}
 	export const pop = (type, data = {}) => {
 		tp = type;
@@ -42,14 +48,6 @@
 			show = 1;
 			d = { ...data };
 			ok = () => {
-				if (d.redirect) {
-					try {
-						new URL(d.redirect);
-					} catch (e) {
-						confirm(getErr(e), '', 'ok');
-						return;
-					}
-				}
 				resolve({ ...d });
 				show = 0;
 			};
@@ -64,12 +62,21 @@
 {#if show}
 	<div class="m" transition:fade>
 		<div class="f">
-			<h1>{['Search logs', 'Edit Rule', 'Create Rule', 'Edit blacklist'][tp]}</h1>
+			<h1>
+				{[
+					'Search logs',
+					'Edit Rule',
+					'Create Rule',
+					'Edit blacklist',
+					'Add Response',
+					'Edit Response'
+				][tp]}
+			</h1>
 			<button class="clo" on:click={cancel}>
 				<i />
 				<i />
 			</button>
-			{#if tp && tp !== 3}
+			{#if tp < 4 && tp !== 3}
 				<div class="f1">
 					<label>
 						<Ck bind:value={d.active}>activate</Ck>
@@ -83,70 +90,88 @@
 						<label transition:slidLeft>
 							<Ck bind:value={d.log}>log</Ck>
 						</label>
-						<label transition:slidLeft>
-							<Ck bind:value={d.forbidden}>forbidden</Ck>
-						</label>
 					{:else}
 						<s />
 					{/if}
 				</div>
 			{/if}
 			<div class="f0">
-				{#if tp !== 3}
-					{#if !d.trigger}
-						<label transition:slide>
-							<span>IP:</span>
-							<input bind:value={d.ip} />
+				{#if tp < 4}
+					{#if tp !== 3}
+						{#if !d.trigger}
+							<label transition:slide>
+								<span>IP:</span>
+								<input bind:value={d.ip} />
+							</label>
+						{/if}
+						<label>
+							<span>path:</span>
+							<input bind:value={d.path} />
 						</label>
+						<label>
+							<span>header:</span>
+							<HdsIpt bind:value={d.headers} />
+						</label>
+						{#if d.trigger}
+							<label transition:slide>
+								<span>status:</span>
+								<input bind:value={d.status} />
+							</label>
+							<label transition:slide>
+								<span title="times per hour">TPH:</span>
+								<input bind:value={d.times} />
+							</label>
+						{:else}
+							<label transition:slide>
+								<span>method:</span>
+								<Sel
+									items={['', 'GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS']}
+									bind:value={d.method}
+								/>
+							</label>
+							<label transition:slide>
+								<span>country:</span>
+								<input bind:value={d.country} />
+							</label>
+						{/if}
 					{/if}
+					<label transition:slide>
+						<span>response:</span>
+						<Sel
+							defaultValue={0}
+							items={[{ name: 'empty', id: 0 }].concat($fwRespLs)}
+							getValue={(a) => a?.id}
+							getText={(a) => a?.name||'empty'}
+							multiply={false}
+							bind:value={d.respId}
+						/>
+					</label>
 					<label>
-						<span>path:</span>
-						<input bind:value={d.path} />
+						<span>mark:</span>
+						<input bind:value={d.mark} />
+					</label>
+				{/if}
+				{#if tp >= 4}
+					<label>
+						<span>name:</span>
+						<input bind:value={d.name} />
+					</label>
+					<label>
+						<span>status:</span>
+						<input bind:value={d.status} />
 					</label>
 					<label>
 						<span>header:</span>
 						<HdsIpt bind:value={d.headers} />
 					</label>
-					{#if d.trigger}
-						<label transition:slide>
-							<span>status:</span>
-							<input bind:value={d.status} />
-						</label>
-						<label transition:slide>
-							<span title="times per hour">TPH:</span>
-							<input bind:value={d.times} />
-						</label>
-					{:else}
-						<label transition:slide>
-							<span>method:</span>
-							<Sel
-								items={['', 'GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS']}
-								bind:value={d.method}
-							/>
-						</label>
-						<label transition:slide>
-							<span>country:</span>
-							<input bind:value={d.country} />
-						</label>
-					{/if}
 				{/if}
-				{#if !d.forbidden || d.trigger || tp === 3}
-					<label transition:slide>
-						<span>redirect:</span>
-						<input bind:value={d.redirect} />
-					</label>
-				{/if}
-				<label>
-					<span>mark:</span>
-					<input bind:value={d.mark} />
-				</label>
 			</div>
 			<div class="fn">
 				<button on:click={() => (d = {})}>clear</button>
 				{#if !tp || hasV}
-					<button transition:slidLeft on:click={ok}
-						>{['search', 'save', 'create', 'save'][tp]}</button
-					>
+					<button transition:slidLeft on:click={ok}>
+						{['search', 'save', 'create', 'save', 'create', 'save'][tp]}
+					</button>
 				{/if}
 			</div>
 		</div>

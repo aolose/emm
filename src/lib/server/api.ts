@@ -29,6 +29,7 @@ import { Buffer } from 'buffer';
 import {
 	BlackList,
 	FwLog,
+	FwResp,
 	FWRule,
 	Post,
 	Require,
@@ -47,15 +48,19 @@ import {
 	blackLists,
 	blockIp,
 	delBlackList,
+	delFwResp,
 	delRule,
 	filterLog,
 	fw2log,
+	fwRespLis,
+	getFwResp,
 	logCache,
 	lsRules,
 	patchDetailIpInfo,
 	ruleHit,
-	saveBlackList
-} from "$lib/server/firewall";
+	saveBlackList,
+	setFwResp
+} from '$lib/server/firewall';
 import { geoClose, geoStatue, loadGeoDb } from '$lib/server/ipLite';
 import { tagPatcher, tags } from '$lib/server/store';
 import { get } from 'svelte/store';
@@ -426,7 +431,7 @@ const apis: APIRoutes = {
 			const ip = await req.text();
 			if (ip) {
 				const o = ruleHit({ ip });
-				if (o?.forbidden) return 1;
+				if (getFwResp(o?.respId)?.status === 403) return 1;
 			}
 		})
 	},
@@ -456,7 +461,7 @@ const apis: APIRoutes = {
 		post: auth(Admin, async (req) => {
 			const b = model(BlackList, await req.json()) as BlackList;
 			if (!b.id) return resp('id not exist', 500);
-			saveBlackList(b)
+			saveBlackList(b);
 		}),
 		delete: auth(Admin, async (req) => {
 			const ids = (await req.text())
@@ -479,8 +484,8 @@ const apis: APIRoutes = {
 			const r = new Uint8Array(await req.arrayBuffer());
 			const p = r[0];
 			const s = r[1];
-			const o = lsRules(p, s)
-			o.items=arrFilter(o.items, [
+			const o = lsRules(p, s);
+			o.items = arrFilter(o.items, [
 				'id',
 				'path',
 				'headers',
@@ -490,12 +495,11 @@ const apis: APIRoutes = {
 				'log',
 				'active',
 				'trigger',
-				'redirect',
 				'status',
 				'times',
-				'forbidden'
-			]) as FWRule[]
-			return o
+				'respId'
+			]) as FWRule[];
+			return o;
 		})
 	},
 	login: {
@@ -933,6 +937,16 @@ const apis: APIRoutes = {
 			const type = +(params.get('t') || '');
 			if (!start || !end) return [];
 			return getRuv(start, end, type);
+		})
+	},
+	fwRsp: {
+		get: auth(Read, () => fwRespLis()),
+		post: auth(Admin, async (req) => {
+			return setFwResp(model(FwResp, await req.json()));
+		}),
+		delete: auth(Admin, async (req) => {
+			const id = +(await req.text());
+			if (id) delFwResp(id);
 		})
 	}
 };

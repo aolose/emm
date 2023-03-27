@@ -8,7 +8,8 @@
 	import Ft from './pop.svelte';
 	import Ru from './rules.svelte';
 	import { watch } from '$lib/utils';
-	import { small } from '$lib/store';
+	import { fwRespLs, small } from '$lib/store';
+	import { method } from '$lib/enum';
 
 	let view = 0;
 	let sty;
@@ -17,7 +18,7 @@
 	let tab = 0;
 	let ls = [];
 	let lastL = 0;
-	let loop = 1;
+	let loop = 0;
 	const size = 10;
 	let p = 1;
 	let total;
@@ -90,6 +91,9 @@
 			if (loop) loadLog();
 		}, 3e3);
 		loadLog(1);
+		req('fwRsp', undefined, { method: method.GET }).then((a) => {
+			fwRespLs.set(a);
+		});
 		return () => clearInterval(t);
 	});
 
