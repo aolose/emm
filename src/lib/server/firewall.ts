@@ -5,7 +5,7 @@ import { BlackList, FwLog, FwResp, FWRule } from '$lib/server/model';
 import { arrFilter, hasFwRuleFilter, hds2Str, str2Hds, trim } from "$lib/utils";
 import type { Obj, Timer } from '$lib/types';
 import { debugMode, getClient, getClientAddr, model } from '$lib/server/utils';
-import { ipInfo } from '$lib/server/ipLite';
+import { ipInfo, ipInfoStr } from "$lib/server/ipLite";
 import { permission } from '$lib/enum';
 import { ruv } from '$lib/server/puv';
 
@@ -208,7 +208,7 @@ export const delBlackList = (...id: number[]) => {
 export const blackLists = (page = 1, size = 20) => {
 	blackList.sort((a, b) => b.createAt - a.createAt);
 	const bs = blackList.slice(size * (page - 1), size * page).map((a) => {
-		a._geo = ipInfo(a.ip).full;
+		a._geo = ipInfoStr(a.ip);
 		return a;
 	});
 	return {
@@ -299,14 +299,7 @@ export const patchDetailIpInfo = (d: log[]) => {
 	const v: log[] = [];
 	d.forEach((a) => {
 		const n: log = [...a];
-		const geo =ipInfo(a[1])
-		let g0=''
-		let g1=''
-		if(geo){
-			g0=geo.region||geo.short||''
-			if(geo.full!==g0)g1=','+geo.short
-		}
-		n[5] = g0+g1;
+		n[5] = ipInfoStr(a[1]);
 		v.push(n);
 	});
 	return v;
