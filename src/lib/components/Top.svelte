@@ -1,72 +1,74 @@
 <script>
-	import { watch } from '$lib/utils';
 	import { onMount } from 'svelte';
+  import { fly } from "svelte/transition";
+  import { small } from "$lib/store";
+  import { delay } from "$lib/utils";
 
 	let h = 99999;
 	let a = 0;
-	let b = 0;
 	let btn;
-	const wa = watch(a);
-	const wb = watch(b);
 	let t;
+  let p
+  const setA = delay((n)=>{
+    a=n
+  },60)
 	onMount(() => {
-		if (btn) {
-			let top = 0;
-			const sc = () => {
-				const o = p.scrollTop;
-				if (Math.abs(o - top) < 20) return;
-				if (o > top) b = 0;
-				else if (o > h / 5) a = 1;
-				else b = 0;
-				top = o;
-			};
-			const p = btn.parentElement;
-			btn.onclick = () => p.scrollTo(0, 0);
-			p.addEventListener('scroll', sc);
-			return () => p.removeEventListener('scroll', sc);
-		}
+		return small.subscribe(()=>{
+      if (btn) {
+        let top = 0;
+        const sc = () => {
+          let n=0
+          const o = p.scrollTop;
+          if (Math.abs(o - top) < 50) return;
+          if (o > top) n = 0;
+          else if (o > h / 5) n = 1;
+          top = o;
+          setA(n)
+        };
+        p = btn.parentElement;
+        p.addEventListener('scroll', sc);
+        return () => p.removeEventListener('scroll', sc);
+      }
+    })
 	});
-	$: {
-		wa(() => {
-			if (a) {
-				clearTimeout(t);
-				t = setTimeout(() => (b = 1), 50);
-			}
-		}, a);
-		wb(() => {
-			if (!b) {
-				clearTimeout(t);
-				t = setTimeout(() => {
-					a = 0;
-				}, 300);
-			}
-		}, b);
-	}
 </script>
 
 <svelte:window bind:innerHeight={h} />
-<button class="t icon i-up" class:a class:b bind:this={btn} />
+<div bind:this={btn} class="o">
+  {#if a}
+    <button
+      on:click={() => p.scrollTo(0, 0)}
+      transition:fly={{ y: 50, duration: 500 }}
+      class="t icon i-up" class:a/>
+  {/if}
+</div>
+
 
 <style lang="scss">
 	@import '../break';
+.o{
+  position: fixed;
+  bottom: 40px;
+  right: 30px;
+  z-index: 3;
 
+  @include s() {
+    right: 20px;
+  }
+}
 	.t {
 		transition: 0.2s ease-in-out;
 		border-radius: 50%;
 		line-height: 1;
 		font-size: 20px;
 		color: #fff;
-		position: fixed;
-		bottom: 40px;
-		right: 30px;
-		height: 40px;
-		width: 40px;
+    height: 40px;
+    width: 40px;
 		border: 1px solid rgba(180, 200, 225, 0.3);
 		background: rgba(60, 140, 245, 0.8);
 		background-clip: content-box;
-		z-index: 3;
 		box-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px -2px;
-		display: none;
+		display: block;
 		opacity: 0;
 		pointer-events: none;
 		&:hover {
@@ -76,16 +78,8 @@
 		}
 
 		&.a {
-			display: block;
-		}
-
-		&.b {
-			opacity: 0.8;
-			pointer-events: auto;
-		}
-
-		@include s() {
-			right: 20px;
+      opacity: 0.8;
+      pointer-events: auto;
 		}
 	}
 </style>

@@ -94,6 +94,7 @@
 	}
 
 	i {
+		border-radius: 3px;
 		margin-right: 10px;
 		width: 16px;
 		height: 16px;
@@ -101,7 +102,7 @@
 		font-style: normal;
 		align-items: center;
 		justify-content: center;
-		background: #1f252c;
+		background: #11161a;
 		font-size: 10px;
 		color: transparent;
 		transition: 0.2s ease-in-out;
@@ -127,7 +128,7 @@
 		position: absolute;
 		z-index: 4;
 		padding: 10px 20px;
-		background: var(--bg0);
+		background: #1e2534;
 		border-radius: 4px;
 	}
 </style>
