@@ -141,6 +141,7 @@ export const getShareKey = (req: Request) => {
 };
 export function slugGen(title: string) {
 	return Pinyin.convertToPinyin(title, "", true)
+		.replace(/ /g,'-')
 		.replace(/[^0-9a-z!@#$&*()_\-+=~]+/gi, "-")
 		.replace(/_+$/,'');
 }
