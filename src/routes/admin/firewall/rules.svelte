@@ -100,6 +100,7 @@
 	const rspName = (id) => $fwRespLs.find((a) => a.id === id)?.name || '';
 	onMount(() => {
 		go(1);
+		return fwRespLs.subscribe(()=>ls=[...ls])
 	});
 </script>
 
