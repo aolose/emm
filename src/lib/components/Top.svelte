@@ -4,6 +4,7 @@
   import { small } from "$lib/store";
   import { delay } from "$lib/utils";
 
+  export let style=''
 	let h = 99999;
 	let a = 0;
 	let btn;
@@ -34,7 +35,7 @@
 </script>
 
 <svelte:window bind:innerHeight={h} />
-<div bind:this={btn} class="o">
+<div bind:this={btn} class="o" {style}>
   {#if a}
     <button
       on:click={() => p.scrollTo(0, 0)}
