@@ -7,16 +7,19 @@
 	import Setting from '$lib/components/adminPost/setting.svelte';
 	import FileWin from '$lib/components/fileManager.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
+	import Ld from '$lib/components/loading.svelte'
 	import { editPost, originPost, posts, setting, small, medium } from '$lib/store';
 	import { api } from '$lib/req';
 	import { onMount } from 'svelte';
 	import { trim, watch } from '$lib/utils';
+	import Top from "$lib/components/Top.svelte";
 
 	const getPost = api('posts');
 	let pages = 1;
 	let tmpMark = 1;
 	let view = 0;
 	let autoSave;
+	let ld=0
 	function sel(p) {
 		if (!p) {
 			originPost.set({});
@@ -47,11 +50,12 @@
 			o.sc = sc;
 			o.ft = ft;
 		}
+		ld=1
 		getPost(o).then((p) => {
 			const { total, items = [] } = p;
 			if (items) posts.set(items);
 			pages = total;
-		});
+		}).finally(()=>ld=0);
 	}
 
 	function close() {
@@ -79,7 +83,7 @@
 			setting.set(0);
 		};
 	});
-	let sty;
+	let sty,topSty;
 	$: {
 		sty = $small
 			? `transform:translate3d(${((-view * 100) / 3).toFixed(4)}%,0,0)`
@@ -88,6 +92,7 @@
 				? ''
 				: `transform:translate3d(400px,0,0)`
 			: '';
+		topSty='right: auto;left:'+($small?'29%':'410px')
 		wc(() => {
 			page(1);
 		}, sc);
@@ -104,13 +109,17 @@
 				<AddPost done={() => (view = 1)} />
 				<Search change={ch} />
 			</div>
-			<div class="ls" bind:this={el}>
-				{#each $posts as p (p._ || p.id)}
-					<PItem {p} {sel} />
-				{/each}
-			</div>
-			<div class="p">
-				<Pg go={page} total={pages} />
+			<div class="l">
+				<div class="ls" bind:this={el}>
+					{#each $posts as p (p._ || p.id)}
+						<PItem {p} {sel} />
+					{/each}
+					<Top style={topSty}/>
+				</div>
+				<div class="p">
+					<Pg go={page} total={pages} />
+				</div>
+				<Ld act={ld}/>
 			</div>
 		</div>
 		<div class="b">
@@ -162,10 +171,16 @@
 			flex: none;
 		}
 	}
-
+  .l{
+		flex-grow: 1;
+		height: 0;
+		display: flex;
+		flex-direction: column;
+		padding-bottom: 10px;
+	}
 	.ls {
 		direction: rtl;
-		flex: 1;
+		flex-grow: 1;
 		overflow: auto;
 		overflow-x: hidden;
 		width: 100%;
