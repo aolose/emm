@@ -55,7 +55,10 @@
 			const { total, items = [] } = p;
 			if (items) posts.set(items);
 			pages = total;
-		}).finally(()=>ld=0);
+		}).finally(()=>{
+			ld=0
+			if(el)el.scrollTo(0,0)
+		});
 	}
 
 	function close() {
@@ -74,12 +77,8 @@
 
 	onMount(() => {
 		page();
-		const un = posts.subscribe(()=>{
-			if(el)el.scrollTo(0,0)
-		})
 		return () => {
 			sel();
-			un();
 			setting.set(0);
 		};
 	});
