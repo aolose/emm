@@ -22,7 +22,7 @@
 			d.path = trim(d.path);
 			if (tp)
 				d.rate = trim(d.rate || '')
-					.replace(/[^0-9/]/g, '')
+					.replace(/[^0-9,/]/g, '')
 					.replace(/\/{2,}/g, '/');
 			d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 			hasV = trim(
