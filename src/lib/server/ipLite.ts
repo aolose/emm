@@ -153,13 +153,13 @@ export const ipInfo = (ip: string) => {
 	return {};
 };
 
-export const ipInfoStr=(ip:string)=>{
-	const geo =ipInfo(ip)
-	let g0=''
-	let g1=''
-	if(geo){
-		g0=geo.region||geo.short||''
-		if(geo.full!==g0)g1=','+geo.short
+export const ipInfoStr = (ip: string) => {
+	const geo = ipInfo(ip);
+	let g0 = '';
+	let g1 = '';
+	if (geo) {
+		g0 = geo.region || geo.short || '';
+		if (geo.full !== g0) g1 = ',' + geo.short;
 	}
-	return g0+g1
-}
+	return g0 + g1;
+};

@@ -21,7 +21,7 @@
 
 <div class="a">
 	<i class="icon i-filter" class:act={ctx.value?.length} on:click={ctx.show} />
-	<input bind:value placeholder="search..."/>
+	<input bind:value placeholder="search..." />
 	<div class="l" />
 	<i class="icon i-search" class:act={value} />
 	<Filter bind:ctx />
@@ -36,7 +36,7 @@
 		width: 300px;
 		margin: 20px auto;
 		height: 40px;
-    border-radius: 4px;
+		border-radius: 4px;
 		align-items: center;
 		@include s() {
 			width: 80%;
@@ -48,7 +48,7 @@
 		padding: 0;
 		outline: none;
 		border: none;
-		&::placeholder{
+		&::placeholder {
 			color: #3b5572;
 		}
 	}
@@ -68,7 +68,7 @@
 			opacity: 1;
 		}
 	}
-	.act{
+	.act {
 		color: var(--blue);
 	}
 </style>

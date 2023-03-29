@@ -439,7 +439,7 @@ const apis: APIRoutes = {
 		post: auth(Admin, async (req) => {
 			const r = model(FWRule, await req.json());
 			if (
-				(r.ip && /^(::1|127\.0)/.test(r.ip)) ||
+				(r.ip && /^(\[::1]|127\.0)/.test(r.ip)) ||
 				r.ip === req.headers.get('x-forwarded-for') ||
 				''
 			) {
@@ -496,7 +496,7 @@ const apis: APIRoutes = {
 				'active',
 				'trigger',
 				'status',
-				'times',
+				'rate',
 				'respId'
 			]) as FWRule[];
 			return o;

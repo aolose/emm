@@ -29,7 +29,7 @@
 				if (d.status) d.status = '';
 				if (d.times) d.times = -1;
 			}
-      if(d.respId===0)d.respId=-1;
+			if (d.respId === 0) d.respId = -1;
 		}
 	};
 	let go = (n) => {
@@ -70,7 +70,7 @@
 				const api = ['rules', 'blk', 'fwRsp'][ta];
 				req(api, id, { method: method.DELETE }).then(() => {
 					ls = ls.filter((a) => a.id !== id);
-          if(ta===2)fwRespLs.set(ls)
+					if (ta === 2) fwRespLs.set(ls);
 				});
 			}
 		});
@@ -100,7 +100,7 @@
 	const rspName = (id) => $fwRespLs.find((a) => a.id === id)?.name || '';
 	onMount(() => {
 		go(1);
-		return fwRespLs.subscribe(()=>ls=[...ls])
+		return fwRespLs.subscribe(() => (ls = [...ls]));
 	});
 </script>
 
@@ -128,7 +128,7 @@
 							<div class="i">
 								<div class="icon i-ip"><span>{r.ip}</span></div>
 								<div class="icon i-geo"><span>{r._geo}</span></div>
-								{#if r.respId>0}
+								{#if r.respId > 0}
 									<div class="icon i-drop"><span>{rspName(r.respId)}</span></div>
 								{/if}
 							</div>
@@ -158,7 +158,7 @@
 					{:else}
 						<div class="u" class:act={r.active} class:tr={r.trigger}>
 							<div class="i">
-								{#if r.respId>0}
+								{#if r.respId > 0}
 									<div class="icon i-drop"><span>{rspName(r.respId)}</span></div>
 								{/if}
 								{#if r.ip && !r.trigger}

@@ -20,7 +20,10 @@
 			d.mark = trim(d.mark, true);
 			d.country = trim(d.country);
 			d.path = trim(d.path);
-			if(tp)d.times = +d.times || 1;
+			if (tp)
+				d.rate = trim(d.rate || '')
+					.replace(/[^0-9/]/g, '')
+					.replace(/\/{2,}/g, '/');
 			d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 			hasV = trim(
 				tp === 3 ||
@@ -118,8 +121,8 @@
 								<input bind:value={d.status} />
 							</label>
 							<label transition:slide>
-								<span title="times per hour">TPH:</span>
-								<input bind:value={d.times} />
+								<span title="times per hour">rate:</span>
+								<input bind:value={d.rate} placeholder="times/seconds,..." />
 							</label>
 						{:else}
 							<label transition:slide>
@@ -142,7 +145,7 @@
 								defaultValue={0}
 								items={[{ name: 'empty', id: 0 }].concat($fwRespLs)}
 								getValue={(a) => a?.id}
-								getText={(a) => a?.name||'empty'}
+								getText={(a) => a?.name || 'empty'}
 								multiply={false}
 								bind:value={d.respId}
 							/>

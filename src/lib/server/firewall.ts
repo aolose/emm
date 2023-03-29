@@ -1,11 +1,11 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import {matches} from 'ip-matching'
+import { matches } from 'ip-matching';
 import { db, sys } from '$lib/server/index';
 import { BlackList, FwLog, FwResp, FWRule } from '$lib/server/model';
-import { arrFilter, hasFwRuleFilter, hds2Str, str2Hds, trim } from "$lib/utils";
+import { arrFilter, hasFwRuleFilter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
 import { debugMode, getClient, getClientAddr, model } from '$lib/server/utils';
-import { ipInfo, ipInfoStr } from "$lib/server/ipLite";
+import { ipInfo, ipInfoStr } from '$lib/server/ipLite';
 import { permission } from '$lib/enum';
 import { ruv } from '$lib/server/puv';
 
@@ -139,7 +139,7 @@ export const ruleHit = (
 			break;
 		}
 		// match blacklist
-		if(k.id<0)break
+		if (k.id < 0) break;
 	}
 	return o;
 };
@@ -157,11 +157,12 @@ export const delRule = (ids: number[]) => {
 	triggers = triggers.filter((a) => ids.indexOf(a.id) === -1);
 };
 let t: Timer;
+
 export function loadRules() {
 	rules = [];
 	triggers = [];
 	db.all(model(FWRule)).forEach((a) => {
-		if (a.trigger) triggers.push(a);
+		if (a.trigger) triggers.push(model(FWRule, a) as FWRule);
 		else rules.push(a);
 	});
 	blackList = db.all(model(BlackList)).map((a) => model(BlackList, a) as BlackList);
@@ -224,24 +225,31 @@ const blackListCheck = (r: {
 	headers?: Headers;
 }) => {
 	const ts = triggers.filter((a) => hitRule(r, a));
-	const times = ts.map((a) => a.times);
+	const now = Date.now();
+	const times: number[] = [];
+	const matches = ts.map((a) => {
+		times.push(0);
+		return a.rateLimiter();
+	});
 	if (ts.length) {
-		const dur = 1e3 * 3600;
-		const after = Date.now() - dur;
 		for (let i = logCache.length - 1; i > -1; i--) {
 			const log = logToReq(logCache[i]);
-			if (log.createAt < after || log.ip !== r.ip) return;
+			const { createAt } = log;
+			if (log.ip !== r.ip) return;
 			for (let i = 0; i < ts.length; i++) {
 				const t = ts[i];
 				if (hitRule(log, t)) {
-					const n = times[i] - 1;
-					if (!n) {
-						addBlackListRule({
-							ip: r.ip,
-							respId: t.respId
-						});
-						return t;
-					} else times[i] = n;
+					const n = matches[i](++times[i], now - createAt);
+					if (n) {
+						if (n === 1) {
+							addBlackListRule({
+								ip: r.ip,
+								respId: t.respId
+							});
+							return t;
+						}
+						break;
+					}
 				}
 			}
 		}
@@ -251,7 +259,7 @@ const blackListCheck = (r: {
 export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
 	// skip admin
 	const ip = getClientAddr(event);
-	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(ip)))
+	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || /^(\[::1]|127\.0)/.test(ip)))
 		return;
 	const {
 		request: { method, headers },
@@ -330,7 +338,9 @@ const logToReq = (l: log) => {
 };
 
 export const filterLog = (logs: log[], t: FWRule) => {
-	return hasFwRuleFilter(t)?logs.filter(a=>hitRule(logToReq(a),{...t,active:true})):logs
+	return hasFwRuleFilter(t)
+		? logs.filter((a) => hitRule(logToReq(a), { ...t, active: true } as FWRule))
+		: logs;
 };
 
 /**
@@ -377,7 +387,7 @@ export const fwFilter = (event: RequestEvent, rs = rules): Obj<FWRule> | undefin
 	if (!db) return;
 	if (!rs || !rs.length) loadRules();
 	const ip = getClientAddr(event);
-	if (/^(::1|127\.0)/.test(ip) && !debugMode) return;
+	if (/^(\[::1]|127\.0)/.test(ip) && !debugMode) return;
 	const path = event.url.pathname;
 	const headers = event.request.headers;
 	const method = event.request.method.toLowerCase();

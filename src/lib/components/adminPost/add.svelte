@@ -58,7 +58,7 @@
 		flex: 1;
 		border: none;
 		outline: none;
-		&::placeholder{
+		&::placeholder {
 			color: #4d6783;
 		}
 		&:focus + .l {
@@ -70,7 +70,7 @@
 		font-size: 16px;
 		transition: 0.3s ease-in-out;
 		cursor: pointer;
-    width: 32px;
+		width: 32px;
 		height: 32px;
 		margin-top: 4px;
 		border-radius: 3px;

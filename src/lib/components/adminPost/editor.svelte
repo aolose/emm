@@ -199,7 +199,7 @@
 			editPost.set({ ...n });
 		}
 		// trigger sitting ok
-		return  1
+		return 1;
 	};
 
 	onMount(async () => {
