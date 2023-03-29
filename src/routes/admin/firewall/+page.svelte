@@ -7,7 +7,7 @@
 	import Ld from '$lib/components/loading.svelte';
 	import Ft from './pop.svelte';
 	import Ru from './rules.svelte';
-	import { watch,hasFwRuleFilter } from '$lib/utils';
+	import { watch, hasFwRuleFilter } from '$lib/utils';
 	import { fwRespLs, small } from '$lib/store';
 	import { method } from '$lib/enum';
 
@@ -24,7 +24,7 @@
 	let total;
 	let ld = false;
 	let filter = {};
-	const lsWatch = watch(tab, p,filter);
+	const lsWatch = watch(tab, p, filter);
 	$: {
 		sty = $small ? `transform:translate3d(${(-view * 100) / 2}%,0,0)` : '';
 		lsWatch(
@@ -108,11 +108,11 @@
 	function search() {
 		pop(0, filter).then((d) => {
 			if (!d) return;
-			 const s = new Set(['mark','ip','path','method','headers','country','status'])
-			Object.keys(d).forEach(a=>{
-				if(!s.has(a)||d[a]===''||d[a]===undefined)delete d[a]
-			})
-			filter = {...d};
+			const s = new Set(['mark', 'ip', 'path', 'method', 'headers', 'country', 'status']);
+			Object.keys(d).forEach((a) => {
+				if (!s.has(a) || d[a] === '' || d[a] === undefined) delete d[a];
+			});
+			filter = { ...d };
 			loadLog(1);
 		});
 	}

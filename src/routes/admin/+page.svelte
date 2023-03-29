@@ -7,19 +7,19 @@
 	import Setting from '$lib/components/adminPost/setting.svelte';
 	import FileWin from '$lib/components/fileManager.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
-	import Ld from '$lib/components/loading.svelte'
+	import Ld from '$lib/components/loading.svelte';
 	import { editPost, originPost, posts, setting, small, medium } from '$lib/store';
 	import { api } from '$lib/req';
 	import { onMount } from 'svelte';
 	import { trim, watch } from '$lib/utils';
-	import Top from "$lib/components/Top.svelte";
+	import Top from '$lib/components/Top.svelte';
 
 	const getPost = api('posts');
 	let pages = 1;
 	let tmpMark = 1;
 	let view = 0;
 	let autoSave;
-	let ld=0
+	let ld = 0;
 	function sel(p) {
 		if (!p) {
 			originPost.set({});
@@ -39,7 +39,7 @@
 	}
 
 	let sc = '';
-	let el
+	let el;
 	let ft = 1;
 	const wc = watch(sc);
 	const wt = watch(ft);
@@ -50,15 +50,17 @@
 			o.sc = sc;
 			o.ft = ft;
 		}
-		ld=1
-		getPost(o).then((p) => {
-			const { total, items = [] } = p;
-			if (items) posts.set(items);
-			pages = total;
-		}).finally(()=>{
-			ld=0
-			if(el)el.scrollTo(0,0)
-		});
+		ld = 1;
+		getPost(o)
+			.then((p) => {
+				const { total, items = [] } = p;
+				if (items) posts.set(items);
+				pages = total;
+			})
+			.finally(() => {
+				ld = 0;
+				if (el) el.scrollTo(0, 0);
+			});
 	}
 
 	function close() {
@@ -82,7 +84,7 @@
 			setting.set(0);
 		};
 	});
-	let sty,topSty;
+	let sty, topSty;
 	$: {
 		sty = $small
 			? `transform:translate3d(${((-view * 100) / 3).toFixed(4)}%,0,0)`
@@ -91,7 +93,7 @@
 				? ''
 				: `transform:translate3d(400px,0,0)`
 			: '';
-		topSty='right: auto;left:'+($small?'29%':'410px')
+		topSty = 'right: auto;left:' + ($small ? '29%' : '410px');
 		wc(() => {
 			page(1);
 		}, sc);
@@ -113,12 +115,12 @@
 					{#each $posts as p (p._ || p.id)}
 						<PItem {p} {sel} />
 					{/each}
-					<Top style={topSty}/>
+					<Top style={topSty} />
 				</div>
 				<div class="p">
 					<Pg go={page} total={pages} />
 				</div>
-				<Ld act={ld}/>
+				<Ld act={ld} />
 			</div>
 		</div>
 		<div class="b">
@@ -170,7 +172,7 @@
 			flex: none;
 		}
 	}
-  .l{
+	.l {
 		flex-grow: 1;
 		height: 0;
 		display: flex;

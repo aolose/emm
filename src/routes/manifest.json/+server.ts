@@ -1,17 +1,17 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { sys } from '$lib/server';
-const etag=Date.now().toString(32)
-export const GET: RequestHandler = ({request}) => {
+const etag = Date.now().toString(32);
+export const GET: RequestHandler = ({ request }) => {
 	const tag = request.headers.get('If-None-Match');
-	if(tag===etag)return new Response(null, { status: 304 });
+	if (tag === etag) return new Response(null, { status: 304 });
 	const icons = [48, 72, 96, 128, 192, 384, 512].map((a) => {
-		const o =  {
+		const o = {
 			src: `/i${a}.png`,
 			sizes: `${a}x${a}`,
 			type: 'image/png'
-		}as {purpose?:string};
-		if(a===512)o.purpose='maskable'
-		return o
+		} as { purpose?: string };
+		if (a === 512) o.purpose = 'maskable';
+		return o;
 	});
 	const data = {
 		$schema: 'https://json.schemastore.org/web-manifest-combined.json',
@@ -27,7 +27,7 @@ export const GET: RequestHandler = ({request}) => {
 	};
 	const headers = {
 		'Content-Type': 'text/plain',
-		etag,
+		etag
 	};
 	return new Response(JSON.stringify(data) || '', {
 		headers

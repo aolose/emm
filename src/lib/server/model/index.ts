@@ -250,10 +250,43 @@ export class FWRule {
 	country = TEXT;
 	active = true;
 	_match?: number[];
-	times = INT;
+	rate = TEXT;
 	trigger = false;
 	status = TEXT;
 	respId = INT;
+	rateLimiter() {
+		const rates: [number, number][] = [];
+		const s = new Set();
+		if (this.rate)
+			this.rate.split(',').map((a) => {
+				const [c, d = 3600] = a.split('/');
+				let e = +c;
+				const f = +d * 1e3;
+				if (e < 0) e = 1;
+				if (e && f) {
+					const k = `${e}:${f}`;
+					if (!s.has(k)) {
+						s.add(k);
+						rates.push([e, f]);
+					}
+				}
+			});
+		rates.sort((a, b) => b[1] / b[0] - a[1] / a[0]);
+		if (!rates.length) rates.push([1, 3600]);
+		// 1  - hit
+		// -1 - break
+		// 0  - go on
+		return (times: number, dur: number) => {
+			let hit = -1;
+			for (const [t, d] of rates) {
+				if (dur < d) {
+					hit = 0;
+					if (times > t) return 1;
+				}
+			}
+			return hit;
+		};
+	}
 }
 
 export class FwResp {
