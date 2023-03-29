@@ -236,6 +236,7 @@ const blackListCheck = (r: {
 			const log = logToReq(logCache[i]);
 			const { createAt } = log;
 			if (log.ip !== r.ip) return;
+			let overRange=1
 			for (let i = 0; i < ts.length; i++) {
 				const t = ts[i];
 				if (hitRule(log, t)) {
@@ -244,14 +245,15 @@ const blackListCheck = (r: {
 						if (n === 1) {
 							addBlackListRule({
 								ip: r.ip,
-								respId: t.respId
+								respId: t.respId,
+								mark:t.mark
 							});
 							return t;
 						}
-						break;
-					}
+					}else overRange=0
 				}
 			}
+			if(overRange)return
 		}
 	}
 };

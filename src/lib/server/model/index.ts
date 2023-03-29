@@ -275,16 +275,16 @@ export class FWRule {
 				}
 			});
 		rates.sort((a, b) => b[1] / b[0] - a[1] / a[0]);
-		if (!rates.length) rates.push([1, 3600]);
+		if (!rates.length) rates.push([1, 3600*1e3]);
 		// 1  - hit
-		// -1 - break
+		// -1 - over range
 		// 0  - go on
 		return (times: number, dur: number) => {
 			let hit = -1;
 			for (const [t, d] of rates) {
 				if (dur < d) {
 					hit = 0;
-					if (times > t) return 1;
+					if (times >= t) return 1;
 				}
 			}
 			return hit;
