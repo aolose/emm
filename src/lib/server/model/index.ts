@@ -258,7 +258,10 @@ export class FWRule {
 		const rates: [number, number][] = [];
 		const s = new Set();
 		if (this.rate)
-			this.rate.split(',').map((a) => {
+			this.rate
+				.replace(/[^0-9,]/g,'')
+				.split(',')
+				.filter(a=>a).map((a) => {
 				const [c, d = 3600] = a.split('/');
 				let e = +c;
 				const f = +d * 1e3;
