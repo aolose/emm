@@ -103,16 +103,14 @@ const hitRule = (
 	if (k.ip) {
 		if (!matches(ip, k.ip)) return false;
 		if (k.country) {
-			const f = ipInfo(ip);
-			if (f && f.short) {
-				if (!match(k.country, f.short)) return false;
-			}
+			if (!match(k.country, ipInfoStr(ip))) return false;
 		}
 	}
 	return true;
 };
-export const getFwResp = (id?: number) => (id ? fwResp.get(id)?.toResp() : undefined);
-export const ruleHit = (
+export const getFwResp = (id?: number) =>
+	id ? fwResp.get(id)?.toResp() || new Response('', { status: 403 }) : undefined;
+export const hitRules = (
 	r: {
 		ip?: string;
 		path?: string;
@@ -125,8 +123,7 @@ export const ruleHit = (
 	let o: Obj<FWRule> | undefined;
 	for (const k of rs) {
 		if (!hitRule(r, k)) continue;
-		if (!o) o = { mark: '', _match: [] };
-		o._match?.push(k.id);
+		if (!o) o = { mark: '' };
 		if (k.mark)
 			o.mark = o.mark
 				?.split(',')
@@ -134,12 +131,10 @@ export const ruleHit = (
 				.filter((a) => trim(a))
 				.join();
 		if (k.log) o.log = k.log;
-		if (k.respId && fwResp.has(k.respId)) {
-			o.respId = k.respId;
+		if (k.respId || k.id < 0) {
+			o.respId = k.respId || -1;
 			break;
 		}
-		// match blacklist
-		if (k.id < 0) break;
 	}
 	return o;
 };
@@ -176,7 +171,16 @@ export function loadRules() {
 	db.all(model(FwResp)).forEach((a) => fwResp.set(a.id, model(FwResp, a) as FwResp));
 }
 
-type log = [number, string, string, string, number, string, string, string];
+type log = {
+	createAt: number;
+	ip: string;
+	path: string;
+	headers: Headers;
+	status: number;
+	method: string;
+	mark?: string;
+	geo?: string;
+};
 export let logCache: log[] = [];
 const max = 1000;
 
@@ -227,62 +231,72 @@ const blackListCheck = (r: {
 	const ts = triggers.filter((a) => hitRule(r, a));
 	const now = Date.now();
 	const times: number[] = [];
+	const max: number[] = [];
 	const matches = ts.map((a) => {
 		times.push(0);
-		return a.rateLimiter();
+		const [mx, limiter] = a.rateLimiter();
+		max.push(mx);
+		return limiter;
 	});
 	if (ts.length) {
 		for (let i = logCache.length - 1; i > -1; i--) {
-			const log = logToReq(logCache[i]);
-			const { createAt } = log;
+			const log = logCache[i];
+			const dur = now - log.createAt;
 			if (log.ip !== r.ip) return;
-			let overRange=1
+			let over = 0;
 			for (let i = 0; i < ts.length; i++) {
+				if (dur > max[i]) {
+					over++;
+					continue;
+				}
 				const t = ts[i];
 				if (hitRule(log, t)) {
-					const n = matches[i](++times[i], now - createAt);
+					const tm = (times[i] = times[i] + 1);
+					const n = matches[i](tm, dur);
 					if (n) {
-						if (n === 1) {
-							addBlackListRule({
-								ip: r.ip,
-								respId: t.respId,
-								mark:t.mark
-							});
-							return t;
-						}
-					}else overRange=0
+						addBlackListRule({
+							ip: r.ip,
+							respId: t.respId,
+							mark: t.mark
+						});
+						return t;
+					}
 				}
 			}
-			if(overRange)return
+			if (over === max.length) return;
 		}
 	}
 };
 
 export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
+	let resp: Response | undefined;
 	// skip admin
 	const ip = getClientAddr(event);
-	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || /^(\[::1]|127\.0)/.test(ip)))
+	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(ip)))
 		return;
 	const {
 		request: { method, headers },
 		url: { pathname }
 	} = event;
 	const path = pathname;
-	const ua = hds2Str(headers);
-	const r = [Date.now(), ip, path, ua, status, ipInfo(ip)?.short || '', fr?.mark, method] as log;
-	const rq = logToReq(r);
+	const r = {
+		createAt: Date.now(),
+		ip,
+		path,
+		headers,
+		status,
+		ipInfo,
+		mark: fr?.mark,
+		method
+	} as log;
 	ruv({ ip, path, ua: headers.get('user-agent') || '', status });
 	if (path !== '/api/log') logCache.push(r);
-	if (!fr?._match?.find((a) => a < 0) && triggers.find((a) => hitRule(rq, a))) {
-		const o = blackListCheck(rq);
+	if (!fr?.respId && triggers.find((a) => hitRule(r, a))) {
+		const o = blackListCheck(r);
 		if (o) {
-			if (fr) {
-				fr._match?.push(o.id);
-				if (o.respId && fwResp.has(o.respId)) fr.respId = o.respId;
-			} else {
-				fr = o;
-				fr._match = [o.id];
-			}
+			o.respId = o.respId || -1;
+			resp = getFwResp(o.respId);
+			if (resp) r.status = status = resp.status;
 		}
 	}
 	const l = logCache.length;
@@ -293,7 +307,7 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 				path,
 				ip,
 				mark: fr.mark,
-				headers: ua,
+				headers: hds2Str(headers),
 				method,
 				status
 			})
@@ -303,45 +317,38 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 			db.db.prepare(`DELETE FROM FwLog WHERE id in (SELECT id FROM FwLog LIMIT ${del})`).run();
 		}
 	}
+	return resp;
 };
 
 export const patchDetailIpInfo = (d: log[]) => {
-	const v: log[] = [];
-	d.forEach((a) => {
-		const n: log = [...a];
-		n[5] = ipInfoStr(a[1]);
-		v.push(n);
+	return d.map((a) => {
+		return [
+			a.createAt,
+			a.ip,
+			a.path,
+			hds2Str(a.headers),
+			a.status,
+			a.method,
+			a.mark,
+			ipInfoStr(a.ip)
+		];
 	});
-	return v;
 };
 export const fw2log = (l: FwLog) => {
-	return [
-		l.save,
-		l.ip,
-		l.path,
-		l.headers,
-		l.status,
-		ipInfo(l.ip)?.short || '',
-		l.mark,
-		l.method
-	] as log;
-};
-
-const logToReq = (l: log) => {
-	const [createAt, ip, path, headers, status, , , method] = l;
 	return {
-		createAt,
-		ip,
-		path,
-		headers: new Headers(str2Hds(headers)),
-		status,
-		method
-	};
+		createAt: l.save,
+		ip: l.ip,
+		path: l.path,
+		headers: new Headers(str2Hds(l.headers)),
+		status: l.status,
+		mark: l.mark,
+		method: l.method
+	} as log;
 };
 
 export const filterLog = (logs: log[], t: FWRule) => {
 	return hasFwRuleFilter(t)
-		? logs.filter((a) => hitRule(logToReq(a), { ...t, active: true } as FWRule))
+		? logs.filter((a) => hitRule(a, { ...t, active: true } as FWRule))
 		: logs;
 };
 
@@ -389,11 +396,11 @@ export const fwFilter = (event: RequestEvent, rs = rules): Obj<FWRule> | undefin
 	if (!db) return;
 	if (!rs || !rs.length) loadRules();
 	const ip = getClientAddr(event);
-	if (/^(\[::1]|127\.0)/.test(ip) && !debugMode) return;
+	if (/^(::1|127\.0)/.test(ip) && !debugMode) return;
 	const path = event.url.pathname;
 	const headers = event.request.headers;
 	const method = event.request.method.toLowerCase();
-	return ruleHit({
+	return hitRules({
 		ip,
 		path,
 		headers,
