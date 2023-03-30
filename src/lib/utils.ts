@@ -39,7 +39,6 @@ export const encrypt = async (data: BufferSource, num: number, shareKey: CryptoK
 	await subtle.encrypt(algorithm_AES_CBC_Gen(num), shareKey, data);
 
 export const genPubKey = async () => {
-	const { subtle } = crypto;
 	genKey = await subtle.generateKey(algorithm, false, ['deriveKey']);
 	return await subtle.exportKey('raw', genKey.publicKey);
 };

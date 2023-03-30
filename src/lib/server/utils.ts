@@ -199,7 +199,7 @@ export const encryptResp = async (params: ApiData, keyNum: number, code = 200) =
 	}
 	return resp('', 500);
 };
-export const getIp = (req: Request) => req.headers.get('x-forwarded-for');
+export const getIp = (req: Request) => req.headers.get('x-forwarded-for') || '';
 export const apiHandle = async (event: RequestEvent): Promise<Response> => {
 	const { request, params } = event;
 	const name = params.api as ApiName;
@@ -429,8 +429,8 @@ export const checkStatue = () => {
 };
 
 export const getClientAddr = (event: RequestEvent) => {
-	const hdr = event.request.headers;
-	let addr = (hdr.get('x-real-ip') || hdr.get('x-forwarded-for') || '').split(/ +/)[0];
+	const req = event.request;
+	let addr = getIp(req).split(/ +/)[0];
 	if (!addr) {
 		try {
 			addr = event.getClientAddress();

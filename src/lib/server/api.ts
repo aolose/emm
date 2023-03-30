@@ -9,6 +9,7 @@ import {
 	debugMode,
 	delCookie,
 	getClient,
+	getIp,
 	getReqJson,
 	md5,
 	mkdir,
@@ -57,7 +58,7 @@ import {
 	logCache,
 	lsRules,
 	patchDetailIpInfo,
-	ruleHit,
+	hitRules,
 	saveBlackList,
 	setFwResp
 } from '$lib/server/firewall';
@@ -419,7 +420,7 @@ const apis: APIRoutes = {
 			const total = Math.floor((l + t.size - 1) / t.size);
 			const st = l - page * size;
 			const d = lgs.slice(Math.max(st, 0), st + size).filter((a) => {
-				return t.t ? a[0] > t.t : 1;
+				return t.t ? a.createAt > t.t : 1;
 			});
 			if (t) {
 				return { total, data: patchDetailIpInfo(d) };
@@ -430,7 +431,7 @@ const apis: APIRoutes = {
 		post: auth(Read, async (req) => {
 			const ip = await req.text();
 			if (ip) {
-				const o = ruleHit({ ip });
+				const o = hitRules({ ip });
 				if (getFwResp(o?.respId)?.status === 403) return 1;
 			}
 		})
@@ -438,11 +439,7 @@ const apis: APIRoutes = {
 	rule: {
 		post: auth(Admin, async (req) => {
 			const r = model(FWRule, await req.json());
-			if (
-				(r.ip && /^(\[::1]|127\.0)/.test(r.ip)) ||
-				r.ip === req.headers.get('x-forwarded-for') ||
-				''
-			) {
+			if ((r.ip && /^(::1|127\.0)/.test(r.ip)) || r.ip === getIp(req)) {
 				return resp('invalid ip', 500);
 			}
 			addRule(r as FWRule);
@@ -507,7 +504,7 @@ const apis: APIRoutes = {
 			if (sysStatue < 2) return resp(-1, 500);
 			const tryTimes = 3;
 			const base = 1e4;
-			const ip = req.headers.get('x-forwarded-for') || '';
+			const ip = getIp(req);
 			const [q, sv] = blockIp('lg', ip);
 			if (q[1]) {
 				sv();
