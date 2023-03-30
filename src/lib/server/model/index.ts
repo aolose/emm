@@ -283,8 +283,8 @@ export class FWRule {
 			Math.max(...rates.map((a) => a[1])),
 			(times: number, dur: number) => {
 				for (const [t, d] of rates) {
-					if (dur < d) {
-						if (times >= t) return 1;
+					if (dur < d && times >= t) {
+						return 1;
 					}
 				}
 				return 0;

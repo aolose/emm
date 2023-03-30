@@ -4,10 +4,17 @@ import { db, sys } from '$lib/server/index';
 import { BlackList, FwLog, FwResp, FWRule } from '$lib/server/model';
 import { arrFilter, hasFwRuleFilter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
-import { debugMode, getClient, getClientAddr, model } from '$lib/server/utils';
+import {
+	checkRedirect,
+	getClient,
+	getClientAddr,
+	model,
+	sysStatue
+} from '$lib/server/utils';
 import { ipInfo, ipInfoStr } from '$lib/server/ipLite';
 import { permission } from '$lib/enum';
 import { ruv } from '$lib/server/puv';
+import { error } from '@sveltejs/kit';
 
 let triggers: FWRule[];
 let rules: FWRule[];
@@ -78,32 +85,32 @@ const isInRange = (str: string, num: number | undefined) => {
 	return false;
 };
 const hitRule = (
-	r: {
+	log: {
 		ip?: string;
 		path?: string;
 		method?: string;
 		status?: number;
 		headers?: Headers;
 	},
-	k: FWRule
+	rule: FWRule
 ) => {
-	const { path = '', ip = '', method = '', headers, status } = r;
-	if (!k.active) return false;
-	if (k.path && !match(k.path, path)) return false;
-	if (k.status && !isInRange(k.status, status)) return false;
-	if (k.method) {
-		const ms = k.method
+	const { path = '', ip = '', method = '', headers, status } = log;
+	if (!rule.active) return false;
+	if (rule.path && !matchRuleValue(rule.path, path)) return false;
+	if (rule.status && !isInRange(rule.status, status)) return false;
+	if (rule.method) {
+		const ms = rule.method
 			.toLowerCase()
 			.split(',')
 			.filter((a) => a);
 		const mms = new Set(ms);
 		if (!mms.has(method.toLowerCase())) return false;
 	}
-	if (k.headers && !matchHeader(k.headers, headers || new Headers())) return false;
-	if (k.ip) {
-		if (!matches(ip, k.ip)) return false;
-		if (k.country) {
-			if (!match(k.country, ipInfoStr(ip))) return false;
+	if (rule.headers && !matchHeader(rule.headers, headers || new Headers())) return false;
+	if (rule.ip) {
+		if (!matches(ip, rule.ip)) return false;
+		if (rule.country) {
+			if (!matchRuleValue(rule.country, ipInfoStr(ip))) return false;
 		}
 	}
 	return true;
@@ -156,9 +163,11 @@ let t: Timer;
 export function loadRules() {
 	rules = [];
 	triggers = [];
+	fwResp.clear();
 	db.all(model(FWRule)).forEach((a) => {
-		if (a.trigger) triggers.push(model(FWRule, a) as FWRule);
-		else rules.push(a);
+		const ru = model(FWRule, a) as FWRule
+		if (a.trigger) triggers.push(ru);
+		else rules.push(ru);
 	});
 	blackList = db.all(model(BlackList)).map((a) => model(BlackList, a) as BlackList);
 	blackList.forEach((a) => {
@@ -167,7 +176,6 @@ export function loadRules() {
 	sort();
 	clearTimeout(t);
 	t = setTimeout(loadRules, 1e3 * 3600 * 72);
-	fwResp.clear();
 	db.all(model(FwResp)).forEach((a) => fwResp.set(a.id, model(FwResp, a) as FwResp));
 }
 
@@ -176,15 +184,16 @@ type log = {
 	ip: string;
 	path: string;
 	headers: Headers;
-	status: number;
+	status?: number;
 	method: string;
 	mark?: string;
 	geo?: string;
+	log?: boolean;
 };
-export let logCache: log[] = [];
+export const logCache: log[] = [];
 const max = 1000;
 
-const addBlackListRule = (r: { ip: string; respId: number; mark?: string }) => {
+const addBlackListRule = (r: { ip: string; respId: number; mark?: string; log?: boolean }) => {
 	if (blackList.find((a) => a.ip === r.ip)) return;
 	const b = model(BlackList, r) as BlackList;
 	if (!fwResp.has(r.respId)) b.respId = 0;
@@ -221,14 +230,17 @@ export const blackLists = (page = 1, size = 20) => {
 		items: arrFilter(bs, ['id', 'ip', 'mark', 'respId', 'createAt', '_geo'], false)
 	};
 };
-const blackListCheck = (r: {
-	ip: string;
-	path?: string;
-	method?: string;
-	status?: number;
-	headers?: Headers;
-}) => {
-	const ts = triggers.filter((a) => hitRule(r, a));
+const blackListCheck = (
+	r: {
+		ip: string;
+		path?: string;
+		method?: string;
+		status?: number;
+		headers?: Headers;
+	},
+	tr: FWRule[]
+) => {
+	const ts = tr.filter((a) => hitRule(r, a));
 	const now = Date.now();
 	const times: number[] = [];
 	const max: number[] = [];
@@ -257,7 +269,8 @@ const blackListCheck = (r: {
 						addBlackListRule({
 							ip: r.ip,
 							respId: t.respId,
-							mark: t.mark
+							mark: t.mark,
+							log: t.log
 						});
 						return t;
 					}
@@ -268,12 +281,34 @@ const blackListCheck = (r: {
 	}
 };
 
-export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) => {
-	let resp: Response | undefined;
+const triggersHit = (tr: FWRule[], r: log) => {
+	if (!tr.length) return;
+	if (tr.find((a) => hitRule(r, a))) {
+		const o = blackListCheck(r, tr);
+		if (o) {
+			o.respId = o.respId || -1;
+			if (o.mark) r.mark = o.mark;
+			if (o.log) r.log = o.log;
+			const res = getFwResp(o.respId);
+			if (res) {
+				r.status = res.status;
+				return res;
+			}
+		}
+	}
+};
+
+export const saveToDb = (r: log) => {
+	db.save(model(FwLog, { ...r, headers: hds2Str(r.headers) }));
+	const del = db.count(FwLog) - (sys.maxFireLogs || max);
+	if (del > 100) {
+		db.db.prepare(`DELETE FROM FwLog WHERE id in (SELECT id FROM FwLog LIMIT ${del})`).run();
+	}
+};
+
+const logReq = (event: RequestEvent) => {
 	// skip admin
 	const ip = getClientAddr(event);
-	if (!debugMode && (getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(ip)))
-		return;
 	const {
 		request: { method, headers },
 		url: { pathname }
@@ -284,40 +319,16 @@ export const reqRLog = (event: RequestEvent, status: number, fr?: Obj<FWRule>) =
 		ip,
 		path,
 		headers,
-		status,
 		ipInfo,
-		mark: fr?.mark,
 		method
 	} as log;
-	ruv({ ip, path, ua: headers.get('user-agent') || '', status });
-	if (path !== '/api/log') logCache.push(r);
-	if (!fr?.respId && triggers.find((a) => hitRule(r, a))) {
-		const o = blackListCheck(r);
-		if (o) {
-			o.respId = o.respId || -1;
-			resp = getFwResp(o.respId);
-			if (resp) r.status = status = resp.status;
+	if (path !== '/api/log') {
+		logCache.push(r);
+		if (logCache.length > max + 100) {
+			logCache.splice(0, max - 100);
 		}
 	}
-	const l = logCache.length;
-	if (l > max) logCache = logCache.slice(l - max);
-	if (fr?.log) {
-		db.save(
-			model(FwLog, {
-				path,
-				ip,
-				mark: fr.mark,
-				headers: hds2Str(headers),
-				method,
-				status
-			})
-		);
-		const del = db.count(FwLog) - (sys.maxFireLogs || 1000);
-		if (del > 100) {
-			db.db.prepare(`DELETE FROM FwLog WHERE id in (SELECT id FROM FwLog LIMIT ${del})`).run();
-		}
-	}
-	return resp;
+	return r;
 };
 
 export const patchDetailIpInfo = (d: log[]) => {
@@ -352,15 +363,10 @@ export const filterLog = (logs: log[], t: FWRule) => {
 		: logs;
 };
 
-/**
- * compare
- * @param rule
- * @param target
- */
-function match(rule: string, target: string) {
-	const rv = rule.startsWith('!');
-	if (rv) rule = rule.substring(1);
-	const reg = rule.match(/^\/(.*?)\/([gimy]+)?$/);
+function matchRuleValue(value: string, target: string) {
+	const rv = value.startsWith('!');
+	if (rv) value = value.substring(1);
+	const reg = value.match(/^\/(.*?)\/([gimy]+)?$/);
 	let hit = false;
 	if (reg) {
 		try {
@@ -372,7 +378,7 @@ function match(rule: string, target: string) {
 		} catch (e) {
 			console.log(e);
 		}
-	} else if (target === rule) {
+	} else if (target === value) {
 		hit = true;
 	}
 	return rv ? !hit : hit;
@@ -386,17 +392,16 @@ function matchHeader(h: string, hs: Headers) {
 			const k = m[1];
 			const v = m[2];
 			const hv = hs.get(k) || '';
-			if (!match(v, hv)) return false;
+			if (!matchRuleValue(v, hv)) return false;
 		}
 	}
 	return true;
 }
 
-export const fwFilter = (event: RequestEvent, rs = rules): Obj<FWRule> | undefined => {
+const fwFilter = (event: RequestEvent, rs = rules): Obj<FWRule> | undefined => {
 	if (!db) return;
 	if (!rs || !rs.length) loadRules();
 	const ip = getClientAddr(event);
-	if (/^(::1|127\.0)/.test(ip) && !debugMode) return;
 	const path = event.url.pathname;
 	const headers = event.request.headers;
 	const method = event.request.method.toLowerCase();
@@ -430,4 +435,63 @@ export const blockIp = (key: string, ip: string): [bkRec, () => void] => {
 			}
 		}
 	];
+};
+
+export const firewallProcess = async (event: RequestEvent, handle: () => Promise<Response>) => {
+	let res: Response | undefined;
+	const pn = event.url.pathname;
+	const skipLog =
+		getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(getClientAddr(event));
+
+	if (!/^\/(api|res|font|src)/.test(pn)) {
+		const p = checkRedirect(sysStatue, pn, event.request);
+		if (p) {
+			res = new Response('', {
+				status: 307,
+				headers: new Headers({
+					location: p
+				})
+			});
+		}
+	}
+
+	if (skipLog) {
+		return res || (await handle());
+	}
+
+	const fr = fwFilter(event);
+	if (fr?.respId) {
+		res = getFwResp(fr.respId);
+	}
+	const log = logReq(event);
+	if (fr) {
+		log.mark = fr.mark;
+		if (fr.respId) {
+			res = getFwResp(fr.respId);
+		}
+	}
+	const sTr: FWRule[] = [];
+	const nTr: FWRule[] = [];
+	triggers.forEach((a) => {
+		if (a.status) sTr.push(a);
+		else nTr.push(a);
+	});
+	if (res) {
+		log.status = res?.status;
+	} else {
+		res = triggersHit(nTr, log);
+	}
+	if (!res) {
+		res = await handle();
+		log.status = res.status;
+		res = triggersHit(sTr, log) || res;
+	}
+	if (fr?.log || log.log) {
+		saveToDb(log);
+	}
+	if (res) {
+		ruv({ ip: log.ip, path: log.path, ua: log.headers.get('user-agent') || '', status: res.status });
+		return res;
+	}
+	throw error(400)
 };
