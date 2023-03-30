@@ -89,13 +89,9 @@
 							<Ck bind:value={d.trigger}>trigger</Ck>
 						</label>
 					{/if}
-					{#if !d.trigger}
-						<label transition:slidLeft>
-							<Ck bind:value={d.log}>log</Ck>
-						</label>
-					{:else}
-						<s />
-					{/if}
+					<label transition:slidLeft>
+						<Ck bind:value={d.log}>log</Ck>
+					</label>
 				</div>
 			{/if}
 			<div class="f0">

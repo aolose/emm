@@ -24,7 +24,6 @@
 				if (d.country) d.country = '';
 				if (d.method) d.method = '';
 				if (d.ip) d.ip = '';
-				if (d.log) d.log = '';
 			} else {
 				if (d.status) d.status = '';
 				if (d.times) d.times = -1;
