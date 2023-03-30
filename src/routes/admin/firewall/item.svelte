@@ -20,14 +20,14 @@
 <div class="r" class:act={sel.has(tm + ip)} on:click={ck(tm + ip)}>
 	<div class="r0"><span>{time(tm)}</span></div>
 	<div class="r1"><span>{ip}</span></div>
-	<div class="r6"><span title={mt}>{(mt || '').toUpperCase()}</span></div>
 	<div class="r3">
 		<span class:c0={col(st, 0)} class:c1={col(st, 1)} class:c2={col(st, 2)} class:c3={col(st, 3)}
 			>{st}</span
 		>
 	</div>
+	<div class="r3"><span title={ct}>{ct}</span></div>
 	<div class="r2"><span title={decodeURI(ph)}>{decodeURI(ph)}</span></div>
-	<div class="r6"><span title={ct}>{ct}</span></div>
+	<div class="r6"><span title={mt}>{mt}</span></div>
 	<div class="r4"><span>{mk || ''}</span></div>
 	<div class="r5">
 		<button
@@ -134,7 +134,7 @@
 	}
 
 	.r3 {
-		width: 80px;
+		width: 60px;
 	}
 
 	.r4 {
