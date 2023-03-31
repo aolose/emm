@@ -106,7 +106,8 @@
 			}
 
 			del{
-				opacity: .7;
+				color: rgba(100,120,150,.8);
+				text-decoration-color: #6c85ff;
 			}
 
 			.head {
