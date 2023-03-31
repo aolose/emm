@@ -105,12 +105,12 @@
 				line-height: 2;
 			}
 
-			.head {
-				text-decoration: none;
+			del{
+				opacity: .7;
 			}
 
-			p {
-				//white-space: pre-wrap;
+			.head {
+				text-decoration: none;
 			}
 
 			p,
