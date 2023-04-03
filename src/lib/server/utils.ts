@@ -505,11 +505,9 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 		if (isCfg||/^\/(admin)/i.test(path)) return login;
 		return '';
 	}
-	if (!done) {
-		if (!done && !isCfg) {
+	if (!done && !isCfg) {
 			return config;
-		}
-	} else if (done &&isCfg) {
+	} else if (done && isCfg) {
 		return '/';
 	}
 	return '';
