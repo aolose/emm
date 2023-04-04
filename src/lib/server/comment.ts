@@ -16,6 +16,7 @@ import { randomUUID } from 'crypto';
 import { filter, trim } from '$lib/utils';
 import { cmStatus, permission } from '$lib/enum';
 import type { Obj } from '$lib/types';
+import { ipInfoStr } from '$lib/server/ipLite';
 const fixOwn = (uid: number, a: Obj<Comment>, isAdm?: boolean) => {
 	if (uid && uid === a.userId) {
 		a._own = 1;
@@ -172,6 +173,7 @@ export const cmManager = (() => {
 			return pageBuilder(page, slug ? 5 : 10, Comment, ['createAt desc'], ks, w, (arr) => {
 				const postCache = new Map<number, { title: string; slug: string }>();
 				arr.forEach((a) => {
+					if (a.ip) a._geo = ipInfoStr(a.ip);
 					if (slug && !topic && a.subCm) {
 						a._cms = subCm(a.subCm, 1, tk, isAdm);
 					}
@@ -284,30 +286,32 @@ export const cmManager = (() => {
 			if (cm.content) cm.content = cm.content?.slice(0, 512);
 			const user = model(CmUser, { token: tk }) as CmUser;
 			const isAdm = getClient(req)?.ok(permission.Admin);
-			if (!isAdm && cm.isAdm) return errMsg('no permission', 1, 401);
-			if (tk) {
-				if (!isAdm) {
+			// ensure cm permission
+			if (!isAdm) {
+				if (cm.isAdm) return errMsg('no permission', 1, 403);
+				if (tk) {
 					const gu = db.get(user) as CmUser;
-					if (!gu || gu.exp < n) return errMsg('invalid cookie', 0, 401);
-					else {
-						Object.assign(user, gu, user);
-					}
+					if (!gu || gu.exp < n) return errMsg('invalid cookie', 0, 403);
+					Object.assign(user, gu, user);
+				} else {
+					if (cm.id) return errMsg('no permission', 1, 403);
+					user.token = randomUUID();
 				}
-				if (cm.id) {
-					const c = db.get(model(Comment, { id: cm.id }));
-					if (!c) return errMsg('comment not exist');
-					else {
-						delete cm.isAdm;
-						db.save(cm);
-						return {
-							save: cm.save
-						};
-					}
-				}
-			} else {
-				if (cm.id && !isAdm) return errMsg('no permission', 1, 401);
-				user.token = randomUUID();
 			}
+
+			if (cm.id) {
+				const c = db.get(model(Comment, { id: cm.id }));
+				if (!c) return errMsg('comment not exist');
+				else {
+					if (!isAdm && cm.userId !== user.id) return errMsg('no permission', 1, 403);
+					delete cm.isAdm;
+					db.save(cm);
+					return {
+						save: cm.save
+					};
+				}
+			}
+
 			let top: Comment | undefined;
 			let rp: Comment | undefined;
 			if (cm.topic) {

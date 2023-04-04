@@ -105,8 +105,8 @@
 				line-height: 2;
 			}
 
-			del{
-				color: rgba(100,120,150,.8);
+			del {
+				color: rgba(100, 120, 150, 0.8);
 				text-decoration-color: #6c85ff;
 			}
 

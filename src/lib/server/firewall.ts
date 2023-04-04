@@ -4,13 +4,7 @@ import { db, sys } from '$lib/server/index';
 import { BlackList, FwLog, FwResp, FWRule } from '$lib/server/model';
 import { arrFilter, hasFwRuleFilter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
-import {
-	checkRedirect,
-	getClient,
-	getClientAddr,
-	model,
-	sysStatue
-} from '$lib/server/utils';
+import { checkRedirect, getClient, getClientAddr, model, sysStatue } from '$lib/server/utils';
 import { ipInfo, ipInfoStr } from '$lib/server/ipLite';
 import { permission } from '$lib/enum';
 import { ruv } from '$lib/server/puv';
@@ -165,7 +159,7 @@ export function loadRules() {
 	triggers = [];
 	fwResp.clear();
 	db.all(model(FWRule)).forEach((a) => {
-		const ru = model(FWRule, a) as FWRule
+		const ru = model(FWRule, a) as FWRule;
 		if (a.trigger) triggers.push(ru);
 		else rules.push(ru);
 	});
@@ -490,8 +484,13 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		saveToDb(log);
 	}
 	if (res) {
-		ruv({ ip: log.ip, path: log.path, ua: log.headers.get('user-agent') || '', status: res.status });
+		ruv({
+			ip: log.ip,
+			path: log.path,
+			ua: log.headers.get('user-agent') || '',
+			status: res.status
+		});
 		return res;
 	}
-	throw error(400)
+	throw error(400);
 };
