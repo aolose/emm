@@ -73,7 +73,7 @@
 							{d._post?.title}
 						</a>
 					{/if}
-					<span>{d.ip || '-'}</span>
+					<span>{d.ip || ''} {d._geo || ''}</span>
 					<span>create at: {time(d.createAt)}</span>
 					{#if d.save} <span>update at: {time(d.save)}</span>{/if}
 				</div>

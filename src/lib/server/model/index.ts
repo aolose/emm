@@ -162,6 +162,7 @@ export class Comment {
 	@primary
 	id = INT;
 	ip = TEXT;
+	_geo?: string;
 	_name = TEXT;
 	_avatar = INT;
 	@noNull

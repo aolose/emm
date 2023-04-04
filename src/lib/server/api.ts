@@ -350,7 +350,7 @@ const apis: APIRoutes = {
 		}),
 		get: auth(Read, async (req) => {
 			const params = new URL(req.url).searchParams;
-			const page = +(params.get('page')||1)||1;
+			const page = +(params.get('page') || 1) || 1;
 			const name = decodeURI(params.get('name') || '');
 			const type = decodeURI(params.get('type') || '');
 			const where: string[] = [];
@@ -624,8 +624,8 @@ const apis: APIRoutes = {
 	posts: {
 		get: async (req) => {
 			const params = new URL(req.url).searchParams;
-			const page = +(params.get('page') || 1)||1;
-			const size = +(params.get('size') || 10)||10;
+			const page = +(params.get('page') || 1) || 1;
+			const size = +(params.get('size') || 10) || 10;
 			const tag = decodeURI(params.get('tag') || '');
 			const tagInfo = !!params.get('inf');
 			const skips = noAccessPosts(getClient(req));

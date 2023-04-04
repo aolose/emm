@@ -496,17 +496,17 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 	const done = statue === 9;
 	const login = '/login';
 	const config = '/config';
-	const isCfg = path===config
+	const isCfg = path === config;
 	if (statue > 1 && !done) {
 		const client = getClient(req);
 		needLogin = !client?.ok(permission.Read);
 	}
 	if (needLogin && !debugMode) {
-		if (isCfg||/^\/(admin)/i.test(path)) return login;
+		if (isCfg || /^\/(admin)/i.test(path)) return login;
 		return '';
 	}
 	if (!done && !isCfg) {
-			return config;
+		return config;
 	} else if (done && isCfg) {
 		return '/';
 	}
