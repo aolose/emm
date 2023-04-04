@@ -15,6 +15,11 @@ let rules: FWRule[];
 let blackList: BlackList[];
 const fwResp = new Map<number, FwResp>();
 
+const getPathName = (u:URL|string)=>{
+	u = new URL(u)
+	return decodeURIComponent(u.href.slice(u.origin.length))
+}
+
 function sort() {
 	triggers.sort((a, b) => b.createAt - a.createAt);
 	rules.sort((a, b) => b.createAt - a.createAt);
@@ -305,9 +310,9 @@ const logReq = (event: RequestEvent) => {
 	const ip = getClientAddr(event);
 	const {
 		request: { method, headers },
-		url: { pathname }
+		url
 	} = event;
-	const path = pathname;
+	const path = getPathName(url)
 	const r = {
 		createAt: Date.now(),
 		ip,
@@ -318,8 +323,9 @@ const logReq = (event: RequestEvent) => {
 	} as log;
 	if (path !== '/api/log') {
 		logCache.push(r);
-		if (logCache.length > max + 100) {
-			logCache.splice(0, max - 100);
+		const s = logCache.length-max
+		if (s >  100) {
+			logCache.splice(0, s);
 		}
 	}
 	return r;
@@ -396,7 +402,7 @@ const fwFilter = (event: RequestEvent, rs = rules): Obj<FWRule> | undefined => {
 	if (!db) return;
 	if (!rs || !rs.length) loadRules();
 	const ip = getClientAddr(event);
-	const path = event.url.pathname;
+	const path = getPathName(event.url);
 	const headers = event.request.headers;
 	const method = event.request.method.toLowerCase();
 	return hitRules({
@@ -433,7 +439,7 @@ export const blockIp = (key: string, ip: string): [bkRec, () => void] => {
 
 export const firewallProcess = async (event: RequestEvent, handle: () => Promise<Response>) => {
 	let res: Response | undefined;
-	const pn = event.url.pathname;
+	const pn = getPathName(event.url);
 	const skipLog =
 		getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(getClientAddr(event));
 
