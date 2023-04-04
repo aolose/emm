@@ -305,7 +305,7 @@ export const cmManager = (() => {
 				else {
 					if (!isAdm && cm.userId !== user.id) return errMsg('no permission', 1, 403);
 					delete cm.isAdm;
-					db.save(cm);
+					db.save(cm,{skipSave:isAdm});
 					return {
 						save: cm.save
 					};
