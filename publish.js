@@ -1,11 +1,13 @@
 import fs from 'fs';
 import fes from 'fs-extra';
 import pkg from './package.json' assert { type: 'json' };
-
+pkg.name='emm-blog'
+pkg.keywords=['svelte','blog','svelteKit-blog']
+pkg.homepage='https://github.com/aolose/emm'
+pkg.description='A personal blog system built with SvelteKit'
 delete pkg.devDependencies;
-delete pkg.name;
+delete pkg.prepare;
 delete pkg.private;
-delete pkg.version;
 const env = '.env.production';
 const lock = 'pnpm-lock.yaml';
 const npm = '.npmrc';
@@ -18,6 +20,6 @@ fes.moveSync('./app', './dist/app');
 fs.copyFileSync(env, './dist/' + env);
 fs.copyFileSync(npm + '.build', './dist/' + npm);
 fs.copyFileSync(lock, './dist/' + lock);
-fs.writeFileSync('./dist/package.json', JSON.stringify(pkg), { flag: 'w' });
+fs.writeFileSync('./dist/package.json', JSON.stringify(pkg,null,' '), { flag: 'w' });
 if (fs.existsSync('.cssCache.json')) fs.rmSync('.cssCache.json');
 console.log('publish done!');
