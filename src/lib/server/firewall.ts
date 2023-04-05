@@ -441,7 +441,7 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	let res: Response | undefined;
 	const pn = getPathName(event.url);
 	const skipLog =
-		getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(getClientAddr(event));
+		sysStatue<2||getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(getClientAddr(event));
 
 	if (!/^\/(api|res|font|src)/.test(pn)) {
 		const p = checkRedirect(sysStatue, pn, event.request);
