@@ -23,7 +23,7 @@
 		margin: 0 20px;
 
 		&:hover {
-			color: #6fa1da;
+			color: #509eff;
 		}
 
 		@include s() {

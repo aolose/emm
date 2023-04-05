@@ -15,7 +15,7 @@
 	</div>
 	<a class="rs" href="/rss">RSS</a>
 	<div class="mu">
-		<a href="/posts" transition:slidLeft|local>Posts -></a>
+		<a href="/posts" transition:slidLeft class="a">Enter -></a>
 	</div>
 </div>
 
@@ -23,27 +23,32 @@
 	@import '../../lib/break';
 	.mu {
 		position: absolute;
-		right: 0;
-		bottom: 0;
-		padding: 30px;
+		bottom: 30px;
+		right: 20px;
 		z-index: 3;
 	}
-
+  @keyframes a {
+    40%{transform: rotateZ(0) scale(1)}
+    50%{transform: rotateZ(10deg) scale(1)}
+    60%{transform: rotateZ(0) scale(1)}
+	}
+	.a{
+		animation: a infinite 2s reverse  linear;
+		transition: transform 0.2s ease-in-out;
+		font-size: 22px;
+		@include s(){
+       font-size: 20px;
+		}
+	}
 	a {
 		text-align: left;
 		display: block;
 		font-size: 20px;
 		font-family: 'Architects Daughter';
 		position: relative;
-		opacity: 0.8;
 		white-space: nowrap;
 		overflow: hidden;
 		color: #000;
-		transition: 0.3s ease-in-out;
-
-		&:hover {
-			opacity: 1;
-		}
 	}
 
 	.b {
@@ -70,5 +75,10 @@
 		padding: 5px 15px;
 		opacity: 0.7;
 		border-radius: 100px;
+	}
+	@include s(){
+		.mu,.rs{
+			bottom: 20px;
+		}
 	}
 </style>
