@@ -15,7 +15,7 @@
 	</div>
 	<a class="rs" href="/rss">RSS</a>
 	<div class="mu">
-		<a href="/posts" transition:slidLeft class="a">Enter -></a>
+		<a href="/posts" transition:slidLeft class="a">Enter ➜</a>
 	</div>
 </div>
 
@@ -28,12 +28,13 @@
 		z-index: 3;
 	}
   @keyframes a {
-    40%{transform: rotateZ(0) scale(1)}
-    50%{transform: rotateZ(10deg) scale(1)}
-    60%{transform: rotateZ(0) scale(1)}
+    46%{transform: rotateZ(-3deg) scale(1)}
+    49%{transform: rotateZ(8deg) scale(1)}
+    51%{transform: rotateZ(-8deg) scale(1)}
+    55%{transform: rotateZ(3deg) scale(1)}
 	}
 	.a{
-		animation: a infinite 2s reverse  linear;
+		animation: a infinite 4s reverse ease-in-out;
 		transition: transform 0.2s ease-in-out;
 		font-size: 22px;
 		@include s(){
