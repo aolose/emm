@@ -210,7 +210,7 @@ export const reqPostCache = (() => {
 		},
 		setPosts(reqId: number, postId: number[]) {
 			const { add, del } = (diffStrSet as DiffFn<Set<number>>)(
-				new Set(c.map((a) => a.targetId)),
+				new Set(c.filter(a=>a.reqId===reqId).map((a) => a.targetId)),
 				new Set(postId)
 			);
 			if (del) reqPostCache.rm({ postId: [...del], reqId });
@@ -220,7 +220,7 @@ export const reqPostCache = (() => {
 		},
 		setReqs(postId: number, reqId: number[]) {
 			const { add, del } = (diffStrSet as DiffFn<Set<number>>)(
-				new Set(c.map((a) => a.targetId)),
+				new Set(c.filter(a=>a.targetId===postId).map((a) => a.reqId)),
 				new Set(reqId)
 			);
 			if (del) reqPostCache.rm({ postId, reqId: [...del] });

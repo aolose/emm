@@ -216,6 +216,7 @@
 	}
 
 	.a {
+		z-index: 5;
 		padding-bottom: 10px;
 		display: flex;
 		flex-direction: column;
