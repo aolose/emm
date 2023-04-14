@@ -8,6 +8,7 @@ import { codeTokens, reqPostCache, requireMap, tagPostCache } from '$lib/server/
 import { loadRules } from '$lib/server/firewall';
 import { sitemap } from '$lib/sitemap';
 import { loadPuv } from '$lib/server/puv';
+import { cmManager } from '$lib/server/comment';
 
 export let sys: System;
 export let db: DB;
@@ -36,6 +37,7 @@ export const server = {
 		const ts = db.db.prepare('select * from Tag order by createAt desc').all();
 		tags.set(ts.map((a) => DBProxy(Tag, a, false)));
 		requireMap.clear();
+		cmManager.clear();
 		tagPostCache.load();
 		publishedPost.set(
 			new Set(
