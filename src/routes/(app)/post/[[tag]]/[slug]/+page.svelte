@@ -179,7 +179,7 @@
 		padding: 60px 80px;
 		box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
 		@include s() {
-			padding: 20px 40px;
+			padding: 20px 20px;
 			margin: 0;
 			min-height: 67vh;
 		}
