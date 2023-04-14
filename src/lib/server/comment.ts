@@ -49,15 +49,17 @@ export const cmManager = (() => {
 		return getCookie(req, ck);
 	}
 
-	let clear = 0;
-	setInterval(() => {
-		if (clear) {
+	let clear = 1;
+	function clearUser(){
+		if (clear&&db?.db) {
 			const n = Date.now();
 			db.db.prepare(`delete from CmUser where del=? and exp<?`).run(1, n);
 			userCache.clear();
 			clear = 0;
 		}
-	}, 1e3 * 3600 * 12);
+	}
+	setTimeout(clearUser,1e4)
+	setInterval(clearUser, 1e3 * 3600 * 12);
 	const patchUserInfo = (a: Obj<Comment>) => {
 		if (a.userId) {
 			const u = getUser(a.userId) as CmUser;
@@ -116,7 +118,12 @@ export const cmManager = (() => {
 			}
 		);
 	};
+
 	return {
+		clear(){
+			userCache.clear()
+			clearUser()
+		},
 		list: async (req: Request) => {
 			const params = new URL(req.url).searchParams;
 			const topic = +(params.get('topic') || 0);
@@ -340,7 +347,7 @@ export const cmManager = (() => {
 				if (cm._avatar) user.avatar = cm._avatar;
 				let name = trim(cm._name || '');
 				if (name) {
-					if (/admin/g.test(name)) name = 'fake admin';
+					if (name.toLocaleLowerCase()==='admin') name = 'visitor';
 					user.name = name;
 				}
 				user.exp = expire + n;
