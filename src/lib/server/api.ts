@@ -875,8 +875,10 @@ const apis: APIRoutes = {
 		})
 	},
 	sys: {
-		get: auth(Read, () => {
-			return filter(sys, sysKs);
+		get: auth(Read, (req) => {
+			const ks = sysKs
+			if(getClient(req)?.ok(Admin))ks.push('ipLiteToken')
+			return filter(sys, ks);
 		}),
 		post: auth(Admin, async (req) => {
 			const o = filter(await req.json(), sysKs) as System;
@@ -954,7 +956,6 @@ const sysKs: (keyof System)[] = [
 	'uploadDir',
 	'maxFireLogs',
 	'thumbDir',
-	'ipLiteToken',
 	'ipLiteDir',
 	'seoKey',
 	'seoDesc'
