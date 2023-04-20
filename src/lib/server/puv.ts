@@ -1,7 +1,7 @@
-import { model } from '$lib/server/utils';
+import { model, sysStatue } from "$lib/server/utils";
 import { RPU, RPUCache } from '$lib/server/model';
 import isbot from 'isbot';
-import { db } from '$lib/server/index';
+import { db, server } from "$lib/server/index";
 import { arrFilter } from '$lib/utils';
 
 let rqH = 0;
@@ -44,6 +44,7 @@ export const loadPuv = () => {
 };
 
 const save = () => {
+	if(sysStatue<2||server.maintain)return;
 	changed = 0;
 	const now = Date.now();
 	const nh = Math.floor(now / hour);

@@ -34,6 +34,7 @@ import { writable } from 'svelte/store';
 import type { Unsubscriber, Writable } from 'svelte/types/runtime/store';
 import fse from 'fs-extra';
 import JSZip from 'jszip';
+import type { Post } from "$lib/server/model";
 
 export const is_dev = process.env.NODE_ENV !== 'production';
 
@@ -155,7 +156,7 @@ export const uniqSlug = (id: number, slug: string) => {
 	const slugs = db.db
 		.prepare(sql)
 		.all(...params)
-		.map((a) => a.slug);
+		.map((a) => (a as Post).slug);
 	if (slugs.length) {
 		const n = slugs
 			.map((a) => +a.replace(slug, ''))
