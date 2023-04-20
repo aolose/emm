@@ -42,7 +42,7 @@ export async function regHjs(lan: Set<string>) {
 					reg = await import('highlight.js/lib/languages/xml');
 					break;
 				case 'v':
-					reg = await import('./lang/v');
+					reg = await import('./lang/v.js');
 					break;
 				case 'go':
 					reg = await import('highlight.js/lib/languages/go');

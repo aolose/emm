@@ -1,6 +1,6 @@
 import { DB } from './db/sqlite3';
 import { checkStatue, DBProxy, model } from './utils';
-import { Require, System, Tag } from './model';
+import { Post, Require, System, Tag } from "./model";
 import { publishedPost, tags } from '$lib/server/store';
 import { loadGeoDb } from '$lib/server/ipLite';
 import { codeTokens, reqPostCache, requireMap, tagPostCache } from '$lib/server/cache';
@@ -34,7 +34,7 @@ export const server = {
 		}
 	},
 	sync() {
-		const ts = db.db.prepare('select * from Tag order by createAt desc').all();
+		const ts = db.db.prepare('select * from Tag order by createAt desc').all() as Tag[];
 		tags.set(ts.map((a) => DBProxy(Tag, a, false)));
 		requireMap.clear();
 		cmManager.clear();
@@ -44,7 +44,7 @@ export const server = {
 				db.db
 					.prepare('select id from Post where published=?')
 					.all(1)
-					.map((a) => +a.id)
+					.map((a) => +(a as Post).id)
 			)
 		);
 		db.all(model(Require)).forEach((r) => {

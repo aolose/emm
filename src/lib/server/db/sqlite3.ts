@@ -120,7 +120,7 @@ export class DB {
 			sql = `${sql} where ${where[0]}`;
 			params = where.slice(1);
 		}
-		return this.db.prepare(sql).get(...params).c as number;
+		return (this.db.prepare(sql).get(...params) as {c:number}).c;
 	}
 
 	page<T extends Model>(
@@ -164,7 +164,7 @@ export class DB {
 		}
 		const table = o.constructor.name;
 		if (changeSave && !skipSave) setKey(a, 'save', now);
-		const pk = getPrimaryKey(table) as keyof typeof o & string;
+		const pk = getPrimaryKey(table) as keyof Obj<Model> & string;
 		const kv = val(o[pk]);
 		let sql: string;
 		let values: unknown[];
@@ -180,10 +180,12 @@ export class DB {
 		const r = this.db.prepare(sql).run(...values);
 		if (pk && r.changes === 1 && !kv) {
 			const t = typeof kv;
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			o[pk] =
 				t === 'number' || t === 'bigint'
 					? r.lastInsertRowid
-					: this.db.prepare(`select ${pk} from ${table} where rowid=?`).get(r.lastInsertRowid)[pk];
+					: (this.db.prepare(`select ${pk} from ${table} where rowid=?`).get(r.lastInsertRowid) as {[key:string]:bigint})[pk];
 		}
 		return r;
 	}
@@ -229,12 +231,12 @@ export class DB {
 			const name = s.name;
 			if (exist.has(name)) {
 				const info = {} as { [key: string]: columnInfo };
-				this.db.pragma(`table_info(${name})`).forEach((a: columnInfo) => (info[a.name] = a));
-				const idxInf = this.db.pragma(`index_list(${name})`);
+				(this.db.pragma(`table_info(${name})`) as []).forEach((a: columnInfo) => (info[a.name] = a));
+				const idxInf = this.db.pragma(`index_list(${name})`) as ({name:string,unique:boolean})[];
 				if (idxInf.length) {
 					idxInf.forEach((a: { name: string; unique: boolean }) => {
 						if (a && a.unique) {
-							const i = this.db.pragma(`index_info(${a.name})`)[0] as columnInfo;
+							const i = (this.db.pragma(`index_info(${a.name})`) as columnInfo[])[0];
 							info[i.name].unique = 1;
 						}
 					});
@@ -282,6 +284,6 @@ export class DB {
             type ='table' AND name NOT LIKE 'sqlite_%';`
 			)
 			.all()
-			.map((a) => a.name);
+			.map((a) => (a as {name:string}).name);
 	}
 }
