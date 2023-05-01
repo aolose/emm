@@ -443,7 +443,7 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	const skipLog =
 		sysStatue<2||getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(getClientAddr(event));
 
-	if (!/^\/(api|res|font|src)/.test(pn)) {
+	if (!/^\/(api|res|font|src|manifest\.json)/.test(pn)) {
 		const p = checkRedirect(sysStatue, pn, event.request);
 		if (p) {
 			res = new Response('', {

@@ -71,10 +71,10 @@ import {
 	getPostSibling,
 	getPubTags,
 	noAccessPosts,
-	patchPostTags,
+	patchPostTags, readManager,
 	reqPostCache,
 	tagPostCache
-} from '$lib/server/cache';
+} from "$lib/server/cache";
 import { versionStrPatch } from '$lib/setStrPatchFn';
 import { NULL } from '$lib/server/enum';
 import { cmManager } from '$lib/server/comment';
@@ -690,9 +690,11 @@ const apis: APIRoutes = {
 					const [pre, next] = getPostSibling(p.id, p.createAt, decodeURI(tag), skips || []);
 					if (pre) p._u = pre;
 					if (next) p._n = next;
+					readManager.set(p.id,req)
+					p._r=readManager.get(p.id)
 					return filter(
 						patchPostTags([p])[0],
-						['banner', '_cm', 'desc', 'content', 'createAt', '_tag', 'title', '_u', '_n'],
+						['banner', '_cm', 'desc', 'content', 'createAt', '_tag', 'title', '_u', '_n','_r'],
 						false
 					);
 				}
@@ -701,6 +703,7 @@ const apis: APIRoutes = {
 		},
 		delete: auth(Admin, async (req) => {
 			const i = new Uint8Array(await req.arrayBuffer());
+			i.forEach(readManager.rm);
 			return db.delByPk(Post, [...i]).changes;
 		}),
 		patch: auth(Admin, async (req) => {
@@ -729,7 +732,7 @@ const apis: APIRoutes = {
 			if (!o.id) {
 				if (flag === o._) {
 					o.id = id;
-				} else o.id = NULL.INT;
+				}
 			}
 			const d = model(Post, o) as { id: number };
 			db.save(d);

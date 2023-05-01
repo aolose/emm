@@ -65,7 +65,10 @@
 					<div class="h">
 						<h1>{d.title}</h1>
 						{#if d.desc}<p>{d.desc}</p>{/if}
-						<span>{time(d.createAt)}</span>
+						<div class="i">
+							<span><span  class="icon i-view"></span>{d._r}</span>
+							<span>{time(d.createAt)}</span>
+						</div>
 					</div>
 					<div class="art">
 						<div class="ct" use:imageViewer>
@@ -281,17 +284,21 @@
 			text-align: left;
 			max-width: 80%;
 		}
-
-		span {
-			width: 100%;
-			display: block;
-			text-align: right;
+	}
+  .i{
+		width: 100%;
+    display: flex;
+		justify-content: center;
+		span{
+			padding:  0 3px;
+			width: auto;
 			font-size: 12px;
 			color: #ddd;
-			font-style: italic;
+		}
+		&>span {
+			margin: 0 10px;
 		}
 	}
-
 	h1 {
 		max-width: 70%;
 		color: inherit;

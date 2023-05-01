@@ -15,14 +15,14 @@ export const GET: RequestHandler = ({ request }) => {
 	});
 	const data = {
 		$schema: 'https://json.schemastore.org/web-manifest-combined.json',
-		name: sys.blogName,
-		short_name: sys.blogName,
+		name: sys?.blogName,
+		short_name: sys?.blogName,
 		start_url: '/',
 		display: 'standalone',
 		background_color: '#000',
 		scope: '/',
 		theme_color: '#000',
-		description: sys.seoDesc,
+		description: sys?.seoDesc,
 		icons: icons
 	};
 	const headers = {

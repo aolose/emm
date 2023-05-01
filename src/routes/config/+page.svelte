@@ -5,7 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { clientRestore, trim } from '$lib/utils';
 	import Ld from '$lib/components/loading.svelte';
-	import { confirm, statueSys } from '$lib/store';
+	import { confirm, statueSys, status } from "$lib/store";
 	import Head from '$lib/components/Head.svelte';
 
 	export let data;
@@ -60,7 +60,9 @@
 	};
 
 	let tip = '';
-	const fail = (e) => (err = e?.data || e);
+	const fail = (e) => {
+		(err = e?.data || e);
+	}
 	const ck = (n) => {
 		const v = o[n];
 		if (!v) return;
@@ -94,8 +96,7 @@
 		}
 	);
 
-	async function submit(e) {
-		e.preventDefault();
+	async function submit() {
 		switch (step) {
 			case 0:
 				if (!db) db = defaultPath;
@@ -122,6 +123,7 @@
 			case 3:
 				req('setGeo', ipTk || ipDir ? ipTk + ',' + ipDir : '')
 					.then(() => {
+						status.set(1);
 						goto('/admin', { replaceState: true });
 					})
 					.catch(fail);
@@ -146,7 +148,7 @@
 			<span class="icon i-upload" />
 		</button>
 	</div>
-	<form on:submit={submit}>
+	<div class="fm">
 		{#if step === 0}
 			<div class="f" class:act={db} transition:fade>
 				<h1>{steps[0]}</h1>
@@ -155,7 +157,7 @@
 						<input placeholder={defaultPath} bind:value={db} />
 						<i />
 					</div>
-					<button>submit</button>
+					<button  on:click={submit}>submit</button>
 				</div>
 			</div>
 		{/if}
@@ -232,7 +234,7 @@
 				<pre>{err}</pre>
 			</div>
 		{/if}
-	</form>
+	</div>
 	<Ld {act} />
 </div>
 
@@ -423,7 +425,7 @@
 		justify-content: center;
 	}
 
-	form {
+	.fm {
 		flex: 1;
 		height: 100%;
 		display: flex;
