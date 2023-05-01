@@ -78,7 +78,7 @@ export class Post {
 	_p = 0; // publish mode
 	_reqs?: string | { id: number; name: string }[]; // permissions
 	// reqId
-  _r?:number // read
+	_r?: number; // read
 	onSave(db: DB, now: number) {
 		const { id, title_d, title, content_d } = this;
 		const oo = id ? db.get(model(this.constructor as FunctionConstructor, { id })) : {};
@@ -400,12 +400,11 @@ export class RPUCache {
 	value = TEXT;
 }
 
-
 export class PostRead {
 	@primary
 	id = INT;
-	pid=INT;
-	ip=TEXT
-	ua=TEXT
-	createAt=TEXT
+	pid = INT;
+	ip = TEXT;
+	ua = TEXT;
+	createAt = TEXT;
 }

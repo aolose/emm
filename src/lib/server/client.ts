@@ -96,7 +96,7 @@ export class Client {
 			switch (k) {
 				case permission.Admin:
 				case permission.Read:
-					if (v > -1 && v < n) this.tokens.delete(permission.Admin);
+					if (typeof v === 'number' && v > -1 && v < n) this.tokens.delete(permission.Admin);
 					else keep = 1;
 					break;
 				case permission.Post:

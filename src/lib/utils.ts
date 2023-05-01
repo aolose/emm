@@ -858,17 +858,16 @@ export const hasFwRuleFilter = (t: FWRule) => {
 	return !!Object.keys(t).find((a) => ks.has(a));
 };
 
-
-export const throttle = (duration:number)=>{
-	const ks = new Set<string>()
-	return (key:string)=>{
-		if(ks.has(key))return false
-	  else {
-			ks.add(key)
-			setTimeout(()=>{
-				ks.delete(key)
-			},duration)
-			return  true
+export const throttle = (duration: number) => {
+	const ks = new Set<string>();
+	return (key: string) => {
+		if (ks.has(key)) return false;
+		else {
+			ks.add(key);
+			setTimeout(() => {
+				ks.delete(key);
+			}, duration);
+			return true;
 		}
-	}
-}
+	};
+};

@@ -37,7 +37,7 @@ export const hooks: apiHooks = {
 		post: {
 			proxy(p) {
 				const o = p as Obj<Post>;
-				if(!o.id)return
+				if (!o.id) return;
 				const keys = Object.keys(o);
 				const content = o.content_d;
 				if (keys.length === 2 && o.id && 'content_d' in o && content) {

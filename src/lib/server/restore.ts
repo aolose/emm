@@ -6,7 +6,7 @@ import path from 'path';
 import { server } from '$lib/server/index';
 import { getErr } from '$lib/utils';
 import { Buffer } from 'buffer';
-import type { System } from "$lib/server/model";
+import type { System } from '$lib/server/model';
 
 const fix = (a: string) => {
 	return path.resolve(a);
@@ -22,7 +22,8 @@ export const restore = async (data: ArrayBuffer) => {
 	if (!dbFile) return resp('database is missing', 500);
 	const dbBuf = await dbFile.async('arraybuffer');
 	const db = new better(Buffer.from(dbBuf));
-	let { thumbDir, uploadDir } = (db.prepare('select thumbDir,uploadDir from System').get() || {}) as System;
+	let { thumbDir, uploadDir } = (db.prepare('select thumbDir,uploadDir from System').get() ||
+		{}) as System;
 	db.close();
 	if (!thumbDir || !uploadDir) return resp('some directories are missing', 500);
 	thumbDir = fix(thumbDir);

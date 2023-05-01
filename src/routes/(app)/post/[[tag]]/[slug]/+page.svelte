@@ -66,7 +66,7 @@
 						<h1>{d.title}</h1>
 						{#if d.desc}<p>{d.desc}</p>{/if}
 						<div class="i">
-							<span><span  class="icon i-view"></span>{d._r}</span>
+							<span><span class="icon i-view" />{d._r}</span>
 							<span>{time(d.createAt)}</span>
 						</div>
 					</div>
@@ -285,17 +285,17 @@
 			max-width: 80%;
 		}
 	}
-  .i{
+	.i {
 		width: 100%;
-    display: flex;
+		display: flex;
 		justify-content: center;
-		span{
-			padding:  0 3px;
+		span {
+			padding: 0 3px;
 			width: auto;
 			font-size: 12px;
 			color: #ddd;
 		}
-		&>span {
+		& > span {
 			margin: 0 10px;
 		}
 	}

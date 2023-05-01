@@ -34,7 +34,7 @@ import { writable } from 'svelte/store';
 import type { Unsubscriber, Writable } from 'svelte/types/runtime/store';
 import fse from 'fs-extra';
 import JSZip from 'jszip';
-import type { Post } from "$lib/server/model";
+import type { Post } from '$lib/server/model';
 
 export const is_dev = process.env.NODE_ENV !== 'production';
 

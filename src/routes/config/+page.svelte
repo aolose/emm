@@ -5,7 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { clientRestore, trim } from '$lib/utils';
 	import Ld from '$lib/components/loading.svelte';
-	import { confirm, statueSys, status } from "$lib/store";
+	import { confirm, statueSys, status } from '$lib/store';
 	import Head from '$lib/components/Head.svelte';
 
 	export let data;
@@ -61,8 +61,8 @@
 
 	let tip = '';
 	const fail = (e) => {
-		(err = e?.data || e);
-	}
+		err = e?.data || e;
+	};
 	const ck = (n) => {
 		const v = o[n];
 		if (!v) return;
@@ -157,7 +157,7 @@
 						<input placeholder={defaultPath} bind:value={db} />
 						<i />
 					</div>
-					<button  on:click={submit}>submit</button>
+					<button on:click={submit}>submit</button>
 				</div>
 			</div>
 		{/if}
