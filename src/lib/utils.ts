@@ -857,3 +857,18 @@ export const hasFwRuleFilter = (t: FWRule) => {
 	const ks = new Set(['mark', 'ip', 'path', 'method', 'headers', 'country', 'status']);
 	return !!Object.keys(t).find((a) => ks.has(a));
 };
+
+
+export const throttle = (duration:number)=>{
+	const ks = new Set<string>()
+	return (key:string)=>{
+		if(ks.has(key))return false
+	  else {
+			ks.add(key)
+			setTimeout(()=>{
+				ks.delete(key)
+			},duration)
+			return  true
+		}
+	}
+}

@@ -63,9 +63,9 @@ export class Post {
 	_tag = TEXT;
 	published = 0;
 	disCm = INT;
-	_cm = INT;
-	_u?: { slug: string; title: string };
-	_n?: { slug: string; title: string };
+	_cm = INT; // allow comment
+	_u?: { slug: string; title: string }; // prev post
+	_n?: { slug: string; title: string }; // next post
 	title = TEXT;
 	content = TEXT;
 	title_d = TEXT;
@@ -75,11 +75,10 @@ export class Post {
 	modify = INT;
 	save = INT;
 	userId = INT;
-	_p = 0;
-	_reqs?: string | { id: number; name: string }[];
+	_p = 0; // publish mode
+	_reqs?: string | { id: number; name: string }[]; // permissions
 	// reqId
-	_r: number[] | undefined;
-
+  _r?:number // read
 	onSave(db: DB, now: number) {
 		const { id, title_d, title, content_d } = this;
 		const oo = id ? db.get(model(this.constructor as FunctionConstructor, { id })) : {};
@@ -399,4 +398,14 @@ export class RPUCache {
 	@primary
 	id = INT;
 	value = TEXT;
+}
+
+
+export class PostRead {
+	@primary
+	id = INT;
+	pid=INT;
+	ip=TEXT
+	ua=TEXT
+	createAt=TEXT
 }
