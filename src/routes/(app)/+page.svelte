@@ -27,18 +27,26 @@
 		right: 20px;
 		z-index: 3;
 	}
-  @keyframes a {
-    46%{transform: rotateZ(-3deg) scale(1)}
-    49%{transform: rotateZ(8deg) scale(1)}
-    51%{transform: rotateZ(-8deg) scale(1)}
-    55%{transform: rotateZ(3deg) scale(1)}
+	@keyframes a {
+		46% {
+			transform: rotateZ(-3deg) scale(1);
+		}
+		49% {
+			transform: rotateZ(8deg) scale(1);
+		}
+		51% {
+			transform: rotateZ(-8deg) scale(1);
+		}
+		55% {
+			transform: rotateZ(3deg) scale(1);
+		}
 	}
-	.a{
+	.a {
 		animation: a infinite 4s reverse ease-in-out;
 		transition: transform 0.2s ease-in-out;
 		font-size: 22px;
-		@include s(){
-       font-size: 20px;
+		@include s() {
+			font-size: 20px;
 		}
 	}
 	a {
@@ -77,8 +85,9 @@
 		opacity: 0.7;
 		border-radius: 100px;
 	}
-	@include s(){
-		.mu,.rs{
+	@include s() {
+		.mu,
+		.rs {
 			bottom: 20px;
 		}
 	}

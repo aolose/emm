@@ -50,15 +50,15 @@ export const cmManager = (() => {
 	}
 
 	let clear = 1;
-	function clearUser(){
-		if (clear&&db?.db) {
+	function clearUser() {
+		if (clear && db?.db) {
 			const n = Date.now();
 			db.db.prepare(`delete from CmUser where del=? and exp<?`).run(1, n);
 			userCache.clear();
 			clear = 0;
 		}
 	}
-	setTimeout(clearUser,1e4)
+	setTimeout(clearUser, 1e4);
 	setInterval(clearUser, 1e3 * 3600 * 12);
 	const patchUserInfo = (a: Obj<Comment>) => {
 		if (a.userId) {
@@ -120,9 +120,9 @@ export const cmManager = (() => {
 	};
 
 	return {
-		clear(){
-			userCache.clear()
-			clearUser()
+		clear() {
+			userCache.clear();
+			clearUser();
 		},
 		list: async (req: Request) => {
 			const params = new URL(req.url).searchParams;
@@ -312,7 +312,7 @@ export const cmManager = (() => {
 				else {
 					if (!isAdm && cm.userId !== user.id) return errMsg('no permission', 1, 403);
 					delete cm.isAdm;
-					db.save(cm,{skipSave:isAdm});
+					db.save(cm, { skipSave: isAdm });
 					return {
 						save: cm.save
 					};
@@ -347,7 +347,7 @@ export const cmManager = (() => {
 				if (cm._avatar) user.avatar = cm._avatar;
 				let name = trim(cm._name || '');
 				if (name) {
-					if (name.toLocaleLowerCase()==='admin') name = 'visitor';
+					if (name.toLocaleLowerCase() === 'admin') name = 'visitor';
 					user.name = name;
 				}
 				user.exp = expire + n;

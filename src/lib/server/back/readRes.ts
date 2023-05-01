@@ -1,4 +1,4 @@
-export const a = 0
+export const a = 0;
 // import better from 'better-sqlite3';
 // import { model } from '$lib/server/utils';
 // import { Post, Res, Tag } from '$lib/server/model';

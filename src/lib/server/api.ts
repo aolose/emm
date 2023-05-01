@@ -71,10 +71,11 @@ import {
 	getPostSibling,
 	getPubTags,
 	noAccessPosts,
-	patchPostTags, readManager,
+	patchPostTags,
+	readManager,
 	reqPostCache,
 	tagPostCache
-} from "$lib/server/cache";
+} from '$lib/server/cache';
 import { versionStrPatch } from '$lib/setStrPatchFn';
 import { NULL } from '$lib/server/enum';
 import { cmManager } from '$lib/server/comment';
@@ -690,11 +691,11 @@ const apis: APIRoutes = {
 					const [pre, next] = getPostSibling(p.id, p.createAt, decodeURI(tag), skips || []);
 					if (pre) p._u = pre;
 					if (next) p._n = next;
-					readManager.set(p.id,req)
-					p._r=readManager.get(p.id)
+					readManager.set(p.id, req);
+					p._r = readManager.get(p.id);
 					return filter(
 						patchPostTags([p])[0],
-						['banner', '_cm', 'desc', 'content', 'createAt', '_tag', 'title', '_u', '_n','_r'],
+						['banner', '_cm', 'desc', 'content', 'createAt', '_tag', 'title', '_u', '_n', '_r'],
 						false
 					);
 				}
@@ -879,8 +880,8 @@ const apis: APIRoutes = {
 	},
 	sys: {
 		get: auth(Read, (req) => {
-			const ks = sysKs
-			if(getClient(req)?.ok(Admin))ks.push('ipLiteToken')
+			const ks = sysKs;
+			if (getClient(req)?.ok(Admin)) ks.push('ipLiteToken');
 			return filter(sys, ks);
 		}),
 		post: auth(Admin, async (req) => {

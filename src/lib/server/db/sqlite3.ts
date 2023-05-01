@@ -120,7 +120,7 @@ export class DB {
 			sql = `${sql} where ${where[0]}`;
 			params = where.slice(1);
 		}
-		return (this.db.prepare(sql).get(...params) as {c:number}).c;
+		return (this.db.prepare(sql).get(...params) as { c: number }).c;
 	}
 
 	page<T extends Model>(
@@ -185,7 +185,11 @@ export class DB {
 			o[pk] =
 				t === 'number' || t === 'bigint'
 					? r.lastInsertRowid
-					: (this.db.prepare(`select ${pk} from ${table} where rowid=?`).get(r.lastInsertRowid) as {[key:string]:bigint})[pk];
+					: (
+							this.db
+								.prepare(`select ${pk} from ${table} where rowid=?`)
+								.get(r.lastInsertRowid) as { [key: string]: bigint }
+					  )[pk];
 		}
 		return r;
 	}
@@ -231,8 +235,10 @@ export class DB {
 			const name = s.name;
 			if (exist.has(name)) {
 				const info = {} as { [key: string]: columnInfo };
-				(this.db.pragma(`table_info(${name})`) as []).forEach((a: columnInfo) => (info[a.name] = a));
-				const idxInf = this.db.pragma(`index_list(${name})`) as ({name:string,unique:boolean})[];
+				(this.db.pragma(`table_info(${name})`) as []).forEach(
+					(a: columnInfo) => (info[a.name] = a)
+				);
+				const idxInf = this.db.pragma(`index_list(${name})`) as { name: string; unique: boolean }[];
 				if (idxInf.length) {
 					idxInf.forEach((a: { name: string; unique: boolean }) => {
 						if (a && a.unique) {
@@ -284,6 +290,6 @@ export class DB {
             type ='table' AND name NOT LIKE 'sqlite_%';`
 			)
 			.all()
-			.map((a) => (a as {name:string}).name);
+			.map((a) => (a as { name: string }).name);
 	}
 }

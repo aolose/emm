@@ -15,10 +15,10 @@ let rules: FWRule[];
 let blackList: BlackList[];
 const fwResp = new Map<number, FwResp>();
 
-const getPathName = (u:URL|string)=>{
-	u = new URL(u)
-	return decodeURIComponent(u.href.slice(u.origin.length))
-}
+const getPathName = (u: URL | string) => {
+	u = new URL(u);
+	return decodeURIComponent(u.href.slice(u.origin.length));
+};
 
 function sort() {
 	triggers.sort((a, b) => b.createAt - a.createAt);
@@ -312,7 +312,7 @@ const logReq = (event: RequestEvent) => {
 		request: { method, headers },
 		url
 	} = event;
-	const path = getPathName(url)
+	const path = getPathName(url);
 	const r = {
 		createAt: Date.now(),
 		ip,
@@ -323,8 +323,8 @@ const logReq = (event: RequestEvent) => {
 	} as log;
 	if (path !== '/api/log') {
 		logCache.push(r);
-		const s = logCache.length-max
-		if (s >  100) {
+		const s = logCache.length - max;
+		if (s > 100) {
 			logCache.splice(0, s);
 		}
 	}
@@ -441,7 +441,9 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	let res: Response | undefined;
 	const pn = getPathName(event.url);
 	const skipLog =
-		sysStatue<2||getClient(event.request)?.ok(permission.Admin) || /^(::1|127\.0)/.test(getClientAddr(event));
+		sysStatue < 2 ||
+		getClient(event.request)?.ok(permission.Admin) ||
+		/^(::1|127\.0)/.test(getClientAddr(event));
 
 	if (!/^\/(api|res|font|src|manifest\.json)/.test(pn)) {
 		const p = checkRedirect(sysStatue, pn, event.request);
