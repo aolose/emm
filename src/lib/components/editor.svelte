@@ -16,11 +16,9 @@
 		'bold',
 		'italic',
 		'strikethrough',
-		'code',
 		'quote',
 		'unordered-list',
 		'ordered-list',
-		'link',
 		'table',
 		{
 			name: 'files',

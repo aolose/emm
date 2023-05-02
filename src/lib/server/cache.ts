@@ -360,7 +360,8 @@ export const readManager = (() => {
 			db.del(model(PostRead, { pid: postId }));
 		},
 		get(postId: number) {
-			if (cMap.has(postId)) return cMap.get(postId);
+			if(!postId)return 0
+			if (cMap.has(postId)) return cMap.get(postId)||0;
 			const n = db.count(PostRead, ['pid = ?', postId]);
 			cMap.set(postId, n);
 			return n;
@@ -376,8 +377,9 @@ export const readManager = (() => {
 				ok(`${postId}-${ip}-${ua}`) &&
 				!getClient(req)?.ok(permission.Admin)
 			) {
-				cMap.set(postId, (cMap.get(postId) || 0) + 1);
-				db.save(model(PostRead, { ip, ua }));
+				const n = this.get(postId)
+				cMap.set(postId, n + 1);
+				db.save(model(PostRead, { ip, ua,pid:postId}));
 			}
 		}
 	};
