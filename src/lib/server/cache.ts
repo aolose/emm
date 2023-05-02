@@ -357,7 +357,7 @@ export const readManager = (() => {
 	return {
 		rm(postId: number) {
 			cMap.delete(postId);
-			db.del(model(PostRead, { pid: postId }));
+			db.del(model(PostRead),'pid=?',postId);
 		},
 		get(postId: number) {
 			if(!postId)return 0
