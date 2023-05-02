@@ -1,6 +1,7 @@
 <script>
 	import Search from '$lib/components/adminPost/search.svelte';
 	import AddPost from '$lib/components/adminPost/add.svelte';
+	import Read from '$lib/components/adminPost/read.svelte';
 	import Pg from '$lib/components/pg.svelte';
 	import Editor from '$lib/components/adminPost/editor.svelte';
 	import PItem from '$lib/components/adminPost/pItem.svelte';
@@ -128,6 +129,7 @@
 		</div>
 		<div class="c">
 			<Viewer preview={true} close={() => (view = 1)} />
+			<Read/>
 		</div>
 		<FileWin w={33.33333} />
 		<Setting {autoSave} />
