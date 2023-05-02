@@ -406,5 +406,6 @@ export class PostRead {
 	pid = INT;
 	ip = TEXT;
 	ua = TEXT;
-	createAt = TEXT;
+	_geo?:string;
+	createAt = INT;
 }

@@ -1,6 +1,7 @@
 <script>
 	import Search from '$lib/components/adminPost/search.svelte';
 	import AddPost from '$lib/components/adminPost/add.svelte';
+	import Vistior from '$lib/components/adminPost/read.svelte';
 	import Pg from '$lib/components/pg.svelte';
 	import Editor from '$lib/components/adminPost/editor.svelte';
 	import PItem from '$lib/components/adminPost/pItem.svelte';
@@ -20,6 +21,7 @@
 	let view = 0;
 	let autoSave;
 	let ld = 0;
+
 	function sel(p) {
 		if (!p) {
 			originPost.set({});
@@ -85,15 +87,16 @@
 		};
 	});
 	let sty, topSty;
+	let visitor = 0;
 	$: {
 		sty = $small
 			? `transform:translate3d(${((-view * 100) / 3).toFixed(4)}%,0,0)`
 			: $medium
-			? view
-				? ''
-				: `transform:translate3d(400px,0,0)`
-			: '';
-		topSty = 'right: auto;left:' + ($small ? '29%' : '410px');
+				? view
+					? ''
+					: `transform:translate3d(400px,0,0)`
+				: '';
+		topSty = 'right: auto;left:' + ($small ? '29%' : $medium ? '-50px' : '410px');
 		wc(() => {
 			page(1);
 		}, sc);
@@ -103,135 +106,148 @@
 	}
 </script>
 
-<div class="x">
-	<div class="m" style={sty}>
-		<div class="a">
-			<div class="h">
+<div class='x'>
+	<div class='m' style={sty}>
+		<div class='a'>
+			<div class='h'>
 				<AddPost done={() => (view = 1)} />
 				<Search change={ch} />
 			</div>
-			<div class="l">
-				<div class="ls" bind:this={el}>
+			<div class='l'>
+				<div class='ls' bind:this={el}>
 					{#each $posts as p (p._ || p.id)}
 						<PItem {p} {sel} />
 					{/each}
 					<Top style={topSty} />
 				</div>
-				<div class="p">
+				<div class='p'>
 					<Pg go={page} total={pages} />
 				</div>
 				<Ld act={ld} />
 			</div>
 		</div>
-		<div class="b">
-			<Editor {close} bind:autoSave preview={() => (view = 2)} />
+		<div class='b'>
+			<Editor {close} bind:autoSave
+							visitor={()=>{
+								visitor=1
+							   view=2
+							}}
+							preview={() => {
+								view = 2
+								visitor=0
+							}} />
 		</div>
-		<div class="c">
+		<div class='c'>
 			<Viewer preview={true} close={() => (view = 1)} />
+			<Vistior
+				close={()=>view=1}
+				bind:act={visitor} id={$editPost.id} />
 		</div>
 		<FileWin w={33.33333} />
 		<Setting {autoSave} />
 	</div>
 </div>
 
-<style lang="scss">
-	@import '../../lib/break';
+<style lang='scss'>
+  @import '../../lib/break';
 
-	.x {
-		width: 100%;
-		height: 100%;
-		overflow: hidden;
-		background: var(--bg2);
-	}
+  .x {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg2);
+  }
 
-	.m {
-		transition: 0.3s ease-in-out;
-		display: flex;
-		height: 100%;
-	}
+  .m {
+    transition: 0.3s ease-in-out;
+    display: flex;
+    height: 100%;
+  }
 
-	.a {
-		width: 400px;
-		background: var(--bg1);
-		display: flex;
-		flex-direction: column;
-		@include m() {
-			z-index: 3;
-			left: -400px;
-			top: 0;
-			bottom: 0;
-			position: absolute;
-		}
-	}
+  .a {
+    width: 400px;
+    background: var(--bg1);
+    display: flex;
+    flex-direction: column;
+    @include m() {
+      z-index: 3;
+      left: -400px;
+      top: 0;
+      bottom: 0;
+      position: absolute;
+    }
+  }
 
-	.b {
-		max-width: 1000px;
-		flex: 1;
-		@include m() {
-			width: 50%;
-			flex: none;
-		}
-	}
-	.l {
-		flex-grow: 1;
-		height: 0;
-		display: flex;
-		flex-direction: column;
-		padding-bottom: 10px;
-	}
-	.ls {
-		direction: rtl;
-		flex-grow: 1;
-		overflow: auto;
-		overflow-x: hidden;
-		width: 100%;
+  .b {
+    max-width: 1000px;
+    flex: 1;
+    @include m() {
+      width: 50%;
+      flex: none;
+    }
+  }
 
-		&::-webkit-scrollbar-track {
-			-webkit-box-shadow: inset var(--bg1) 0 0 10px;
-		}
+  .l {
+    flex-grow: 1;
+    height: 0;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+  }
 
-		&::-webkit-scrollbar-thumb {
-			background-color: rgba(49, 62, 87, 0.75);
-		}
-	}
+  .ls {
+    direction: rtl;
+    flex-grow: 1;
+    overflow: auto;
+    overflow-x: hidden;
+    width: 100%;
 
-	.p {
-		padding-top: 10px;
-		height: 60px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
+    &::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset var(--bg1) 0 0 10px;
+    }
 
-	.c {
-		flex: 1;
-		max-width: 800px;
-		@include m() {
-			width: 50%;
-			flex: none;
-		}
-	}
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(49, 62, 87, 0.75);
+    }
+  }
 
-	@include s() {
-		.m {
-			transition: 0.3s ease-in-out;
-			width: 300%;
-			height: 100%;
-		}
-		.a,
-		.b,
-		.c {
-			position: relative;
-			left: 0;
-			flex: 1;
-			width: 33%;
-			min-width: 0;
-			max-width: none;
-		}
-		.pi {
-			min-width: 0;
-			max-width: 100%;
-			width: 100%;
-		}
-	}
+  .p {
+    padding-top: 10px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .c {
+    flex: 1;
+    max-width: 800px;
+    @include m() {
+      width: 50%;
+      flex: none;
+    }
+  }
+
+  @include s() {
+    .m {
+      transition: 0.3s ease-in-out;
+      width: 300%;
+      height: 100%;
+    }
+    .a,
+    .b,
+    .c {
+      position: relative;
+      left: 0;
+      flex: 1;
+      width: 33%;
+      min-width: 0;
+      max-width: none;
+    }
+    .pi {
+      min-width: 0;
+      max-width: 100%;
+      width: 100%;
+    }
+  }
 </style>

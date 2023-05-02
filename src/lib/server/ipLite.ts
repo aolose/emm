@@ -159,7 +159,7 @@ export const ipInfoStr = (ip: string) => {
 	let g1 = '';
 	if (geo) {
 		g0 = geo.region || geo.short || '';
-		if (geo.full !== g0) g1 = ',' + geo.short;
+		if (geo.full !== g0 && geo.short) g1 = ',' + geo.short;
 	}
 	return g0 + g1;
 };
