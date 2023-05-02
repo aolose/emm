@@ -66,6 +66,7 @@
 	}
 
 	function close() {
+		visitor=0;
 		sel();
 	}
 
