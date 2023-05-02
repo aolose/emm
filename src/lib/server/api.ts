@@ -32,7 +32,7 @@ import {
 	FwLog,
 	FwResp,
 	FWRule,
-	Post,
+	Post, PostRead,
 	Require,
 	Res,
 	System,
@@ -62,7 +62,7 @@ import {
 	saveBlackList,
 	setFwResp
 } from '$lib/server/firewall';
-import { geoClose, geoStatue, loadGeoDb } from '$lib/server/ipLite';
+import { geoClose, geoStatue, ipInfoStr, loadGeoDb } from '$lib/server/ipLite';
 import { tagPatcher, tags } from '$lib/server/store';
 import { get } from 'svelte/store';
 import {
@@ -89,7 +89,7 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 		const requires = new Set(([] as permission[]).concat(ps));
 		const client = getClient(req);
 		if (requires.size) {
-			if (!client) return resp('invalid token', 401);
+			if (!client) return resp('invalid token:'+req.url, 401);
 			if (!client.ok(Admin)) {
 				for (const p of requires) {
 					const s = client.ok(p);
@@ -950,6 +950,24 @@ const apis: APIRoutes = {
 		delete: auth(Admin, async (req) => {
 			const id = +(await req.text());
 			if (id) delFwResp(id);
+		})
+	},
+	visitor:{
+		get:auth(Read,req => {
+			const params = new URL(req.url).searchParams ;
+			const id = params.get('id')
+			const p = params.get('p')||1
+			if(!id)return resp('no post id',500)
+			return pageBuilder(+p,20,
+				PostRead,
+				['createAt desc'],
+				['ip','createAt','ua','_geo'],
+				 ['pid=?',+id],
+				  a=>{
+				    a.forEach(c=>c._geo=ipInfoStr(c.ip))
+						return a
+					}
+				)
 		})
 	}
 };

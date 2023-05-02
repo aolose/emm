@@ -23,6 +23,7 @@
 	let draft = '';
 	let cid = 0;
 	export let preview;
+	export let visitor;
 	const ctxWatch = watch(draft, title);
 	const tSet = {
 		name: 'setting',
@@ -31,6 +32,12 @@
 		},
 		className: 'icon i-sys',
 		title: 'setting'
+	};
+	const tUser = {
+		name: 'visitor',
+		action: visitor,
+		className: 'icon i-user',
+		title: 'visitor'
 	};
 	const tFull = {
 		name: 'full screen',
@@ -218,6 +225,7 @@
 				t.push(tSlug);
 				t.push(tUnPub);
 			}
+			if(id)t.push(tUser)
 			if (hasDraft) t.push(tPub);
 			if (id) t.push(tDel);
 			t.push(tView);
