@@ -32,7 +32,8 @@ import {
 	FwLog,
 	FwResp,
 	FWRule,
-	Post, PostRead,
+	Post,
+	PostRead,
 	Require,
 	Res,
 	System,
@@ -89,7 +90,7 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 		const requires = new Set(([] as permission[]).concat(ps));
 		const client = getClient(req);
 		if (requires.size) {
-			if (!client) return resp('invalid token:'+req.url, 401);
+			if (!client) return resp('invalid token:' + req.url, 401);
 			if (!client.ok(Admin)) {
 				for (const p of requires) {
 					const s = client.ok(p);
@@ -952,22 +953,24 @@ const apis: APIRoutes = {
 			if (id) delFwResp(id);
 		})
 	},
-	visitor:{
-		get:auth(Read,req => {
-			const params = new URL(req.url).searchParams ;
-			const id = params.get('id')
-			const p = params.get('p')||1
-			if(!id)return resp('no post id',500)
-			return pageBuilder(+p,20,
+	visitor: {
+		get: auth(Read, (req) => {
+			const params = new URL(req.url).searchParams;
+			const id = params.get('id');
+			const p = params.get('p') || 1;
+			if (!id) return resp('no post id', 500);
+			return pageBuilder(
+				+p,
+				20,
 				PostRead,
 				['createAt desc'],
-				['ip','createAt','ua','_geo'],
-				 ['pid=?',+id],
-				  a=>{
-				    a.forEach(c=>c._geo=ipInfoStr(c.ip))
-						return a
-					}
-				)
+				['ip', 'createAt', 'ua', '_geo'],
+				['pid=?', +id],
+				(a) => {
+					a.forEach((c) => (c._geo = ipInfoStr(c.ip)));
+					return a;
+				}
+			);
 		})
 	}
 };

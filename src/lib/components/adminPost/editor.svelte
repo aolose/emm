@@ -225,7 +225,7 @@
 				t.push(tSlug);
 				t.push(tUnPub);
 			}
-			if(id)t.push(tUser)
+			if (id) t.push(tUser);
 			if (hasDraft) t.push(tPub);
 			if (id) t.push(tDel);
 			t.push(tView);
