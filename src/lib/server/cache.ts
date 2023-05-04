@@ -357,11 +357,11 @@ export const readManager = (() => {
 	return {
 		rm(postId: number) {
 			cMap.delete(postId);
-			db.del(model(PostRead),'pid=?',postId);
+			db.del(model(PostRead), 'pid=?', postId);
 		},
 		get(postId: number) {
-			if(!postId)return 0
-			if (cMap.has(postId)) return cMap.get(postId)||0;
+			if (!postId) return 0;
+			if (cMap.has(postId)) return cMap.get(postId) || 0;
 			const n = db.count(PostRead, ['pid = ?', postId]);
 			cMap.set(postId, n);
 			return n;
@@ -369,6 +369,7 @@ export const readManager = (() => {
 		set(postId: number, req: Request) {
 			const ua = req.headers.get('user-agent');
 			const ip = getIp(req);
+			console.log({ ua, ip });
 			// only human allow
 			if (
 				!/^(::1|127\.0)/.test(ip) &&
@@ -377,9 +378,9 @@ export const readManager = (() => {
 				ok(`${postId}-${ip}-${ua}`) &&
 				!getClient(req)?.ok(permission.Admin)
 			) {
-				const n = this.get(postId)
+				const n = this.get(postId);
 				cMap.set(postId, n + 1);
-				db.save(model(PostRead, { ip, ua,pid:postId}));
+				db.save(model(PostRead, { ip, ua, pid: postId }));
 			}
 		}
 	};
