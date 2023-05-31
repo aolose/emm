@@ -6,13 +6,15 @@
 	import Pg from '$lib/components/pg.svelte';
 	import Ld from '$lib/components/loading.svelte';
 	import { method } from '$lib/enum';
-	import { randNm, rndAr } from '$lib/utils';
+	import { randNm, rndAr, watch } from "$lib/utils";
 	import { msg } from './msg';
 	import { fly } from 'svelte/transition';
 
 	let page = 1;
 	let total = 1;
 	let ld = 0;
+	export let slug = '';
+	const ws = watch(slug)
 	const cur = {
 		act: 0,
 		topic: 0,
@@ -45,7 +47,7 @@
 	onMount(() => {
 		cur.name = localStorage.nm || randNm();
 		cur.avatar = localStorage.av || rndAr(avLs);
-		go();
+		go()
 		msg.subscribe((m) => {
 			if (m.length) {
 				setTimeout(() => msg.set([]), 2e3);
@@ -72,13 +74,13 @@
 	$: {
 		if (cur.name) localStorage.nm = cur.name;
 		if (cur.avatar) localStorage.av = cur.avatar;
+		ws(()=>go(),slug)
 	}
 	const rm = (i) => () => {
 		ls = ls.filter((a) => a !== i);
 	};
-	export let slug = '';
-</script>
 
+</script>
 {#if $msg.length === 2}
 	<div class="tp" class:su={$msg[0]} class:fa={!$msg[0]} transition:fly={{ y: -50, duration: 500 }}>
 		{$msg[1]}
