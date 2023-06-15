@@ -1,5 +1,5 @@
 <script>
-	import { bgColor, goBack, time, watch } from '$lib/utils';
+	import { bgColor, goBack, time, watch } from "$lib/utils";
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
 	import PF from '$lib/components/post/pf.svelte';
@@ -10,12 +10,13 @@
 	import Head from '$lib/components/Head.svelte';
 	import Top from '$lib/components/Top.svelte';
 	import { goto } from '$app/navigation';
+	import { page } from "$app/stores";
 
 	export let data;
 	let d, p, o, c;
 	let sly = '';
 	let style, tag;
-	let desc, prev, next;
+	let desc,view, prev, next;
 	let slug = data.p.slug;
 	const wc = watch(slug);
 	$: {
@@ -30,6 +31,7 @@
 		next = d._n;
 		tag = p.tag;
 		desc = d.desc;
+		view = desc||d._d;
 		if (d.createAt)
 			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
 		if (d.banner) {
@@ -38,14 +40,15 @@
 	}
 </script>
 
-<Head title={d.title} description={desc}>
+<Head title={d.title} description={view}>
 	<meta name="og:type" content="article" />
 	<meta name="og:title" content={d.title} />
-	<meta name="og:description" content={desc} />
-	<meta name="og:url" content={d.slug} />
+	<meta name="og:description" content={view} />
+	<meta name="og:url" content="{$page.url.href}" />
 	<meta name="article:published_time" content={time(d.createAt)} />
 	<meta name="article:tag" content={d._tag} />
-	{#if d.banner}<meta name="og:image" content={`/res/_${d.banner}`} />{/if}
+	{#if d.banner}<meta name="og:image" content={`${$page.url.origin}/res/_${d.banner}`} />{/if}
+	{#if d.banner}<meta name="image" content={`${$page.url.origin}/res/_${d.banner}`} />{/if}
 	<meta name="og:image:width" content="600" />
 	<meta name="og:image:height" content="400" />
 </Head>

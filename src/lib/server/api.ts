@@ -40,7 +40,7 @@ import {
 	Tag,
 	TokenInfo
 } from '$lib/server/model';
-import { arrFilter, diffObj, enc, filter, trim } from '$lib/utils';
+import { arrFilter, diffObj, enc, filter, getPain, trim } from "$lib/utils";
 import { permission } from '$lib/enum';
 import path from 'path';
 import fs from 'fs';
@@ -694,9 +694,10 @@ const apis: APIRoutes = {
 					if (next) p._n = next;
 					readManager.set(p.id, req);
 					p._r = readManager.get(p.id);
+					if(!p.desc)p._d=(await getPain(p.content)).substring(0, 140)
 					return filter(
 						patchPostTags([p])[0],
-						['banner', '_cm', 'desc', 'content', 'createAt', '_tag', 'title', '_u', '_n', '_r'],
+						['banner', '_cm', 'desc', 'content', '_d','createAt', '_tag', 'title', '_u', '_n', '_r'],
 						false
 					);
 				}

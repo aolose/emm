@@ -60,6 +60,7 @@ export class Post {
 	banner = INT;
 	slug = TEXT;
 	desc = TEXT;
+	_d=TEXT;
 	_tag = TEXT;
 	published = 0;
 	disCm = INT;
