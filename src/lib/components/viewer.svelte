@@ -116,7 +116,7 @@
 
 			p,
 			span {
-				word-break: break-all;
+				overflow-wrap:break-word;
 			}
 
 			blockquote {
