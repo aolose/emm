@@ -517,6 +517,16 @@ export const getColor = (a: number | string, opacity = 1) => {
 	return c;
 };
 
+export const clipWords = (str:string,len:number)=> {
+	let i=0
+	let e = len
+	while (e>0){
+		if(/[\u4e00-\u9fa5]/.test(str[i++]))e--
+		else e-=0.5
+	}
+	return str.substring(0,i)
+}
+
 export const getPain = async (src?: string) => {
 	const { marked } = await import('marked');
 	const { convert } = await import('html-to-text');

@@ -1,9 +1,9 @@
 <script>
-	import { bgColor } from '$lib/utils';
+	import { bgColor, clipWords } from "$lib/utils";
 
 	export let p = {};
 	export let path;
-	const { banner, slug, title, desc, content, createAt } = p;
+	const { banner, slug, title, desc, createAt } = p;
 	const sty = banner ? `background-image:url(/res/_${banner})` : '';
 	const tm = new Date(createAt);
 	const y = tm.getFullYear();
@@ -12,7 +12,7 @@
 	const showY = new Date().getFullYear() !== y;
 	let ds;
 	$: {
-		ds = (desc || content || '').substring(0, 60);
+		ds = clipWords(desc, 60);
 	}
 </script>
 
@@ -118,8 +118,8 @@
 		margin-bottom: 10px;
 		display: flex;
 		overflow: hidden;
-		word-break: break-all;
 		white-space: normal;
+		overflow-wrap:break-word;
 		text-overflow: ellipsis;
 		line-height: 1.5;
 		margin-top: 3px;
