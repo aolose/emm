@@ -674,7 +674,7 @@ const apis: APIRoutes = {
 		get: async (req) => {
 			const [slug, tag] = decodeURI(req.url).replace(/.*?\?/, '').split(',');
 			if (slug) {
-				const p = db.get(model(Post, { slug }));
+				const p = db.get(model(Post, { slug, published:1}));
 				if (p) {
 					if (tag) {
 						if (!tagPostCache.getTags(p.id).find((a) => a.name === tag))
