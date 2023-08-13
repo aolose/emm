@@ -1,13 +1,14 @@
-import type { APIRoutes, curPost, Obj } from '../types';
-import { db, server, sys } from './index';
-import { genPubKey } from './crypto';
+import type { APIRoutes, curPost, Obj } from "../types";
+import { db, server, sys } from "./index";
+import { genPubKey } from "./crypto";
 import {
 	blogExp,
 	checkStatue,
 	combineResult,
 	DBProxy,
 	debugMode,
-	delCookie, delFile,
+	delCookie,
+	delFile,
 	getClient,
 	getIp,
 	getReqJson,
@@ -24,9 +25,9 @@ import {
 	throwDbProxyError,
 	uniqSlug
 } from "./utils";
-import type { RespHandle } from '$lib/types';
-import sharp from 'sharp';
-import { Buffer } from 'buffer';
+import type { RespHandle } from "$lib/types";
+import sharp from "sharp";
+import { Buffer } from "buffer";
 import {
 	BlackList,
 	FwLog,
@@ -39,12 +40,12 @@ import {
 	System,
 	Tag,
 	TokenInfo
-} from '$lib/server/model';
+} from "$lib/server/model";
 import { arrFilter, clipWords, diffObj, enc, filter, getPain, trim } from "$lib/utils";
-import { permission } from '$lib/enum';
-import path from 'path';
-import fs from 'fs';
-import { genToken } from '$lib/server/token';
+import { permission } from "$lib/enum";
+import path from "path";
+import fs from "fs";
+import { genToken } from "$lib/server/token";
 import {
 	addRule,
 	blackLists,
@@ -56,16 +57,16 @@ import {
 	fw2log,
 	fwRespLis,
 	getFwResp,
+	hitRules,
 	logCache,
 	lsRules,
 	patchDetailIpInfo,
-	hitRules,
 	saveBlackList,
 	setFwResp
-} from '$lib/server/firewall';
-import { geoClose, geoStatue, ipInfoStr, loadGeoDb } from '$lib/server/ipLite';
-import { tagPatcher, tags } from '$lib/server/store';
-import { get } from 'svelte/store';
+} from "$lib/server/firewall";
+import { geoClose, geoStatue, ipInfoStr, loadGeoDb } from "$lib/server/ipLite";
+import { tagPatcher, tags } from "$lib/server/store";
+import { get } from "svelte/store";
 import {
 	codeTokens,
 	eTags,
@@ -76,12 +77,12 @@ import {
 	readManager,
 	reqPostCache,
 	tagPostCache
-} from '$lib/server/cache';
-import { versionStrPatch } from '$lib/setStrPatchFn';
-import { cmManager } from '$lib/server/comment';
-import { postList, postPatch, pubPostList } from '$lib/server/posts';
-import { restore } from '$lib/server/restore';
-import { getRuv } from '$lib/server/puv';
+} from "$lib/server/cache";
+import { versionStrPatch } from "$lib/setStrPatchFn";
+import { cmManager } from "$lib/server/comment";
+import { postList, postPatch, pubPostList } from "$lib/server/posts";
+import { restore } from "$lib/server/restore";
+import { getRuv } from "$lib/server/puv";
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
 	if (!sysStatue) return resp('system uninitialized', 500);
@@ -972,6 +973,15 @@ const apis: APIRoutes = {
 				}
 			);
 		})
+	},
+	about:{
+		post:auth(Admin,async req => {
+			sys.about=await req.text() || ''
+		}),
+		get(){
+			console.log(sys)
+			return sys.about||''
+		}
 	}
 };
 const sysKs: (keyof System)[] = [

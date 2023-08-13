@@ -37,11 +37,6 @@
 
 <style lang="scss">
 	@import '../../../lib/break';
-
-	p {
-		padding: 20px 10px;
-	}
-
 	.o {
 		transition: 0.3s ease-in-out;
 		display: flex;
@@ -58,23 +53,6 @@
 		position: relative;
 		border-bottom: 1px solid #eee;
 		box-shadow: rgba(0, 0, 0, 0.05) 0 10px 10px -5px;
-	}
-
-	h1 {
-		margin: 0 auto;
-		width: 90%;
-		color: #000;
-		display: flex;
-		align-items: center;
-		font-weight: 100;
-
-		span {
-			color: inherit;
-
-			&:first-letter {
-				color: #223bec;
-			}
-		}
 	}
 
 	a {

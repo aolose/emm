@@ -202,6 +202,7 @@ export class System {
 	@primary
 	id = INT;
 	admUsr = TEXT;
+	about=TEXT;
 	admPwd = TEXT;
 	uploadDir = TEXT;
 	thumbDir = TEXT;

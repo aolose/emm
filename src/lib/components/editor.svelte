@@ -109,7 +109,7 @@
 
 <style lang="scss">
 	@import '../../lib/break';
-
+	@import url(./font/fas.css);
 	.d {
 		display: none;
 	}
