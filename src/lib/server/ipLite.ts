@@ -1,6 +1,6 @@
 import fs from 'fs';
 import JSZip from 'jszip';
-import * as https from 'https';
+import {https} from 'follow-redirects';
 import { IP2Location } from 'ip2location-nodejs';
 import { sys } from '$lib/server/index';
 import path from 'path';
