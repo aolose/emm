@@ -258,7 +258,6 @@
 
 <style lang="scss">
 	@import '../../break';
-	@import url(./font/fas.css);
 	:global {
 		.editor-toolbar .icon.i-full {
 			display: none;
