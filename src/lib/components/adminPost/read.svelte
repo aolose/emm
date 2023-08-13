@@ -58,7 +58,7 @@
 				<div class="r">
 					<span>{time(createAt)}</span>
 					<span class="i">{ip}</span>
-					<span class="g">{_geo || 'HK'}</span>
+					<span class="g">{_geo || ''}</span>
 					<p>{ua}</p>
 				</div>
 			{/each}
