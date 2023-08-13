@@ -1,6 +1,6 @@
 import fs from 'fs';
 import JSZip from 'jszip';
-import {https} from 'follow-redirects';
+import * as fr from 'follow-redirects';
 import { IP2Location } from 'ip2location-nodejs';
 import { sys } from '$lib/server/index';
 import path from 'path';
@@ -37,6 +37,7 @@ async function update() {
 		const data = [] as Uint8Array[];
 		const link = url.replace('$TOKEN', tk);
 		downloading = 1;
+		const {https} = fr
 		const req = https.get(link, (res) => {
 			res.on('data', (d) => {
 				siz += d.length;
