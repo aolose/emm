@@ -39,7 +39,7 @@ async function update() {
       const req = https.get(url, (res) => {
         if (res.statusCode && res.statusCode > 300 && res.statusCode < 400) {
           const lo = res.headers.location;
-          if (lo) query(lo).then(resolve).catch(reject);
+          if (lo) return query(lo).then(resolve).catch(reject);
         }
         res.on("data", (d) => {
           siz += d.length;
