@@ -82,7 +82,7 @@
 		const s = selected.size;
 		confirm(`Are you sure to delete the selected file${s > 1 ? 's' : ''}?`)
 			.then(() => {
-				return req('res', new Uint8Array([...selected].map((a) => a.id)), { method: 2 });
+				return req('res', [...selected].map((a) => a.id).join(), { method: 2 });
 			})
 			.then((a) => {
 				if (a) {
