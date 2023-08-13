@@ -78,7 +78,6 @@ import {
 	tagPostCache
 } from '$lib/server/cache';
 import { versionStrPatch } from '$lib/setStrPatchFn';
-import { NULL } from '$lib/server/enum';
 import { cmManager } from '$lib/server/comment';
 import { postList, postPatch, pubPostList } from '$lib/server/posts';
 import { restore } from '$lib/server/restore';
