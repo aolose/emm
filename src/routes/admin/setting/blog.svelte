@@ -8,6 +8,8 @@
 	import { h } from '$lib/store';
 	let nm;
 	let bio;
+	let linkedin;
+	let github;
 	let msg;
 	let ld;
 	let err = 0;
@@ -21,6 +23,8 @@
 			robot = a.robots;
 			nm = a.blogName;
 			bio = a.blogBio;
+			linkedin = a.linkedin;
+			github = a.github;
 			key = a.seoKey;
 			desc = a.seoDesc;
 			mx = a.maxFireLogs || 1000;
@@ -34,7 +38,8 @@
 			maxFireLogs: mx,
 			seoDesc: desc,
 			blogName: nm,
-			blogBio: bio
+			blogBio: bio,
+			github,linkedin
 		};
 		req('sys', o)
 			.then(() => {
@@ -66,6 +71,8 @@
 <Card {act} {msg} {err} title="Blog" {save} {ld}>
 	<Ipt label="Name" bind:value={nm} placeholder="my blog" />
 	<Ipt box label="Bio" bind:value={bio} placeholder="say something" />
+	<Ipt label="LinkedIn" bind:value={linkedin} placeholder="your linkedin" />
+	<Ipt label="Github" bind:value={github} placeholder="your github" />
 	<Ipt label="Keywords" bind:value={key} placeholder="photos,foods,.ect" />
 	<Ipt box label="Description" bind:value={desc} placeholder="description for seo" />
 	<Ipt box label="Robots.text" bind:value={robot} placeholder="robots" />

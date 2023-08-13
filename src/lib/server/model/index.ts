@@ -208,6 +208,8 @@ export class System {
 	blogName = TEXT;
 	blogBio = TEXT;
 	seoKey = TEXT;
+	linkedin= TEXT;
+	github=TEXT;
 	seoDesc = TEXT;
 	ipLiteToken = TEXT;
 	ipLiteDir = TEXT;
