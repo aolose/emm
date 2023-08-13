@@ -929,9 +929,9 @@ const apis: APIRoutes = {
 			});
 		})
 	},
-	bio: {
+	home: {
 		get() {
-			return sys.blogBio || '';
+			return [sys.linkedin,sys.github,sys.blogBio];
 		}
 	},
 	puv: {
@@ -978,6 +978,8 @@ const apis: APIRoutes = {
 const sysKs: (keyof System)[] = [
 	'blogName',
 	'blogBio',
+	'linkedin',
+	'github',
 	'robots',
 	'uploadDir',
 	'maxFireLogs',

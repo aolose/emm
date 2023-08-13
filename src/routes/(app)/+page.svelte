@@ -5,15 +5,24 @@
 	import Head from '$lib/components/Head.svelte';
 	export let data;
 	const d = data.d;
+	const [linkedin,github,bio='']=d||[]
 </script>
 
 <Head />
 <Ctx />
 <div class="b">
 	<div class="bb">
-		<Bird {d} />
+		<Bird d={bio}/>
 	</div>
-	<a class="rs" href="/rss">RSS</a>
+	<div class="rm">
+		<a class="icon i-rss" href="/rss"></a>
+		{#if linkedin}
+       <a href={linkedin} target="_blank" class="icon i-LinkedIn"></a>
+		{/if}
+		{#if github}
+       <a href={github} target="_blank" class="icon i-github"></a>
+		{/if}
+	</div>
 	<div class="mu">
 		<a href="/posts" transition:slidLeft class="a">Enter ➜</a>
 	</div>
@@ -59,7 +68,9 @@
 		overflow: hidden;
 		color: #000;
 	}
-
+  .i-rss{
+		font-size: 14px;
+	}
 	.b {
 		width: 100%;
 		height: 100%;
@@ -74,20 +85,26 @@
 		width: 50%;
 		max-width: 80px;
 	}
-	.rs {
+	.rm{
 		position: absolute;
 		bottom: 30px;
 		left: 30px;
-		color: #fff;
-		font-size: 13px;
-		border: 1px solid;
-		padding: 5px 15px;
-		opacity: 0.7;
-		border-radius: 100px;
+		display: flex;
+		align-items: center;
+		color: #c3d7e5;
+		a{
+			color: inherit;
+			text-shadow: 1px 1px 1px #000;
+			margin-right: .8rem;
+			opacity: 0.7;
+			&:hover{
+				opacity: 1;
+			}
+		}
 	}
 	@include s() {
 		.mu,
-		.rs {
+		.rm {
 			bottom: 20px;
 		}
 	}
