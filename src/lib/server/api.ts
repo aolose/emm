@@ -7,7 +7,7 @@ import {
 	combineResult,
 	DBProxy,
 	debugMode,
-	delCookie,
+	delCookie, delFile,
 	getClient,
 	getIp,
 	getReqJson,
@@ -23,7 +23,7 @@ import {
 	sysStatue,
 	throwDbProxyError,
 	uniqSlug
-} from './utils';
+} from "./utils";
 import type { RespHandle } from '$lib/types';
 import sharp from 'sharp';
 import { Buffer } from 'buffer';
@@ -747,9 +747,9 @@ const apis: APIRoutes = {
 	},
 	res: {
 		delete: auth(Admin, async (req) => {
-			const r = new Uint8Array(await req.arrayBuffer());
+			const r = (await req.text()).split(',').map(a=>+a);
 			const { changes } = db.delByPk(Res, [...r]);
-
+			r.forEach(delFile);
 			const ids = new Set([...r]);
 			for (const [k, v] of eTags) {
 				if (ids.has(v)) eTags.delete(k);
