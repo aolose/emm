@@ -31,6 +31,7 @@ const load = () => {
 	const allTags = getPubTags();
 	urls.length = 0;
 	urls.push({ url: '/', lastMod: start });
+	urls.push({ url: '/about', lastMod: start });
 	urls.push({ url: '/tags', lastMod: lastMod });
 	page('/posts/', pMap.size, 10);
 	allTags.forEach((a) => {
