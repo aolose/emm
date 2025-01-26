@@ -1,4 +1,4 @@
-import better from 'better-sqlite3';
+import { type SQLQueryBindings, Database } from 'bun:sqlite';
 import { Log, noNullKeyValues, printSql, setKey, sqlFields, sqlVal, val } from '../utils';
 import * as models from '../model';
 import { getConstraint, getPrimaryKey, pkMap, primaryKey } from '../model/decorations';
@@ -12,7 +12,7 @@ const TEXT = 'TEXT';
 // model
 type M = (typeof tables)[number];
 
-export function getColumnType(v: unknown) {
+export function getColumnType(v: SQLQueryBindings) {
 	let type = 'BLOB';
 	const name = v?.constructor?.name;
 	switch (name) {
@@ -48,26 +48,38 @@ function createTable(Model: M) {
 	if (pk.length) {
 		fields.push(`PRIMARY KEY (${pk.join()})`);
 	}
-	return `CREATE TABLE ${Model.name} (${fields.join()})`;
+	return `CREATE TABLE ${Model.name}
+          (
+              ${fields.join()}
+          )`;
 }
 
 function select(obj: Obj<Model>) {
 	const table = obj.constructor.name;
 	const [k, v] = noNullKeyValues(obj);
 	const where = k.length ? k.map((a) => `${a}=?`).join(' and ') : '';
-	return [`SELECT * FROM ${table}`, where, v];
+	return [
+		`SELECT *
+     FROM ${table}`,
+		where,
+		v
+	];
 }
 
-function insert(obj: Obj<Model>): [string, unknown[]] {
+function insert(obj: Obj<Model>): [string, SQLQueryBindings[]] {
 	const table = obj.constructor.name;
 	const [k, m] = noNullKeyValues(obj);
 	const v = sqlVal(m);
 	const q = sqlFields(k.length);
 	if (!k.length) return ['', v];
-	return [`insert into ${table} (${k.join()}) values (${q})`, v];
+	return [
+		`insert into ${table} (${k.join()})
+     values (${q})`,
+		v
+	];
 }
 
-function update(obj: Obj<Model>): [string, unknown[]] {
+function update(obj: Obj<Model>): [string, SQLQueryBindings[]] {
 	const table = obj.constructor.name;
 	const pk = getPrimaryKey(table) as string;
 	const [k, m] = noNullKeyValues(obj);
@@ -80,21 +92,22 @@ function update(obj: Obj<Model>): [string, unknown[]] {
 	}
 	if (!k.length) return ['', v];
 	return [
-		`update ${table} set ${k.map((a) => `${a} = ?`).join()}${w.length ? ` where ${pk}=?` : ''}`,
+		`update ${table}
+     set ${k.map((a) => `${a} = ?`).join()}${w.length ? ` where ${pk}=?` : ''}`,
 		v
 	];
 }
 
 export class DB {
 	// expose for test
-	db: better.Database;
+	db: Database;
 
 	constructor(path = 'db') {
-		this.db = new better(path);
+		this.db = new Database(path);
 		process.on('exit', () => this.db.close());
 	}
 
-	private select(one: boolean, o: Obj<Model>, where = '', values: unknown[]) {
+	private select(one: boolean, o: Obj<Model>, where = '', values: SQLQueryBindings[]) {
 		const [sql, w, v] = select(o);
 		const wh = [w, where].filter((a) => a).join(' and ');
 		const s = sql + (wh ? ` WHERE ${wh}` : '').replace(/where order by/i, 'order by');
@@ -105,17 +118,18 @@ export class DB {
 		return paper.all(...params);
 	}
 
-	get<T extends Model>(o: Obj<T>, where?: string, ...values: unknown[]) {
+	get<T extends Model>(o: Obj<T>, where?: string, ...values: SQLQueryBindings[]) {
 		return this.select(true, o, where, values) as T | undefined;
 	}
 
-	all<T extends Model>(o: Obj<T>, where?: string, ...values: unknown[]) {
+	all<T extends Model>(o: Obj<T>, where?: string, ...values: SQLQueryBindings[]) {
 		return this.select(false, o, where, values) as T[];
 	}
 
-	count(o: Class<Model>, where?: [string, ...unknown[]]): number {
-		let sql = `select count(*) as c from ${o.name}`;
-		let params: unknown[] = [];
+	count(o: Class<Model>, where?: SQLQueryBindings[]): number {
+		let sql = `select count(*) as c
+               from ${o.name}`;
+		let params: SQLQueryBindings[] = [];
 		if (where && where.length > 1) {
 			sql = `${sql} where ${where[0]}`;
 			params = where.slice(1);
@@ -128,14 +142,15 @@ export class DB {
 		page: number,
 		size: number,
 		order = [] as string[],
-		where?: [string, ...unknown[]],
+		where?: SQLQueryBindings[],
 		after?: (a: T[]) => T[]
 	) {
-		const s = `select * from ${o.name}`;
+		const s = `select *
+               from ${o.name}`;
 		const d = order.length ? ` order by ${order.join()}` : '';
 		const l = ` limit ${size * (page - 1)},${size}`;
 		let w = '';
-		let p = [] as unknown[];
+		let p = [] as SQLQueryBindings[];
 		if (where && where.length) {
 			w = ` where ${where[0]}`;
 			p = where?.slice(1) || [];
@@ -167,7 +182,7 @@ export class DB {
 		const pk = getPrimaryKey(table) as keyof Obj<Model> & string;
 		const kv = val(o[pk]);
 		let sql: string;
-		let values: unknown[];
+		let values: SQLQueryBindings[];
 		if ((!kv || create) && !search) {
 			if (!override_create) setKey(a, 'createAt', now);
 			[sql, values] = insert(o);
@@ -187,28 +202,34 @@ export class DB {
 					? r.lastInsertRowid
 					: (
 							this.db
-								.prepare(`select ${pk} from ${table} where rowid=?`)
+								.prepare(
+									`select ${pk}
+                   from ${table}
+                   where rowid = ?`
+								)
 								.get(r.lastInsertRowid) as { [key: string]: bigint }
 						)[pk];
 		}
 		return r;
 	}
 
-	delByPk<T extends Model>(c: Class<T>, pks: unknown[]) {
+	delByPk<T extends Model>(c: Class<T>, pks: SQLQueryBindings[]) {
 		const pk = pkMap[c.name] as string;
-		const sql = `delete from ${c.name} where ${pk} in (${sqlFields(pks.length)})`;
+		const sql = `delete
+                 from ${c.name}
+                 where ${pk} in (${sqlFields(pks.length)})`;
 		Log.debug('delete', sql, pks);
 		return this.db.prepare(sql).run(...pks);
 	}
 
-	del<T extends Model>(o: Obj<T>, where?: string, ...values: unknown[]) {
+	del<T extends Model>(o: Obj<T>, where?: string, ...values: SQLQueryBindings[]) {
 		const table = o.constructor.name;
 		const pk = getPrimaryKey(table) as keyof typeof o & string;
 		const wh = [];
-		const va = [];
+		const va: SQLQueryBindings[] = [];
 		if (pk && pk in o) {
 			wh.push(`${pk}=?`);
-			va.push(o[pk]);
+			va.push(o[pk] as SQLQueryBindings);
 		}
 		if (where) {
 			wh.push(where);
@@ -216,8 +237,9 @@ export class DB {
 		if (values && values.length) va.push(...values);
 		const cd = wh.join(' and ');
 		if (!cd) throw new Error(`empty condition when delete ${table}`);
-		const sql = `delete from ${o.constructor.name} where ${cd}`;
-		Log.debug('del', sql, va);
+		const sql = `delete
+                 from ${o.constructor.name}
+                 where ${cd}`;
 		return this.db.prepare(sql).run(...va);
 	}
 
@@ -235,15 +257,20 @@ export class DB {
 			const name = s.name;
 			if (exist.has(name)) {
 				const info = {} as { [key: string]: columnInfo };
-				(this.db.pragma(`table_info(${name})`) as []).forEach(
-					(a: columnInfo) => (info[a.name] = a)
-				);
-				const idxInf = this.db.pragma(`index_list(${name})`) as { name: string; unique: boolean }[];
+				this.db
+					.query<columnInfo, string[]>(`PRAGMA table_info('${name}')`)
+					.all()
+					.forEach((a) => {
+						info[a.name] = a;
+					});
+				const idxInf = this.db
+					.query<{ name: string; unique: boolean }, string[]>(`PRAGMA index_list(${name})`)
+					.all();
 				if (idxInf.length) {
 					idxInf.forEach((a: { name: string; unique: boolean }) => {
 						if (a && a.unique) {
-							const i = (this.db.pragma(`index_info(${a.name})`) as columnInfo[])[0];
-							info[i.name].unique = 1;
+							const i = this.db.query<columnInfo, string[]>(`pragma index_info(${a.name})`).get();
+							if (i) info[i.name].unique = 1;
 						}
 					});
 				}
@@ -274,7 +301,10 @@ export class DB {
 					const nm = name + '_' + randNum();
 					const column = same.join();
 					const ru = [`ALTER TABLE ${name} RENAME TO ${nm}`, createTable(s)];
-					if (column) ru.push(`INSERT INTO ${name} (${column}) SELECT ${column} FROM  ${nm}`);
+					if (column)
+						ru.push(`INSERT INTO ${name} (${column})
+                     SELECT ${column}
+                     FROM ${nm}`);
 					ru.push(`DROP TABLE ${nm}`);
 					this.db.exec(ru.join(';'));
 				}
@@ -283,11 +313,14 @@ export class DB {
 			}
 		}
 	}
+
 	tables() {
 		return this.db
-			.prepare(
-				`SELECT name FROM sqlite_schema WHERE 
-            type ='table' AND name NOT LIKE 'sqlite_%';`
+			.query(
+				`SELECT name
+         FROM sqlite_schema
+         WHERE type = 'table'
+           AND name NOT LIKE 'sqlite_%';`
 			)
 			.all()
 			.map((a) => (a as { name: string }).name);
