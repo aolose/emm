@@ -15,7 +15,7 @@
 <Head title={`${$h.title} - tags`} />
 <UpDownScroll bind:down={a} />
 <Canvas type={2} />
-<div class="o" class:e={$expand} transition:fade>
+<div class="o" class:e={$expand} transition:fade|global>
 	<Ph bind:shrink={a}>Tags</Ph>
 	<div class="v" class:s={a}>
 		<div class="ls">
@@ -36,7 +36,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 	.o {
 		transition: 0.3s ease-in-out;
 		display: flex;

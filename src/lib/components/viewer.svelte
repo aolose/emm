@@ -72,7 +72,7 @@
 </script>
 
 {#if title || content}
-	<div class="a" class:p={preview} transition:fade>
+	<div class="a" class:p={preview} transition:fade|global>
 		{#if preview}
 			<div class="t">
 				<h1>{title || ''}</h1>
@@ -90,7 +90,7 @@
 {/if}
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 	@import 'highlight.js/styles/github-dark.css';
 	@import 'viewerjs/dist/viewer.css';
 	.a {
@@ -116,7 +116,7 @@
 
 			p,
 			span {
-				overflow-wrap:break-word;
+				overflow-wrap: break-word;
 			}
 
 			blockquote {
@@ -321,7 +321,8 @@
 
 			ul,
 			ol {
-				margin: 0 0 10px 20px;
+				margin-bottom: 10px;
+				list-style-position: inside;
 			}
 
 			h1 {

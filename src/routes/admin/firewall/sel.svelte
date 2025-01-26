@@ -43,7 +43,7 @@
 <div class="a" class:c={e} on:click|stopPropagation={fn}>
 	<span>{getText ? getText(items.find((a) => getValue(a) === value)) : value}</span>
 	{#if e}
-		<div transition:slide class="b">
+		<div transition:slide|global class="b">
 			{#each items as k}
 				<div
 					class:s={multiply ? s.has(k) : value === getValue ? getValue(k) : k}
@@ -90,11 +90,10 @@
 		font-size: 13px;
 
 		div {
+			padding: 8px 20px;
 			&:hover {
 				background: rgba(0, 0, 0, 0.1);
 			}
-
-			padding: 8px 20px;
 
 			& + div {
 				border-top: 1px solid #273644;

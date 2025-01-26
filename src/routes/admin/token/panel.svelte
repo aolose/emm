@@ -110,7 +110,7 @@
 </script>
 
 {#if show}
-	<div class="m" transition:fade>
+	<div class="m" transition:fade|global>
 		<div class="a">
 			<div class="t">
 				<span>{['permission', 'ticket'][t]}</span>
@@ -127,7 +127,7 @@
 					</div>
 				{/if}
 				{#if (t && /\d/.test(d.type)) || d.type === permission.Post}
-					<div class="r" transition:slide>
+					<div class="r" transition:slide|global>
 						<span>{t ? 'permission' : 'posts'}</span>
 						{#if t}
 							<Se type={t} bind:items={d._reqs} inline />
@@ -166,7 +166,9 @@
 			</div>
 			<div class="n">
 				{#if fine}
-					<button transition:slidLeft on:click={ok}>{t && editMod ? 'create' : 'submit'}</button>
+					<button transition:slidLeft|global on:click={ok}
+						>{t && editMod ? 'create' : 'submit'}</button
+					>
 				{/if}
 				<button on:click={cancel}>cancel</button>
 			</div>
@@ -177,7 +179,7 @@
 {/if}
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 
 	[type='number'] {
 		height: 40px;

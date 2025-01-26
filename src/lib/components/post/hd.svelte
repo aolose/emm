@@ -15,7 +15,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../break';
+	@use '../../break' as *;
 
 	.cc {
 		height: 120px;

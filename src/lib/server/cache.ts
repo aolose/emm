@@ -9,7 +9,7 @@ import { publishedPost, tags } from '$lib/server/store';
 import { diffStrSet } from '$lib/setStrPatchFn';
 import { get } from 'svelte/store';
 import { arrFilter, rndPick, throttle } from '$lib/utils';
-import isbot from 'isbot';
+import { isbot } from 'isbot';
 import { permission } from '$lib/enum';
 
 export const requireMap = new Map<number, Require>();

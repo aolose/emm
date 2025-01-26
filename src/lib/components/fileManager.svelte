@@ -130,7 +130,7 @@
 {#if cfg.show}
 	<div
 		style={sty}
-		transition:fade
+		transition:fade|global
 		class="a"
 		class:dr={state === 1}
 		on:dragover|preventDefault={() => (state = 1)}
@@ -147,24 +147,14 @@
 						<input type="file" accept={cfg.type || '*/*'} on:change={upload} multiple />
 					</button>
 					{#if selected.size}
+						<button transition:slidLeft class="icon i-ok" title="use selected" on:click={ok} />
 						<button
-							transition:slidLeft|local
-							class="icon i-ok"
-							title="use selected"
-							on:click={ok}
-						/>
-						<button
-							transition:slidLeft|local
+							transition:slidLeft
 							class="icon i-no"
 							title="clear selected"
 							on:click={() => (selected = new Set())}
 						/>
-						<button
-							transition:slidLeft|local
-							class="icon i-del"
-							title="delete selected"
-							on:click={del}
-						/>
+						<button transition:slidLeft class="icon i-del" title="delete selected" on:click={del} />
 						<span class="v">{ss}</span>
 					{/if}
 				</div>
@@ -181,7 +171,7 @@
 				{/each}
 			</div>
 			{#if $upFiles.length}
-				<div class="u" transition:slide>
+				<div class="u" transition:slide|global>
 					{#each fs as u}
 						<div class="r">
 							<span title={u[0]}>{u[0]}</span>
@@ -201,7 +191,7 @@
 {/if}
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 
 	.g {
 		display: flex;

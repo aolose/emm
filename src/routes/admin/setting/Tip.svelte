@@ -6,12 +6,14 @@
 </script>
 
 {#if act}
-	<div class="a" class:e={err} class:b={act} transition:fly={{ y: -50, duration: 500 }}>
+	<div class="a" class:e={err} class:b={act} transition:fly|global={{ y: -50, duration: 500 }}>
 		{text}
 	</div>
 {/if}
 
 <style lang="scss">
+	@use 'sass:color';
+
 	.a {
 		z-index: 10;
 		text-align: center;
@@ -20,7 +22,7 @@
 		top: 50px;
 		right: 50%;
 		transform: translateX(50%);
-		background: transparentize(green, 0.7);
+		background: color.adjust(green, $alpha: -0.7);
 		opacity: 0;
 		transition: opacity 0.3s ease-in-out;
 
@@ -31,7 +33,7 @@
 		border-radius: 4px;
 	}
 	.e {
-		background: transparentize(orange, 0.8);
+		background: color.adjust(orange, $alpha: -0.8);
 	}
 	.b {
 		opacity: 1;

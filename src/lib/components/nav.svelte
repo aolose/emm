@@ -33,7 +33,7 @@
 </nav>
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 
 	nav {
 		display: flex;

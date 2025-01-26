@@ -6,8 +6,8 @@ export const load = apiLoad(
 	'posts',
 	({ params: { page = 1 } }) => {
 		const a = +page;
-		if (!a) throw error(404);
-		return { page: a, size: 10 };
+		if (!a) error(404);
+		else return { page: a, size: 10 };
 	},
 	{ method: method.GET, group: 'posts', cache: 1e3 * 3600 * 3 }
 );

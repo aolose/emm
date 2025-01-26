@@ -25,7 +25,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 
 	.a {
 		padding-left: 50px;
@@ -133,6 +133,8 @@
 			width: 100%;
 			margin: 0;
 			padding: 0;
+			display: none;
+			justify-content: center;
 			* {
 				background: none !important;
 				transform: none;
@@ -145,8 +147,6 @@
 				position: relative;
 				font-size: 20px !important;
 			}
-			display: none;
-			justify-content: center;
 			i {
 				display: none;
 			}

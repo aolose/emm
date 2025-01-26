@@ -206,7 +206,7 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 					if (browser) {
 						sessionStorage.setItem('bk', location.pathname);
 						confirm('token expire!', '', 'ok').then(() => status.set(0));
-					} else throw redirect(307, '/login');
+					} else return redirect(307, '/login');
 				}
 			}
 			fal = true;
@@ -214,7 +214,7 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 			cfg.cache = 0;
 		} else if (r.status > 300) {
 			const lo = await r.headers.get('location');
-			if (lo) throw redirect(r.status as 301, lo);
+			if (lo) return redirect(r.status as 301, lo);
 		}
 		const e = encryptHeader(r);
 		const t = getHeaderDataType(r.headers);
@@ -400,7 +400,7 @@ export const apiLoad = (
 			p: ps,
 			d: await req(url, pm, cfg).catch((e) => {
 				if (e.status >= 400) {
-					throw error(e.status, getErr(e));
+					return error(e.status, getErr(e));
 				}
 				throw e;
 			})

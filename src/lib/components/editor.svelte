@@ -108,7 +108,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 	@import url(./font/fas.css);
 	.d {
 		display: none;

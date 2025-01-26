@@ -1,5 +1,5 @@
 <script>
-	import { bgColor, goBack, time, watch } from "$lib/utils";
+	import { bgColor, goBack, time, watch } from '$lib/utils';
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
 	import PF from '$lib/components/post/pf.svelte';
@@ -10,13 +10,13 @@
 	import Head from '$lib/components/Head.svelte';
 	import Top from '$lib/components/Top.svelte';
 	import { goto } from '$app/navigation';
-	import { page } from "$app/stores";
+	import { page } from '$app/stores';
 
 	export let data;
 	let d, p, o, c;
 	let sly = '';
 	let style, tag;
-	let desc,view, prev, next;
+	let desc, view, prev, next;
 	let slug = data.p.slug;
 	const wc = watch(slug);
 	$: {
@@ -31,7 +31,7 @@
 		next = d._n;
 		tag = p.tag;
 		desc = d.desc;
-		view = desc||d._d;
+		view = desc || d._d;
 		if (d.createAt)
 			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
 		if (d.banner) {
@@ -44,7 +44,7 @@
 	<meta name="og:type" content="article" />
 	<meta name="og:title" content={d.title} />
 	<meta name="og:description" content={view} />
-	<meta name="og:url" content="{$page.url.href}" />
+	<meta name="og:url" content={$page.url.href} />
 	<meta name="article:published_time" content={time(d.createAt)} />
 	<meta name="article:tag" content={d._tag} />
 	{#if d.banner}<meta name="og:image" content={`${$page.url.origin}/res/_${d.banner}`} />{/if}
@@ -114,7 +114,9 @@
 {/if}
 
 <style lang="scss">
-	@import '../../../../../lib/break';
+	@use 'sass:color';
+
+	@use '../../../../../lib/break' as *;
 
 	$bg: var(--bg6);
 	$bg2: var(--bg7);
@@ -212,7 +214,7 @@
 				code {
 					border-radius: 3px;
 					word-break: break-word;
-					background: transparentize(rgb(37, 40, 55), 0.95);
+					background: color.adjust(rgb(37, 40, 55), $alpha: -0.95);
 					color: #1a2638;
 				}
 

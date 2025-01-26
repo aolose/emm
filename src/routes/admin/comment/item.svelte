@@ -22,7 +22,13 @@
 	export let detail = 0;
 </script>
 
-<div class="a" on:click={() => ck && ck(d)} class:dt={detail} class:tp={topic} transition:slide>
+<div
+	class="a"
+	on:click={() => ck && ck(d)}
+	class:dt={detail}
+	class:tp={topic}
+	transition:slide|global
+>
 	<div class="v">
 		{#if !topic}
 			<div class="b">
@@ -32,7 +38,8 @@
 		<span>{d.isAdm ? 'admin' : d._name}</span>
 		{#if topic}
 			<span>create at: {time(d.createAt)}</span>
-			{#if d.save} <span>update at: {time(d.save)}</span>{/if}
+			{#if d.save}
+				<span>update at: {time(d.save)}</span>{/if}
 		{/if}
 		{#if d._reply && detail}
 			<span>@{d._reply}</span>
@@ -75,7 +82,8 @@
 					{/if}
 					<span>{d.ip || ''} {d._geo || ''}</span>
 					<span>create at: {time(d.createAt)}</span>
-					{#if d.save} <span>update at: {time(d.save)}</span>{/if}
+					{#if d.save}
+						<span>update at: {time(d.save)}</span>{/if}
 				</div>
 			{/if}
 		</div>
@@ -83,17 +91,16 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 
 	.h {
 		width: 100%;
 		display: flex;
 
+		align-items: center;
 		s {
 			flex: 1;
 		}
-
-		align-items: center;
 	}
 
 	.i {

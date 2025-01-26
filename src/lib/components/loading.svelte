@@ -16,7 +16,7 @@
 </script>
 
 {#if act}
-	<span transition:fade class="load">
+	<span transition:fade|global class="load">
 		<i />
 		<span class="a">
 			{text}
@@ -26,6 +26,8 @@
 {/if}
 
 <style lang="scss">
+	@use 'sass:color';
+
 	@keyframes rd {
 		0%,
 		100% {
@@ -62,7 +64,7 @@
 		right: 0;
 		bottom: 0;
 		top: 0;
-		background: transparentize(rgb(17, 21, 30), 0.2);
+		background: color.adjust(rgb(17, 21, 30), $alpha: -0.2);
 		backdrop-filter: blur(1px);
 		border-radius: inherit;
 		z-index: 100;

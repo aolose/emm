@@ -58,7 +58,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break.scss';
+	@use '../../../lib/break.scss' as *;
 
 	.e {
 		flex: 1;

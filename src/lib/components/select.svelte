@@ -31,7 +31,7 @@
 		<i />
 	</div>
 	{#if h}
-		<div class="b" transition:slide={{ duration: 100 }}>
+		<div class="b" transition:slide|global={{ duration: 100 }}>
 			{#each items as [k, v]}
 				<div class:e={k === value} on:click|stopPropagation={s(k)}>{v}</div>
 			{/each}
@@ -48,14 +48,14 @@
 	.a {
 		cursor: pointer;
 		display: flex;
-		span {
-			flex: 1;
-		}
 		border: 1px solid rgba(140, 181, 236, 0.1);
 		align-items: center;
 		background: var(--bg3);
 		height: 40px;
 		padding: 0 10px;
+		span {
+			flex: 1;
+		}
 		i {
 			border: 5px transparent solid;
 			border-bottom: 0;

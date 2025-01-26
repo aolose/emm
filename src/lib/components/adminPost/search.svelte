@@ -28,7 +28,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../break';
+	@use '../../break' as *;
 
 	.a {
 		background: rgba(0, 0, 0, 0.24);
