@@ -57,15 +57,15 @@ and want to use it, welcome to fork.
 
 ### deploy
 
-You need a nodejs environment vps.
+You need a bun environment vps.
 
 - step1: build locally
   ```bash
-  npm run build
+  bun run build
   ```
 - step2: add package.json
   ```bash
-  npm run publish
+  bun run publish
   ```
 - step3: upload the dist folder to your vps
 
@@ -73,5 +73,5 @@ You need a nodejs environment vps.
 
 - step4: run it (If you need to run in the background, you could add it to `pm2` or add a service)
   ```bash
-  npm run start
+  bun --bun run start
   ```
