@@ -17,6 +17,7 @@ import { filter, trim } from '$lib/utils';
 import { cmStatus, permission } from '$lib/enum';
 import type { Obj } from '$lib/types';
 import { ipInfoStr } from '$lib/server/ipLite';
+import type { SQLQueryBindings } from 'bun:sqlite';
 const fixOwn = (uid: number, a: Obj<Comment>, isAdm?: boolean) => {
 	if (uid && uid === a.userId) {
 		a._own = 1;
@@ -175,7 +176,7 @@ export const cmManager = (() => {
 				}
 			}
 			const w = where.length
-				? ([where.join(' and '), ...values] as [string, ...unknown[]])
+				? ([where.join(' and '), ...values] as [string, ...SQLQueryBindings[]])
 				: undefined;
 			return pageBuilder(page, slug ? 5 : 10, Comment, ['createAt desc'], ks, w, (arr) => {
 				const postCache = new Map<number, { title: string; slug: string }>();
