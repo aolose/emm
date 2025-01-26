@@ -25,19 +25,19 @@ import { getPrimaryKey } from './model/decorations';
 import { db, server, sys } from './index';
 import crypto from 'crypto';
 import fs from 'fs';
-import path from 'path';
+import { resolve, dirname } from 'path';
 import type { RequestEvent } from '@sveltejs/kit';
 import { clientMap } from '$lib/server/cache';
 import { Client } from '$lib/server/client';
 import type { TokenInfo } from '$lib/server/model';
-import { writable, type Unsubscriber, type Writable} from 'svelte/store';
+import { writable, type Unsubscriber, type Writable } from 'svelte/store';
 import fse from 'fs-extra';
 import JSZip from 'jszip';
 import type { Post } from '$lib/server/model';
+import type { SQLQueryBindings } from 'bun:sqlite';
 
 export const is_dev = process.env.NODE_ENV !== 'production';
-
-export const sqlVal = (values: unknown[]) =>
+export const sqlVal = (values: SQLQueryBindings[]) =>
 	values.map((a) => {
 		const t = typeof a;
 		switch (t) {
@@ -53,7 +53,7 @@ export function noNullKeyValues(o: Obj<Model>) {
 	const C = o.constructor as Class<Model>;
 	const ks = new Set<string>(Object.keys(new C() as object) as (keyof Model)[]);
 	const keys = [] as string[];
-	const values = [] as unknown[];
+	const values = [] as SQLQueryBindings[];
 	const { TEXT, INT, DATE } = NULL;
 	Object.entries(o).forEach(([k, v]) => {
 		if (k[0] === '_' && !ks.has(k[0])) return;
@@ -86,17 +86,15 @@ function now() {
 	return `[${new Date().toLocaleString()}]`;
 }
 
+type LogField = SQLQueryBindings | SQLQueryBindings[];
 export const Log = {
-	debug(label: string, ...params: unknown[]) {
+	debug(label: string, ...params: LogField[]) {
 		if (is_dev) console.log(now(), '\x1b[36m', label, '\x1b[0m', ...params);
 	},
-	info(label: string, ...params: unknown[]) {
-		console.log(now(), '\x1b[30m', label, '\x1b[0m', ...params);
-	},
-	warn(label: string, ...params: unknown[]) {
+	warn(label: string, ...params: LogField[]) {
 		console.warn(now(), label, ...params);
 	},
-	error(label: string, ...params: unknown[]) {
+	error(label: string, ...params: LogField[]) {
 		console.error(now(), label, ...params);
 	}
 };
@@ -121,7 +119,7 @@ export const val = (a: unknown) => {
 export const resp = (body: ApiData, code = 200, headers: { [key: string]: string } = {}) => {
 	const [tp, data] = parseBody(body);
 	if (code >= 400) {
-		Log.debug('error', code, data);
+		Log.debug('error', code, data as LogField);
 	}
 	return new Response(data as BodyInit, {
 		status: code,
@@ -148,8 +146,10 @@ export function slugGen(title: string) {
 }
 
 export const uniqSlug = (id: number, slug: string) => {
-	const params = [`slug%`] as unknown[];
-	let sql = `select slug from post where slug like ?`;
+	const params: SQLQueryBindings[] = [`slug%`];
+	let sql = `select slug
+             from post
+             where slug like ?`;
 	if (id) {
 		sql = `${sql} and id != ?`;
 		params.push(id);
@@ -229,7 +229,7 @@ const dBProxyErrs = new WeakMap<Model, Writable<Error | number>>();
 export const throwDbProxyError = async <T extends Model>(o: T): Promise<T> => {
 	const err = dBProxyErrs.get(o);
 	let un: Unsubscriber | undefined;
-	let t= setTimeout(Number);
+	let t = setTimeout(Number);
 	if (err) {
 		t = setTimeout(() => {
 			err.set(0);
@@ -252,7 +252,7 @@ export const throwDbProxyError = async <T extends Model>(o: T): Promise<T> => {
 		clearTimeout(t);
 		if (un) un();
 	}
-};;
+};
 export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = true): T => {
 	const error: Writable<Error | number> = writable(0);
 	type key = keyof T;
@@ -345,6 +345,7 @@ export const md5 = (buf: Buffer | string) => {
 };
 
 export const mkdir = (dir: string) => {
+	dir = resolve(dir);
 	try {
 		if (!fs.existsSync(dir)) {
 			fs.mkdirSync(dir, { recursive: true });
@@ -360,14 +361,14 @@ export const saveFile = (name: string | number, dir: string, buf: Buffer) => {
 	if (!fs.existsSync(dir)) {
 		fs.mkdirSync(dir, { recursive: true });
 	}
-	const p = path.resolve(dir, name + '');
+	const p = resolve(dir, name + '');
 	fs.writeFileSync(p, buf, { flag: 'w' });
 };
 
 const _delFile = (id: string | number, dir: string) => {
 	if (fs.existsSync(dir)) {
 		try {
-			fs.unlinkSync(path.resolve(dir, id + ''));
+			fs.unlinkSync(resolve(dir, id + ''));
 			return true;
 		} catch (e) {
 			console.log(e);
@@ -380,7 +381,7 @@ export const delFile = (id: string | number) => {
 	}
 };
 
-const cacheCount = (model: Class<Model>, where?: [string, ...unknown[]]) => {
+const cacheCount = (model: Class<Model>, where?: SQLQueryBindings[]) => {
 	const k = `${model.name}-${where?.join() || ''}`;
 	const c = countMap.get(k);
 	if (c !== null && c !== undefined) return c;
@@ -398,7 +399,7 @@ export const pageBuilder = <T extends Model>(
 	model: Class<T>,
 	orders: string[] = [],
 	keys: (keyof T)[] = [],
-	where?: [string, ...unknown[]],
+	where?: SQLQueryBindings[],
 	after?: (a: T[]) => T[]
 ) => {
 	const c = cacheCount(model, where) as number;
@@ -419,12 +420,12 @@ export const setKey = <T extends Model>(o: Obj<T>, key: string, value: unknown) 
 export let sysStatue = 0;
 const chk = () => {
 	// step1 config db
-	const dbc = '.dbCfg';
+	const dbc = resolve('.dbCfg');
 	let dbOk = false;
 	if (fs.existsSync(dbc)) {
 		const p = fs.readFileSync(dbc).toString();
 		if (!p) return 0;
-		const err = mkdir(path.dirname(p));
+		const err = mkdir(dirname(p));
 		if (err) {
 			console.log(err);
 			return 0;
@@ -568,7 +569,7 @@ export const blogExp = () => {
 		if (!s) return;
 		const f = zip.folder(s);
 		fs.readdirSync(s).forEach((a) => {
-			f?.file(a, fs.readFileSync(path.resolve(s, a)));
+			f?.file(a, fs.readFileSync(resolve(s, a)));
 		});
 	};
 	zip.file(dbc, dbpath);
