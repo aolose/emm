@@ -12,7 +12,7 @@ and want to use it, welcome to fork.
 ### Tech Stack
 
 [svelteKit](https://github.com/sveltejs/kit)+
-[better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
+[bun:sqlite](https://bun.sh/docs/api/sqlite)
 
 ### features
 

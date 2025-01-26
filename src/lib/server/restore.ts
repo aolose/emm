@@ -1,16 +1,12 @@
 import { resp } from '$lib/server/utils';
-import better from 'better-sqlite3';
+import { Database } from 'bun:sqlite';
 import JSZip from 'jszip';
 import fs from 'fs';
-import path from 'path';
+import { resolve } from 'path';
 import { server } from '$lib/server/index';
 import { getErr } from '$lib/utils';
 import { Buffer } from 'buffer';
 import type { System } from '$lib/server/model';
-
-const fix = (a: string) => {
-	return path.resolve(a);
-};
 
 export const restore = async (data: ArrayBuffer) => {
 	const zip = await JSZip.loadAsync(data);
@@ -21,17 +17,25 @@ export const restore = async (data: ArrayBuffer) => {
 	const dbFile = zip.file(dbPath);
 	if (!dbFile) return resp('database is missing', 500);
 	const dbBuf = await dbFile.async('arraybuffer');
-	const db = new better(Buffer.from(dbBuf));
-	let { thumbDir, uploadDir } = (db.prepare('select thumbDir,uploadDir from System').get() ||
-		{}) as System;
-	db.close();
+	const tmp = resolve('tmp_db');
+	let [thumbDir, uploadDir] = ['', ''];
+	try {
+		fs.writeFileSync(tmp, Buffer.from(dbBuf));
+		const db = new Database(tmp);
+		db.close();
+		const { thumbDir: t, uploadDir: u } = (db
+			.prepare('select thumbDir,uploadDir from System')
+			.get() || {}) as System;
+		thumbDir = resolve(t);
+		uploadDir = resolve(u);
+	} catch (e) {
+		console.warn(e);
+	}
 	if (!thumbDir || !uploadDir) return resp('some directories are missing', 500);
-	thumbDir = fix(thumbDir);
-	uploadDir = fix(uploadDir);
 	server.stop();
 	try {
-		fs.writeFileSync(fix(dbPath), Buffer.from(dbBuf));
-		fs.writeFileSync(fix(cfgPath), dbPath, { flag: 'w' });
+		fs.rename(tmp, resolve(dbPath), console.warn);
+		fs.writeFileSync(resolve(cfgPath), dbPath, { flag: 'w' });
 		if (fs.existsSync(thumbDir)) fs.rmSync(thumbDir, { recursive: true, force: true });
 		if (fs.existsSync(uploadDir)) fs.rmSync(uploadDir, { recursive: true, force: true });
 		fs.mkdirSync(thumbDir, { recursive: true });
@@ -42,7 +46,7 @@ export const restore = async (data: ArrayBuffer) => {
 	}
 	const falls: string[] = [];
 	for (const [pa, file] of Object.entries(zip.files)) {
-		const p = path.resolve(pa);
+		const p = resolve(pa);
 		if ((p.startsWith(uploadDir) || p.startsWith(thumbDir)) && !file.dir) {
 			try {
 				fs.writeFileSync(p, await file.async('nodebuffer'), { flag: 'w' });

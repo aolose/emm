@@ -7,6 +7,7 @@ import { clipWords, getPain } from '$lib/utils';
 import { db } from '$lib/server/index';
 import { DiffMatchPatch } from 'diff-match-patch-typescript';
 import type { PatchObject } from 'diff-match-patch-typescript';
+import type { SQLQueryBindings } from 'bun:sqlite';
 
 const dmp = new DiffMatchPatch();
 export const pubPostList = async (
@@ -17,7 +18,7 @@ export const pubPostList = async (
 	tagInfo = false
 ) => {
 	const where: string[] = ['published=?'];
-	const values: unknown[] = [1];
+	const values: SQLQueryBindings[] = [1];
 	let bn = null;
 	let desc = null;
 	if (tag) {
@@ -57,7 +58,7 @@ export const pubPostList = async (
 
 let patchMap: Map<number, string>;
 let curPost: number;
-export const postList = (page: number, size: number, where?: [string, ...unknown[]]) => {
+export const postList = (page: number, size: number, where?: [string, ...SQLQueryBindings[]]) => {
 	const o = pageBuilder(
 		page,
 		size,

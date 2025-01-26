@@ -83,6 +83,7 @@ import { cmManager } from '$lib/server/comment';
 import { postList, postPatch, pubPostList } from '$lib/server/posts';
 import { restore } from '$lib/server/restore';
 import { getRuv } from '$lib/server/puv';
+import type { SQLQueryBindings } from 'bun:sqlite';
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
 	if (!sysStatue) return resp('system uninitialized', 500);
@@ -395,7 +396,7 @@ const apis: APIRoutes = {
 						}
 					: undefined;
 			const wh = where.length
-				? ([where.join(' and '), ...pm] as [string, ...unknown[]])
+				? ([where.join(' and '), ...pm] as [string, ...SQLQueryBindings[]])
 				: undefined;
 			return pageBuilder(
 				page,
@@ -558,7 +559,7 @@ const apis: APIRoutes = {
 				if (ps.length) {
 					return {
 						...t,
-						_posts: db.all(model(Post), `id in (${sqlFields(ps.length)})`, ps).map((a) => ({
+						_posts: db.all(model(Post), `id in (${sqlFields(ps.length)})`, ...ps).map((a) => ({
 							id: a.id,
 							title: a.title || a.title
 						}))
@@ -639,7 +640,7 @@ const apis: APIRoutes = {
 			const { page, size, ft = 1 } = d;
 			const w = [];
 			const v = [];
-			let where: [string, ...unknown[]] | undefined;
+			let where: [string, ...SQLQueryBindings[]] | undefined;
 			if (!getClient(req)?.ok(Admin)) {
 				w.push('published=?');
 				v.push(1);
@@ -769,7 +770,7 @@ const apis: APIRoutes = {
 			return changes;
 		}),
 		post: auth(Read, async (req) => {
-			let where: [string, ...unknown[]] | undefined;
+			let where: [string, ...SQLQueryBindings[]] | undefined;
 			const d = await req.json();
 			const { page, size } = d;
 			let { type, name = '' } = d;
