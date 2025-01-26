@@ -1,6 +1,6 @@
 import fs from 'fs';
 import fes from 'fs-extra';
-import pkg from './package.json' assert { type: 'json' };
+import pkg from './package.json' with { type: 'json' };
 pkg.name = 'emm-blog';
 pkg.keywords = ['svelte', 'blog', 'svelteKit-blog'];
 pkg.homepage = 'https://github.com/aolose/emm';
