@@ -100,7 +100,7 @@
 <UpDownScroll bind:down={a} />
 <svelte:window on:sveltekit:navigation-end={scTop} />
 <Canvas type={1} />
-<div class="o" class:e={$expand} transition:fade>
+<div class="o" class:e={$expand} transition:fade|global>
 	<Ph bind:shrink={a}>Ticket</Ph>
 	<div class="j">
 		<div class="i">
@@ -124,7 +124,7 @@
 					{/if}
 				</div>
 				{#if act && idx === index}
-					<div class="dt" transition:slide>
+					<div class="dt" transition:slide|global>
 						{#if c === 2}
 							<a href="/admin">visit backstage 👈</a>
 							<span>expire: {act > 0 ? time(act) : 'never'}</span>
@@ -148,7 +148,7 @@
 		</div>
 	</div>
 	{#if s}
-		<div class="p" transition:fade={{ duration: 500 }}>
+		<div class="p" transition:fade|global={{ duration: 500 }}>
 			<div class="m">
 				<p>You got a ticket</p>
 				<Ticket d={o} {inf} view={1} />
@@ -159,7 +159,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break.scss';
+	@use '../../../lib/break.scss' as *;
 
 	.p {
 		position: fixed;

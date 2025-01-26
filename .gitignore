@@ -11,3 +11,4 @@ node_modules
 /.dbCfg
 /.cssCache.json
 /dist/
+bun.lock

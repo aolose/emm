@@ -6,12 +6,12 @@
 	export let href;
 </script>
 
-<a class="k" transition:slidLeft|local use:act={exact} {href}>
+<a class="k" transition:slidLeft use:act={exact} {href}>
 	<slot />
 </a>
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 
 	.k {
 		color: #485c72;

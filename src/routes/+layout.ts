@@ -10,7 +10,6 @@ import { goto } from '$app/navigation';
 import type { BeforeNavigate } from '@sveltejs/kit';
 const cacheTime = 1e3 * 3600 * 24;
 let pathname = '';
-let routId = '';
 const jump = async (nav?: BeforeNavigate) => {
 	const path = nav?.to?.url.pathname || pathname;
 	const adm = '/admin';
@@ -31,7 +30,7 @@ const jump = async (nav?: BeforeNavigate) => {
 			pathname = rd;
 			if (nav) nav.cancel();
 			return await goto(rd, { replaceState: true });
-		} else throw redirect(307, rd);
+		} else redirect(307, rd);
 	}
 };
 
@@ -43,7 +42,6 @@ let stu = 0;
 navStore.subscribe(jump);
 
 const ps = async (p: Page) => {
-	routId = p.route?.id || '';
 	pathname = p.url?.pathname || '';
 };
 

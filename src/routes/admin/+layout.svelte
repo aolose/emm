@@ -17,7 +17,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 
 	.a {
 		height: 100%;

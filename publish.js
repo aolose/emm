@@ -9,10 +9,10 @@ delete pkg.devDependencies;
 delete pkg.prepare;
 delete pkg.private;
 const env = '.env.production';
-const lock = 'pnpm-lock.yaml';
+const lock = 'bun.lock';
 const npm = '.npmrc';
 pkg.scripts = {
-	start: 'node --trace-uncaught -r dotenv/config app dotenv_config_path=' + env
+	start: 'bun --trace-uncaught -r dotenv/config app dotenv_config_path=' + env
 };
 if (fs.existsSync('./dist')) fs.rmSync('./dist', { recursive: true });
 fs.mkdirSync('./dist');

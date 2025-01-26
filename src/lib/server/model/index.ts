@@ -60,7 +60,7 @@ export class Post {
 	banner = INT;
 	slug = TEXT;
 	desc = TEXT;
-	_d=TEXT;
+	_d = TEXT;
 	_tag = TEXT;
 	published = 0;
 	disCm = INT;
@@ -202,15 +202,15 @@ export class System {
 	@primary
 	id = INT;
 	admUsr = TEXT;
-	about=TEXT;
+	about = TEXT;
 	admPwd = TEXT;
 	uploadDir = TEXT;
 	thumbDir = TEXT;
 	blogName = TEXT;
 	blogBio = TEXT;
 	seoKey = TEXT;
-	linkedin= TEXT;
-	github=TEXT;
+	linkedin = TEXT;
+	github = TEXT;
 	seoDesc = TEXT;
 	ipLiteToken = TEXT;
 	ipLiteDir = TEXT;
@@ -373,7 +373,7 @@ export class TokenInfo {
 						.split(',')
 						.map((a) => +a)
 						.filter((a) => a)
-			  )
+				)
 			: undefined;
 	}
 

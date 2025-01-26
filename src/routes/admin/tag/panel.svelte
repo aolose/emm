@@ -63,7 +63,7 @@
 </script>
 
 {#if show}
-	<div class="b" transition:fade>
+	<div class="b" transition:fade|global>
 		<div class="t">
 			<button class="icon i-close" on:click={cancel} />
 			<button class="s" on:click={ok}>save</button>
@@ -104,7 +104,9 @@
 {/if}
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use 'sass:color';
+
+	@use '../../../lib/break' as *;
 	.b {
 		display: flex;
 		flex-direction: column;
@@ -176,7 +178,7 @@
 		align-items: center;
 		justify-content: center;
 		font-size: 40px;
-		color: transparentize(#fff, 0.8);
+		color: color.adjust(#fff, $alpha: -0.8);
 		cursor: pointer;
 		transition: 0.2s;
 		background: center no-repeat;
@@ -258,14 +260,13 @@
 	}
 
 	.r {
+		display: flex;
+		flex-wrap: wrap;
+		padding: 10px 50px;
 		span {
 			line-height: 30px;
 			width: 100px;
 		}
-
-		display: flex;
-		flex-wrap: wrap;
-		padding: 10px 50px;
 
 		&:global {
 			.v {

@@ -46,7 +46,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 
 	.r {
 		transition: 0.3s ease-in-out;
@@ -186,10 +186,10 @@
 
 	.r {
 		.r5 {
+			padding: 5px 10px 12px 35px;
 			@include s() {
 				margin: -10px;
 			}
-			padding: 5px 10px 12px 35px;
 
 			div {
 				min-height: 0;

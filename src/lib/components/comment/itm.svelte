@@ -87,7 +87,7 @@
 	};
 </script>
 
-<div class="a" class:m={topic} transition:slide>
+<div class="a" class:m={topic} transition:slide|global>
 	{#if !topic}
 		<div class="b">
 			<div class="v">
@@ -98,7 +98,7 @@
 	{/if}
 	<div class="c">
 		{#if editMod}
-			<div class="e" transition:slide>
+			<div class="e" transition:slide|global>
 				<Cm edit={d} />
 			</div>
 		{:else}
@@ -136,7 +136,7 @@
 		{/if}
 	</div>
 	{#if (topic ? cur.topic === topic : cur.topic === d.id) && cur.reply === d.id}
-		<div class="r" transition:slide>
+		<div class="r" transition:slide|global>
 			<Cm
 				{user}
 				{cur}
@@ -164,7 +164,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 
 	@mixin bg {
 		border: 1px solid rgba(80, 100, 150, 0.07);

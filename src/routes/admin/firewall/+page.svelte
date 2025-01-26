@@ -154,7 +154,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 	.i-set {
 		display: none;
 		@include s() {

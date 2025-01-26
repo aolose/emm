@@ -4,28 +4,28 @@
 	import Head from '$lib/components/Head.svelte';
 	export let data;
 	const d = data.d;
-	const [linkedin,github,bio='']=d||[]
+	const [linkedin, github, bio = ''] = d || [];
 </script>
 
 <Head />
 <Ctx />
 <div class="b">
 	<div class="bb">
-		<Bird d={bio}/>
+		<Bird d={bio} />
 	</div>
 	<div class="rm">
-		<a class="icon i-rss" href="/rss"></a>
+		<a class="icon i-rss" href="/rss" />
 		{#if linkedin}
-			<a href={linkedin} target="_blank" class="icon i-LinkedIn"></a>
+			<a href={linkedin} target="_blank" class="icon i-LinkedIn" />
 		{/if}
 		{#if github}
-			<a href={github} target="_blank" class="icon i-github"></a>
+			<a href={github} target="_blank" class="icon i-github" />
 		{/if}
 	</div>
 </div>
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 	.b {
 		width: 100%;
 		height: 100%;
@@ -40,24 +40,24 @@
 		width: 50%;
 		max-width: 80px;
 	}
-	.rm{
+	.rm {
 		position: absolute;
 		bottom: 30px;
 		left: 10px;
 		display: flex;
 		align-items: center;
-		a{
+		a {
 			font-size: 22px;
-			margin-left: .8rem;
-			transition: .2s;
+			margin-left: 0.8rem;
+			transition: 0.2s;
 			color: #fff;
-			opacity: .8;
+			opacity: 0.8;
 			&:hover {
 				opacity: 1;
 				transform: scale(1.1);
 			}
 		}
-		.i-rss{
+		.i-rss {
 			font-size: 16px;
 		}
 	}

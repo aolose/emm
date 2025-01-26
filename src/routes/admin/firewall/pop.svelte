@@ -63,7 +63,7 @@
 </script>
 
 {#if show}
-	<div class="m" transition:fade>
+	<div class="m" transition:fade|global>
 		<div class="f">
 			<h1>
 				{[
@@ -89,7 +89,7 @@
 							<Ck bind:value={d.trigger}>trigger</Ck>
 						</label>
 					{/if}
-					<label transition:slidLeft>
+					<label transition:slidLeft|global>
 						<Ck bind:value={d.log}>log</Ck>
 					</label>
 				</div>
@@ -98,7 +98,7 @@
 				{#if tp < 4}
 					{#if tp !== 3}
 						{#if !d.trigger}
-							<label transition:slide>
+							<label transition:slide|global>
 								<span>IP:</span>
 								<input bind:value={d.ip} />
 							</label>
@@ -112,30 +112,30 @@
 							<HdsIpt bind:value={d.headers} />
 						</label>
 						{#if d.trigger}
-							<label transition:slide>
+							<label transition:slide|global>
 								<span>status:</span>
 								<input bind:value={d.status} />
 							</label>
-							<label transition:slide>
+							<label transition:slide|global>
 								<span title="times per hour">rate:</span>
 								<input bind:value={d.rate} placeholder="times/seconds,..." />
 							</label>
 						{:else}
-							<label transition:slide>
+							<label transition:slide|global>
 								<span>method:</span>
 								<Sel
 									items={['', 'GET', 'POST', 'DELETE', 'PATCH', 'PUT', 'HEAD', 'OPTIONS']}
 									bind:value={d.method}
 								/>
 							</label>
-							<label transition:slide>
+							<label transition:slide|global>
 								<span>country:</span>
 								<input bind:value={d.country} />
 							</label>
 						{/if}
 					{/if}
 					{#if tp}
-						<label transition:slide>
+						<label transition:slide|global>
 							<span>response:</span>
 							<Sel
 								defaultValue={0}
@@ -176,7 +176,7 @@
 			<div class="fn">
 				<button on:click={() => (d = {})}>clear</button>
 				{#if !tp || hasV}
-					<button transition:slidLeft on:click={ok}>
+					<button transition:slidLeft|global on:click={ok}>
 						{['search', 'save', 'create', 'save', 'create', 'save'][tp]}
 					</button>
 				{/if}
@@ -186,7 +186,7 @@
 {/if}
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 
 	s {
 		flex: 1;
@@ -304,6 +304,8 @@
 		font-size: 15px;
 		align-items: flex-start;
 
+		display: flex;
+		padding: 10px;
 		input {
 			width: 0;
 			resize: none;
@@ -321,9 +323,6 @@
 			width: 80px;
 			flex-shrink: 0;
 		}
-
-		display: flex;
-		padding: 10px;
 	}
 
 	.f {

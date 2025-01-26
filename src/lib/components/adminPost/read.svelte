@@ -39,7 +39,7 @@
 </script>
 
 {#if act && id}
-	<div transition:fade class="a">
+	<div transition:fade|global class="a">
 		<div class="c">
 			<span>visitor</span>
 			<button

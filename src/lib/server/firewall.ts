@@ -500,5 +500,5 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		});
 		return res;
 	}
-	throw error(400);
+	error(400);
 };

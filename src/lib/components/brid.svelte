@@ -14,10 +14,13 @@
 					if (stop) return;
 					const s = ls[i++ % ls.length];
 					msg.set(s);
-					setTimeout(() => {
-						if (stop) return;
-						m(ls, i);
-					}, s.length * 240 + 1e3);
+					setTimeout(
+						() => {
+							if (stop) return;
+							m(ls, i);
+						},
+						s.length * 240 + 1e3
+					);
 				};
 				m(c, 0);
 			}
@@ -29,7 +32,7 @@
 	});
 </script>
 
-<div class="b" transition:fade={{ duration: 200 }}>
+<div class="b" transition:fade|global={{ duration: 200 }}>
 	<div class="h">
 		<div class="mg">
 			<Msg defaultText={'welcome to my blog!'} />

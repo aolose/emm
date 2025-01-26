@@ -1,12 +1,12 @@
 <script>
 	import Card from './Card.svelte';
-  import { goto } from '$app/navigation';
-  function go(){
-    goto('/admin/about')
-  }
+	import { goto } from '$app/navigation';
+	function go() {
+		goto('/admin/about');
+	}
 </script>
 
-<Card title="About" saveText="Setting" save={go} empty={true}></Card>
+<Card title="About" saveText="Setting" save={go} empty={true} />
 
 <style lang="scss">
 	.r {

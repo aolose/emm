@@ -3,12 +3,12 @@
 	import { expand } from '$lib/store';
 </script>
 
-<div class="ctx" class:ex={$expand} transition:fade>
+<div class="ctx" class:ex={$expand} transition:fade|global>
 	<slot />
 </div>
 
 <style lang="scss">
-	@import '../../break';
+	@use '../../break' as *;
 	.ctx {
 		flex: 1;
 		display: flex;

@@ -1,39 +1,23 @@
-name: Node.js CI
+name: Deploy
 on:
   push:
     branches: [master]
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x]
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ matrix.node-version }}
-
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
-        id: pnpm-install
-        with:
-          version: 7.29.1
-          run_install: false
-
+          bun-version: "latest"
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
+        run: bun  install --no-frozen-lockfile
       - name: Build
-        run: pnpm run build
-
+        run: bun  run build
       - name: Build publish
-        run: pnpm run publish
-
+        run: bun run publish
       - name: Ls
         run: ls -al dist
-
       - name: Depoly
         uses: kostya-ten/ssh-server-deploy@v4
         with:
@@ -44,4 +28,4 @@ jobs:
           scp_source: 'dist/*'
           scp_target: '/home/aolose/errApp/'
           after_script: |
-            cd "/home/aolose/errApp/"  && pnpm i && echo -e "${{ secrets.VPS_PWD }}\n" | sudo -S service errApp restart
+            cd "/home/aolose/errApp/"  && bun i && echo -e "${{ secrets.VPS_PWD }}\n" | sudo -S service errApp restart

@@ -1,6 +1,6 @@
 import { apiLoad } from '$lib/req';
 import { method } from '$lib/enum';
-import { regHjs } from "$lib/hjs";
+import { regHjs } from '$lib/hjs';
 
 export const load = apiLoad('about', undefined, {
 	method: method.GET,
