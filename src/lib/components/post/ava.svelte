@@ -13,7 +13,7 @@
 />
 
 <style lang="scss">
-	@import './av.css';
+	@use './av.css' as *;
 	.c {
 		cursor: pointer;
 	}

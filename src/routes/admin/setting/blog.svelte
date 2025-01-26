@@ -39,7 +39,8 @@
 			seoDesc: desc,
 			blogName: nm,
 			blogBio: bio,
-			github,linkedin
+			github,
+			linkedin
 		};
 		req('sys', o)
 			.then(() => {

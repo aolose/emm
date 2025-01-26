@@ -189,7 +189,7 @@ export class DB {
 							this.db
 								.prepare(`select ${pk} from ${table} where rowid=?`)
 								.get(r.lastInsertRowid) as { [key: string]: bigint }
-					  )[pk];
+						)[pk];
 		}
 		return r;
 	}

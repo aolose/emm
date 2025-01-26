@@ -6,7 +6,7 @@
 	import Pg from '$lib/components/pg.svelte';
 	import Ld from '$lib/components/loading.svelte';
 	import { method } from '$lib/enum';
-	import { randNm, rndAr, watch } from "$lib/utils";
+	import { randNm, rndAr, watch } from '$lib/utils';
 	import { msg } from './msg';
 	import { fly } from 'svelte/transition';
 
@@ -14,7 +14,7 @@
 	let total = 1;
 	let ld = 0;
 	export let slug = '';
-	const ws = watch(slug)
+	const ws = watch(slug);
 	const cur = {
 		act: 0,
 		topic: 0,
@@ -47,7 +47,7 @@
 	onMount(() => {
 		cur.name = localStorage.nm || randNm();
 		cur.avatar = localStorage.av || rndAr(avLs);
-		go()
+		go();
 		msg.subscribe((m) => {
 			if (m.length) {
 				setTimeout(() => msg.set([]), 2e3);
@@ -74,15 +74,20 @@
 	$: {
 		if (cur.name) localStorage.nm = cur.name;
 		if (cur.avatar) localStorage.av = cur.avatar;
-		ws(()=>go(),slug)
+		ws(() => go(), slug);
 	}
 	const rm = (i) => () => {
 		ls = ls.filter((a) => a !== i);
 	};
-
 </script>
+
 {#if $msg.length === 2}
-	<div class="tp" class:su={$msg[0]} class:fa={!$msg[0]} transition:fly={{ y: -50, duration: 500 }}>
+	<div
+		class="tp"
+		class:su={$msg[0]}
+		class:fa={!$msg[0]}
+		transition:fly|global={{ y: -50, duration: 500 }}
+	>
 		{$msg[1]}
 	</div>
 {/if}
@@ -100,7 +105,9 @@
 <Cm av={avLs} {slug} {cur} {user} {done} />
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use 'sass:color';
+
+	@use '../../../lib/break' as *;
 	.p {
 		display: flex;
 		justify-content: center;
@@ -129,10 +136,10 @@
 	}
 
 	.su {
-		background-color: transparentize(#16b005, 0.3);
+		background-color: color.adjust(#16b005, $alpha: -0.3);
 	}
 
 	.fa {
-		background-color: transparentize(#ff0044, 0.8);
+		background-color: color.adjust(#ff0044, $alpha: -0.8);
 	}
 </style>

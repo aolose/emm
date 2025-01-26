@@ -1,7 +1,9 @@
 @font-face {
 	font-family: 'FontAwesome';
 	src: url('fas.eot');
-	src: url('fas.woff2') format('woff2'), url('fas.woff') format('woff'),
+	src:
+		url('fas.woff2') format('woff2'),
+		url('fas.woff') format('woff'),
 		url('fas.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;

@@ -93,10 +93,10 @@
 		sty = $small
 			? `transform:translate3d(${((-view * 100) / 3).toFixed(4)}%,0,0)`
 			: $medium
-			? view
-				? ''
-				: `transform:translate3d(400px,0,0)`
-			: '';
+				? view
+					? ''
+					: `transform:translate3d(400px,0,0)`
+				: '';
 		topSty = 'right: auto;left:' + ($small ? '29%' : $medium ? '-50px' : '410px');
 		wc(() => {
 			page(1);
@@ -151,7 +151,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 
 	.x {
 		width: 100%;

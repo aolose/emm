@@ -84,7 +84,7 @@
 </script>
 
 {#if hide}
-	<div class="a" transition:fade>
+	<div class="a" transition:fade|global>
 		<div class="t">
 			<span>{type ? 'select permission' : 'select posts'}</span>
 			<div class="bn">
@@ -121,6 +121,8 @@
 {/if}
 
 <style lang="scss">
+	@use 'sass:color';
+
 	.s {
 		display: flex;
 		padding: 2px 1.5em 0 0.8em;
@@ -130,9 +132,6 @@
 			color: #1c93ff;
 		}
 		input {
-			&::placeholder {
-				color: var(--darkgrey);
-			}
 			color: var(--darkgrey-h);
 			padding: 0 25px;
 			border-radius: 100px;
@@ -142,6 +141,9 @@
 			flex: 1;
 			border: 0;
 			background: var(--bg2);
+			&::placeholder {
+				color: var(--darkgrey);
+			}
 		}
 	}
 	.p {
@@ -154,21 +156,20 @@
 		}
 
 		&:nth-child(2n) {
-			background: transparentize(#122336, 0.8);
+			background: color.adjust(#122336, $alpha: -0.8);
 		}
 
 		&:hover {
-			background: transparentize(#0b3054, 0.5);
+			background: color.adjust(#0b3054, $alpha: -0.5);
 		}
 	}
 
 	.m {
+		pointer-events: none;
+		background: var(--bg1);
 		.k {
 			opacity: 0;
 		}
-
-		pointer-events: none;
-		background: var(--bg1);
 	}
 
 	.t {
@@ -209,7 +210,7 @@
 
 	.ls {
 		padding: 20px 0;
-		background: transparentize(black, 0.8);
+		background: color.adjust(black, $alpha: -0.8);
 		overflow: auto;
 		flex: 1;
 		margin-bottom: 10px;

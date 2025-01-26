@@ -1,6 +1,6 @@
 import { model, sysStatue } from '$lib/server/utils';
 import { RPU, RPUCache } from '$lib/server/model';
-import isbot from 'isbot';
+import { isbot } from 'isbot';
 import { db, server } from '$lib/server/index';
 import { arrFilter } from '$lib/utils';
 

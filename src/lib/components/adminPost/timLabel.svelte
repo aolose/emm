@@ -7,7 +7,7 @@
 </script>
 
 {#if +value}
-	<label transition:slide>{name}:<span>{t}</span></label>
+	<label transition:slide|global>{name}:<span>{t}</span></label>
 {/if}
 
 <style lang="scss">

@@ -34,13 +34,13 @@
 			? {
 					isAdm: 1,
 					content: cm
-			  }
+				}
 			: {
 					_slug: slug,
 					_name: cur.name,
 					_avatar: cur.avatar,
 					content: cm
-			  };
+				};
 		if (reply?.cm) o.reply = reply.cm;
 		if (reply?.topic) o.topic = reply.topic;
 		req('cm', o)
@@ -79,7 +79,7 @@
 
 <div class="c" class:m={reply} class:ed={edit} class:am={admin}>
 	{#if !reply && !edit && sh}
-		<div class="as" transition:fade>
+		<div class="as" transition:fade|global>
 			{#each av as a}
 				<Ava
 					idx={a}
@@ -135,7 +135,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 
 	:root {
 		--bg: rgba(0, 0, 0, 0.15);

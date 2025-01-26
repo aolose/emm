@@ -18,7 +18,7 @@
 		'Set upload directory',
 		'Set ipLocation (optional)'
 	];
-	const fx = (db) => trim(db);
+	const fx = (db = '') => trim(db);
 	let o = {
 		usr: '',
 		pwd: '',
@@ -150,7 +150,7 @@
 	</div>
 	<div class="fm">
 		{#if step === 0}
-			<div class="f" class:act={db} transition:fade>
+			<div class="f" class:act={db} transition:fade|global>
 				<h1>{steps[0]}</h1>
 				<div class="q">
 					<div class="r">
@@ -162,9 +162,9 @@
 			</div>
 		{/if}
 		{#if step === 1}
-			<div class="f" transition:fade class:act={o.usr && o.pwd && o.pwd2 && !tip}>
+			<div class="f" transition:fade|global class:act={o.usr && o.pwd && o.pwd2 && !tip}>
 				<h1>{steps[1]}</h1>
-				{#each rows as [key, name,, type]}
+				{#each rows as [key, name, , type]}
 					<div class="r" class:act={o[key]}>
 						<input
 							{type}
@@ -176,7 +176,7 @@
 					</div>
 				{/each}
 				{#if tip}
-					<div class="m" transition:slide>
+					<div class="m" transition:slide|global>
 						{tip}
 					</div>
 				{/if}
@@ -184,7 +184,7 @@
 			</div>
 		{/if}
 		{#if step === 2}
-			<div class="f" transition:fade class:act={tbDir && tbDir}>
+			<div class="f" transition:fade|global class:act={tbDir && tbDir}>
 				<h1>{steps[2]}</h1>
 				<div class="r" class:act={upDir} on:blur={ck2}>
 					<input bind:value={upDir} />
@@ -197,7 +197,7 @@
 					<span>Thumbnail directory</span>
 				</div>
 				{#if tip}
-					<div class="m" transition:slide>
+					<div class="m" transition:slide|global>
 						{tip}
 					</div>
 				{/if}
@@ -205,7 +205,7 @@
 			</div>
 		{/if}
 		{#if step === 3}
-			<div class="f" transition:fade class:act={ipDir && ipTk}>
+			<div class="f" transition:fade|global class:act={ipDir && ipTk}>
 				<h1>{steps[3]}</h1>
 				<div class="r l" class:act={ipTk}>
 					<input bind:value={ipTk} />
@@ -221,7 +221,7 @@
 					<span>Download directory</span>
 				</div>
 				{#if tip}
-					<div class="m" transition:slide>
+					<div class="m" transition:slide|global>
 						{tip}
 					</div>
 				{/if}
@@ -230,7 +230,7 @@
 			<button class="k" on:click={submit}>Skip</button>
 		{/if}
 		{#if err}
-			<div class="e" transition:slide>
+			<div class="e" transition:slide|global>
 				<pre>{err}</pre>
 			</div>
 		{/if}
@@ -239,7 +239,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use '../../lib/break' as *;
 
 	.o {
 		background: url('$lib/components/img/fav.png') left center no-repeat;

@@ -16,7 +16,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 
 	.v {
 		padding: 20px;

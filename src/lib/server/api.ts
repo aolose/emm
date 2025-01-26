@@ -1,6 +1,6 @@
-import type { APIRoutes, curPost, Obj } from "../types";
-import { db, server, sys } from "./index";
-import { genPubKey } from "./crypto";
+import type { APIRoutes, curPost, Obj } from '../types';
+import { db, server, sys } from './index';
+import { genPubKey } from './crypto';
 import {
 	blogExp,
 	checkStatue,
@@ -24,10 +24,10 @@ import {
 	sysStatue,
 	throwDbProxyError,
 	uniqSlug
-} from "./utils";
-import type { RespHandle } from "$lib/types";
-import sharp from "sharp";
-import { Buffer } from "buffer";
+} from './utils';
+import type { RespHandle } from '$lib/types';
+import sharp from 'sharp';
+import { Buffer } from 'buffer';
 import {
 	BlackList,
 	FwLog,
@@ -40,12 +40,12 @@ import {
 	System,
 	Tag,
 	TokenInfo
-} from "$lib/server/model";
-import { arrFilter, clipWords, diffObj, enc, filter, getPain, trim } from "$lib/utils";
-import { permission } from "$lib/enum";
-import path from "path";
-import fs from "fs";
-import { genToken } from "$lib/server/token";
+} from '$lib/server/model';
+import { arrFilter, clipWords, diffObj, enc, filter, getPain, trim } from '$lib/utils';
+import { permission } from '$lib/enum';
+import path from 'path';
+import fs from 'fs';
+import { genToken } from '$lib/server/token';
 import {
 	addRule,
 	blackLists,
@@ -63,10 +63,10 @@ import {
 	patchDetailIpInfo,
 	saveBlackList,
 	setFwResp
-} from "$lib/server/firewall";
-import { geoClose, geoStatue, ipInfoStr, loadGeoDb } from "$lib/server/ipLite";
-import { tagPatcher, tags } from "$lib/server/store";
-import { get } from "svelte/store";
+} from '$lib/server/firewall';
+import { geoClose, geoStatue, ipInfoStr, loadGeoDb } from '$lib/server/ipLite';
+import { tagPatcher, tags } from '$lib/server/store';
+import { get } from 'svelte/store';
 import {
 	codeTokens,
 	eTags,
@@ -77,12 +77,12 @@ import {
 	readManager,
 	reqPostCache,
 	tagPostCache
-} from "$lib/server/cache";
-import { versionStrPatch } from "$lib/setStrPatchFn";
-import { cmManager } from "$lib/server/comment";
-import { postList, postPatch, pubPostList } from "$lib/server/posts";
-import { restore } from "$lib/server/restore";
-import { getRuv } from "$lib/server/puv";
+} from '$lib/server/cache';
+import { versionStrPatch } from '$lib/setStrPatchFn';
+import { cmManager } from '$lib/server/comment';
+import { postList, postPatch, pubPostList } from '$lib/server/posts';
+import { restore } from '$lib/server/restore';
+import { getRuv } from '$lib/server/puv';
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
 	if (!sysStatue) return resp('system uninitialized', 500);
@@ -392,7 +392,7 @@ const apis: APIRoutes = {
 								});
 							}
 							return ls;
-					  }
+						}
 					: undefined;
 			const wh = where.length
 				? ([where.join(' and '), ...pm] as [string, ...unknown[]])
@@ -674,7 +674,7 @@ const apis: APIRoutes = {
 		get: async (req) => {
 			const [slug, tag] = decodeURI(req.url).replace(/.*?\?/, '').split(',');
 			if (slug) {
-				const p = db.get(model(Post, { slug, published:1}));
+				const p = db.get(model(Post, { slug, published: 1 }));
 				if (p) {
 					if (tag) {
 						if (!tagPostCache.getTags(p.id).find((a) => a.name === tag))
@@ -694,10 +694,22 @@ const apis: APIRoutes = {
 					if (next) p._n = next;
 					readManager.set(p.id, req);
 					p._r = readManager.get(p.id);
-					if(!p.desc)p._d=clipWords(await getPain(p.content),140)
+					if (!p.desc) p._d = clipWords(await getPain(p.content), 140);
 					return filter(
 						patchPostTags([p])[0],
-						['banner', '_cm', 'desc', 'content', '_d','createAt', '_tag', 'title', '_u', '_n', '_r'],
+						[
+							'banner',
+							'_cm',
+							'desc',
+							'content',
+							'_d',
+							'createAt',
+							'_tag',
+							'title',
+							'_u',
+							'_n',
+							'_r'
+						],
 						false
 					);
 				}
@@ -747,7 +759,7 @@ const apis: APIRoutes = {
 	},
 	res: {
 		delete: auth(Admin, async (req) => {
-			const r = (await req.text()).split(',').map(a=>+a);
+			const r = (await req.text()).split(',').map((a) => +a);
 			const { changes } = db.delByPk(Res, [...r]);
 			r.forEach(delFile);
 			const ids = new Set([...r]);
@@ -931,7 +943,7 @@ const apis: APIRoutes = {
 	},
 	home: {
 		get() {
-			return [sys.linkedin,sys.github,sys.blogBio];
+			return [sys.linkedin, sys.github, sys.blogBio];
 		}
 	},
 	puv: {
@@ -974,13 +986,13 @@ const apis: APIRoutes = {
 			);
 		})
 	},
-	about:{
-		post:auth(Admin,async req => {
-			sys.about=await req.text() || ''
+	about: {
+		post: auth(Admin, async (req) => {
+			sys.about = (await req.text()) || '';
 		}),
-		get(){
-			console.log(sys)
-			return sys.about||''
+		get() {
+			console.log(sys);
+			return sys.about || '';
 		}
 	}
 };
