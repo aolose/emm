@@ -37,7 +37,7 @@
 
 <UpDownScroll bind:down={a} />
 <Canvas type={1} />
-<div class="o" class:e={$expand} transition:fade>
+<div class="o" class:e={$expand} transition:fade|global>
 	<Ph bind:shrink={a}>
 		<slot />
 	</Ph>
@@ -61,7 +61,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../break';
+	@use '../../break' as *;
 
 	$w: 15px;
 	.nn {

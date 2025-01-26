@@ -331,7 +331,8 @@
 
 	canvas {
 		position: absolute;
-		background: linear-gradient(0deg, rgba(100, 100, 100, 0.5) 0, transparent 1px),
+		background:
+			linear-gradient(0deg, rgba(100, 100, 100, 0.5) 0, transparent 1px),
 			linear-gradient(90deg, rgba(100, 100, 100, 0.5) 0, transparent 1px) 18px 10px;
 		background-size: 20px 20px;
 		border: 1px solid #6c7a93;

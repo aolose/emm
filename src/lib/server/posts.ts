@@ -3,7 +3,7 @@ import { tags } from '$lib/server/store';
 import { combine, patchPostReqs, patchPostTags, tagPostCache } from '$lib/server/cache';
 import { model, pageBuilder, resp, sqlFields } from '$lib/server/utils';
 import { Post } from '$lib/server/model';
-import { clipWords, getPain } from "$lib/utils";
+import { clipWords, getPain } from '$lib/utils';
 import { db } from '$lib/server/index';
 import { DiffMatchPatch } from 'diff-match-patch-typescript';
 import type { PatchObject } from 'diff-match-patch-typescript';
@@ -45,7 +45,7 @@ export const pubPostList = async (
 		patchPostTags
 	);
 	for (const a of o.items) {
-		a.desc = a.desc || clipWords(await getPain(a.content),140);
+		a.desc = a.desc || clipWords(await getPain(a.content), 140);
 		delete a.content;
 	}
 	if (!tagInfo) return o;

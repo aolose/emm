@@ -14,7 +14,9 @@
 </div>
 
 <style lang="scss">
-	@import '../../lib/break';
+	@use 'sass:color';
+
+	@use '../../lib/break' as *;
 
 	:global {
 		* {
@@ -23,7 +25,7 @@
 
 		*::-webkit-scrollbar-thumb {
 			border-radius: 10px;
-			background-color: transparentize(#222f48, 0.4);
+			background-color: color.adjust(#222f48, $alpha: -0.4);
 		}
 	}
 

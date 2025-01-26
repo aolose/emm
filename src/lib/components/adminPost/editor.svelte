@@ -239,7 +239,7 @@
 </script>
 
 {#if $editPost._ || $editPost.id}
-	<div class="a" class:fu={$full} transition:fade>
+	<div class="a" class:fu={$full} transition:fade|global>
 		<div class="t">
 			<input bind:value={title} />
 			<button class="icon i-close" on:click={close} />
@@ -257,7 +257,7 @@
 {/if}
 
 <style lang="scss">
-	@import '../../break';
+	@use '../../break' as *;
 	:global {
 		.editor-toolbar .icon.i-full {
 			display: none;

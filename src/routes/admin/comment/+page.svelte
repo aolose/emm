@@ -132,7 +132,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 
 	.m {
 		width: 100%;

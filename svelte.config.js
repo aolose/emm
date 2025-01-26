@@ -1,5 +1,5 @@
 import adapter from '@sveltejs/adapter-node';
-import preprocess from 'svelte-preprocess';
+import { sveltePreprocess } from 'svelte-preprocess';
 import fs from 'node:fs';
 
 let nm = {};
@@ -32,7 +32,7 @@ const config = {
 	compilerOptions: {
 		cssHash: ({ hash, css }) => uniqCssName(hash(css))
 	},
-	preprocess: preprocess(),
+	preprocess: sveltePreprocess(),
 
 	kit: {
 		adapter: adapter({ out: 'app' })

@@ -33,7 +33,7 @@
 
 <svelte:window on:keydown={esc} />
 {#if cfg.show}
-	<div class="a" class:act={cfg.show} transition:fade>
+	<div class="a" class:act={cfg.show} transition:fade|global>
 		<div class="b" on:click|stopPropagation={() => 0}>
 			<p>{cfg.text}</p>
 			<div class="n">

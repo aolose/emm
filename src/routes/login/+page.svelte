@@ -86,7 +86,7 @@
 	}
 </script>
 
-<div class="g" transition:fade>
+<div class="g" transition:fade|global>
 	<div class="bg" />
 	<div class="cc">
 		<div class="bx">
@@ -98,7 +98,7 @@
 				{#if $msg}
 					<div class="v" />
 				{/if}
-				{#key ke}<i in:jump={{ y: -18, duration: 150 }} />{/key}
+				{#key ke}<i in:jump|global={{ y: -18, duration: 150 }} />{/key}
 			</div>
 			<div class="l">
 				<div class="r" class:a={usr}>
@@ -173,6 +173,10 @@
 		left: 50%;
 		top: -75px;
 
+		width: 80px;
+		height: 80px;
+		position: absolute;
+		transition: 0.1s ease-in-out;
 		&.bk {
 			transform: translate3d(-50%, 0, 0) rotateY(180deg);
 
@@ -181,11 +185,6 @@
 				transform: rotate(50deg);
 			}
 		}
-
-		width: 80px;
-		height: 80px;
-		position: absolute;
-		transition: 0.1s ease-in-out;
 	}
 
 	.dis {

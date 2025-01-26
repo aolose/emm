@@ -108,13 +108,13 @@
 						return;
 					case 3:
 						ctx.strokeStyle = '#ab5425';
-						drawCurve(m - k + 13, n - p +10);
+						drawCurve(m - k + 13, n - p + 10);
 						ctx.stroke();
 						ctx.strokeStyle = '#8f6c21';
 						drawCurve(m - k + 4, n - p - 20);
 						ctx.stroke();
 						ctx.strokeStyle = '#861832';
-						drawCurve(m - k -5, n - p - 30);
+						drawCurve(m - k - 5, n - p - 30);
 						ctx.stroke();
 						return;
 					default:
@@ -138,7 +138,7 @@
 	}
 </script>
 
-<div class="cvs" transition:fade bind:offsetWidth={w} bind:offsetHeight={h}>
+<div class="cvs" transition:fade|global bind:offsetWidth={w} bind:offsetHeight={h}>
 	<canvas bind:this={cvs} />
 </div>
 

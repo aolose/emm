@@ -106,7 +106,7 @@
 			<div class="o">
 				<button class="icon i-add" on:click={add} />
 				{#if siz}
-					<button class="icon i-del" on:click={del} transition:slidLeft>{siz}</button>
+					<button class="icon i-del" on:click={del} transition:slidLeft|global>{siz}</button>
 				{/if}
 			</div>
 		</div>
@@ -120,7 +120,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 
 	.t {
 		justify-content: space-between;

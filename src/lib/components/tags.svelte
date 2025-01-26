@@ -88,7 +88,7 @@
 
 <label class="a" for={id}>
 	{#if selects.length && (show || val)}
-		<div class="d" bind:this={dp} transition:slide>
+		<div class="d" bind:this={dp} transition:slide|global>
 			{#each selects as sec, index}
 				<div class:act={idx === index} on:click={() => (val = sec)}>{sec}</div>
 			{/each}

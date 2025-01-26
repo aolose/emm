@@ -71,7 +71,7 @@
 </script>
 
 {#if $setting}
-	<div class="m" transition:fade>
+	<div class="m" transition:fade|global>
 		<div class="a">
 			<div class="h">
 				<button class="icon i-ok" on:click={ok}>
@@ -100,7 +100,11 @@
 						on:click={pickPic}
 					>
 						{#if post.banner}
-							<button on:click|stopPropagation={rmPic} class="icon i-close" transition:fade />
+							<button
+								on:click|stopPropagation={rmPic}
+								class="icon i-close"
+								transition:fade|global
+							/>
 						{/if}
 					</div>
 				</div>
@@ -127,7 +131,7 @@
 {/if}
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 	.m {
 		z-index: 5;
 		position: fixed;
@@ -173,14 +177,13 @@
 	}
 
 	.h {
-		span {
-			color: #6c7a93;
-		}
-
 		padding: 20px;
 		display: flex;
 		justify-content: space-between;
 		border-bottom: 1px solid var(--bg0);
+		span {
+			color: #6c7a93;
+		}
 	}
 
 	button {

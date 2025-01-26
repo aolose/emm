@@ -14,14 +14,14 @@
 	import { editPost } from '$lib/store';
 </script>
 
-<div class="pi" on:click={() => sel(p)} class:act={$editPost.id === p.id} transition:slide|local>
+<div class="pi" on:click={() => sel(p)} class:act={$editPost.id === p.id} transition:slide>
 	<div class="v">
 		{#if hasDraft}<span class="vd" title="draft">D</span>{/if}
 		{#if isPublish}<span class="vp" title="published">P</span>{/if}
 	</div>
 	<h3>{title}</h3>
 	{#if title_d}
-		<h5 transition:slide|local>{title_d}</h5>
+		<h5 transition:slide>{title_d}</h5>
 	{/if}
 	<p>{desc}</p>
 	<div class="i">
@@ -33,7 +33,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../break';
+	@use '../../break' as *;
 	.v {
 		position: absolute;
 		right: 10%;
@@ -70,6 +70,7 @@
 		max-width: 100%;
 		direction: ltr;
 		padding: 10px 10% 20px;
+		transition: 0.3s ease-in-out;
 		&:not(.act):hover {
 			background: var(--bg0);
 		}
@@ -77,8 +78,6 @@
 		&.act {
 			background: var(--bg2);
 		}
-
-		transition: 0.3s ease-in-out;
 
 		h3 {
 			color: #667085;

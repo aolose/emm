@@ -39,7 +39,7 @@
 	{#if a}
 		<button
 			on:click={() => p.scrollTo(0, 0)}
-			transition:fly={{ y: 50, duration: 500 }}
+			transition:fly|global={{ y: 50, duration: 500 }}
 			class="t icon i-up"
 			class:a
 		/>
@@ -47,7 +47,7 @@
 </div>
 
 <style lang="scss">
-	@import '../break';
+	@use '../break' as *;
 	.o {
 		position: fixed;
 		bottom: 40px;

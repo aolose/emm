@@ -31,7 +31,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../break';
+	@use '../../break' as *;
 
 	.a {
 		width: 300px;

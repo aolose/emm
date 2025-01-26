@@ -53,7 +53,7 @@
 </script>
 
 {#if act}
-	<div class="a" transition:fade bind:this={a}>
+	<div class="a" transition:fade|global bind:this={a}>
 		{#each ff as f}
 			<div class="r" on:click={tg(f)}>
 				<i class:act={ft[f]} />
@@ -66,10 +66,6 @@
 
 <style lang="scss">
 	button {
-		&:hover {
-			color: var(--blue);
-		}
-
 		transition: 0.1s ease-in-out;
 		cursor: pointer;
 		display: block;
@@ -79,6 +75,9 @@
 		text-align: center;
 		background: none;
 		color: #364764;
+		&:hover {
+			color: var(--blue);
+		}
 
 		&.act {
 			color: #4d91be;

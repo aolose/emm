@@ -27,7 +27,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../../lib/break';
+	@use '../../../lib/break' as *;
 	.t {
 		display: flex;
 	}
@@ -58,10 +58,6 @@
 	}
 
 	.a {
-		&:hover {
-			border-color: #28649a;
-		}
-
 		cursor: pointer;
 		transition: 0.2s ease-in-out;
 		border: 1px solid transparent;
@@ -70,6 +66,10 @@
 		min-height: 50px;
 		margin: 10px;
 		background: var(--bg2);
+		&:hover {
+			border-color: #28649a;
+		}
+
 		@include s() {
 			margin: 5px;
 			min-width: 0;

@@ -1,5 +1,5 @@
 <script>
-	import { bgColor, clipWords } from "$lib/utils";
+	import { bgColor, clipWords } from '$lib/utils';
 
 	export let p = {};
 	export let path;
@@ -20,7 +20,8 @@
 	<div class="x" style={sty} />
 	<div class="t">
 		{m}/{d}
-		{#if showY} {y}{/if}
+		{#if showY}
+			{y}{/if}
 	</div>
 	<a class="f" href={`/post${path}/${slug}`}>
 		<div class="c" class:ex={!banner} />
@@ -32,7 +33,7 @@
 </div>
 
 <style lang="scss">
-	@import '../../break';
+	@use '../../break' as *;
 
 	.x {
 		transition: 2s ease-in-out;
@@ -119,7 +120,7 @@
 		display: flex;
 		overflow: hidden;
 		white-space: normal;
-		overflow-wrap:break-word;
+		overflow-wrap: break-word;
 		text-overflow: ellipsis;
 		line-height: 1.5;
 		margin-top: 3px;

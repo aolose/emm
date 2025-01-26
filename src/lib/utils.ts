@@ -411,7 +411,7 @@ export async function enc(str: string) {
 
 export function goBack(root = '/posts') {
 	if (sessionStorage.hasBack) history.go(-1);
-	else return goto('/posts', { replaceState: true });
+	else return goto(root, { replaceState: true });
 }
 
 export const time = (value?: number) => {
@@ -517,28 +517,28 @@ export const getColor = (a: number | string, opacity = 1) => {
 	return c;
 };
 
-export const clipWords = (str:string,len:number)=> {
-	let i=0
-	let e = len
-	while (e>0){
-		if(/[\u4e00-\u9fa5]/.test(str[i++]))e--
-		else e-=0.5
+export const clipWords = (str: string, len: number) => {
+	let i = 0;
+	let e = len;
+	while (e > 0) {
+		if (/[\u4e00-\u9fa5]/.test(str[i++])) e--;
+		else e -= 0.5;
 	}
-	return str.substring(0,i)
-}
+	return str.substring(0, i);
+};
 
 export const getPain = async (src?: string) => {
 	const { marked } = await import('marked');
 	const { convert } = await import('html-to-text');
 	return src
-		? convert(marked.parse(src), {
+		? convert(await marked.parse(src), {
 				selectors: [
 					{ selector: 'a', options: { ignoreHref: true } },
 					{ selector: 'img', format: 'skip' },
 					{ selector: 'code', format: 'skip' },
 					{ selector: 'table', format: 'skip' }
 				]
-		  })
+			})
 		: '';
 };
 export const rndAr = <T extends string | number>(a: T[]) => {
