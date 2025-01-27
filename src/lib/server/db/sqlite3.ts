@@ -316,7 +316,7 @@ export class DB {
 
 	tables() {
 		return this.db
-			.query(
+			.prepare(
 				`SELECT name
          FROM sqlite_schema
          WHERE type = 'table'
