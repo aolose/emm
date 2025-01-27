@@ -42,8 +42,8 @@ import {
 	TokenInfo
 } from '$lib/server/model';
 import { arrFilter, clipWords, diffObj, enc, filter, getPain, trim } from '$lib/utils';
-import { permission } from '$lib/enum';
-import path from 'path';
+import { contentType, dataType, permission } from '$lib/enum';
+import { dirname, resolve } from 'path';
 import fs from 'fs';
 import { genToken } from '$lib/server/token';
 import {
@@ -533,17 +533,14 @@ const apis: APIRoutes = {
 			if (sysStatue) return resp('', 403);
 			const p = await req.text();
 			if (!p) return 'empty path';
-			const pa = path.resolve(p);
-			const dir = path.dirname(pa);
+			const pa = resolve(p);
+			const dir = dirname(pa);
 			try {
-				const ex = fs.existsSync(dir);
-				if (!ex) {
-					fs.mkdirSync(dir, { recursive: true });
-				}
-				const err = server.start(p);
+				const err = mkdir(dir);
+				if (!err) server.start(p);
 				if (err) return err;
 				else {
-					fs.writeFileSync('.dbCfg', p);
+					fs.writeFileSync(resolve('.dbCfg'), p);
 					checkStatue();
 				}
 			} catch (e) {
@@ -936,10 +933,30 @@ const apis: APIRoutes = {
 			return await restore(data);
 		},
 		get: auth(Admin, async () => {
-			const f = await blogExp();
-			return resp(f, 200, {
-				'content-disposition': `attachment; filename=blog_${Date.now()}.zip`
-			});
+			const f = blogExp();
+			return new Response(
+				new ReadableStream({
+					start(controller) {
+						f
+							?.on('data', (chunk) => {
+								controller.enqueue(chunk);
+							})
+							.on('error', (e) => {
+								controller.error(e);
+							})
+							.on('end', () => {
+								controller.close();
+							});
+					}
+				}),
+				{
+					status: 200,
+					headers: new Headers({
+						'content-disposition': `attachment; filename=blog_${Date.now()}.zip`,
+						[contentType]: dataType.binary
+					})
+				}
+			);
 		})
 	},
 	home: {
@@ -992,7 +1009,6 @@ const apis: APIRoutes = {
 			sys.about = (await req.text()) || '';
 		}),
 		get() {
-			console.log(sys);
 			return sys.about || '';
 		}
 	}

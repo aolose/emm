@@ -149,7 +149,10 @@ export const parseBody = (data: ApiData) => {
 			tp = dataType.json;
 			break;
 		case 'object':
-			if (data && /ArrayBuffer|Blob|File|(Uint16|Uint8)Array/g.test(data.constructor.name)) {
+			if (
+				data &&
+				/Readable|ArrayBuffer|Blob|File|(Uint16|Uint8)Array/g.test(data.constructor.name)
+			) {
 				tp = dataType.binary;
 				break;
 			}
