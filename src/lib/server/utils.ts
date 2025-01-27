@@ -568,7 +568,7 @@ export const blogExp = () => {
 	const z = (s: string) => {
 		if (!s) return;
 		const f = zip.folder(s);
-		fs.readdirSync(s).forEach((a) => {
+		fs.readdirSync(resolve(s)).forEach((a) => {
 			f?.file(a, fs.readFileSync(resolve(s, a)));
 		});
 	};
