@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import fs from 'fs';
 import { resp } from '$lib/server/utils';
-import path from 'path';
+import { resolve } from 'path';
 import { sys, db } from '$lib/server';
 import { Res } from '$lib/server/model';
 import { contentType } from '$lib/enum';
@@ -23,8 +23,8 @@ export const GET: RequestHandler = ({ params, request }) => {
 		const r = db.get(res);
 		if (r) {
 			let f: Buffer | undefined;
-			const u = path.resolve(sys.uploadDir, p);
-			const t = path.resolve(sys.thumbDir, p);
+			const u = resolve(sys.uploadDir, p);
+			const t = resolve(sys.thumbDir, p);
 			if (isThumb && r.thumb) {
 				if (fs.existsSync(t)) f = fs.readFileSync(t);
 			}

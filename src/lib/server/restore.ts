@@ -45,7 +45,7 @@ export const restore = async (data: ArrayBuffer) => {
 	}
 	const falls: string[] = [];
 	for (const [pa, file] of Object.entries(zip.files)) {
-		const p = resolve(pa);
+		const p = pa && resolve(pa);
 		if ((p.startsWith(uploadDir) || p.startsWith(thumbDir)) && !file.dir) {
 			try {
 				fs.writeFileSync(p, await file.async('nodebuffer'), { flag: 'w' });
