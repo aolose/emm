@@ -12,3 +12,4 @@ node_modules
 /.cssCache.json
 /dist/
 bun.lock
+/tmp_db

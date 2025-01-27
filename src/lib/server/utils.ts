@@ -345,7 +345,7 @@ export const md5 = (buf: Buffer | string) => {
 };
 
 export const mkdir = (dir: string) => {
-	dir = resolve(dir);
+	dir = dir && resolve(dir);
 	try {
 		if (!fs.existsSync(dir)) {
 			fs.mkdirSync(dir, { recursive: true });
@@ -358,6 +358,7 @@ export const mkdir = (dir: string) => {
 };
 
 export const saveFile = (name: string | number, dir: string, buf: Buffer) => {
+	dir = dir && resolve(dir);
 	if (!fs.existsSync(dir)) {
 		fs.mkdirSync(dir, { recursive: true });
 	}
@@ -366,6 +367,7 @@ export const saveFile = (name: string | number, dir: string, buf: Buffer) => {
 };
 
 const _delFile = (id: string | number, dir: string) => {
+	dir = dir && resolve(dir);
 	if (fs.existsSync(dir)) {
 		try {
 			fs.unlinkSync(resolve(dir, id + ''));
@@ -538,6 +540,9 @@ export const debugMode = 0;
 export const sqlFields = (n: number) => ',?'.repeat(n).slice(1);
 
 export const mv = (from: string, to: string) => {
+	from = from && resolve(from);
+	to = to && resolve(to);
+	if (from === to) return;
 	let mv = 0;
 	let err;
 	if (from) {
@@ -581,7 +586,7 @@ export const blogExp = () => {
 	else zip.file(dbpath, f);
 	z(sys.uploadDir);
 	z(sys.thumbDir);
-	return zip.generateAsync({ type: 'uint8array' });
+	return zip.generateNodeStream({ streamFiles: true });
 };
 
 export const printSql = (sql: string, value: unknown[]) => {
