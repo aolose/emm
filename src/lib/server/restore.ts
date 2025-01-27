@@ -17,17 +17,16 @@ export const restore = async (data: ArrayBuffer) => {
 	const dbFile = zip.file(dbPath);
 	if (!dbFile) return resp('database is missing', 500);
 	const dbBuf = await dbFile.async('arraybuffer');
-	const tmp = resolve('tmp_db');
+	const tmp = resolve('tmp.db');
 	let [thumbDir, uploadDir] = ['', ''];
 	try {
 		fs.writeFileSync(tmp, Buffer.from(dbBuf));
 		const db = new Database(tmp);
+		const { thumbDir: t, uploadDir: u } =
+			db.query<System, string[]>('select thumbDir,uploadDir from System').get() || {};
+		if (t) thumbDir = resolve(t);
+		if (u) uploadDir = resolve(u);
 		db.close();
-		const { thumbDir: t, uploadDir: u } = (db
-			.prepare('select thumbDir,uploadDir from System')
-			.get() || {}) as System;
-		thumbDir = resolve(t);
-		uploadDir = resolve(u);
 	} catch (e) {
 		console.warn(e);
 	}
