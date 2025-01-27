@@ -3,7 +3,7 @@
 import { build, files, version } from '$service-worker';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-const sw = self as unknown as ServiceWorkerGlobalScope;
+const sw = self;
 // Create a unique cache name for this deployment
 const CACHE = `cache-${version}`;
 
@@ -54,5 +54,5 @@ sw.addEventListener('fetch', (event) => {
 		}
 	}
 
-	event.respondWith(respond() as PromiseLike<Response>);
+	event.respondWith(respond());
 });

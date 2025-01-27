@@ -7,7 +7,7 @@
 	"license": "MIT",
 	"scripts": {
 		"dev": "bun --bun run vite dev",
-		"build": "bun --bun run vite build",
+		"build": "bun --bun run vite build && bun ./bun-fix.js",
 		"preview": "bun --bun vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
