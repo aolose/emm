@@ -61,17 +61,17 @@ You need a bun environment vps.
 
 - step1: build locally
   ```bash
-  bun run build
+  bun --bun run build
   ```
 - step2: add package.json
   ```bash
-  bun run publish
+  bun --bun run publish
   ```
 - step3: upload the dist folder to your vps
 
-- optional: edit the `.env.production` in dist folder if you want change the bind port
+- optional: crete the `.env` in dist folder if you want change the bind port
 
-- step4: run it (If you need to run in the background, you could add it to `pm2` or add a service)
+- step4: run it (If you need to run in the background, you could add a service)
   ```bash
   bun --bun run start
   ```

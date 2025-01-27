@@ -2,6 +2,11 @@ name: Deploy
 on:
   push:
     branches: [master]
+    paths-ignore:
+      - 'README.md'
+      - 'doc/**'
+      - '**/*.draft.md'
+      - '.gitignore'
 jobs:
   build:
     runs-on: ubuntu-latest
