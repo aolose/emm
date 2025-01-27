@@ -2,7 +2,7 @@ import fs from 'fs';
 import JSZip from 'jszip';
 import { IP2Location } from 'ip2location-nodejs';
 import { sys } from '$lib/server/index';
-import path from 'path';
+import { resolve } from 'path';
 import https from 'node:https';
 import { mkdir } from '$lib/server/utils';
 
@@ -26,7 +26,7 @@ async function update() {
 		return 0;
 	}
 	const name = `ip_${Date.now()}`;
-	const latest = path.resolve(dir, name);
+	const latest = resolve(dir, name);
 	let siz = 0;
 	if (curDownLoad && curDownLoad === tk) return 0;
 	else {
@@ -70,7 +70,7 @@ async function update() {
 				fs.readdirSync(dir).forEach((a) => {
 					if (/^ip_\d+$/.test(a)) {
 						try {
-							fs.unlinkSync(path.resolve(dir, a));
+							fs.unlinkSync(resolve(dir, a));
 						} catch (e) {
 							console.log('unlink error:', a, '\n', e?.toString());
 						}
@@ -125,7 +125,7 @@ export const geoClose = () => {
 let downloading = 0;
 export const geoStatue = () => (downloading ? '-' : (geoIp && geoIp.getDatabaseVersion()) || '');
 export const loadGeoDb = () => {
-	const dir = sys.ipLiteDir;
+	const dir = sys.ipLiteDir && resolve(sys.ipLiteDir);
 	if (dir) {
 		const next = 1e3 * 3600 * 24 * 14;
 		let delay = 0;
@@ -142,7 +142,7 @@ export const loadGeoDb = () => {
 				return a;
 			}, n);
 			if (file && file !== n) {
-				load(path.resolve(dir, `ip_${file}`));
+				load(resolve(dir, `ip_${file}`));
 				delay = next - Date.now() + file;
 			}
 		}
