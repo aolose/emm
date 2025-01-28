@@ -3,11 +3,11 @@
 	"compilerOptions": {
 		"moduleResolution": "bundler",
 		"noEmit": true,
-		"lib": [
-			"WebWorker",
-			"ESNext",
-			"dom.iterable"
-		],
+      "lib": [
+        "WebWorker",
+        "ESNext",
+        "dom.iterable"
+      ],
 		"experimentalDecorators": true,
 		"allowJs": true,
 		"checkJs": false,
