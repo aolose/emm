@@ -36,73 +36,74 @@
 </div>
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
-	.o {
-		transition: 0.3s ease-in-out;
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-	}
+  @use '../../../lib/break' as *;
 
-	.e {
-		transform: translate3d(0, 30px, 0);
-	}
+  .o {
+    transition: 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
 
-	.cc {
-		padding: 60px 0 20px;
-		position: relative;
-		border-bottom: 1px solid #eee;
-		box-shadow: rgba(0, 0, 0, 0.05) 0 10px 10px -5px;
-	}
+  .e {
+    transform: translate3d(0, 30px, 0);
+  }
 
-	a {
-		display: block;
-		min-width: 100px;
-		text-align: center;
-		font-size: 14px;
-		margin: 10px 15px;
-		border-radius: 3px;
-		position: relative;
+  .cc {
+    padding: 60px 0 20px;
+    position: relative;
+    border-bottom: 1px solid #eee;
+    box-shadow: rgba(0, 0, 0, 0.05) 0 10px 10px -5px;
+  }
 
-		span {
-			display: block;
-			color: #fff;
-			border-radius: inherit;
-			padding: 7px 10px;
-			transition: 0.2s ease-in-out;
-		}
+  a {
+    display: block;
+    min-width: 100px;
+    text-align: center;
+    font-size: 14px;
+    margin: 10px 15px;
+    border-radius: 3px;
+    position: relative;
 
-		&:hover {
-			span {
-				background: rgba(0, 0, 0, 0.5);
-			}
-		}
-	}
+    span {
+      display: block;
+      color: #fff;
+      border-radius: inherit;
+      padding: 7px 10px;
+      transition: 0.2s ease-in-out;
+    }
 
-	.v {
-		position: absolute;
-		top: 30px;
-		bottom: 100px;
-		left: 50%;
-		width: 100%;
-		transform: translate3d(-50%, 0, 0);
-		overflow: auto;
-		padding: 100px 5% 0;
-		transition: 0.3s ease-in-out;
-		clip-path: inset(80px 0px 10px 0 round 8px);
-	}
+    &:hover {
+      span {
+        background: rgba(0, 0, 0, 0.5);
+      }
+    }
+  }
 
-	.ls {
-		flex: 1;
-		max-width: 800px;
-		align-content: flex-start;
-		display: flex;
-		flex-wrap: wrap;
-	}
+  .v {
+    position: absolute;
+    top: 30px;
+    bottom: 100px;
+    left: 50%;
+    width: 100%;
+    transform: translate3d(-50%, 0, 0);
+    overflow: auto;
+    padding: 100px 5% 0;
+    transition: 0.3s ease-in-out;
+    clip-path: inset(80px 0px 10px 0 round 8px);
+  }
 
-	.s {
-		@include s() {
-			clip-path: inset(10px 0px 10px 0 round 8px);
-		}
-	}
+  .ls {
+    flex: 1;
+    max-width: 800px;
+    align-content: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .s {
+    @include s() {
+      clip-path: inset(10px 0px 10px 0 round 8px);
+    }
+  }
 </style>

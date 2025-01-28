@@ -31,6 +31,7 @@
 			hide = 0;
 		});
 	};
+
 	function go(n = 1) {
 		page = n;
 		ld = 1;
@@ -57,6 +58,7 @@
 	}
 
 	const delayGo = delay(go, 600);
+
 	function ch(it) {
 		return () => {
 			const x = !s.find((a) => a.id === it.id);
@@ -121,131 +123,137 @@
 {/if}
 
 <style lang="scss">
-	@use 'sass:color';
+  @use 'sass:color';
 
-	.s {
-		display: flex;
-		padding: 2px 1.5em 0 0.8em;
-		align-items: center;
-		color: var(--darkgrey);
-		&.act {
-			color: #1c93ff;
-		}
-		input {
-			color: var(--darkgrey-h);
-			padding: 0 25px;
-			border-radius: 100px;
-			line-height: 40px;
-			margin-left: 7px;
-			width: 0;
-			flex: 1;
-			border: 0;
-			background: var(--bg2);
-			&::placeholder {
-				color: var(--darkgrey);
-			}
-		}
-	}
-	.p {
-		display: flex;
-		align-items: center;
-		padding: 5px 30px;
+  .s {
+    display: flex;
+    padding: 2px 1.5em 0 0.8em;
+    align-items: center;
+    color: var(--darkgrey);
 
-		span {
-			min-width: 100px;
-		}
+    &.act {
+      color: #1c93ff;
+    }
 
-		&:nth-child(2n) {
-			background: color.adjust(#122336, $alpha: -0.8);
-		}
+    input {
+      color: var(--darkgrey-h);
+      padding: 0 25px;
+      border-radius: 100px;
+      line-height: 40px;
+      margin-left: 7px;
+      width: 0;
+      flex: 1;
+      border: 0;
+      background: var(--bg2);
 
-		&:hover {
-			background: color.adjust(#0b3054, $alpha: -0.5);
-		}
-	}
+      &::placeholder {
+        color: var(--darkgrey);
+      }
+    }
+  }
 
-	.m {
-		pointer-events: none;
-		background: var(--bg1);
-		.k {
-			opacity: 0;
-		}
-	}
+  .p {
+    display: flex;
+    align-items: center;
+    padding: 5px 30px;
 
-	.t {
-		height: 40px;
-		display: flex;
-		align-items: center;
-		padding: 0 20px;
-		justify-content: space-between;
+    span {
+      min-width: 100px;
+    }
 
-		.i-ok {
-			padding: 0 20px;
-		}
+    &:nth-child(2n) {
+      background: color.adjust(#122336, $alpha: -0.8);
+    }
 
-		button {
-			line-height: 2;
-			transition: 0.2s;
-			opacity: 0.6;
+    &:hover {
+      background: color.adjust(#0b3054, $alpha: -0.5);
+    }
+  }
 
-			&:hover {
-				opacity: 1;
-			}
-		}
-	}
+  .m {
+    pointer-events: none;
+    background: var(--bg1);
 
-	.c {
-		flex: 1;
-		flex-direction: column;
-		display: flex;
-		align-items: center;
-	}
+    .k {
+      opacity: 0;
+    }
+  }
 
-	.b {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		overflow: auto;
-	}
+  .t {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    justify-content: space-between;
 
-	.ls {
-		padding: 20px 0;
-		background: color.adjust(black, $alpha: -0.8);
-		overflow: auto;
-		flex: 1;
-		margin-bottom: 10px;
-	}
+    .i-ok {
+      padding: 0 20px;
+    }
 
-	.a {
-		z-index: 5;
-		padding-bottom: 10px;
-		display: flex;
-		flex-direction: column;
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: var(--bg1);
-		border-radius: inherit;
-	}
+    button {
+      line-height: 2;
+      transition: 0.2s;
+      opacity: 0.6;
 
-	.k {
-		border-radius: 4px;
-		background: var(--bg3);
-		width: 18px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 12px;
-		height: 18px;
-		border: 1px solid #1d2e48;
-		color: transparent;
-		cursor: pointer;
-		margin-right: 20px;
-		padding: 0 !important;
-		&.s {
-			color: #fff;
-		}
-	}
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .c {
+    flex: 1;
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+  }
+
+  .b {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .ls {
+    padding: 20px 0;
+    background: color.adjust(black, $alpha: -0.8);
+    overflow: auto;
+    flex: 1;
+    margin-bottom: 10px;
+  }
+
+  .a {
+    z-index: 5;
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg1);
+    border-radius: inherit;
+  }
+
+  .k {
+    border-radius: 4px;
+    background: var(--bg3);
+    width: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    height: 18px;
+    border: 1px solid #1d2e48;
+    color: transparent;
+    cursor: pointer;
+    margin-right: 20px;
+    padding: 0 !important;
+
+    &.s {
+      color: #fff;
+    }
+  }
 </style>

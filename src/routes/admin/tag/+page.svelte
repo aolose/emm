@@ -91,79 +91,79 @@
 </div>
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
+  @use '../../../lib/break' as *;
 
-	.c {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		background: var(--bg3);
-		@include s() {
-			transition: 0.3s ease-in-out;
-			width: 200%;
-		}
-	}
+  .c {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    background: var(--bg3);
+    @include s() {
+      transition: 0.3s ease-in-out;
+      width: 200%;
+    }
+  }
 
-	.m {
-		height: 100%;
-		width: 100%;
-		@include s() {
-			overflow: hidden;
-		}
-	}
+  .m {
+    height: 100%;
+    width: 100%;
+    @include s() {
+      overflow: hidden;
+    }
+  }
 
-	s {
-		flex: 1;
-	}
+  s {
+    flex: 1;
+  }
 
-	.h {
-		padding: 20px 30px;
-		align-items: center;
-		justify-content: center;
-		border-bottom: 1px solid var(--bg0);
+  .h {
+    padding: 20px 30px;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--bg0);
 
-		input {
-			background: var(--bg0);
-			margin-right: 10px;
-		}
+    input {
+      background: var(--bg0);
+      margin-right: 10px;
+    }
 
-		button {
-			border-radius: 4px;
-			height: 34px;
-			width: 34px;
-			background: #6c7a93;
-		}
-	}
+    button {
+      border-radius: 4px;
+      height: 34px;
+      width: 34px;
+      background: #6c7a93;
+    }
+  }
 
-	.o {
-		button {
-			background: #1c93ff;
-			color: #fff;
-		}
-	}
+  .o {
+    button {
+      background: #1c93ff;
+      color: #fff;
+    }
+  }
 
-	.a {
-		background: var(--bg1);
-		width: 100%;
-		max-width: 600px;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		@include s() {
-			width: 50%;
-		}
-	}
+  .a {
+    background: var(--bg1);
+    width: 100%;
+    max-width: 600px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    @include s() {
+      width: 50%;
+    }
+  }
 
-	.ls {
-		flex: 1;
-		display: flex;
-		flex-wrap: wrap;
-		overflow: auto;
-		padding: 20px;
-		align-content: flex-start;
-	}
+  .ls {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    overflow: auto;
+    padding: 20px;
+    align-content: flex-start;
+  }
 
-	.r {
-		display: flex;
-	}
+  .r {
+    display: flex;
+  }
 </style>

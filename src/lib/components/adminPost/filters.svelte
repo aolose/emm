@@ -43,6 +43,7 @@
 			window.addEventListener('click', hide, true);
 		}
 	}
+
 	let size;
 	$: size = Object.values(ft).reduce((a, b) => a + b, 0);
 	$: {
@@ -65,69 +66,70 @@
 {/if}
 
 <style lang="scss">
-	button {
-		transition: 0.1s ease-in-out;
-		cursor: pointer;
-		display: block;
-		border: none;
-		margin-top: 10px;
-		width: 100%;
-		text-align: center;
-		background: none;
-		color: #364764;
-		&:hover {
-			color: var(--blue);
-		}
+  button {
+    transition: 0.1s ease-in-out;
+    cursor: pointer;
+    display: block;
+    border: none;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+    background: none;
+    color: #364764;
 
-		&.act {
-			color: #4d91be;
-		}
-	}
+    &:hover {
+      color: var(--blue);
+    }
 
-	.r {
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		margin: 3px auto;
-		color: #666;
-	}
+    &.act {
+      color: #4d91be;
+    }
+  }
 
-	i {
-		border-radius: 3px;
-		margin-right: 10px;
-		width: 16px;
-		height: 16px;
-		display: flex;
-		font-style: normal;
-		align-items: center;
-		justify-content: center;
-		background: #11161a;
-		font-size: 10px;
-		color: transparent;
-		transition: 0.2s ease-in-out;
+  .r {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin: 3px auto;
+    color: #666;
+  }
 
-		&:before {
-			content: '✓';
-		}
+  i {
+    border-radius: 3px;
+    margin-right: 10px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    font-style: normal;
+    align-items: center;
+    justify-content: center;
+    background: #11161a;
+    font-size: 10px;
+    color: transparent;
+    transition: 0.2s ease-in-out;
 
-		&.act {
-			color: #fff;
-			background: var(--blue);
+    &:before {
+      content: '✓';
+    }
 
-			& + span {
-				color: #6a818f;
-			}
-		}
-	}
+    &.act {
+      color: #fff;
+      background: var(--blue);
 
-	.a {
-		box-shadow: rgba(0, 0, 0, 0.3) 5px 6px 13px;
-		top: 110%;
-		left: 0;
-		position: absolute;
-		z-index: 4;
-		padding: 10px 20px;
-		background: #1e2534;
-		border-radius: 4px;
-	}
+      & + span {
+        color: #6a818f;
+      }
+    }
+  }
+
+  .a {
+    box-shadow: rgba(0, 0, 0, 0.3) 5px 6px 13px;
+    top: 110%;
+    left: 0;
+    position: absolute;
+    z-index: 4;
+    padding: 10px 20px;
+    background: #1e2534;
+    border-radius: 4px;
+  }
 </style>

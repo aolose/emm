@@ -26,110 +26,113 @@
 
 <table>
 	<thead>
-		<tr>
-			{#each cols as { name = '', check }}
-				<th>
-					{name}
-					{#if check}
-						<div
-							class="k"
-							on:click={() => {
-								if (st === 2) sel = new Set([...sel].filter((a) => !allSet.has(a)));
-								else sel = new Set([...sel, ...allSet]);
-							}}
-							class:act={st}
-						>
-							{['', '-', '✓'][st]}
-						</div>
-					{/if}
-				</th>
-			{/each}
-		</tr>
+	<tr>
+		{#each cols as { name = '', check }}
+			<th>
+				{name}
+				{#if check}
+					<div
+						class="k"
+						on:click={() => {
+                if (st === 2) sel = new Set([...sel].filter((a) => !allSet.has(a)));
+                else sel = new Set([...sel, ...allSet]);
+              }}
+						class:act={st}
+					>
+						{['', '-', '✓'][st]}
+					</div>
+				{/if}
+			</th>
+		{/each}
+	</tr>
 	</thead>
 	<tbody>
-		{#each items as row}
-			<tr>
-				{#each cols as { key, cell, check, btn }}
-					<td>
-						<div>
-							{#if cell}{cell(row)}{/if}
-							{#if key}{row[key]}{/if}
-							{#if check}
-								<div
-									class="k"
-									class:act={sel.has(row.id)}
-									on:click={() => {
-										if (sel.has(row.id)) sel.delete(row.id);
-										else sel.add(row.id);
-										sel = new Set([...sel]);
-									}}
-								>
-									✓
-								</div>
-							{/if}
-							{#if btn}
-								<button class="icon i-ed" on:click={() => btn(row)} />
-							{/if}
-						</div>
-					</td>
-				{/each}
-			</tr>
-		{/each}
+	{#each items as row}
+		<tr>
+			{#each cols as { key, cell, check, btn }}
+				<td>
+					<div>
+						{#if cell}{cell(row)}{/if}
+						{#if key}{row[key]}{/if}
+						{#if check}
+							<div
+								class="k"
+								class:act={sel.has(row.id)}
+								on:click={() => {
+                    if (sel.has(row.id)) sel.delete(row.id);
+                    else sel.add(row.id);
+                    sel = new Set([...sel]);
+                  }}
+							>
+								✓
+							</div>
+						{/if}
+						{#if btn}
+							<button class="icon i-ed" on:click={() => btn(row)} />
+						{/if}
+					</div>
+				</td>
+			{/each}
+		</tr>
+	{/each}
 	</tbody>
 </table>
 
 <style lang="scss">
-	.k {
-		width: 18px;
-		height: 18px;
-		background: var(--bg2);
-		border-radius: 4px;
-		border: #1c334a 1px solid;
-		margin: 0 auto;
-		color: transparent;
-		cursor: pointer;
-		&.act {
-			color: #7189a1;
-		}
-	}
-	table {
-		font-size: 14px;
-		width: 100%;
-		border-collapse: collapse;
-	}
+  .k {
+    width: 18px;
+    height: 18px;
+    background: var(--bg2);
+    border-radius: 4px;
+    border: #1c334a 1px solid;
+    margin: 0 auto;
+    color: transparent;
+    cursor: pointer;
 
-	thead {
-		background: var(--bg3);
+    &.act {
+      color: #7189a1;
+    }
+  }
 
-		th {
-			line-height: 3;
-			font-weight: 400;
-		}
-	}
+  table {
+    font-size: 14px;
+    width: 100%;
+    border-collapse: collapse;
+  }
 
-	tbody {
-		tr {
-			&:nth-child(2n) {
-				background: var(--bg2);
-			}
-		}
-	}
+  thead {
+    background: var(--bg3);
 
-	tr {
-	}
+    th {
+      line-height: 3;
+      font-weight: 400;
+    }
+  }
 
-	td,
-	th {
-		padding: 0 10px;
-		div {
-			height: 40px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			text-align: center;
-		}
-	}
+  tbody {
+    tr {
+      &:nth-child(2n) {
+        background: var(--bg2);
+      }
+    }
+  }
 
-	th {
-	}
+  tr {
+  }
+
+  td,
+  th {
+    padding: 0 10px;
+
+    div {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+  }
+
+  th {
+  }
 </style>

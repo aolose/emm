@@ -47,41 +47,44 @@
 </div>
 
 <style lang="scss">
-	@use '../break' as *;
-	.o {
-		position: fixed;
-		bottom: 40px;
-		right: 30px;
-		z-index: 3;
+  @use '../break' as *;
 
-		@include s() {
-			right: 20px;
-		}
-	}
-	.t {
-		transition: 0.2s ease-in-out;
-		border-radius: 50%;
-		line-height: 1;
-		font-size: 20px;
-		color: #fff;
-		height: 40px;
-		width: 40px;
-		border: 1px solid rgba(180, 200, 225, 0.3);
-		background: rgba(60, 140, 245, 0.8);
-		background-clip: content-box;
-		box-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px -2px;
-		display: block;
-		opacity: 0;
-		pointer-events: none;
-		&:hover {
-			opacity: 1;
-			border-color: rgba(80, 130, 250, 0.8);
-			background: rgba(60, 140, 245, 0.4);
-		}
+  .o {
+    position: fixed;
+    bottom: 40px;
+    right: 30px;
+    z-index: 3;
 
-		&.a {
-			opacity: 0.8;
-			pointer-events: auto;
-		}
-	}
+    @include s() {
+      right: 20px;
+    }
+  }
+
+  .t {
+    transition: 0.2s ease-in-out;
+    border-radius: 50%;
+    line-height: 1;
+    font-size: 20px;
+    color: #fff;
+    height: 40px;
+    width: 40px;
+    border: 1px solid rgba(180, 200, 225, 0.3);
+    background: rgba(60, 140, 245, 0.8);
+    background-clip: content-box;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px -2px;
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+
+    &:hover {
+      opacity: 1;
+      border-color: rgba(80, 130, 250, 0.8);
+      background: rgba(60, 140, 245, 0.4);
+    }
+
+    &.a {
+      opacity: 0.8;
+      pointer-events: auto;
+    }
+  }
 </style>

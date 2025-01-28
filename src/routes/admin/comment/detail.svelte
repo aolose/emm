@@ -96,10 +96,10 @@
 		admin={1}
 		done={done(d.id)}
 		reply={{
-			topic: d.topic || d.id,
-			cm: d.id,
-			name: d._name
-		}}
+      topic: d.topic || d.id,
+      cm: d.id,
+      name: d._name
+    }}
 	/>
 	<div class="b">
 		{#if !d.isAdm}
@@ -133,84 +133,84 @@
 </div>
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
+  @use '../../../lib/break' as *;
 
-	.h {
-		.i-close {
-			display: none;
-			@include s() {
-				display: block;
-				top: 10px;
-				padding: 10px;
-				position: absolute;
-				right: 5px;
-				font-size: 24px;
-				color: #1c93ff;
-				opacity: 0.5;
-			}
-		}
-	}
+  .h {
+    .i-close {
+      display: none;
+      @include s() {
+        display: block;
+        top: 10px;
+        padding: 10px;
+        position: absolute;
+        right: 5px;
+        font-size: 24px;
+        color: #1c93ff;
+        opacity: 0.5;
+      }
+    }
+  }
 
-	.a {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		@include s() {
-			flex: none;
-			width: 50%;
-		}
-	}
+  .a {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    @include s() {
+      flex: none;
+      width: 50%;
+    }
+  }
 
-	.b {
-		position: absolute;
-		right: 10px;
-		top: 10px;
-		padding: 10px;
-		@include s() {
-			right: 40px;
-		}
-	}
+  .b {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    padding: 10px;
+    @include s() {
+      right: 40px;
+    }
+  }
 
-	button {
-		padding: 0 5px;
-		transition: 0.1s;
-		opacity: 0.5;
-	}
+  button {
+    padding: 0 5px;
+    transition: 0.1s;
+    opacity: 0.5;
+  }
 
-	.act {
-		opacity: 1;
+  .act {
+    opacity: 1;
 
-		&.i-ip {
-			color: red;
-		}
+    &.i-ip {
+      color: red;
+    }
 
-		&.i-fbi {
-			color: orangered;
-		}
+    &.i-fbi {
+      color: orangered;
+    }
 
-		&.i-ok {
-			color: greenyellow;
-		}
+    &.i-ok {
+      color: greenyellow;
+    }
 
-		&.i-del {
-			color: #fff;
-		}
-	}
+    &.i-del {
+      color: #fff;
+    }
+  }
 
-	.l {
-		flex-grow: 1;
-		min-height: 200px;
-		display: flex;
-		flex-direction: column;
-		padding-bottom: 10px;
-		@include s() {
-			min-height: 0;
-			height: 0;
-		}
-	}
+  .l {
+    flex-grow: 1;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+    @include s() {
+      min-height: 0;
+      height: 0;
+    }
+  }
 
-	.ls {
-		flex: 1;
-		overflow: auto;
-	}
+  .ls {
+    flex: 1;
+    overflow: auto;
+  }
 </style>

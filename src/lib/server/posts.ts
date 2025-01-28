@@ -11,115 +11,115 @@ import type { SQLQueryBindings } from 'bun:sqlite';
 
 const dmp = new DiffMatchPatch();
 export const pubPostList = async (
-	page: number,
-	size: number,
-	tag: string | null,
-	skips?: number[],
-	tagInfo = false
+  page: number,
+  size: number,
+  tag: string | null,
+  skips?: number[],
+  tagInfo = false
 ) => {
-	const where: string[] = ['published=?'];
-	const values: SQLQueryBindings[] = [1];
-	let bn = null;
-	let desc = null;
-	if (tag) {
-		const tg = get(tags).find((a) => a.name === tag);
-		if (!tg) return resp('tag not exist', 404);
-		bn = tg.banner;
-		desc = tg.desc;
-		const ps = tagPostCache.getPostIds(tg.id);
-		if (ps.length) {
-			where.push(`id in (${sqlFields(ps.length)})`);
-			values.push(...ps);
-		}
-	}
-	if (skips) {
-		where.push(`id not in (${sqlFields(skips.length)})`);
-		values.push(...skips);
-	}
-	const o = pageBuilder(
-		page,
-		size,
-		Post,
-		['createAt desc'],
-		['banner', 'desc', 'publish', 'content', 'createAt', '_tag', 'title', 'slug'],
-		[where.join(' and '), ...values],
-		patchPostTags
-	);
-	for (const a of o.items) {
-		a.desc = a.desc || clipWords(await getPain(a.content), 140);
-		delete a.content;
-	}
-	if (!tagInfo) return o;
-	const e = o as { total: number; items: Post[]; bn?: number; desc?: string };
-	if (bn) e.bn = bn;
-	if (desc) e.desc = desc;
-	return e;
+  const where: string[] = ['published=?'];
+  const values: SQLQueryBindings[] = [1];
+  let bn = null;
+  let desc = null;
+  if (tag) {
+    const tg = get(tags).find((a) => a.name === tag);
+    if (!tg) return resp('tag not exist', 404);
+    bn = tg.banner;
+    desc = tg.desc;
+    const ps = tagPostCache.getPostIds(tg.id);
+    if (ps.length) {
+      where.push(`id in (${sqlFields(ps.length)})`);
+      values.push(...ps);
+    }
+  }
+  if (skips) {
+    where.push(`id not in (${sqlFields(skips.length)})`);
+    values.push(...skips);
+  }
+  const o = pageBuilder(
+    page,
+    size,
+    Post,
+    ['createAt desc'],
+    ['banner', 'desc', 'publish', 'content', 'createAt', '_tag', 'title', 'slug'],
+    [where.join(' and '), ...values],
+    patchPostTags
+  );
+  for (const a of o.items) {
+    a.desc = a.desc || clipWords(await getPain(a.content), 140);
+    delete a.content;
+  }
+  if (!tagInfo) return o;
+  const e = o as { total: number; items: Post[]; bn?: number; desc?: string };
+  if (bn) e.bn = bn;
+  if (desc) e.desc = desc;
+  return e;
 };
 
 let patchMap: Map<number, string>;
 let curPost: number;
 export const postList = (page: number, size: number, where?: [string, ...SQLQueryBindings[]]) => {
-	const o = pageBuilder(
-		page,
-		size,
-		Post,
-		['createAt desc'],
-		undefined,
-		where,
-		combine(patchPostTags, patchPostReqs)
-	);
-	return o;
+  const o = pageBuilder(
+    page,
+    size,
+    Post,
+    ['createAt desc'],
+    undefined,
+    where,
+    combine(patchPostTags, patchPostReqs)
+  );
+  return o;
 };
 
 export const postPatch = (id: number, ver: number, length: number, patch: string) => {
-	if (!id || !patch) return resp('error patch', 500);
-	if (curPost !== id) {
-		curPost = id;
-		patchMap = new Map();
-		if (ver) return resp('patch ver error', 500);
-	}
-	const p = model(Post, { id });
-	if (!db.get(p)) return resp('post not exist', 500);
-	if (ver === 0) {
-		p.content_d = patch;
-	} else {
-		for (const [v] of patchMap) {
-			if (v < ver) patchMap.delete(v);
-		}
-		const content = patchMap.get(ver);
-		if (content !== undefined) {
-			const patchList: PatchObject[] = [];
-			const [infText, ...diff] = patch.split('\x01');
-			const infList = infText.split(',').map((a) => +a);
-			const l = diff.length;
-			let dataStart = l * 4;
-			for (let i = 0; i < l; i++) {
-				const [start1, start2, length1, length2] = infList.slice(i * 4, i * 4 + 4);
-				const diffs: [number, string][] = [];
-				const data = diff[i].split('\x00');
-				if (data.length) {
-					for (const s of data) {
-						diffs.push([1 - infList[dataStart++], s]);
-					}
-				}
-				patchList.push({ start1, start2, length1, length2, diffs });
-			}
-			const [r, status = []] = dmp.patch_apply(patchList, content);
-			const err = status.find((a) => !a);
-			if (err) {
-				return resp('patch fail', 500);
-			}
-			if (r.length === length) {
-				p.content_d = r;
-			} else {
-				return resp(`patch content length miss match ${r.length}:${length}`, 500);
-			}
-		} else {
-			return resp('patch ver not found', 500);
-		}
-	}
-	db.save(p);
-	ver++;
-	patchMap.set(ver, p.content_d);
-	return [ver, p.save].join();
+  if (!id || !patch) return resp('error patch', 500);
+  if (curPost !== id) {
+    curPost = id;
+    patchMap = new Map();
+    if (ver) return resp('patch ver error', 500);
+  }
+  const p = model(Post, { id });
+  if (!db.get(p)) return resp('post not exist', 500);
+  if (ver === 0) {
+    p.content_d = patch;
+  } else {
+    for (const [v] of patchMap) {
+      if (v < ver) patchMap.delete(v);
+    }
+    const content = patchMap.get(ver);
+    if (content !== undefined) {
+      const patchList: PatchObject[] = [];
+      const [infText, ...diff] = patch.split('\x01');
+      const infList = infText.split(',').map((a) => +a);
+      const l = diff.length;
+      let dataStart = l * 4;
+      for (let i = 0; i < l; i++) {
+        const [start1, start2, length1, length2] = infList.slice(i * 4, i * 4 + 4);
+        const diffs: [number, string][] = [];
+        const data = diff[i].split('\x00');
+        if (data.length) {
+          for (const s of data) {
+            diffs.push([1 - infList[dataStart++], s]);
+          }
+        }
+        patchList.push({ start1, start2, length1, length2, diffs });
+      }
+      const [r, status = []] = dmp.patch_apply(patchList, content);
+      const err = status.find((a) => !a);
+      if (err) {
+        return resp('patch fail', 500);
+      }
+      if (r.length === length) {
+        p.content_d = r;
+      } else {
+        return resp(`patch content length miss match ${r.length}:${length}`, 500);
+      }
+    } else {
+      return resp('patch ver not found', 500);
+    }
+  }
+  db.save(p);
+  ver++;
+  patchMap.set(ver, p.content_d);
+  return [ver, p.save].join();
 };

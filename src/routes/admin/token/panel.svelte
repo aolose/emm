@@ -167,7 +167,7 @@
 			<div class="n">
 				{#if fine}
 					<button transition:slidLeft|global on:click={ok}
-						>{t && editMod ? 'create' : 'submit'}</button
+					>{t && editMod ? 'create' : 'submit'}</button
 					>
 				{/if}
 				<button on:click={cancel}>cancel</button>
@@ -179,161 +179,161 @@
 {/if}
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
+  @use '../../../lib/break' as *;
 
-	[type='number'] {
-		height: 40px;
+  [type='number'] {
+    height: 40px;
 
-		&::-webkit-outer-spin-button,
-		&::-webkit-inner-spin-button {
-			-webkit-appearance: none;
-			margin: 0;
-		}
-	}
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
 
-	.i-ed {
-		position: absolute;
-		left: 100%;
-		top: 7px;
-		margin-left: 5px;
-		padding: 5px;
-		border: 1px solid #1c340a;
-		border-radius: 4px;
-		color: #52718f;
-		background: var(--bg1);
-		transition: 0.2s;
+  .i-ed {
+    position: absolute;
+    left: 100%;
+    top: 7px;
+    margin-left: 5px;
+    padding: 5px;
+    border: 1px solid #1c340a;
+    border-radius: 4px;
+    color: #52718f;
+    background: var(--bg1);
+    transition: 0.2s;
 
-		&:hover {
-			color: #869bb4;
-		}
-	}
+    &:hover {
+      color: #869bb4;
+    }
+  }
 
-	.m {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: absolute;
-		left: 0;
-		top: 0;
-		bottom: 0;
-		right: 0;
-		backdrop-filter: blur(2px);
-		background: rgba(80, 100, 150, 0.1);
-		@include s() {
-			backdrop-filter: none;
-		}
-	}
+  .m {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    backdrop-filter: blur(2px);
+    background: rgba(80, 100, 150, 0.1);
+    @include s() {
+      backdrop-filter: none;
+    }
+  }
 
-	.a {
-		border: 1px solid var(--bg7);
-		border-radius: 10px;
-		display: flex;
-		flex-direction: column;
-		width: 500px;
-		max-width: 100%;
-		height: 700px;
-		max-height: 100%;
-		background: var(--bg1);
-		box-shadow: var(--bg3) 0 20px 50px -30px;
-		@include s() {
-			height: 100%;
-			box-shadow: none;
-			border-radius: 0;
-		}
-	}
+  .a {
+    border: 1px solid var(--bg7);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    width: 500px;
+    max-width: 100%;
+    height: 700px;
+    max-height: 100%;
+    background: var(--bg1);
+    box-shadow: var(--bg3) 0 20px 50px -30px;
+    @include s() {
+      height: 100%;
+      box-shadow: none;
+      border-radius: 0;
+    }
+  }
 
-	.b {
-		overflow-y: auto;
-		padding: 10px 0;
-		flex: 1;
-		background: var(--bg2);
-	}
+  .b {
+    overflow-y: auto;
+    padding: 10px 0;
+    flex: 1;
+    background: var(--bg2);
+  }
 
-	.t {
-		span {
-			color: #5a6875;
-		}
+  .t {
+    span {
+      color: #5a6875;
+    }
 
-		button {
-			opacity: 0.5;
-			padding: 10px;
-			right: -10px;
-			transition: 0.2s;
+    button {
+      opacity: 0.5;
+      padding: 10px;
+      right: -10px;
+      transition: 0.2s;
 
-			&:hover {
-				opacity: 1;
-			}
-		}
-	}
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
 
-	.t,
-	.n {
-		padding: 0 20px;
-		display: flex;
-		height: 50px;
-		align-items: center;
-		justify-content: space-between;
-	}
+  .t,
+  .n {
+    padding: 0 20px;
+    display: flex;
+    height: 50px;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-	.n {
-		justify-content: center;
-		height: 60px;
+  .n {
+    justify-content: center;
+    height: 60px;
 
-		button {
-			color: var(--darkgrey-h);
-			height: 30px;
-			display: flex;
-			margin: 0 10px;
-			align-items: center;
-			width: 100px;
-			border-radius: 100px;
-			justify-content: center;
-			border: 1px solid currentColor;
-			transition: 0.2s;
+    button {
+      color: var(--darkgrey-h);
+      height: 30px;
+      display: flex;
+      margin: 0 10px;
+      align-items: center;
+      width: 100px;
+      border-radius: 100px;
+      justify-content: center;
+      border: 1px solid currentColor;
+      transition: 0.2s;
 
-			&:hover {
-				color: #566f85;
-			}
-		}
-	}
+      &:hover {
+        color: #566f85;
+      }
+    }
+  }
 
-	.r {
-		display: flex;
-		margin: 20px auto;
-		width: 70%;
+  .r {
+    display: flex;
+    margin: 20px auto;
+    width: 70%;
 
-		&:global {
-			.a {
-				margin: 0;
-			}
+    &:global {
+      .a {
+        margin: 0;
+      }
 
-			i {
-				top: 2px;
-				background: var(--bg3);
-				border: 1px solid rgba(140, 181, 236, 0.1);
-			}
-		}
+      i {
+        top: 2px;
+        background: var(--bg3);
+        border: 1px solid rgba(140, 181, 236, 0.1);
+      }
+    }
 
-		& > span {
-			color: #455564;
-			line-height: 40px;
-			width: 90px;
-			text-align: right;
-			padding-right: 20px;
-		}
+    & > span {
+      color: #455564;
+      line-height: 40px;
+      width: 90px;
+      text-align: right;
+      padding-right: 20px;
+    }
 
-		input {
-			width: 0;
-			flex-grow: 1;
-			border: 1px solid rgba(140, 181, 236, 0.1);
-			background: var(--bg3);
-		}
-	}
+    input {
+      width: 0;
+      flex-grow: 1;
+      border: 1px solid rgba(140, 181, 236, 0.1);
+      background: var(--bg3);
+    }
+  }
 
-	.rr {
-		span {
-			text-align: left;
-			width: 100%;
-		}
-	}
+  .rr {
+    span {
+      text-align: left;
+      width: 100%;
+    }
+  }
 </style>

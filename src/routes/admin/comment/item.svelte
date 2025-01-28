@@ -62,8 +62,8 @@
 					class:re={d.state === cmStatus.Reject}
 					class:pe={d.state === cmStatus.Pending}
 				>
-					{stu(d.state)[0]}
-				</span>
+          {stu(d.state)[0]}
+        </span>
 			</div>
 		{/if}
 		<div class="t">
@@ -91,236 +91,244 @@
 </div>
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
+  @use '../../../lib/break' as *;
 
-	.h {
-		width: 100%;
-		display: flex;
+  .h {
+    width: 100%;
+    display: flex;
 
-		align-items: center;
-		s {
-			flex: 1;
-		}
-	}
+    align-items: center;
 
-	.i {
-		flex-grow: 1;
-		height: 100%;
-		align-items: flex-end;
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: flex-end;
-		a {
-			flex-shrink: 0;
-		}
-		span {
-			padding: 0 5px 0 0;
-			white-space: nowrap;
-		}
-	}
+    s {
+      flex: 1;
+    }
+  }
 
-	a {
-		margin-right: 10px;
-		opacity: 0.5;
-		font-size: 13px;
-		color: inherit;
-		text-decoration: underline;
-	}
+  .i {
+    flex-grow: 1;
+    height: 100%;
+    align-items: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 
-	.d {
-		align-self: center;
-		font-size: 14px;
-		flex-grow: 1;
-		display: flex;
-		flex-direction: column;
+    a {
+      flex-shrink: 0;
+    }
 
-		span {
-			color: var(--darkgrey-h);
-		}
-	}
+    span {
+      padding: 0 5px 0 0;
+      white-space: nowrap;
+    }
+  }
 
-	.c {
-		padding: 10px 0;
-		max-height: 100px;
-		flex-grow: 1;
-		color: #3b4557;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
+  a {
+    margin-right: 10px;
+    opacity: 0.5;
+    font-size: 13px;
+    color: inherit;
+    text-decoration: underline;
+  }
 
-	.t {
-		font-size: 12px;
-		color: #637288;
-		display: flex;
-		flex-direction: column;
-		p {
-			white-space: pre-wrap;
-			line-height: 2;
-			color: #ddd;
-			max-height: none;
-		}
-	}
+  .d {
+    align-self: center;
+    font-size: 14px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 
-	.a {
-		--bg: var(--bg5);
-		transition: 0.1s linear;
-		box-shadow: rgba(0, 0, 0, 0.1) 0 3px 20px -10px;
-		border-radius: 4px;
-		display: flex;
-		margin: 5px;
-		background: var(--bg);
-		padding: 10px;
-		cursor: pointer;
-		border: 1px solid var(--bg5);
+    span {
+      color: var(--darkgrey-h);
+    }
+  }
 
-		&.act {
-			--bg: var(--bg3);
-		}
+  .c {
+    padding: 10px 0;
+    max-height: 100px;
+    flex-grow: 1;
+    color: #3b4557;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-		&:hover {
-			--bg: var(--bg2);
-		}
-	}
+  .t {
+    font-size: 12px;
+    color: #637288;
+    display: flex;
+    flex-direction: column;
 
-	.b {
-		border-radius: 50%;
-		overflow: hidden;
-	}
+    p {
+      white-space: pre-wrap;
+      line-height: 2;
+      color: #ddd;
+      max-height: none;
+    }
+  }
 
-	.v {
-		padding-top: 10px;
-		width: 80px;
-		flex-grow: 0;
-		flex-shrink: 0;
-		display: flex;
-		justify-content: flex-start;
-		flex-direction: column;
-		align-items: center;
+  .a {
+    --bg: var(--bg5);
+    transition: 0.1s linear;
+    box-shadow: rgba(0, 0, 0, 0.1) 0 3px 20px -10px;
+    border-radius: 4px;
+    display: flex;
+    margin: 5px;
+    background: var(--bg);
+    padding: 10px;
+    cursor: pointer;
+    border: 1px solid var(--bg5);
 
-		span {
-			font-size: 13px;
-			margin-top: 10px;
-			width: 100%;
-			text-align: center;
-		}
-	}
+    &.act {
+      --bg: var(--bg3);
+    }
 
-	.s {
-		text-transform: uppercase;
-		color: var(--darkgrey-h);
-		background: var(--bg2);
-		padding: 0;
-		width: 16px;
-		height: 16px;
-		line-height: 16px;
-		text-align: center;
-		font-size: 10px !important;
-		&.ap {
-			color: #00bb00;
-		}
-		&.re {
-			color: orange;
-		}
-		&.pe {
-			color: #1c93ff;
-		}
-	}
+    &:hover {
+      --bg: var(--bg2);
+    }
+  }
 
-	.dt {
-		margin: 0;
-		background: rgba(105, 125, 185, 0.05);
-		flex-direction: column;
-		cursor: auto;
+  .b {
+    border-radius: 50%;
+    overflow: hidden;
+  }
 
-		.rp {
-			display: none;
-		}
+  .v {
+    padding-top: 10px;
+    width: 80px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    align-items: center;
 
-		.h {
-			display: none;
-		}
+    span {
+      font-size: 13px;
+      margin-top: 10px;
+      width: 100%;
+      text-align: center;
+    }
+  }
 
-		.v {
-			flex-direction: row;
-			width: 100%;
-			align-items: center;
-			@include s() {
-				padding: 10px;
-			}
-			span {
-				width: auto;
-				margin: 0;
-				padding: 0 5px;
-				font-size: 13px;
-			}
-		}
+  .s {
+    text-transform: uppercase;
+    color: var(--darkgrey-h);
+    background: var(--bg2);
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    font-size: 10px !important;
 
-		.d {
-			width: 100%;
-			padding: 0 10px;
-		}
+    &.ap {
+      color: #00bb00;
+    }
 
-		.t {
-			display: block;
-		}
+    &.re {
+      color: orange;
+    }
 
-		.c {
-			max-width: none;
-			padding: 20px 16px;
-			overflow: auto;
-			max-height: none;
-			white-space: normal;
-			@include s() {
-				padding: 10px 0;
-			}
-		}
+    &.pe {
+      color: #1c93ff;
+    }
+  }
 
-		.i {
-			justify-content: flex-start;
-			flex-direction: row;
-			height: auto;
-		}
-	}
+  .dt {
+    margin: 0;
+    background: rgba(105, 125, 185, 0.05);
+    flex-direction: column;
+    cursor: auto;
 
-	.tp {
-		flex-direction: column;
-		cursor: auto;
-		max-width: 500px;
-		background: none;
-		border: none;
-		padding: 0 10px;
-		margin-bottom: 0;
+    .rp {
+      display: none;
+    }
 
-		.v {
-			flex-direction: row;
-			width: 100%;
-			justify-content: flex-start;
-			align-items: flex-start;
+    .h {
+      display: none;
+    }
 
-			span {
-				padding-right: 10px;
-				width: auto;
-			}
-		}
+    .v {
+      flex-direction: row;
+      width: 100%;
+      align-items: center;
+      @include s() {
+        padding: 10px;
+      }
 
-		.d {
-			background: rgba(80, 100, 150, 0.2);
-			width: 100%;
-			margin: 10px;
-			padding: 10px 20px;
-			border-radius: 4px;
-		}
+      span {
+        width: auto;
+        margin: 0;
+        padding: 0 5px;
+        font-size: 13px;
+      }
+    }
 
-		.rp {
-			padding-right: 10px;
-			font-size: 12px;
-		}
+    .d {
+      width: 100%;
+      padding: 0 10px;
+    }
 
-		.c {
-			width: 100%;
-			max-width: none;
-			overflow: auto;
-		}
-	}
+    .t {
+      display: block;
+    }
+
+    .c {
+      max-width: none;
+      padding: 20px 16px;
+      overflow: auto;
+      max-height: none;
+      white-space: normal;
+      @include s() {
+        padding: 10px 0;
+      }
+    }
+
+    .i {
+      justify-content: flex-start;
+      flex-direction: row;
+      height: auto;
+    }
+  }
+
+  .tp {
+    flex-direction: column;
+    cursor: auto;
+    max-width: 500px;
+    background: none;
+    border: none;
+    padding: 0 10px;
+    margin-bottom: 0;
+
+    .v {
+      flex-direction: row;
+      width: 100%;
+      justify-content: flex-start;
+      align-items: flex-start;
+
+      span {
+        padding-right: 10px;
+        width: auto;
+      }
+    }
+
+    .d {
+      background: rgba(80, 100, 150, 0.2);
+      width: 100%;
+      margin: 10px;
+      padding: 10px 20px;
+      border-radius: 4px;
+    }
+
+    .rp {
+      padding-right: 10px;
+      font-size: 12px;
+    }
+
+    .c {
+      width: 100%;
+      max-width: none;
+      overflow: auto;
+    }
+  }
 </style>

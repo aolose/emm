@@ -34,7 +34,7 @@
 </div>
 
 <style>
-	div {
-		display: none;
-	}
+    div {
+        display: none;
+    }
 </style>

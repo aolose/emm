@@ -27,87 +27,89 @@
 </div>
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
-	.t {
-		display: flex;
-	}
+  @use '../../../lib/break' as *;
 
-	.t,
-	p {
-		text-shadow: rgba(0, 0, 0, 0.5) 0 0 3px;
-	}
+  .t {
+    display: flex;
+  }
 
-	button {
-		cursor: pointer;
-		opacity: 0.5;
-		width: 20px;
-		top: 10px;
-		right: 10px;
-		height: 20px;
-		align-items: center;
-		display: flex;
-		justify-content: center;
+  .t,
+  p {
+    text-shadow: rgba(0, 0, 0, 0.5) 0 0 3px;
+  }
 
-		&:hover {
-			opacity: 1;
-		}
-	}
+  button {
+    cursor: pointer;
+    opacity: 0.5;
+    width: 20px;
+    top: 10px;
+    right: 10px;
+    height: 20px;
+    align-items: center;
+    display: flex;
+    justify-content: center;
 
-	h4 {
-		flex: 1;
-	}
+    &:hover {
+      opacity: 1;
+    }
+  }
 
-	.a {
-		cursor: pointer;
-		transition: 0.2s ease-in-out;
-		border: 1px solid transparent;
-		width: 46%;
-		min-width: 200px;
-		min-height: 50px;
-		margin: 10px;
-		background: var(--bg2);
-		&:hover {
-			border-color: #28649a;
-		}
+  h4 {
+    flex: 1;
+  }
 
-		@include s() {
-			margin: 5px;
-			min-width: 0;
-		}
-	}
+  .a {
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+    border: 1px solid transparent;
+    width: 46%;
+    min-width: 200px;
+    min-height: 50px;
+    margin: 10px;
+    background: var(--bg2);
 
-	.s {
-		background: var(--bg0);
-		border-color: rgb(39, 64, 85);
+    &:hover {
+      border-color: #28649a;
+    }
 
-		.b {
-			filter: grayscale(0);
-			opacity: 0.3;
-		}
-	}
+    @include s() {
+      margin: 5px;
+      min-width: 0;
+    }
+  }
 
-	h4 {
-		font-weight: 400;
-		padding: 10px 20px;
-	}
+  .s {
+    background: var(--bg0);
+    border-color: rgb(39, 64, 85);
 
-	p {
-		color: #8e9bb2;
-		padding: 10px 20px;
-		white-space: normal;
-		word-break: break-all;
-	}
+    .b {
+      filter: grayscale(0);
+      opacity: 0.3;
+    }
+  }
 
-	.b {
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		bottom: 0;
-		pointer-events: none;
-		opacity: 0.1;
-		background: center;
-		background-size: cover;
-		filter: grayscale(0.5);
-	}
+  h4 {
+    font-weight: 400;
+    padding: 10px 20px;
+  }
+
+  p {
+    color: #8e9bb2;
+    padding: 10px 20px;
+    white-space: normal;
+    word-break: break-all;
+  }
+
+  .b {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    opacity: 0.1;
+    background: center;
+    background-size: cover;
+    filter: grayscale(0.5);
+  }
 </style>
