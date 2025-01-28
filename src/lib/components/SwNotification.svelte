@@ -33,22 +33,26 @@
 		reg();
 	});
 </script>
+
 <div id="k" class:a={show}>
 	<p>The data has been updated. Do you want to reload it?</p>
 	<div>
-		<button on:click={()=>{
-			show = false;
-			location.reload();
-		}}>Reload
+		<button
+			on:click={() => {
+				show = false;
+				location.reload();
+			}}
+		>Reload
 		</button>
 		<button
-			on:click={()=>{
-			show = false
-		}}
+			on:click={() => {
+				show = false;
+			}}
 		>Cancel
 		</button>
 	</div>
 </div>
+
 <style lang="scss">
   button {
     border-radius: 4px;
