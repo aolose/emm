@@ -131,181 +131,183 @@
 {/if}
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
-	.m {
-		z-index: 5;
-		position: fixed;
-		top: 0;
-		bottom: 0;
-		right: 0;
-		left: 0;
-		background: rgba(0, 0, 0, 0.5);
-		backdrop-filter: blur(1px);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
+  @use '../../../lib/break' as *;
 
-	.f {
-		flex: 1;
-		overflow: auto;
-		overflow-x: hidden;
-		padding-bottom: 30px;
+  .m {
+    z-index: 5;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(1px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-		&::-webkit-scrollbar-track {
-			background: var(--bg2);
-			box-shadow: none;
-		}
+  .f {
+    flex: 1;
+    overflow: auto;
+    overflow-x: hidden;
+    padding-bottom: 30px;
 
-		&::-webkit-scrollbar-thumb {
-			background: #232d3a;
-		}
-	}
+    &::-webkit-scrollbar-track {
+      background: var(--bg2);
+      box-shadow: none;
+    }
 
-	.a {
-		display: flex;
-		flex-direction: column;
-		max-height: 90%;
-		background: var(--bg1);
-		width: 400px;
-		box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 10px;
-		@include s() {
-			max-height: 100%;
-			width: 33.333%;
-			box-shadow: none;
-		}
-	}
+    &::-webkit-scrollbar-thumb {
+      background: #232d3a;
+    }
+  }
 
-	.h {
-		padding: 20px;
-		display: flex;
-		justify-content: space-between;
-		border-bottom: 1px solid var(--bg0);
-		span {
-			color: #6c7a93;
-		}
-	}
+  .a {
+    display: flex;
+    flex-direction: column;
+    max-height: 90%;
+    background: var(--bg1);
+    width: 400px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 10px;
+    @include s() {
+      max-height: 100%;
+      width: 33.333%;
+      box-shadow: none;
+    }
+  }
 
-	button {
-		background: none;
-		color: #3a596b;
-		font-size: 20px;
-		display: flex;
-		line-height: 1;
-		border: none;
-		cursor: pointer;
-		transition: 0.3s ease-in-out;
-		width: 80px;
+  .h {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--bg0);
 
-		span {
-			font-size: 18px;
-			display: block;
-			color: inherit !important;
-		}
+    span {
+      color: #6c7a93;
+    }
+  }
 
-		&:hover {
-			color: #fff;
-		}
-	}
+  button {
+    background: none;
+    color: #3a596b;
+    font-size: 20px;
+    display: flex;
+    line-height: 1;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    width: 80px;
 
-	.i-close {
-		justify-content: flex-end;
-	}
+    span {
+      font-size: 18px;
+      display: block;
+      color: inherit !important;
+    }
 
-	.r {
-		padding: 20px;
+    &:hover {
+      color: #fff;
+    }
+  }
 
-		:global {
-			.v {
-				background: var(--bg2) center no-repeat;
-				width: 100%;
-				outline: none;
-				padding: 10px !important;
-				box-shadow: inset 0 0 3px rgb(0 0 0 / 20%);
-				border-radius: 3px;
-				border: none !important;
-				min-height: 50px !important;
-			}
-		}
-	}
+  .i-close {
+    justify-content: flex-end;
+  }
 
-	.n {
-		min-height: 50px;
-		display: flex;
-		width: 100%;
-		margin-top: 20px;
+  .r {
+    padding: 20px;
 
-		button {
-			width: 40px;
-			background: var(--bg3);
-			border-left: 1px solid var(--bg1);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-	}
+    :global {
+      .v {
+        background: var(--bg2) center no-repeat;
+        width: 100%;
+        outline: none;
+        padding: 10px !important;
+        box-shadow: inset 0 0 3px rgb(0 0 0 / 20%);
+        border-radius: 3px;
+        border: none !important;
+        min-height: 50px !important;
+      }
+    }
+  }
 
-	h3 {
-		color: #545e72;
-		font-weight: 200;
-		font-size: 13px;
-		align-items: center;
-		line-height: 2;
-		display: flex;
+  .n {
+    min-height: 50px;
+    display: flex;
+    width: 100%;
+    margin-top: 20px;
 
-		span {
-			flex: 1;
-			text-align: right;
-			color: #566279;
-		}
-	}
+    button {
+      width: 40px;
+      background: var(--bg3);
+      border-left: 1px solid var(--bg1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
 
-	input,
-	textarea,
-	.p,
-	.t {
-		display: block;
-		margin-top: 20px;
-		border: none;
-		background: var(--bg2) center no-repeat;
-		width: 100%;
-		outline: none;
-		padding: 10px;
-		box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
-		border-radius: 3px;
-		resize: none;
-	}
+  h3 {
+    color: #545e72;
+    font-weight: 200;
+    font-size: 13px;
+    align-items: center;
+    line-height: 2;
+    display: flex;
 
-	.p {
-		cursor: pointer;
-		height: 200px;
-		color: var(--darkgrey);
-		font-size: 60px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background-size: cover;
+    span {
+      flex: 1;
+      text-align: right;
+      color: #566279;
+    }
+  }
 
-		button {
-			position: absolute;
-			top: 0;
-			right: 0;
-			z-index: 2;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			text-shadow: #fff 0 0 2px;
-			font-weight: 600;
-			width: 40px;
-			height: 40px;
+  input,
+  textarea,
+  .p,
+  .t {
+    display: block;
+    margin-top: 20px;
+    border: none;
+    background: var(--bg2) center no-repeat;
+    width: 100%;
+    outline: none;
+    padding: 10px;
+    box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    resize: none;
+  }
 
-			&:hover {
-				text-shadow: #000 0 0 2px;
-			}
-		}
-	}
+  .p {
+    cursor: pointer;
+    height: 200px;
+    color: var(--darkgrey);
+    font-size: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
 
-	.act {
-		color: transparent;
-	}
+    button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: #fff 0 0 2px;
+      font-weight: 600;
+      width: 40px;
+      height: 40px;
+
+      &:hover {
+        text-shadow: #000 0 0 2px;
+      }
+    }
+  }
+
+  .act {
+    color: transparent;
+  }
 </style>

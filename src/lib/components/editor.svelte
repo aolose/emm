@@ -108,20 +108,21 @@
 </div>
 
 <style lang="scss">
-	@use '../../lib/break' as *;
-	@import url(./font/fas.css);
-	.d {
-		display: none;
-	}
+  @use '../../lib/break' as *;
+  @import url(./font/fas.css);
 
-	.e {
-		height: 100%;
-		overflow: hidden;
-		line-height: 2;
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		bottom: 0;
-	}
+  .d {
+    display: none;
+  }
+
+  .e {
+    height: 100%;
+    overflow: hidden;
+    line-height: 2;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
 </style>

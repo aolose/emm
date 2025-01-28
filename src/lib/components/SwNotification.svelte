@@ -1,53 +1,54 @@
 <script>
-	import { onMount } from 'svelte';
-	import { dev } from '$app/environment';
+  import { onMount } from 'svelte';
+  import { dev } from '$app/environment';
 
-	const channel = new BroadcastChannel('sw-messages');
-	channel.onmessage = (event) => {
-		if (event.data?.type === 'CACHE_DONE') {
-			show = true;
-		}
-	};
-	let show = $state(false);
-	const reg = async () => {
-		const { serviceWorker } = navigator;
-		if (serviceWorker) {
-			let register = await serviceWorker.getRegistration();
-			if (!register) {
-				register = await serviceWorker.register('service-worker.js', {
-					type: dev ? 'module' : 'classic',
-					scope: '/'
-				});
-			}
-			setInterval(() => {
-				const { waiting, installing } = register;
-				if (!waiting && !installing) register.update().catch(console.error);
-			}, 12e4); // 2min
-		}
-	};
-	onMount(() => {
-		reg();
-	});
+  const channel = new BroadcastChannel('sw-messages');
+  channel.onmessage = (event) => {
+    if (event.data?.type === 'CACHE_DONE') {
+      show = true;
+    }
+  };
+  let show = $state(false);
+  const reg = async () => {
+    const { serviceWorker } = navigator;
+    if (serviceWorker) {
+      let register = await serviceWorker.getRegistration();
+      if (!register) {
+        register = await serviceWorker.register('service-worker.js', {
+          type: dev ? 'module' : 'classic',
+          scope: '/'
+        });
+      }
+      setInterval(() => {
+        const { waiting, installing } = register;
+        if (!waiting && !installing) register.update().catch(console.error);
+      }, 12e4); // 2min
+    }
+  };
+  onMount(() => {
+    reg();
+  });
 </script>
+
 <div id="k" class:a={show}>
-	<p>The data has been updated. Do you want to reload it?</p>
-	<div>
-		<button
-			on:click={() => {
-				setTimeout(()=>{
-					show = false;
-				  location.reload();
-				})
-			}}
-		>Reload
-		</button>
-		<button
-			on:click={() => {
-				show = false;
-			}}
-		>Cancel
-		</button>
-	</div>
+  <p>The data has been updated. Do you want to reload it?</p>
+  <div>
+    <button
+      on:click={() => {
+        setTimeout(() => {
+          show = false;
+          location.reload();
+        });
+      }}
+    >Reload
+    </button>
+    <button
+      on:click={() => {
+        show = false;
+      }}
+    >Cancel
+    </button>
+  </div>
 </div>
 
 <style lang="scss">

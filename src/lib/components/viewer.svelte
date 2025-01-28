@@ -90,303 +90,310 @@
 {/if}
 
 <style lang="scss">
-	@use '../../lib/break' as *;
-	@import 'highlight.js/styles/github-dark.css';
-	@import 'viewerjs/dist/viewer.css';
-	.a {
-		overflow: auto;
-		padding: 20px 0;
-		display: flex;
-		height: 100%;
-		flex-direction: column;
+  @use '../../lib/break' as *;
+  @import 'highlight.js/styles/github-dark.css';
+  @import 'viewerjs/dist/viewer.css';
 
-		:global {
-			* {
-				line-height: 2;
-			}
+  .a {
+    overflow: auto;
+    padding: 20px 0;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
 
-			del {
-				color: rgba(100, 120, 150, 0.8);
-				text-decoration-color: #6c85ff;
-			}
+    :global {
+      * {
+        line-height: 2;
+      }
 
-			.head {
-				text-decoration: none;
-			}
+      del {
+        color: rgba(100, 120, 150, 0.8);
+        text-decoration-color: #6c85ff;
+      }
 
-			p,
-			span {
-				overflow-wrap: break-word;
-			}
+      .head {
+        text-decoration: none;
+      }
 
-			blockquote {
-				background: rgba(100, 120, 150, 0.1);
-				border-left: 2px solid rgba(100, 120, 150, 0.5);
-				margin: 1.5em 0;
-				padding: 0.5em 10px;
-			}
+      p,
+      span {
+        overflow-wrap: break-word;
+      }
 
-			blockquote:before {
-				color: #ccc;
-				content: open-quote;
-				font-size: 2em;
-				line-height: 0.1em;
-				margin-right: 0.1em;
-				vertical-align: -0.2em;
-			}
+      blockquote {
+        background: rgba(100, 120, 150, 0.1);
+        border-left: 2px solid rgba(100, 120, 150, 0.5);
+        margin: 1.5em 0;
+        padding: 0.5em 10px;
+      }
 
-			blockquote p {
-				color: #6f93be;
-				display: inline;
-			}
+      blockquote:before {
+        color: #ccc;
+        content: open-quote;
+        font-size: 2em;
+        line-height: 0.1em;
+        margin-right: 0.1em;
+        vertical-align: -0.2em;
+      }
 
-			code {
-				border-radius: 4px;
-				overflow: hidden;
-				padding: 0 5px;
-				color: #659a62;
-				background: rgba(10, 20, 40, 0.4);
-			}
+      blockquote p {
+        color: #6f93be;
+        display: inline;
+      }
 
-			pre {
-				& > code {
-					border: rgba(0, 0, 0, 0.1) 1px solid;
-					max-width: 100%;
-					overflow: auto;
-					line-height: 1.5;
-					font-size: 14px;
-					box-shadow: rgba(0, 0, 0, 0.4) 0 2px 8px -5px;
-					white-space: pre-wrap;
-					background: rgba(7, 8, 10, 0.4);
-					padding: 32px 0 3px;
-					display: flex;
-					word-break: break-all;
-					.code {
-						padding: 0.1em 10px 0.5em;
-					}
-					.line {
-						flex-shrink: 0;
-						background: rgba(0, 0, 0, 0.5);
-						border-right: 1px solid rgba(100, 120, 150, 0.2);
-						display: flex;
-						flex-direction: column;
-						user-select: none;
-						justify-content: center;
-						align-items: center;
-						padding: 0.1em 0 0.5em;
-						div {
-							padding-top: 3px;
-							user-select: none;
-							color: rgba(100, 120, 150, 0.8);
-							justify-content: flex-end;
-							align-items: flex-start;
-							display: flex;
-							font-size: 12px;
-							flex: 1;
-						}
-					}
-					&:after {
-						content: '';
-						border: 2px solid rgba(188, 255, 148, 0.55);
-						border-radius: 50%;
-						position: absolute;
-						top: 12px;
-						left: 12px;
-					}
+      code {
+        border-radius: 4px;
+        overflow: hidden;
+        padding: 0 5px;
+        color: #659a62;
+        background: rgba(10, 20, 40, 0.4);
+      }
 
-					&:before {
-						color: var(--darkgrey-h);
-						padding: 0 0 0 23px;
-						font-size: 12px;
-						content: attr(name);
-						height: 30px;
-						display: block;
-						position: absolute;
-						top: 0;
-						left: 0;
-						right: 0;
-						line-height: 30px;
-						background: rgba(76, 116, 173, 0.23);
-					}
-				}
-			}
+      pre {
+        & > code {
+          border: rgba(0, 0, 0, 0.1) 1px solid;
+          max-width: 100%;
+          overflow: auto;
+          line-height: 1.5;
+          font-size: 14px;
+          box-shadow: rgba(0, 0, 0, 0.4) 0 2px 8px -5px;
+          white-space: pre-wrap;
+          background: rgba(7, 8, 10, 0.4);
+          padding: 32px 0 3px;
+          display: flex;
+          word-break: break-all;
 
-			p {
-				line-height: 2;
-				margin-bottom: 20px;
-			}
+          .code {
+            padding: 0.1em 10px 0.5em;
+          }
 
-			img {
-				margin: 10px 0;
-				max-width: 100%;
-				border-radius: 6px;
-				border: 2px solid rgba(3, 169, 244, 0.08);
-			}
+          .line {
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-right: 1px solid rgba(100, 120, 150, 0.2);
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            justify-content: center;
+            align-items: center;
+            padding: 0.1em 0 0.5em;
 
-			.hljs-section {
-				color: #2196f3;
-			}
-		}
-	}
+            div {
+              padding-top: 3px;
+              user-select: none;
+              color: rgba(100, 120, 150, 0.8);
+              justify-content: flex-end;
+              align-items: flex-start;
+              display: flex;
+              font-size: 12px;
+              flex: 1;
+            }
+          }
 
-	.t {
-		margin-bottom: 20px;
-		display: flex;
-		justify-content: space-between;
-		@include s() {
-			margin: 0;
-		}
+          &:after {
+            content: '';
+            border: 2px solid rgba(188, 255, 148, 0.55);
+            border-radius: 50%;
+            position: absolute;
+            top: 12px;
+            left: 12px;
+          }
 
-		button {
-			display: none;
-			@include s() {
-				display: block;
-				padding: 5px;
-				opacity: 0.5;
-				color: #1c93ff;
-				font-size: 32px;
-				right: -8px;
-				align-self: flex-start;
-			}
-		}
-	}
+          &:before {
+            color: var(--darkgrey-h);
+            padding: 0 0 0 23px;
+            font-size: 12px;
+            content: attr(name);
+            height: 30px;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            line-height: 30px;
+            background: rgba(76, 116, 173, 0.23);
+          }
+        }
+      }
 
-	.p {
-		background: var(--bg1);
-		overflow: hidden;
-		@include s() {
-			padding: 0;
-		}
+      p {
+        line-height: 2;
+        margin-bottom: 20px;
+      }
 
-		.t {
-			padding: 10px 60px;
-			@include s() {
-				padding: 10px 30px;
-			}
-		}
+      img {
+        margin: 10px 0;
+        max-width: 100%;
+        border-radius: 6px;
+        border: 2px solid rgba(3, 169, 244, 0.08);
+      }
 
-		.c {
-			line-height: 2;
-			padding: 1px 60px 20px;
-			flex: 1;
-			overflow: auto;
-			@include s() {
-				padding: 1px 30px 20px;
-			}
-		}
-	}
+      .hljs-section {
+        color: #2196f3;
+      }
+    }
+  }
 
-	h1 {
-		font-weight: 200;
-		font-size: 40px;
-		margin: auto;
-		@include s() {
-			margin: 0;
-		}
-	}
+  .t {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    @include s() {
+      margin: 0;
+    }
 
-	.c {
-		:global {
-			& > p::first-letter {
-				padding-left: 2em;
+    button {
+      display: none;
+      @include s() {
+        display: block;
+        padding: 5px;
+        opacity: 0.5;
+        color: #1c93ff;
+        font-size: 32px;
+        right: -8px;
+        align-self: flex-start;
+      }
+    }
+  }
 
-				* {
-					text-indent: 0;
-				}
-			}
-			a {
-				color: cornflowerblue;
+  .p {
+    background: var(--bg1);
+    overflow: hidden;
+    @include s() {
+      padding: 0;
+    }
 
-				&:visited {
-					color: #90ace0;
-				}
-			}
+    .t {
+      padding: 10px 60px;
+      @include s() {
+        padding: 10px 30px;
+      }
+    }
 
-			h1,
-			h2,
-			h3,
-			h4,
-			h5,
-			h6 {
-				color: #668cc2;
-				font-weight: 400;
-				line-height: 2;
-				margin: 10px 0;
-				&:before {
-					content: '#';
-					padding-right: 5px;
-					opacity: 0.5;
-				}
-			}
+    .c {
+      line-height: 2;
+      padding: 1px 60px 20px;
+      flex: 1;
+      overflow: auto;
+      @include s() {
+        padding: 1px 30px 20px;
+      }
+    }
+  }
 
-			ul,
-			ol {
-				margin-bottom: 10px;
-				list-style-position: inside;
-			}
+  h1 {
+    font-weight: 200;
+    font-size: 40px;
+    margin: auto;
+    @include s() {
+      margin: 0;
+    }
+  }
 
-			h1 {
-				font-size: 27px;
-			}
+  .c {
+    :global {
+      & > p::first-letter {
+        padding-left: 2em;
 
-			h2 {
-				font-size: 24px;
-			}
+        * {
+          text-indent: 0;
+        }
+      }
 
-			h3 {
-				font-size: 20px;
-			}
+      a {
+        color: cornflowerblue;
 
-			h4 {
-				font-size: 18px;
-			}
+        &:visited {
+          color: #90ace0;
+        }
+      }
 
-			h5 {
-				font-size: 16px;
-			}
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        color: #668cc2;
+        font-weight: 400;
+        line-height: 2;
+        margin: 10px 0;
 
-			h6 {
-				font-size: 15px;
-			}
+        &:before {
+          content: '#';
+          padding-right: 5px;
+          opacity: 0.5;
+        }
+      }
 
-			thead {
-				background: rgba(80, 100, 150, 0.1);
+      ul,
+      ol {
+        margin-bottom: 10px;
+        list-style-position: inside;
+      }
 
-				th {
-					color: #acb7cb;
-					font-weight: 200;
-				}
-			}
+      h1 {
+        font-size: 27px;
+      }
 
-			td,
-			th {
-				font-size: 14px;
-				padding: 3px 5px;
-				border: 1px solid rgba(80, 100, 150, 0.7);
-			}
+      h2 {
+        font-size: 24px;
+      }
 
-			table {
-				margin: 10px 0;
-				border-collapse: collapse;
-			}
+      h3 {
+        font-size: 20px;
+      }
 
-			a {
-				text-decoration: underline;
-			}
+      h4 {
+        font-size: 18px;
+      }
 
-			pre {
-				margin: 10px 0;
-			}
+      h5 {
+        font-size: 16px;
+      }
 
-			hr {
-				margin: 10px 0;
-				border-top: 1px solid currentColor;
-				color: rgba(255, 255, 255, 0.1);
-			}
+      h6 {
+        font-size: 15px;
+      }
 
-			li {
-				margin-top: 5px;
-			}
-		}
-	}
+      thead {
+        background: rgba(80, 100, 150, 0.1);
+
+        th {
+          color: #acb7cb;
+          font-weight: 200;
+        }
+      }
+
+      td,
+      th {
+        font-size: 14px;
+        padding: 3px 5px;
+        border: 1px solid rgba(80, 100, 150, 0.7);
+      }
+
+      table {
+        margin: 10px 0;
+        border-collapse: collapse;
+      }
+
+      a {
+        text-decoration: underline;
+      }
+
+      pre {
+        margin: 10px 0;
+      }
+
+      hr {
+        margin: 10px 0;
+        border-top: 1px solid currentColor;
+        color: rgba(255, 255, 255, 0.1);
+      }
+
+      li {
+        margin-top: 5px;
+      }
+    }
+  }
 </style>

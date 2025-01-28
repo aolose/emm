@@ -53,10 +53,10 @@
 </p>
 
 <style lang="scss">
-	p {
-		font-size: inherit;
-		font-family: 'Architects Daughter';
-		color: inherit;
-		text-align: inherit;
-	}
+  p {
+    font-size: inherit;
+    font-family: 'Architects Daughter';
+    color: inherit;
+    text-align: inherit;
+  }
 </style>

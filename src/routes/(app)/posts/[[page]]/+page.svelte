@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import Head from '$lib/components/Head.svelte';
 	import { h } from '$lib/store';
+
 	onMount(() => {
 		sessionStorage.hasBack = 1;
 	});

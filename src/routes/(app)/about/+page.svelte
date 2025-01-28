@@ -25,25 +25,27 @@
 </div>
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
-	.ct {
-		width: 90%;
-		max-width: 600px;
-	}
-	.o {
-		transition: 0.3s ease-in-out;
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-	}
+  @use '../../../lib/break' as *;
 
-	.e {
-		transform: translate3d(0, 30px, 0);
-	}
+  .ct {
+    width: 90%;
+    max-width: 600px;
+  }
 
-	.v {
-		padding: 10px 5% 100px;
-		overflow: auto;
-		border-radius: 1rem;
-	}
+  .o {
+    transition: 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .e {
+    transform: translate3d(0, 30px, 0);
+  }
+
+  .v {
+    padding: 10px 5% 100px;
+    overflow: auto;
+    border-radius: 1rem;
+  }
 </style>

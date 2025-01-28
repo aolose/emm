@@ -51,71 +51,73 @@
 <button class="icon i-sys" on:click={() => goto('/admin', { replaceState: true })} />
 
 <style lang="scss">
-	.i {
-		text-align: center;
-		font-size: 14px;
-		top: -5px;
-		transition: 0.3s;
-	}
+  .i {
+    text-align: center;
+    font-size: 14px;
+    top: -5px;
+    transition: 0.3s;
+  }
 
-	.o {
-		color: orange;
-	}
+  .o {
+    color: orange;
+  }
 
-	button {
-		width: 90%;
-		display: block;
-		padding: 5px 10px;
-		margin: 10px auto 0;
-	}
+  button {
+    width: 90%;
+    display: block;
+    padding: 5px 10px;
+    margin: 10px auto 0;
+  }
 
-	.tk {
-		border: 2px dashed rgba(80, 100, 150, 0.5);
-		padding: 10px 15px 15px;
-		margin: 10px;
-	}
+  .tk {
+    border: 2px dashed rgba(80, 100, 150, 0.5);
+    padding: 10px 15px 15px;
+    margin: 10px;
+  }
 
-	.v {
-		border: 0;
-		margin: 0;
-		background: rgba(0, 0, 0, 0.2);
-		div {
-			margin: 0 auto;
-			width: 180px;
-		}
-	}
+  .v {
+    border: 0;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.2);
 
-	code {
-		color: #b1837a;
-		font-size: 28px;
-		display: block;
-		text-align: center;
-		padding: 10px;
-	}
+    div {
+      margin: 0 auto;
+      width: 180px;
+    }
+  }
 
-	p {
-		text-align: center;
-		margin-bottom: 10px;
-		color: #5278a8;
-	}
+  code {
+    color: #b1837a;
+    font-size: 28px;
+    display: block;
+    text-align: center;
+    padding: 10px;
+  }
 
-	span {
-		padding: 0 10px;
-		display: flex;
-		font-size: 13px;
-	}
+  p {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #5278a8;
+  }
 
-	b {
-		font-weight: 200;
-		display: block;
-		flex: 1;
-		padding-right: 10px;
-	}
-	.i-sys {
-		position: fixed;
-		bottom: 10px;
-		right: 0;
-		opacity: 0.2;
-		width: auto;
-	}
+  span {
+    padding: 0 10px;
+    display: flex;
+    font-size: 13px;
+  }
+
+  b {
+    font-weight: 200;
+    display: block;
+    flex: 1;
+    padding-right: 10px;
+  }
+
+  .i-sys {
+    position: fixed;
+    bottom: 10px;
+    right: 0;
+    opacity: 0.2;
+    width: auto;
+  }
 </style>

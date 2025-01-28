@@ -6,6 +6,7 @@
 	import { getErr, trim } from '$lib/utils';
 	import { req } from '$lib/req';
 	import { h } from '$lib/store';
+
 	let nm;
 	let bio;
 	let linkedin;

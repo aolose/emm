@@ -1,110 +1,109 @@
 a {
-	text-decoration: none;
+    text-decoration: none;
 }
 :root {
-	--green: #3ab744;
-	--orange: orange;
-	--green-h: #40d14c;
-	--darkgrey: #374354;
-	--darkgrey-h: #54617c;
-	--blue: #2596e3;
-	--yellow: yellow;
-	--pink: #f11b86;
-	--bg0: #0e1118;
-	--bg1: #171a22;
-	--bg2: #101319;
-	--bg3: #0e1015;
-	--bg4: #20232c;
-	--bg5: #1a1e26;
-	--bg6: #161b22;
-	--bg7: #0d1117;
+    --green: #3ab744;
+    --orange: orange;
+    --green-h: #40d14c;
+    --darkgrey: #374354;
+    --darkgrey-h: #54617c;
+    --blue: #2596e3;
+    --yellow: yellow;
+    --pink: #f11b86;
+    --bg0: #0e1118;
+    --bg1: #171a22;
+    --bg2: #101319;
+    --bg3: #0e1015;
+    --bg4: #20232c;
+    --bg5: #1a1e26;
+    --bg6: #161b22;
+    --bg7: #0d1117;
 }
 
 * {
-	scroll-behavior: smooth;
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
-	font-family:
-		-apple-system,
-		BlinkMacSystemFont,
-		Helvetica Neue,
-		PingFang SC,
-		Microsoft YaHei,
-		Source Han Sans SC,
-		Noto Sans CJK SC,
-		WenQuanYi Micro Hei,
-		sans-serif;
-	position: relative;
-	background: none;
-	border: none;
-	outline: none;
+    scroll-behavior: smooth;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system,
+    BlinkMacSystemFont,
+    Helvetica Neue,
+    PingFang SC,
+    Microsoft YaHei,
+    Source Han Sans SC,
+    Noto Sans CJK SC,
+    WenQuanYi Micro Hei,
+    sans-serif;
+    position: relative;
+    background: none;
+    border: none;
+    outline: none;
 }
 
 a,
 img {
-	-webkit-touch-callout: none; /* 禁止长按链接与图片弹出菜单 */
+    -webkit-touch-callout: none; /* 禁止长按链接与图片弹出菜单 */
 }
 i {
-	display: block;
-	background: no-repeat center;
-	background-size: contain;
+    display: block;
+    background: no-repeat center;
+    background-size: contain;
 }
 
 html {
-	height: 100%;
+    height: 100%;
 }
 
 body {
-	background: var(--bg1);
-	margin: 0;
-	height: 100%;
-	overflow: hidden;
-	font-size: 16px;
-	color: rgba(212, 219, 238, 0.8);
+    background: var(--bg1);
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    font-size: 16px;
+    color: rgba(212, 219, 238, 0.8);
 }
 
 input:not([type$='box']),
 textarea {
-	background: none;
-	display: block;
-	border: 1px solid rgba(119, 129, 138, 0.3);
-	color: rgba(222, 226, 232, 0.6);
-	font-size: 15px;
-	padding: 0 10px;
-	line-height: 32px;
-	transition: 0.2s ease-in-out;
+    background: none;
+    display: block;
+    border: 1px solid rgba(119, 129, 138, 0.3);
+    color: rgba(222, 226, 232, 0.6);
+    font-size: 15px;
+    padding: 0 10px;
+    line-height: 32px;
+    transition: 0.2s ease-in-out;
 }
 input:not([type$='box']):focus,
 textarea:focus {
-	border-color: rgba(100, 129, 158, 0.6);
+    border-color: rgba(100, 129, 158, 0.6);
 }
 button {
-	background: transparent;
-	border: none;
-	color: currentColor;
-	cursor: pointer;
+    background: transparent;
+    border: none;
+    color: currentColor;
+    cursor: pointer;
 }
 span {
-	color: rgba(127, 146, 161, 0.75);
+    color: rgba(127, 146, 161, 0.75);
 }
 
 *::-webkit-scrollbar {
-	width: 8px;
-	background: rgba(0, 0, 0, 0.1);
+    width: 8px;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 *::-webkit-scrollbar-track {
-	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 *::-webkit-scrollbar-thumb {
-	background-color: rgba(111, 156, 238, 0.1);
-	border-radius: 30px;
+    background-color: rgba(111, 156, 238, 0.1);
+    border-radius: 30px;
 }
 
 .ld {
-	transition: 0.3s ease-in-out;
-	pointer-events: none;
-	animation: ss 0.3s linear infinite;
+    transition: 0.3s ease-in-out;
+    pointer-events: none;
+    animation: ss 0.3s linear infinite;
 }
