@@ -1,31 +1,27 @@
 <script>
-	import { dev } from '$app/environment';
 	import { onMount } from 'svelte';
+	import { dev } from '$app/environment';
 
+	const channel = new BroadcastChannel('sw-messages');
+	channel.onmessage = (event) => {
+		if (event.data?.type === 'CACHE_DONE') {
+			show = true;
+		}
+	};
 	let show = $state(false);
 	const reg = async () => {
 		const { serviceWorker } = navigator;
 		if (serviceWorker) {
 			let register = await serviceWorker.getRegistration();
 			if (!register) {
-				register = await serviceWorker.register(dev ? 'dev-sw.js?dev-sw' : '/sw.js', {
+				register = await serviceWorker.register('service-worker.js', {
+					type: dev ? 'module' : 'classic',
 					scope: '/'
 				});
-				let updated;
-				register.onupdatefound = () => {
-					if (updated) show = true;
-					updated = 1;
-				};
-			} else
-				setInterval(() => {
-					const worker = register.waiting;
-					if (worker?.state === 'installed') {
-						worker.postMessage({ type: 'SKIP_WAITING' });
-						show = true;
-					}
-				}, 5e3);
+			}
 			setInterval(() => {
-				if (!register.waiting) register.update().catch(console.error);
+				const { waiting, installing } = register;
+				if (!waiting && !installing) register.update().catch(console.error);
 			}, 12e4); // 2min
 		}
 	};
@@ -36,19 +32,24 @@
 <div id="k" class:a={show}>
 	<p>The data has been updated. Do you want to reload it?</p>
 	<div>
-		<button on:click={()=>{
-			show = false;
-			location.reload();
-		}}>Reload
+		<button
+			on:click={() => {
+				setTimeout(()=>{
+					show = false;
+				  location.reload();
+				})
+			}}
+		>Reload
 		</button>
 		<button
-			on:click={()=>{
-			show = false
-		}}
+			on:click={() => {
+				show = false;
+			}}
 		>Cancel
 		</button>
 	</div>
 </div>
+
 <style lang="scss">
   button {
     border-radius: 4px;

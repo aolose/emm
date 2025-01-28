@@ -9,7 +9,6 @@ node_modules
 /.idea
 *.db
 /.dbCfg
-/.cssCache.json
 /dist/
 bun.lock
 /tmp_db
