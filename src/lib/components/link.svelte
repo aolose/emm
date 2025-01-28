@@ -11,30 +11,30 @@
 </a>
 
 <style lang="scss">
-	@use '../../lib/break' as *;
+  @use '../../lib/break' as *;
 
-	.k {
-		color: #485c72;
-		width: 36px;
-		height: 36px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin: 0 20px;
+  .k {
+    color: #485c72;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 20px;
 
-		&:hover {
-			color: #509eff;
-		}
+    &:hover {
+      color: #509eff;
+    }
 
-		@include s() {
-			margin: 0;
-			width: 25%;
-		}
-	}
+    @include s() {
+      margin: 0;
+      width: 25%;
+    }
+  }
 
-	:global .k {
-		&.act {
-			color: rgba(255, 255, 255, 0.8);
-		}
-	}
+  :global .k {
+    &.act {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
 </style>

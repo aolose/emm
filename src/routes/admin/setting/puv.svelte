@@ -205,140 +205,147 @@
 <svelte:window on:resize={render} />
 
 <style lang="scss">
-	.bn {
-		padding: 0 20px;
-		margin-bottom: 20px;
-		display: flex;
-	}
+  .bn {
+    padding: 0 20px;
+    margin-bottom: 20px;
+    display: flex;
+  }
 
-	button {
-		flex: 1;
-		border-radius: 3px;
-		font-size: 12px;
-		padding: 1px 8px;
-		margin: 0 5px;
-		opacity: 0.5;
-		background: var(--darkgrey);
-	}
+  button {
+    flex: 1;
+    border-radius: 3px;
+    font-size: 12px;
+    padding: 1px 8px;
+    margin: 0 5px;
+    opacity: 0.5;
+    background: var(--darkgrey);
+  }
 
-	.icon {
-		flex: none;
-		cursor: pointer;
-		opacity: 1;
-		padding: 3px;
-		right: -10px;
-		background: none;
-		&:hover {
-			color: #fff;
-		}
-	}
+  .icon {
+    flex: none;
+    cursor: pointer;
+    opacity: 1;
+    padding: 3px;
+    right: -10px;
+    background: none;
 
-	.act {
-		opacity: 1;
-		background: #3767b9;
-		color: #fff;
-	}
+    &:hover {
+      color: #fff;
+    }
+  }
 
-	.i {
-		margin-top: 10px;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-		span {
-			color: rgba(130, 140, 180, 1);
-			display: block;
-			padding: 0 3px;
-			font-size: 13px;
-		}
-		button {
-			opacity: 0.5;
-			margin-bottom: 3px;
-			justify-content: flex-end;
-			align-items: center;
-			font-size: 13px;
-			display: flex;
-			background: none;
-		}
-		.act {
-			opacity: 1;
-		}
-		b {
-			margin-left: 10px;
-			height: 10px;
-			width: 10px;
-			background: currentColor;
-			display: block;
-		}
-	}
+  .act {
+    opacity: 1;
+    background: #3767b9;
+    color: #fff;
+  }
 
-	.v {
-		display: flex;
-		flex-direction: column;
-		min-height: 360px;
-		flex-grow: 1;
-		width: 100%;
-		padding: 0 30px 0 20px;
-	}
+  .i {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 
-	.a {
-		flex-grow: 1;
-		display: flex;
+    span {
+      color: rgba(130, 140, 180, 1);
+      display: block;
+      padding: 0 3px;
+      font-size: 13px;
+    }
 
-		span {
-			display: block;
-		}
-	}
+    button {
+      opacity: 0.5;
+      margin-bottom: 3px;
+      justify-content: flex-end;
+      align-items: center;
+      font-size: 13px;
+      display: flex;
+      background: none;
+    }
 
-	.y {
-		top: -1em;
-		text-align: right;
-		font-size: 12px;
-		display: flex;
-		flex-direction: column-reverse;
-		justify-content: space-between;
-		padding: 20px 5px;
-	}
+    .act {
+      opacity: 1;
+    }
 
-	.x {
-		display: flex;
-		padding: 0 20px;
-		justify-content: space-between;
-		span {
-			flex: 1;
-			text-align: center;
-		}
-		span:first-child {
-			flex: 0;
-			transform: translateX(-50%);
-		}
-		span:last-child {
-			flex: 0;
-			transform: translateX(50%);
-		}
-	}
+    b {
+      margin-left: 10px;
+      height: 10px;
+      width: 10px;
+      background: currentColor;
+      display: block;
+    }
+  }
 
-	.c {
-		width: 0;
-		min-height: 300px;
-		flex-grow: 1;
-		display: flex;
-		flex-direction: column;
-	}
+  .v {
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+    flex-grow: 1;
+    width: 100%;
+    padding: 0 30px 0 20px;
+  }
 
-	.e {
-		flex-grow: 1;
-	}
+  .a {
+    flex-grow: 1;
+    display: flex;
 
-	canvas {
-		position: absolute;
-		background:
-			linear-gradient(0deg, rgba(100, 100, 100, 0.5) 0, transparent 1px),
-			linear-gradient(90deg, rgba(100, 100, 100, 0.5) 0, transparent 1px) 18px 10px;
-		background-size: 20px 20px;
-		border: 1px solid #6c7a93;
-		border-top: 0;
-		border-right: 0;
-		top: 0;
-		left: 0;
-	}
+    span {
+      display: block;
+    }
+  }
+
+  .y {
+    top: -1em;
+    text-align: right;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: space-between;
+    padding: 20px 5px;
+  }
+
+  .x {
+    display: flex;
+    padding: 0 20px;
+    justify-content: space-between;
+
+    span {
+      flex: 1;
+      text-align: center;
+    }
+
+    span:first-child {
+      flex: 0;
+      transform: translateX(-50%);
+    }
+
+    span:last-child {
+      flex: 0;
+      transform: translateX(50%);
+    }
+  }
+
+  .c {
+    width: 0;
+    min-height: 300px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .e {
+    flex-grow: 1;
+  }
+
+  canvas {
+    position: absolute;
+    background: linear-gradient(0deg, rgba(100, 100, 100, 0.5) 0, transparent 1px),
+    linear-gradient(90deg, rgba(100, 100, 100, 0.5) 0, transparent 1px) 18px 10px;
+    background-size: 20px 20px;
+    border: 1px solid #6c7a93;
+    border-top: 0;
+    border-right: 0;
+    top: 0;
+    left: 0;
+  }
 </style>

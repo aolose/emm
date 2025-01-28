@@ -7,15 +7,16 @@
 {/each}
 
 <style lang="scss">
-	a {
-		font-size: 14px;
-		color: #68758f;
-		border-radius: 3px;
-		background: var(--bg4);
-		padding: 3px 10px;
-		margin-left: 5px;
-		&:hover {
-			color: #fff;
-		}
-	}
+  a {
+    font-size: 14px;
+    color: #68758f;
+    border-radius: 3px;
+    background: var(--bg4);
+    padding: 3px 10px;
+    margin-left: 5px;
+
+    &:hover {
+      color: #fff;
+    }
+  }
 </style>

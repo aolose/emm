@@ -10,16 +10,16 @@ let num = 0;
 
 export const genPubKey = async (pub: ArrayBuffer): Promise<[number, ArrayBuffer]> => {
 	const { subtle } = crypto;
-	const my = await subtle.generateKey(algorithm, false, ['deriveKey']);
-	const myPub = await subtle.exportKey('raw', my.publicKey);
-	const cliPub = await subtle.importKey('raw', pub, algorithm, true, []);
-	const shareKey = await genShareKey(cliPub, my.privateKey);
-	const key = num++ % maxKeyNum;
-	keyPool.set(key, [
-		shareKey,
-		setTimeout(() => {
-			keyPool.delete(key);
-		}, expire)
-	]);
-	return [key, myPub];
+  const my = await subtle.generateKey(algorithm, false, ['deriveKey']);
+  const myPub = await subtle.exportKey('raw', my.publicKey);
+  const cliPub = await subtle.importKey('raw', pub, algorithm, true, []);
+  const shareKey = await genShareKey(cliPub, my.privateKey);
+  const key = num++ % maxKeyNum;
+  keyPool.set(key, [
+    shareKey,
+    setTimeout(() => {
+      keyPool.delete(key);
+    }, expire)
+  ]);
+  return [key, myPub];
 };

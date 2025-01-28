@@ -49,10 +49,10 @@
 		<button on:click={() => go()}>refresh</button>
 		{#if total}
 			{#if page > 1}
-				<button on:click={() => go(-1)}> newer </button>
+				<button on:click={() => go(-1)}> newer</button>
 			{/if}
 			{#if page < total}
-				<button on:click={() => go(1)}> older </button>
+				<button on:click={() => go(1)}> older</button>
 			{/if}
 			<p>{page} / {total}</p>
 		{/if}
@@ -61,47 +61,51 @@
 </div>
 
 <style lang="scss">
-	.a {
-		width: 200px;
-	}
-	.i {
-		width: 260px;
-		margin-bottom: 10px;
-		alignment: center;
-		display: flex;
-		justify-content: space-between;
-		span {
-			font-size: 13px;
-			opacity: 0.5;
-		}
-		a {
-			text-decoration: underline;
-			flex: 1;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-		* {
-			font-size: 15px;
-			line-height: 1.5;
-		}
-	}
+  .a {
+    width: 200px;
+  }
 
-	.b {
-		margin-top: 10px;
-		display: flex;
-	}
+  .i {
+    width: 260px;
+    margin-bottom: 10px;
+    alignment: center;
+    display: flex;
+    justify-content: space-between;
 
-	button {
-		font-size: 14px;
-		color: #1c93ff;
-		margin-right: 10px;
-	}
+    span {
+      font-size: 13px;
+      opacity: 0.5;
+    }
 
-	p {
-		text-align: right;
-		font-size: 13px;
-		flex: 1;
-		opacity: 0.8;
-	}
+    a {
+      text-decoration: underline;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    * {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+  }
+
+  .b {
+    margin-top: 10px;
+    display: flex;
+  }
+
+  button {
+    font-size: 14px;
+    color: #1c93ff;
+    margin-right: 10px;
+  }
+
+  p {
+    text-align: right;
+    font-size: 13px;
+    flex: 1;
+    opacity: 0.8;
+  }
 </style>

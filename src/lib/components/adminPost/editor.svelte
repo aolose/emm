@@ -257,142 +257,149 @@
 {/if}
 
 <style lang="scss">
-	@use '../../break' as *;
-	:global {
-		.editor-toolbar .icon.i-full {
-			display: none;
-			@include s() {
-				display: inline;
-			}
-		}
-	}
-	.i-shrink {
-		display: none;
-		@include s() {
-			transition: opacity 0.3s;
-			opacity: 0;
-			padding: 3px;
-			font-size: 23px;
-			position: absolute;
-			pointer-events: none;
-			z-index: -1;
-			display: block;
-			top: 10px;
-			right: 7px;
-		}
-	}
-	.tm {
-		line-height: 2;
-		position: absolute;
-		font-size: 12px;
-		bottom: 0;
-		left: 30px;
-		padding: 0 10px 9px;
-	}
-	.a {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		background: var(--bg2);
-	}
+  @use '../../break' as *;
 
-	.e {
-		transition: 0.3s ease-in-out;
-		flex: 1;
-	}
-	.t {
-		display: flex;
-		align-items: center;
-		align-content: normal;
-		padding: 10px 8%;
-		margin-top: 20px;
-		@include s() {
-			height: 62px;
-			transition: 0.3s linear;
-			width: 76%;
-			margin: 0 auto 0 8%;
-			border-bottom: 1px solid rgba(80, 100, 150, 0.3);
-			padding: 0;
-			transform: translate3d(0, 0, 0);
-		}
+  :global {
+    .editor-toolbar .icon.i-full {
+      display: none;
+      @include s() {
+        display: inline;
+      }
+    }
+  }
 
-		input {
-			padding-right: 30px;
-			margin: 0;
-		}
+  .i-shrink {
+    display: none;
+    @include s() {
+      transition: opacity 0.3s;
+      opacity: 0;
+      padding: 3px;
+      font-size: 23px;
+      position: absolute;
+      pointer-events: none;
+      z-index: -1;
+      display: block;
+      top: 10px;
+      right: 7px;
+    }
+  }
 
-		button {
-			font-size: 30px;
-			position: absolute;
-			right: 20px;
-			top: 50%;
-			transform: translateY(-50%);
-			@include s() {
-				right: -16%;
-			}
-		}
-	}
+  .tm {
+    line-height: 2;
+    position: absolute;
+    font-size: 12px;
+    bottom: 0;
+    left: 30px;
+    padding: 0 10px 9px;
+  }
 
-	button {
-		border: none;
-		width: 40px;
-		height: 40px;
-		color: var(--darkgrey);
-		background: none;
-		margin-left: 5px;
-		cursor: pointer;
+  .a {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg2);
+  }
 
-		&:hover {
-			color: #c8d3ee;
-		}
-	}
+  .e {
+    transition: 0.3s ease-in-out;
+    flex: 1;
+  }
 
-	input {
-		font-size: 40px;
-		flex: 1;
-		margin: 20px 20px 10px 0;
-		padding: 0;
-		border: 0;
-		resize: none;
-		color: #556175;
-		outline: none;
-		@include s() {
-			font-size: 30px;
-			line-height: 2;
-		}
-	}
-	.fu {
-		@include s() {
-			.t {
-				margin-bottom: -62px;
-				opacity: 0;
-				pointer-events: none;
-				transform: translate3d(0, -100%, 0);
-			}
-			.i-shrink {
-				pointer-events: auto;
-				opacity: 1;
-				z-index: 10;
-			}
-			:global {
-				.CodeMirror-scroll {
-					padding-top: 10px;
-				}
-			}
-		}
-	}
-	:global {
-		.editor-toolbar .i-view {
-			display: none;
-			@include s() {
-				display: inline-block;
-			}
-		}
+  .t {
+    display: flex;
+    align-items: center;
+    align-content: normal;
+    padding: 10px 8%;
+    margin-top: 20px;
+    @include s() {
+      height: 62px;
+      transition: 0.3s linear;
+      width: 76%;
+      margin: 0 auto 0 8%;
+      border-bottom: 1px solid rgba(80, 100, 150, 0.3);
+      padding: 0;
+      transform: translate3d(0, 0, 0);
+    }
 
-		@include s() {
-			.EasyMDEContainer .CodeMirror {
-				background: rgba(50, 80, 90, 0.07);
-			}
-		}
-	}
+    input {
+      padding-right: 30px;
+      margin: 0;
+    }
+
+    button {
+      font-size: 30px;
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      @include s() {
+        right: -16%;
+      }
+    }
+  }
+
+  button {
+    border: none;
+    width: 40px;
+    height: 40px;
+    color: var(--darkgrey);
+    background: none;
+    margin-left: 5px;
+    cursor: pointer;
+
+    &:hover {
+      color: #c8d3ee;
+    }
+  }
+
+  input {
+    font-size: 40px;
+    flex: 1;
+    margin: 20px 20px 10px 0;
+    padding: 0;
+    border: 0;
+    resize: none;
+    color: #556175;
+    outline: none;
+    @include s() {
+      font-size: 30px;
+      line-height: 2;
+    }
+  }
+
+  .fu {
+    @include s() {
+      .t {
+        margin-bottom: -62px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translate3d(0, -100%, 0);
+      }
+      .i-shrink {
+        pointer-events: auto;
+        opacity: 1;
+        z-index: 10;
+      }
+      :global {
+        .CodeMirror-scroll {
+          padding-top: 10px;
+        }
+      }
+    }
+  }
+
+  :global {
+    .editor-toolbar .i-view {
+      display: none;
+      @include s() {
+        display: inline-block;
+      }
+    }
+
+    @include s() {
+      .EasyMDEContainer .CodeMirror {
+        background: rgba(50, 80, 90, 0.07);
+      }
+    }
+  }
 </style>

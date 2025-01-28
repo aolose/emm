@@ -102,13 +102,13 @@
 </div>
 
 <style lang="scss">
-	.s {
-		margin: 40px auto 10px;
-		color: #272e44;
-		width: 240px;
+  .s {
+    margin: 40px auto 10px;
+    color: #272e44;
+    width: 240px;
 
-		* {
-			color: inherit;
-		}
-	}
+    * {
+      color: inherit;
+    }
+  }
 </style>
