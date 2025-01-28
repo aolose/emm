@@ -1,5 +1,6 @@
 <script>
 	import { h } from '$lib/store';
+
 	export let title;
 	export let description;
 	export let keywords;

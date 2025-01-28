@@ -143,17 +143,17 @@
 </div>
 
 <style lang="scss">
-	canvas {
-		display: block;
-	}
+  canvas {
+    display: block;
+  }
 
-	.cvs {
-		transition: 0.3s ease-in-out;
-		pointer-events: none;
-		position: absolute;
-		left: 0;
-		top: 0;
-		right: 0;
-		bottom: 0;
-	}
+  .cvs {
+    transition: 0.3s ease-in-out;
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+  }
 </style>

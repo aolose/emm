@@ -54,59 +54,60 @@
 </nav>
 
 <style lang="scss">
-	:root {
-		--act: var(--bg0);
-	}
-	nav {
-		align-items: center;
-		justify-content: center;
-		display: flex;
+  :root {
+    --act: var(--bg0);
+  }
 
-		* {
-			color: rgb(78, 96, 115);
-		}
+  nav {
+    align-items: center;
+    justify-content: center;
+    display: flex;
 
-		.act {
-			color: antiquewhite;
-			background: var(--act);
-		}
+    * {
+      color: rgb(78, 96, 115);
+    }
 
-		.nv {
-			font-size: 12px;
-			cursor: pointer;
-			height: 24px;
-			min-width: 24px;
-			padding: 0 5px;
-			display: flex;
-			margin: 0 5px;
-			justify-content: center;
-			align-items: center;
+    .act {
+      color: antiquewhite;
+      background: var(--act);
+    }
 
-			&:hover {
-				color: #65b9e7;
-			}
-		}
-	}
+    .nv {
+      font-size: 12px;
+      cursor: pointer;
+      height: 24px;
+      min-width: 24px;
+      padding: 0 5px;
+      display: flex;
+      margin: 0 5px;
+      justify-content: center;
+      align-items: center;
 
-	.lt {
-		* {
-			color: rgba(80, 100, 150, 0.9);
-		}
+      &:hover {
+        color: #65b9e7;
+      }
+    }
+  }
 
-		.nv {
-			background: none;
-			padding: 5px 8px;
-			height: 24px;
-			width: auto;
-			border-radius: 2px;
-			border: 1px solid currentColor;
-		}
+  .lt {
+    * {
+      color: rgba(80, 100, 150, 0.9);
+    }
 
-		.act,
-		.nv:hover {
-			color: #fff;
-			border-color: transparent;
-			background: var(--darkgrey-h);
-		}
-	}
+    .nv {
+      background: none;
+      padding: 5px 8px;
+      height: 24px;
+      width: auto;
+      border-radius: 2px;
+      border: 1px solid currentColor;
+    }
+
+    .act,
+    .nv:hover {
+      color: #fff;
+      border-color: transparent;
+      background: var(--darkgrey-h);
+    }
+  }
 </style>

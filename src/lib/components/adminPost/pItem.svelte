@@ -33,88 +33,92 @@
 </div>
 
 <style lang="scss">
-	@use '../../break' as *;
-	.v {
-		position: absolute;
-		right: 10%;
-		top: 20px;
-		display: flex;
-		line-height: 1;
-		z-index: 3;
-		span {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-size: 10px;
-			width: 14px;
-			height: 14px;
-			margin-right: 5px;
-			font-weight: 800;
-			padding: 0 !important;
-			opacity: 0.5;
-			border: 1px solid currentColor;
-		}
-	}
+  @use '../../break' as *;
 
-	.vd {
-		color: var(--blue);
-	}
+  .v {
+    position: absolute;
+    right: 10%;
+    top: 20px;
+    display: flex;
+    line-height: 1;
+    z-index: 3;
 
-	.vp {
-		color: var(--green-h);
-	}
+    span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      width: 14px;
+      height: 14px;
+      margin-right: 5px;
+      font-weight: 800;
+      padding: 0 !important;
+      opacity: 0.5;
+      border: 1px solid currentColor;
+    }
+  }
 
-	.pi {
-		min-width: 400px;
-		min-height: 100px;
-		max-width: 100%;
-		direction: ltr;
-		padding: 10px 10% 20px;
-		transition: 0.3s ease-in-out;
-		&:not(.act):hover {
-			background: var(--bg0);
-		}
+  .vd {
+    color: var(--blue);
+  }
 
-		&.act {
-			background: var(--bg2);
-		}
+  .vp {
+    color: var(--green-h);
+  }
 
-		h3 {
-			color: #667085;
-			line-height: 1.4;
-			padding: 3px 80px 16px 0;
-			font-weight: 200;
-			@include s() {
-				padding: 10px 50px 10px 0;
-			}
-		}
+  .pi {
+    min-width: 400px;
+    min-height: 100px;
+    max-width: 100%;
+    direction: ltr;
+    padding: 10px 10% 20px;
+    transition: 0.3s ease-in-out;
 
-		h5 {
-			line-height: 1;
-			font-weight: 200;
-			padding-bottom: 10px;
-			color: #3574a8;
-		}
+    &:not(.act):hover {
+      background: var(--bg0);
+    }
 
-		p {
-			opacity: 0.5;
-			font-size: 12px;
-			line-height: 1.7;
-			word-break: break-all;
-		}
+    &.act {
+      background: var(--bg2);
+    }
 
-		.i {
-			padding: 10px 0;
-			font-size: 12px;
-			display: flex;
-			justify-content: space-between;
-			flex-wrap: wrap;
-		}
-	}
-	@include s() {
-		.pi {
-			min-width: 100%;
-			max-width: 100%;
-		}
-	}
+    h3 {
+      color: #667085;
+      line-height: 1.4;
+      padding: 3px 80px 16px 0;
+      font-weight: 200;
+      @include s() {
+        padding: 10px 50px 10px 0;
+      }
+    }
+
+    h5 {
+      line-height: 1;
+      font-weight: 200;
+      padding-bottom: 10px;
+      color: #3574a8;
+    }
+
+    p {
+      opacity: 0.5;
+      font-size: 12px;
+      line-height: 1.7;
+      word-break: break-all;
+    }
+
+    .i {
+      padding: 10px 0;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+  }
+
+  @include s() {
+    .pi {
+      min-width: 100%;
+      max-width: 100%;
+    }
+  }
 </style>

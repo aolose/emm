@@ -1,6 +1,7 @@
 <script>
 	import Q from './mediaQuery.svelte';
 	import { medium, small } from '$lib/store';
+
 	let mobile = 0;
 	let normal = 0;
 	$: {

@@ -197,218 +197,218 @@
 </div>
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
+  @use '../../../lib/break' as *;
 
-	.q {
-		overflow: auto;
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-	}
+  .q {
+    overflow: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
 
-	.e {
-		display: flex;
-		flex-direction: column;
-		flex: 1;
-	}
+  .e {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
 
-	.i-close {
-		display: none;
-		@include s() {
-			display: block;
-		}
-	}
+  .i-close {
+    display: none;
+    @include s() {
+      display: block;
+    }
+  }
 
-	.t {
-		background: var(--bg2);
-		border-radius: 6px;
+  .t {
+    background: var(--bg2);
+    border-radius: 6px;
 
-		button {
-			color: var(--darkgrey-h);
-			transition: 0.2s ease-in-out;
-			font-size: 13px;
-			line-height: 1;
-			height: 30px;
-			padding: 0 15px !important;
-			border-radius: inherit;
-		}
+    button {
+      color: var(--darkgrey-h);
+      transition: 0.2s ease-in-out;
+      font-size: 13px;
+      line-height: 1;
+      height: 30px;
+      padding: 0 15px !important;
+      border-radius: inherit;
+    }
 
-		.act {
-			color: #eee;
-			background: #26548c;
-		}
-	}
+    .act {
+      color: #eee;
+      background: #26548c;
+    }
+  }
 
-	s {
-		flex: 1;
-	}
+  s {
+    flex: 1;
+  }
 
-	.i-set {
-		background: rgba(0, 0, 0, 0.1);
-	}
+  .i-set {
+    background: rgba(0, 0, 0, 0.1);
+  }
 
-	.u {
-		margin: 10px;
-		overflow: hidden;
-		border-radius: 2px;
-		background: var(--bg0);
+  .u {
+    margin: 10px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--bg0);
 
-		button {
-			opacity: 0.5;
+    button {
+      opacity: 0.5;
 
-			&:hover {
-				opacity: 1;
-				color: #fff;
-			}
-		}
-	}
+      &:hover {
+        opacity: 1;
+        color: #fff;
+      }
+    }
+  }
 
-	.act {
-		background: #0f1c38;
+  .act {
+    background: #0f1c38;
 
-		.m {
-			padding-right: 10px;
-			color: #94abc0;
-		}
+    .m {
+      padding-right: 10px;
+      color: #94abc0;
+    }
 
-		.i {
-			span,
-			div {
-				color: #bfc6d9;
-			}
-		}
+    .i {
+      span,
+      div {
+        color: #bfc6d9;
+      }
+    }
 
-		.r {
-			background: #070e1e;
-		}
-	}
+    .r {
+      background: #070e1e;
+    }
+  }
 
-	pre {
-		flex: 1;
-		font-size: 13px;
-		padding: 0 10px;
-	}
+  pre {
+    flex: 1;
+    font-size: 13px;
+    padding: 0 10px;
+  }
 
-	.i {
-		display: flex;
-		flex-wrap: wrap;
+  .i {
+    display: flex;
+    flex-wrap: wrap;
 
-		div {
-			font-size: 14px;
-			padding: 5px 10px;
-			flex-grow: 1;
-			width: 50%;
+    div {
+      font-size: 14px;
+      padding: 5px 10px;
+      flex-grow: 1;
+      width: 50%;
 
-			span {
-				color: #959ca8;
-				padding-left: 10px;
-			}
-		}
+      span {
+        color: #959ca8;
+        padding-left: 10px;
+      }
+    }
 
-		.i-set,
-		.i-drop {
-			line-height: 2;
-			align-items: flex-start;
-			display: flex;
-			width: 100%;
-		}
+    .i-set,
+    .i-drop {
+      line-height: 2;
+      align-items: flex-start;
+      display: flex;
+      width: 100%;
+    }
 
-		.i-drop {
-			border-top: 1px solid rgba(0, 0, 0, 0.3);
-			background: rgba(0, 0, 0, 0.1);
-		}
-	}
+    .i-drop {
+      border-top: 1px solid rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
 
-	span.icon {
-		margin-right: 10px;
-		opacity: 0.7;
-		min-width: 20px;
-		padding: 0;
-	}
+  span.icon {
+    margin-right: 10px;
+    opacity: 0.7;
+    min-width: 20px;
+    padding: 0;
+  }
 
-	.i-log {
-		color: #00d2ff;
-	}
+  .i-log {
+    color: #00d2ff;
+  }
 
-	.i-fbi {
-		color: #f11b86;
-	}
+  .i-fbi {
+    color: #f11b86;
+  }
 
-	.r {
-		border-top: 1px solid rgba(0, 0, 0, 0.2);
-		background: #1d2125;
-		width: 100%;
-		align-items: center;
-		height: 30px;
-		display: flex;
-		padding: 0 10px;
+  .r {
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    background: #1d2125;
+    width: 100%;
+    align-items: center;
+    height: 30px;
+    display: flex;
+    padding: 0 10px;
 
-		p {
-			font-size: 13px;
-		}
-	}
+    p {
+      font-size: 13px;
+    }
+  }
 
-	.m {
-		font-size: 13px;
-		flex: 1;
-	}
+  .m {
+    font-size: 13px;
+    flex: 1;
+  }
 
-	button {
-		padding: 0 5px;
-	}
+  button {
+    padding: 0 5px;
+  }
 
-	.d {
-		display: flex;
-		align-items: center;
-		padding: 0 0 0 10px;
-		height: 60px;
+  .d {
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 10px;
+    height: 60px;
 
-		button {
-			padding: 10px 20px;
-			@include s() {
-				padding: 10px 15px;
-			}
+    button {
+      padding: 10px 20px;
+      @include s() {
+        padding: 10px 15px;
+      }
 
-			&:hover {
-				color: #fff;
-			}
-		}
-	}
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
 
-	h1 {
-		flex: 1;
-		padding: 0 10px;
-		color: #627079;
-		font-weight: 400;
-		font-size: 14px;
-	}
+  h1 {
+    flex: 1;
+    padding: 0 10px;
+    color: #627079;
+    font-weight: 400;
+    font-size: 14px;
+  }
 
-	.a {
-		border-left: 1px solid #141e28;
-		padding: 0 0 10px;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		@include s() {
-			width: 100%;
-		}
-	}
+  .a {
+    border-left: 1px solid #141e28;
+    padding: 0 0 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    @include s() {
+      width: 100%;
+    }
+  }
 
-	.b {
-	}
+  .b {
+  }
 
-	.c {
-		flex: 1;
-		margin-bottom: 10px;
-	}
+  .c {
+    flex: 1;
+    margin-bottom: 10px;
+  }
 
-	.tr {
-		&.act {
-			.i {
-				background: #0f3826;
-			}
-		}
-	}
+  .tr {
+    &.act {
+      .i {
+        background: #0f3826;
+      }
+    }
+  }
 </style>

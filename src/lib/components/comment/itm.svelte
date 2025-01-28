@@ -142,10 +142,10 @@
 				{cur}
 				done={done || ok}
 				reply={{
-					topic: topic || d.id,
-					cm: d.id,
-					name: name
-				}}
+          topic: topic || d.id,
+          cm: d.id,
+          name: name
+        }}
 			/>
 		</div>
 	{/if}
@@ -164,163 +164,163 @@
 </div>
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
+  @use '../../../lib/break' as *;
 
-	@mixin bg {
-		border: 1px solid rgba(80, 100, 150, 0.07);
-		background: rgba(80, 100, 150, 0.07);
-	}
+  @mixin bg {
+    border: 1px solid rgba(80, 100, 150, 0.07);
+    background: rgba(80, 100, 150, 0.07);
+  }
 
-	.o {
-		color: orangered;
-	}
+  .o {
+    color: orangered;
+  }
 
-	.p {
-		display: flex;
-		justify-content: flex-end;
-	}
+  .p {
+    display: flex;
+    justify-content: flex-end;
+  }
 
-	.ls {
-		width: 100%;
-		padding-left: 80px;
-		@include s() {
-			padding: 0;
-		}
-	}
+  .ls {
+    width: 100%;
+    padding-left: 80px;
+    @include s() {
+      padding: 0;
+    }
+  }
 
-	.r {
-		width: 100%;
-		padding-left: 80px;
-	}
+  .r {
+    width: 100%;
+    padding-left: 80px;
+  }
 
-	.a {
-		display: flex;
-		flex-wrap: wrap;
-		margin-bottom: 10px;
-	}
+  .a {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
 
-	.m {
-		margin: 10px 0 0;
-		flex-direction: column;
-		@include bg;
+  .m {
+    margin: 10px 0 0;
+    flex-direction: column;
+    @include bg;
 
-		.r {
-			padding-left: 0;
-		}
+    .r {
+      padding-left: 0;
+    }
 
-		.n {
-			button {
-				padding: 0;
-			}
-		}
+    .n {
+      button {
+        padding: 0;
+      }
+    }
 
-		.c {
-			border: none;
-			background: none;
+    .c {
+      border: none;
+      background: none;
 
-			p {
-				color: #8396af;
-				padding: 0 5px 5px;
-				font-size: 13px;
-				line-height: 2;
-				white-space: pre-wrap;
+      p {
+        color: #8396af;
+        padding: 0 5px 5px;
+        font-size: 13px;
+        line-height: 2;
+        white-space: pre-wrap;
 
-				& > span {
-					padding: 0 5px;
-					color: var(--darkgrey-h);
-				}
-			}
-		}
-	}
+        & > span {
+          padding: 0 5px;
+          color: var(--darkgrey-h);
+        }
+      }
+    }
+  }
 
-	label {
-		display: inline-flex;
-		align-items: center;
+  label {
+    display: inline-flex;
+    align-items: center;
 
-		span {
-			font-size: inherit;
-			line-height: inherit;
-			padding: 0 5px;
-		}
-	}
+    span {
+      font-size: inherit;
+      line-height: inherit;
+      padding: 0 5px;
+    }
+  }
 
-	.b {
-		padding: 15px 10px 0 0;
-		width: 80px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		@include s() {
-			width: 100%;
-			flex-direction: row;
-			padding: 0 10px 10px;
-			.v {
-				:global {
-					i {
-						max-width: 20px;
-						max-height: 20px;
-					}
-				}
-			}
-		}
+  .b {
+    padding: 15px 10px 0 0;
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    @include s() {
+      width: 100%;
+      flex-direction: row;
+      padding: 0 10px 10px;
+      .v {
+        :global {
+          i {
+            max-width: 20px;
+            max-height: 20px;
+          }
+        }
+      }
+    }
 
-		p {
-			margin-top: 5px;
-			word-break: break-all;
-			font-size: 12px;
-		}
-	}
+    p {
+      margin-top: 5px;
+      word-break: break-all;
+      font-size: 12px;
+    }
+  }
 
-	.c {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 5px 0 0 7px;
-		@include bg;
+  .c {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 5px 0 0 7px;
+    @include bg;
 
-		p {
-			flex-grow: 1;
-			padding: 5px 10px 15px;
-			white-space: normal;
-			word-break: break-all;
-			color: #a6afb4;
-			line-height: 1.5;
-			font-size: 15px;
-		}
-	}
+    p {
+      flex-grow: 1;
+      padding: 5px 10px 15px;
+      white-space: normal;
+      word-break: break-all;
+      color: #a6afb4;
+      line-height: 1.5;
+      font-size: 15px;
+    }
+  }
 
-	.t {
-		display: flex;
-		justify-content: flex-end;
-		font-size: 12px;
-		opacity: 0.6;
-		flex: 1;
-		align-items: center;
+  .t {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 12px;
+    opacity: 0.6;
+    flex: 1;
+    align-items: center;
 
-		span {
-			padding-left: 10px;
-		}
-	}
+    span {
+      padding-left: 10px;
+    }
+  }
 
-	.u {
-		display: flex;
-		align-items: center;
-	}
+  .u {
+    display: flex;
+    align-items: center;
+  }
 
-	.n {
-		padding: 0 10px 5px;
-		display: flex;
-		flex-wrap: wrap;
+  .n {
+    padding: 0 10px 5px;
+    display: flex;
+    flex-wrap: wrap;
 
-		button {
-			margin-right: 5px;
-			padding: 5px 0;
-			opacity: 0.5;
-			left: -5px;
+    button {
+      margin-right: 5px;
+      padding: 5px 0;
+      opacity: 0.5;
+      left: -5px;
 
-			&:hover {
-				opacity: 1;
-			}
-		}
-	}
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
 </style>

@@ -13,14 +13,15 @@
 />
 
 <style lang="scss">
-	@use './av.css' as *;
-	.c {
-		cursor: pointer;
-	}
+  @use './av.css' as *;
 
-	.a {
-		background-position: center;
-		background-repeat: no-repeat;
-		background-size: auto 80%;
-	}
+  .c {
+    cursor: pointer;
+  }
+
+  .a {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: auto 80%;
+  }
 </style>
