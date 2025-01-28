@@ -1,9 +1,10 @@
 import adapter from 'svelte-adapter-bun';
 import { sveltePreprocess } from 'svelte-preprocess';
 import fs from 'node:fs';
+import { resolve } from 'path';
 
 let nm = {};
-const cssCacheFile = './.cssCache.json';
+const cssCacheFile = resolve('./.cssCache.json');
 try {
 	nm = JSON.parse(fs.readFileSync(cssCacheFile).toString());
 } catch (e) {
@@ -27,14 +28,20 @@ function hashId(hash) {
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	compilerOptions: {
-		cssHash: ({ hash, css }) => `_${hashId(hash(css))}`
-	},
 	preprocess: sveltePreprocess(),
-
+	compilerOptions: {},
 	kit: {
+		files: {
+			serviceWorker: 'src/sw.js'
+		},
+		serviceWorker: {
+			register: false
+		},
 		adapter: adapter({ out: 'dist' })
 	}
 };
 
+if (process.env.NODE_ENV !== 'development') {
+	config.compilerOptions.cssHash = ({ hash, css }) => `_${hashId(hash(css))}`;
+}
 export default config;
