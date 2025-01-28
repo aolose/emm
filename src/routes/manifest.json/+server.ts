@@ -1,5 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { sys } from '$lib/server';
+
 const etag = Date.now().toString(32);
 export const GET: RequestHandler = ({ request }) => {
 	const tag = request.headers.get('If-None-Match');
@@ -14,7 +15,6 @@ export const GET: RequestHandler = ({ request }) => {
 		return o;
 	});
 	const data = {
-		$schema: 'https://json.schemastore.org/web-manifest-combined.json',
 		name: sys?.blogName,
 		short_name: sys?.blogName,
 		start_url: '/',
@@ -23,10 +23,16 @@ export const GET: RequestHandler = ({ request }) => {
 		scope: '/',
 		theme_color: '#000',
 		description: sys?.seoDesc,
+		shortcuts: [
+			{
+				name: 'Login',
+				url: '/login'
+			}
+		],
 		icons: icons
 	};
 	const headers = {
-		'Content-Type': 'text/plain',
+		'Content-Type': 'application/manifest+json',
 		etag
 	};
 	return new Response(JSON.stringify(data) || '', {
