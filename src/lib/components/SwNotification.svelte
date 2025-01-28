@@ -26,7 +26,7 @@
 				}, 5e3);
 			setInterval(() => {
 				if (!register.waiting) register.update().catch(console.error);
-			}, 10); // 2min
+			}, 12e4); // 2min
 		}
 	};
 	onMount(() => {
