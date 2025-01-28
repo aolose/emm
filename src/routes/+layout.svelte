@@ -9,6 +9,7 @@
 		navStore.set(nav);
 	});
 </script>
+
 <slot />
 <Mobile />
 <Confirm />

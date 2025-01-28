@@ -1,28 +1,15 @@
 import adapter from 'svelte-adapter-bun';
 import { sveltePreprocess } from 'svelte-preprocess';
-import fs from 'node:fs';
-import { resolve } from 'path';
 
-let nm = {};
-const cssCacheFile = resolve('./.cssCache.json');
-try {
-	nm = JSON.parse(fs.readFileSync(cssCacheFile).toString());
-} catch (e) {
-	console.log(e.toString());
-}
-let i = 0,
-	t;
-const b = {};
+const nm = {};
+let i = 0;
 
 function hashId(hash) {
-	if (nm[hash]) {
-		return (b[hash] = nm[hash]);
+	const cls = nm[hash];
+	if (cls) {
+		return cls;
 	} else {
-		clearTimeout(t);
-		t = setTimeout(function () {
-			fs.writeFileSync(cssCacheFile, JSON.stringify(b));
-		}, 300);
-		return (b[hash] = (i++).toString(36));
+		return (nm[hash] = (i++).toString(36));
 	}
 }
 
@@ -31,9 +18,6 @@ const config = {
 	preprocess: sveltePreprocess(),
 	compilerOptions: {},
 	kit: {
-		files: {
-			serviceWorker: 'src/sw.js'
-		},
 		serviceWorker: {
 			register: false
 		},
