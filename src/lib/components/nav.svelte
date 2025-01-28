@@ -86,7 +86,7 @@
 		transform: translate3d(0, 0, 0);
 		height: 36px;
 		width: 36px;
-		color: #6fa1da;
+    color: #fff;
 
 		i {
 			transition: 0.3s ease-in-out;
