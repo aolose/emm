@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import Cm from '$lib/components/comment/cm.svelte';
 	import Item from './item.svelte';
 	import { watch } from '$lib/utils';
@@ -9,16 +11,14 @@
 	import Pg from '$lib/components/pg.svelte';
 	import { tick } from 'svelte';
 
-	export let close;
-	export let d = {};
-	export let filter;
-	let ban = 0;
+	let { close, d = $bindable({}), filter } = $props();
+	let ban = $state(0);
 	const wip = watch(0);
 	const wid = watch(0);
-	let ls = [];
-	let page = 1;
-	let total = 1;
-	let ld = 0;
+	let ls = $state([]);
+	let page = $state(1);
+	let total = $state(1);
+	let ld = $state(0);
 	const go = (n) => {
 		page = n;
 		const { id } = d;
@@ -39,7 +39,7 @@
 				ld = 0;
 			});
 	};
-	$: {
+	run(() => {
 		wid(() => {
 			ls = [];
 			ld = 1;
@@ -59,7 +59,7 @@
 				});
 			}
 		}, d.ip);
-	}
+	});
 	const set = (m) => () => {
 		const a = d;
 		req('cm', { id: a.id, state: m, isAdm: 1 }).then(() => {
@@ -67,7 +67,7 @@
 			filter();
 		});
 	};
-	let el;
+	let el = $state();
 	const del = (id) => () => {
 		confirm('sure to delete?').then((a) => {
 			if (a)
@@ -90,36 +90,36 @@
 <div class="a">
 	<div class="h">
 		<Item detail={1} {d} />
-		<button class="icon i-close" on:click={close} />
+		<button class="icon i-close" onclick={close}></button>
 	</div>
 	<Cm
 		admin={1}
 		done={done(d.id)}
 		reply={{
-      topic: d.topic || d.id,
-      cm: d.id,
-      name: d._name
-    }}
+			topic: d.topic || d.id,
+			cm: d.id,
+			name: d._name
+		}}
 	/>
 	<div class="b">
 		{#if !d.isAdm}
-			<button class="icon i-ip" class:act={ban} />
+			<button class="icon i-ip" class:act={ban}></button>
 		{/if}
 		{#if !d.isAdm}
 			<button
 				class:act={d.state === cmStatus.Reject}
 				class="icon i-fbi"
-				on:click={set(cmStatus.Reject)}
-			/>
+				onclick={set(cmStatus.Reject)}
+			></button>
 		{/if}
 		{#if !d.isAdm}
 			<button
 				class="icon i-ok"
 				class:act={d.state === cmStatus.Approve}
-				on:click={set(cmStatus.Approve)}
-			/>
+				onclick={set(cmStatus.Approve)}
+			></button>
 		{/if}
-		<button class="icon i-del" on:click={del(d.id)} />
+		<button class="icon i-del" onclick={del(d.id)}></button>
 	</div>
 	<div class="l">
 		<div class="ls" bind:this={el}>

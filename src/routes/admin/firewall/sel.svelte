@@ -1,15 +1,28 @@
-<script>
+<script lang="ts">
+	import { run, stopPropagation } from 'svelte/legacy';
+
 	import { slide } from 'svelte/transition';
 	import { onDestroy } from 'svelte';
 
-	export let getValue;
-	export let getText;
-	export let defaultValue = '';
-	export let multiply = true;
-	export let value = defaultValue;
-	export let items = [];
-	let s = new Set();
-	let e;
+	interface Props {
+		getValue: any;
+		getText: any;
+		defaultValue?: string;
+		multiply?: boolean;
+		value?: any;
+		items?: any;
+	}
+
+	let {
+		getValue,
+		getText,
+		defaultValue = '',
+		multiply = true,
+		value = $bindable(),
+		items = []
+	}: Props = $props();
+	let s = $state(new Set());
+	let e = $state();
 	const ck = (v) => (ev) => {
 		ev.stopPropagation();
 		if (multiply) {
@@ -34,20 +47,20 @@
 	onDestroy(() => {
 		window.removeEventListener('click', fn);
 	});
-	$: {
+	run(() => {
 		if (!value) value = defaultValue;
 		if (multiply) s = new Set(value.split(','));
-	}
+	});
 </script>
 
-<div class="a" class:c={e} on:click|stopPropagation={fn}>
+<div class="a" class:c={e} onclick={stopPropagation(fn)}>
 	<span>{getText ? getText(items.find((a) => getValue(a) === value)) : value}</span>
 	{#if e}
 		<div transition:slide|global class="b">
 			{#each items as k}
 				<div
 					class:s={multiply ? s.has(k) : value === getValue ? getValue(k) : k}
-					on:click|stopPropagation={ck(k)}
+					onclick={stopPropagation(ck(k))}
 				>
 					{getText ? getText(k) : k}
 				</div>

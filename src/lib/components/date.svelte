@@ -1,7 +1,5 @@
 <script>
-	export let value = 0;
-	export let min = 0;
-	export let time = 'mm:hh:ss';
+	let { value = $bindable(), min = 0, time = 'mm:hh:ss' } = $props();
 	const pad = {
 		year: 4,
 		month: 2,
@@ -168,20 +166,20 @@
 			update: fn
 		};
 	};
-	$: {
+	$effect(() => {
 		if (!value) value = new Date(1970, 0, 1).getDate();
 		if (min && value < min) value = min;
 		if (bfValue !== value) {
 			bfValue === value;
 			readValue();
 		}
-	}
+	});
 </script>
 
 <div class="a">
 	<input use:num={'year'} /><span>/</span>
 	<input use:num={'month'} /><span>/</span>
-	<input use:num={'day'} /><span />
+	<input use:num={'day'} /><span></span>
 	{#if time}
 		<input use:num={'hour'} /><span>:</span>
 		<input use:num={'minute'} /><span>:</span>

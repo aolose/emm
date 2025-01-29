@@ -1,13 +1,18 @@
-<script>
+<script lang="ts">
 	import { act } from '$lib/use';
 	import { slidLeft } from '$lib/transition';
 
-	export let exact = true;
-	export let href;
+	interface Props {
+		exact?: boolean;
+		href: any;
+		children?: import('svelte').Snippet;
+	}
+
+	let { exact = true, href, children }: Props = $props();
 </script>
 
 <a class="k" transition:slidLeft use:act={exact} {href}>
-	<slot />
+	{@render children?.()}
 </a>
 
 <style lang="scss">

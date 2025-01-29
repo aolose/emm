@@ -1,14 +1,20 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import './easymde.scss';
 	import { filesUpload, selectFile } from '$lib/store';
 	import { createFileMd, createUrl, file2Md, watch } from '$lib/utils';
 
-	let e = '';
-	let editor;
-	export let value = '';
+	let e = $state('');
+	let editor = $state();
 
-	export let toolbar = [];
+	interface Props {
+		value?: string;
+		toolbar?: any;
+	}
+
+	let { value = $bindable(''), toolbar = [] }: Props = $props();
 	const wb = watch(toolbar);
 	const wv = watch(value);
 	let ts = '';
@@ -32,8 +38,10 @@
 			title: 'Files'
 		}
 	];
-	let tools;
-	$: tools = base.concat(toolbar);
+	let tools = $state();
+	run(() => {
+		tools = base.concat(toolbar);
+	});
 	const changeTools = () => {
 		if (!editor) return;
 		const bar = editor.toolbar_div;
@@ -53,14 +61,14 @@
 		};
 		editor.createToolbar(tools);
 	};
-	$: {
+	run(() => {
 		wv(() => {
 			if (editor && value !== editor.value()) {
 				editor.value(value);
 			}
 		}, value);
 		wb(changeTools, tools);
-	}
+	});
 
 	onMount(async () => {
 		const eModule = await import('easymde');
@@ -104,7 +112,7 @@
 </script>
 
 <div class="e">
-	<textarea class="d" bind:this={e} />
+	<textarea class="d" bind:this={e}></textarea>
 </div>
 
 <style lang="scss">

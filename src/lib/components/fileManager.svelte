@@ -1,3 +1,5 @@
+<!-- @migration-task Error while migrating Svelte code: can't migrate `let cfg = {};` to `$state` because there's a variable named status.
+     Rename the variable and try again or migrate by hand. -->
 <script>
 	import Pg from './pg.svelte';
 	import Item from './fItems.svelte';
@@ -10,14 +12,16 @@
 	import { delay, trim, watch } from '$lib/utils';
 
 	const getRes = api('res');
+	let total = $state(1);
+	let status = $state(0);
+	let cfg = $state({
+		show: false,
+		limit: 0
+	});
 
-	let cfg = {};
-	let total = 1;
-	let state = '';
-	let ss;
-	let ls = [];
+	let ls = $state([]);
 	let loading = false;
-	export let w;
+	let { w } = $props();
 	const size = 15;
 	const trigger = writable(0);
 
@@ -59,7 +63,7 @@
 	});
 
 	function upload(e) {
-		state = 0;
+		status = 0;
 		let files = e.type === 'drop' ? e.dataTransfer.files : e.target.files;
 		const tp = cfg.type;
 		if (tp && files?.length)
@@ -95,14 +99,20 @@
 
 	onMount(() => {
 		return fileManagerStore.subscribe((s) => {
-			cfg = s;
+			Object.assign(
+				cfg,
+				{
+					show: false,
+					limit: 0
+				},
+				s
+			);
 			if (s.show) load();
 		});
 	});
-	let limit;
-	$: limit = cfg.limit || 0;
-	let selected = new Set();
-	$: ss = `${selected.size}${limit ? ' / ' + limit : ''}`;
+	let limit = $derived(cfg.limit);
+	let selected = $state(new Set());
+	let ss = $derived(`${selected.size}${limit ? ' / ' + limit : ''}`);
 
 	const sel = (f) => () => {
 		if (selected.has(f)) selected.delete(f);
@@ -117,14 +127,14 @@
 		selected = new Set(selected);
 	};
 	const sty = `--w:${w}%`;
-	let sc = '';
+	let sc = $state('');
 	const ws = watch(sc);
-	$: {
+	$effect(() => {
 		ws(() => {
 			sc = trim(sc);
 			dLoad(1);
 		}, sc);
-	}
+	});
 </script>
 
 {#if cfg.show}
@@ -132,11 +142,11 @@
 		style={sty}
 		transition:fade|global
 		class="a"
-		class:dr={state === 1}
-		on:dragover|preventDefault={() => (state = 1)}
+		class:dr={status === 1}
+		on:dragover|preventDefault={() => (status = 1)}
 		on:drop|preventDefault={upload}
-		on:dragleave|preventDefault={() => (state = 0)}
-		on:dragend|preventDefault={() => (state = 0)}
+		on:dragleave|preventDefault={() => (status = 0)}
+		on:dragend|preventDefault={() => (status = 0)}
 		on:click={cancel}
 	>
 		<div class="dp" on:click|stopPropagation />
@@ -167,7 +177,12 @@
 			</div>
 			<div class="ls">
 				{#each ls as file, index (file.id)}
-					<Item bind:file {trigger} act={selected.has(file)} on:click={sel(file)} />
+					<Item
+						bind:file={ls[index]}
+						{trigger}
+						act={selected.has(ls[index])}
+						on:click={sel(ls[index])}
+					/>
 				{/each}
 			</div>
 			{#if $upFiles.length}

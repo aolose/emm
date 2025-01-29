@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import { req } from '$lib/req';
 	import Itm from './item.svelte';
@@ -11,21 +13,21 @@
 	import { fwRespLs, small } from '$lib/store';
 	import { method } from '$lib/enum';
 
-	let view = 0;
-	let sty;
-	let pop;
-	let sel = new Set();
-	let tab = 0;
-	let ls = [];
-	let lastL = 0;
-	let loop = 0;
+	let view = $state(0);
+	let sty = $state();
+	let pop = $state();
+	let sel = $state(new Set());
+	let tab = $state(0);
+	let ls = $state([]);
+	let lastL = $state(0);
+	let loop = $state(0);
 	const size = 10;
-	let p = 1;
-	let total;
-	let ld = false;
-	let filter = {};
+	let p = $state(1);
+	let total = $state();
+	let ld = $state(false);
+	let filter = $state({});
 	const lsWatch = watch(tab, p, filter);
-	$: {
+	run(() => {
 		sty = $small ? `transform:translate3d(${(-view * 100) / 2}%,0,0)` : '';
 		lsWatch(
 			() => {
@@ -36,7 +38,7 @@
 			p,
 			filter
 		);
-	}
+	});
 
 	function tabCk(a) {
 		return () => {
@@ -124,16 +126,17 @@
 			<div class="d">
 				<div class="h">
 					<h1>Logs</h1>
-					<s />
+					<s></s>
 					<div class="tb" class:ac={tab}>
-						<span on:click={tabCk(0)}>real-time</span>
-						<span on:click={tabCk(1)}>firewall</span>
-						<i />
+						<span onclick={tabCk(0)}>real-time</span>
+						<span onclick={tabCk(1)}>firewall</span>
+						<i></i>
 					</div>
 					<Ck name="auto" bind:value={loop} />
-					<button on:click={() => loadLog()} class="icon i-refresh" />
-					<button class="icon i-filter" class:act={hasFwRuleFilter(filter)} on:click={search} />
-					<button class="icon i-set" on:click={() => (view = 1)} />
+					<button onclick={() => loadLog()} class="icon i-refresh"></button>
+					<button class="icon i-filter" class:act={hasFwRuleFilter(filter)} onclick={search}
+					></button>
+					<button class="icon i-set" onclick={() => (view = 1)}></button>
 				</div>
 			</div>
 			<div class="e">

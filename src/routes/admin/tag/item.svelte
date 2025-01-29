@@ -1,11 +1,17 @@
-<script>
+<script lang="ts">
+	import { stopPropagation } from 'svelte/legacy';
+
 	import { confirm } from '$lib/store';
 	import { getErr } from '$lib/utils';
 
-	export let d = {};
-	export let sel = false;
-	export let ck;
-	export let del;
+	interface Props {
+		d?: any;
+		sel?: boolean;
+		ck: any;
+		del: any;
+	}
+
+	let { d = {}, sel = false, ck, del }: Props = $props();
 
 	function de(id) {
 		return () =>
@@ -15,13 +21,13 @@
 	}
 </script>
 
-<div class="a" class:s={sel} on:click={ck}>
+<div class="a" class:s={sel} onclick={ck}>
 	{#if d.banner}
-		<div class="b" style:background-image={`url(/res/_${d.banner})`} />
+		<div class="b" style:background-image={`url(/res/_${d.banner})`}></div>
 	{/if}
 	<div class="t">
 		<h4>{d.name}</h4>
-		<button on:click|stopPropagation={de(d.id)} class="icon i-del" />
+		<button onclick={stopPropagation(de(d.id))} class="icon i-del"></button>
 	</div>
 	{#if d.desc}<p>{d.desc}</p>{/if}
 </div>

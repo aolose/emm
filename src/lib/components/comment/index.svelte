@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import Cm from '$lib/components/comment/cm.svelte';
 	import Itm from './itm.svelte';
 	import { onMount } from 'svelte';
@@ -10,12 +12,17 @@
 	import { msg } from './msg';
 	import { fly } from 'svelte/transition';
 
-	let page = 1;
-	let total = 1;
+	let page = $state(1);
+	let total = $state(1);
 	let ld = 0;
-	export let slug = '';
+
+	interface Props {
+		slug?: string;
+	}
+
+	let { slug = '' }: Props = $props();
 	const ws = watch(slug);
-	const cur = {
+	const cur = $state({
 		act: 0,
 		topic: 0,
 		reply: 0,
@@ -33,7 +40,7 @@
 			cur.name = randNm();
 			cur.avatar = localStorage.av = rndAr(avLs);
 		}
-	};
+	});
 
 	function go(n = 1) {
 		page = n;
@@ -54,15 +61,15 @@
 			}
 		});
 	});
-	let ls = [];
-	const user = {
+	let ls = $state([]);
+	const user = $state({
 		name: '',
 		avatar: 0,
 		set(name, avatar) {
 			user.name = name;
 			user.avatar = avatar;
 		}
-	};
+	});
 
 	function done(a) {
 		if (a) {
@@ -71,11 +78,11 @@
 		}
 	}
 
-	$: {
+	run(() => {
 		if (cur.name) localStorage.nm = cur.name;
 		if (cur.avatar) localStorage.av = cur.avatar;
 		ws(() => go(), slug);
-	}
+	});
 	const rm = (i) => () => {
 		ls = ls.filter((a) => a !== i);
 	};

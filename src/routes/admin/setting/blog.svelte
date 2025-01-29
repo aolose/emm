@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import { sys } from './sys';
 	import Card from './Card.svelte';
@@ -7,18 +9,18 @@
 	import { req } from '$lib/req';
 	import { h } from '$lib/store';
 
-	let nm;
-	let bio;
-	let linkedin;
-	let github;
-	let msg;
-	let ld;
-	let err = 0;
-	let act;
-	let key;
-	let robot;
-	let mx = 1000;
-	let desc;
+	let nm = $state();
+	let bio = $state();
+	let linkedin = $state();
+	let github = $state();
+	let msg = $state();
+	let ld = $state();
+	let err = $state(0);
+	let act = $state();
+	let key = $state();
+	let robot = $state();
+	let mx = $state(1000);
+	let desc = $state();
 	onMount(() =>
 		sys.subscribe((a) => {
 			robot = a.robots;
@@ -58,7 +60,7 @@
 			})
 			.finally(() => (ld = 0));
 	};
-	$: {
+	run(() => {
 		nm = trim(nm);
 		bio = trim(bio, true);
 		desc = trim(desc, true);
@@ -67,7 +69,7 @@
 		if (act) {
 			setTimeout(() => (act = 0), 2e3);
 		}
-	}
+	});
 </script>
 
 <Card {act} {msg} {err} title="Blog" {save} {ld}>

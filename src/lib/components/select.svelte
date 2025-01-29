@@ -1,21 +1,27 @@
-<script>
+<script lang="ts">
+	import { run, stopPropagation } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
-	export let items = [];
-	export let value = '';
-	export let placeholder = '';
-	let h = 0;
-	let val = '';
+	interface Props {
+		items?: any;
+		value?: string;
+		placeholder?: string;
+	}
+
+	let { items = [], value = $bindable(), placeholder = '' }: Props = $props();
+	let h = $state(0);
+	let val = $state('');
 	const s = (k) => () => {
 		h = 0;
 		value = k;
 	};
-	let cur;
-	$: {
+	let cur = $state();
+	run(() => {
 		const i = items.find((a) => a[0] === value);
 		val = i?.[1] || placeholder;
-	}
+	});
 	onMount(() => {
 		const fn = () => (h = 0);
 		window.addEventListener('click', fn);
@@ -25,15 +31,15 @@
 	});
 </script>
 
-<div class="s" bind:this={cur} on:click|stopPropagation={() => 0}>
-	<div class="a" on:click={() => (h = 1 - h)}>
+<div class="s" bind:this={cur} onclick={stopPropagation(() => 0)}>
+	<div class="a" onclick={() => (h = 1 - h)}>
 		<span>{val}</span>
-		<i />
+		<i></i>
 	</div>
 	{#if h}
 		<div class="b" transition:slide|global={{ duration: 100 }}>
 			{#each items as [k, v]}
-				<div class:e={k === value} on:click|stopPropagation={s(k)}>{v}</div>
+				<div class:e={k === value} onclick={stopPropagation(s(k))}>{v}</div>
 			{/each}
 		</div>
 	{/if}

@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import Item from '$lib/components/post/item.svelte';
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Canvas from '$lib/components/ctx.svelte';
@@ -11,8 +13,7 @@
 	import { page } from '$app/stores';
 	import { afterNavigate } from '$app/navigation';
 
-	let a = 0;
-	export let path = '';
+	let a = $state(0);
 
 	async function scTop({ from, to }) {
 		if (from?.route?.id !== to?.route?.id) return;
@@ -24,15 +25,26 @@
 		}
 	}
 
-	let sc,
-		oh = 0,
-		ih = 0;
-	export let name = '';
-	export let d = {};
-	let total = 1;
-	$: total = d.total;
-	let ls = [];
-	$: ls = d.items || [];
+	let sc = $state(),
+		oh = $state(0),
+		ih = $state(0);
+
+	interface Props {
+		path?: string;
+		name?: string;
+		d?: any;
+		children?: import('svelte').Snippet;
+	}
+
+	let { path = '', name = '', d = {}, children }: Props = $props();
+	let total = $state(1);
+	run(() => {
+		total = d.total;
+	});
+	let ls = $state([]);
+	run(() => {
+		ls = d.items || [];
+	});
 	afterNavigate(scTop);
 </script>
 
@@ -40,7 +52,7 @@
 <Canvas type={1} />
 <div class="o" class:e={$expand} transition:fade|global>
 	<Ph bind:shrink={a}>
-		<slot />
+		{@render children?.()}
 	</Ph>
 	<div class="t" bind:this={sc} class:v={a} bind:offsetHeight={oh}>
 		<Ctx>

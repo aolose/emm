@@ -1,13 +1,13 @@
-<script>
+<script lang="ts">
+	import { stopPropagation } from 'svelte/legacy';
+
 	import { str2Hds, time } from '$lib/utils';
 
-	export let data = [];
+	let { data = [], sel, ck } = $props();
 	const [tm, ip, ph, hds, st, ct, mk, mt] = data;
-	export let sel;
-	export let ck;
 
-	let exp = 0;
-	$: hd = str2Hds(hds).filter(([a]) => (exp ? 1 : /^user-agent$/gi.test(a)));
+	let exp = $state(0);
+	let hd = $derived(str2Hds(hds).filter(([a]) => (exp ? 1 : /^user-agent$/gi.test(a))));
 
 	function col(n, s) {
 		if (n < 300) return 0 === s;
@@ -17,11 +17,11 @@
 	}
 </script>
 
-<div class="r" class:act={sel.has(tm + ip)} on:click={ck(tm + ip)}>
+<div class="r" class:act={sel.has(tm + ip)} onclick={ck(tm + ip)}>
 	<div class="r0"><span>{time(tm)}</span></div>
 	<div class="r1"><span>{ip}</span></div>
 	<div class="r3">
-    <span class:c0={col(st, 0)} class:c1={col(st, 1)} class:c2={col(st, 2)} class:c3={col(st, 3)}
+		<span class:c0={col(st, 0)} class:c1={col(st, 1)} class:c2={col(st, 2)} class:c3={col(st, 3)}
 		>{st}</span
 		>
 	</div>
@@ -32,10 +32,10 @@
 	<div class="r5">
 		<button
 			class="icon"
-			on:click|stopPropagation={() => (exp = 1 - exp)}
+			onclick={stopPropagation(() => (exp = 1 - exp))}
 			class:i-add={!exp}
 			class:i-no={exp}
-		/>
+		></button>
 		{#each hd as [k, v]}
 			<div class="h">
 				<span>{k}:</span>

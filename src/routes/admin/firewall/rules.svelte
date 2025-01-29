@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import Pg from '$lib/components/pg.svelte';
 	import { confirm, fwRespLs } from '$lib/store';
 	import { req } from '$lib/req';
@@ -7,17 +9,12 @@
 	import { watch, time, diffObj, getErr } from '$lib/utils';
 	import Ld from '$lib/components/loading.svelte';
 
-	export let close;
-	let total = 1;
+	let total = $state(1);
 	let p = 1;
-	export let pop;
-	let ta = 0;
-	let ld = 0;
+	let { close, pop } = $props();
+	let ta = $state(0);
+	let ld = $state(0);
 	const wa = watch(ta);
-	$: wa(() => {
-		ls = ta === 2 ? $fwRespLs : [];
-		go(1);
-	}, ta);
 	const fix = (d) => {
 		if (ta !== 2) {
 			if (d.trigger) {
@@ -95,11 +92,17 @@
 				.catch((e) => confirm(getErr(e), '', 'ok'));
 		});
 	};
-	let ls = [];
+	let ls = $state([]);
 	const rspName = (id) => $fwRespLs.find((a) => a.id === id)?.name || '';
 	onMount(() => {
 		go(1);
 		return fwRespLs.subscribe(() => (ls = [...ls]));
+	});
+	run(() => {
+		wa(() => {
+			ls = ta === 2 ? $fwRespLs : [];
+			go(1);
+		}, ta);
 	});
 </script>
 
@@ -107,15 +110,15 @@
 	<div class="b">
 		<div class="d">
 			<div class="t">
-				<button class:act={!ta} on:click={() => (ta = 0)}>rules</button>
-				<button class:act={ta === 1} on:click={() => (ta = 1)}>blackList</button>
-				<button class:act={ta === 2} on:click={() => (ta = 2)}>response</button>
+				<button class:act={!ta} onclick={() => (ta = 0)}>rules</button>
+				<button class:act={ta === 1} onclick={() => (ta = 1)}>blackList</button>
+				<button class:act={ta === 2} onclick={() => (ta = 2)}>response</button>
 			</div>
-			<s />
+			<s></s>
 			{#if !ta || ta === 2}
-				<button on:click={add} class="icon i-add" />
+				<button onclick={add} class="icon i-add"></button>
 			{/if}
-			<button on:click={close} class="icon i-close" />
+			<button onclick={close} class="icon i-close"></button>
 		</div>
 	</div>
 	<div class="e">
@@ -136,9 +139,9 @@
 									<span class="m">{r.mark}</span>
 								{/if}
 								<p>{time(r.createAt)}</p>
-								<s />
-								<button class="icon i-del" on:click={() => del(r.id)} />
-								<button class="icon i-ed" on:click={() => edit(r)} />
+								<s></s>
+								<button class="icon i-del" onclick={() => del(r.id)}></button>
+								<button class="icon i-ed" onclick={() => edit(r)}></button>
 							</div>
 						</div>
 					{:else if ta === 2}
@@ -149,9 +152,9 @@
 							</div>
 							<div class="r">
 								<p>{r.headers || ''}</p>
-								<s />
-								<button class="icon i-del" on:click={() => del(r.id)} />
-								<button class="icon i-ed" on:click={() => edit(r)} />
+								<s></s>
+								<button class="icon i-del" onclick={() => del(r.id)}></button>
+								<button class="icon i-ed" onclick={() => edit(r)}></button>
 							</div>
 						</div>
 					{:else}
@@ -180,11 +183,11 @@
 							</div>
 							<div class="r">
 								{#if r.log && !r.trigger}
-									<span class="icon i-log" />
+									<span class="icon i-log"></span>
 								{/if}
 								<span class="m">{r.mark || ''}</span>
-								<button class="icon i-del" on:click={() => del(r.id)} />
-								<button class="icon i-ed" on:click={() => edit(r)} />
+								<button class="icon i-del" onclick={() => del(r.id)}></button>
+								<button class="icon i-ed" onclick={() => edit(r)}></button>
 							</div>
 						</div>
 					{/if}

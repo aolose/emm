@@ -1,12 +1,17 @@
-<script>
-	export let shrink = 0;
-	export let desc;
+<script lang="ts">
+	interface Props {
+		shrink?: number;
+		desc: any;
+		children?: import('svelte').Snippet;
+	}
+
+	let { shrink = 0, desc, children }: Props = $props();
 </script>
 
 <div class="ph" class:s={shrink}>
 	<div class="cc">
 		<h1>
-			<slot />
+			{@render children?.()}
 			{#if desc}
 				<p>{desc}</p>
 			{/if}

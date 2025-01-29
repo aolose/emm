@@ -1,10 +1,14 @@
-<script>
+<script lang="ts">
 	import { slide } from 'svelte/transition';
 	import { time } from '$lib/utils';
 
-	export let value = 0;
-	export let name = '';
-	$: t = +value && time(+value);
+	interface Props {
+		value?: number;
+		name?: string;
+	}
+
+	let { value = 0, name = '' }: Props = $props();
+	let t = $derived(+value && time(+value));
 </script>
 
 {#if +value}

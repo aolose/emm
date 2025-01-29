@@ -1,15 +1,19 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { small } from '$lib/store';
 	import { delay } from '$lib/utils';
 
-	export let style = '';
-	let h = 99999;
-	let a = 0;
-	let btn;
+	interface Props {
+		style?: string;
+	}
+
+	let { style = '' }: Props = $props();
+	let h = $state(99999);
+	let a = $state(0);
+	let btn = $state();
 	let t;
-	let p;
+	let p = $state();
 	const setA = delay((n) => {
 		a = n;
 	}, 60);
@@ -38,11 +42,11 @@
 <div bind:this={btn} class="o" {style}>
 	{#if a}
 		<button
-			on:click={() => p.scrollTo(0, 0)}
+			onclick={() => p.scrollTo(0, 0)}
 			transition:fly|global={{ y: 50, duration: 500 }}
 			class="t icon i-up"
 			class:a
-		/>
+		></button>
 	{/if}
 </div>
 

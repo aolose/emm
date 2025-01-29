@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import S from './rSelect.svelte';
 	import Ld from '$lib/components/loading.svelte';
 	import Pg from '$lib/components/pg.svelte';
@@ -6,31 +6,21 @@
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
 	import { delay, trim, watch } from '$lib/utils';
+	import { onMount } from 'svelte';
 
-	export let type;
-	export let permission;
-	let sc = '';
-	let s = [];
-	let page = 1;
-	let total = 1;
-	let items = [];
-	let ld = 0;
-	let hide = 0;
-	let ok;
-	let cancel;
-	let init = 0;
+	let { type, permission, select = $bindable() } = $props();
+	let sc = $state('');
+	let s = $state([]);
+	let page = $state(1);
+	let total = $state(1);
+	let items = $state([]);
+	let ld = $state(0);
+	let hide = $state(0);
+	let ok = $state();
+	let cancel = $state();
+	let init = $state(0);
 	let clear = () => (s = []);
 	const ws = watch(sc);
-	export const select = (d) => {
-		hide = 1;
-		s = [...(d || [])];
-		return new Promise((r) => {
-			ok = () => r([...s]);
-			cancel = () => r();
-		}).finally(() => {
-			hide = 0;
-		});
-	};
 
 	function go(n = 1) {
 		page = n;
@@ -72,7 +62,19 @@
 		};
 	}
 
-	$: {
+	onMount(() => {
+		select = (d) => {
+			hide = 1;
+			s = [...(d || [])];
+			return new Promise((r) => {
+				ok = () => r([...s]);
+				cancel = () => r();
+			}).finally(() => {
+				hide = 0;
+			});
+		};
+	});
+	$effect(() => {
 		sc = trim(sc, true);
 		ws(() => {
 			delayGo();
@@ -82,7 +84,7 @@
 				init = 1;
 				go();
 			}
-	}
+	});
 </script>
 
 {#if hide}
@@ -90,9 +92,9 @@
 		<div class="t">
 			<span>{type ? 'select permission' : 'select posts'}</span>
 			<div class="bn">
-				<button title="clear" class="icon i-no" on:click={clear} />
-				<button title="ok" class="icon i-ok" on:click={ok} />
-				<button title="cancel" class="icon i-close" on:click={cancel} />
+				<button title="clear" class="icon i-no" onclick={clear}></button>
+				<button title="ok" class="icon i-ok" onclick={ok}></button>
+				<button title="cancel" class="icon i-close" onclick={cancel}></button>
 			</div>
 		</div>
 		<div class="c">
@@ -103,14 +105,14 @@
 		</div>
 		<div class="b">
 			<div class="p m">
-				<div class="k" />
+				<div class="k"></div>
 				<span>ID</span>
 				<span>{type ? 'name' : 'title'}</span>
 			</div>
 			<div class="ls">
 				{#each items as it}
 					<div class="p">
-						<div on:click={ch(it)} class="k" class:s={s && s.find((a) => a.id === it.id)}>✓</div>
+						<div onclick={ch(it)} class="k" class:s={s && s.find((a) => a.id === it.id)}>✓</div>
 						<span>{it.id}</span>
 						<span>{it.title || it.title_d || it.name}</span>
 					</div>

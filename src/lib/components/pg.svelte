@@ -1,15 +1,26 @@
-<script>
-	export let total = 1;
-	export let page = 1;
-	export let go;
-	export let tm;
-	export let length = 4;
-	let first, isF, f, n, last, pg;
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
+	interface Props {
+		total?: number;
+		page?: number;
+		go: any;
+		tm: any;
+		length?: number;
+	}
+
+	let { total = 1, page = $bindable(1), go, tm, length = 4 }: Props = $props();
+	let first = $state(),
+		isF = $state(),
+		f = $state(),
+		n = $state(),
+		last = $state(),
+		pg = $state();
 	const setPage = (n) => () => {
 		go(n);
 		page = n;
 	};
-	$: {
+	run(() => {
 		last = page === total;
 		first = page === 1;
 		isF = typeof go === 'function';
@@ -26,19 +37,19 @@
 		f = g[0] > 2 ? '...' : '';
 		n = g[g.length - 1] < total - 1 ? '...' : '';
 		pg = [...g];
-	}
+	});
 </script>
 
 <nav class:lt={tm}>
 	{#if isF}
-		<span class="nv" class:act={first} on:click={setPage(1)}>1</span>
+		<span class="nv" class:act={first} onclick={setPage(1)}>1</span>
 	{:else}
 		<a class="nv" class:act={first} href={`${go}/1`}>1</a>
 	{/if}
 	{#if f}<span>{f}</span>{/if}
 	{#each pg as p}
 		{#if isF}
-			<span class="nv" class:act={page === p} on:click={setPage(p)}>{p}</span>
+			<span class="nv" class:act={page === p} onclick={setPage(p)}>{p}</span>
 		{:else}
 			<a class="nv" class:act={page === p} href={`${go}/${p}`}>{p}</a>
 		{/if}
@@ -46,7 +57,7 @@
 	{#if n}<span>{n}</span>{/if}
 	{#if total > 1}
 		{#if isF}
-			<span class="nv" class:act={last} on:click={setPage(total)}>{total}</span>
+			<span class="nv" class:act={last} onclick={setPage(total)}>{total}</span>
 		{:else}
 			<a class="nv" class:act={last} href={`${go}/${total}`}>{total}</a>
 		{/if}

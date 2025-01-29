@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
 	import Bird from '$lib/components/brid.svelte';
 	import Ctx from '$lib/components/ctx.svelte';
 	import Head from '$lib/components/Head.svelte';
 
-	export let data;
+	let { data } = $props();
 	const d = data.d;
 	const [linkedin, github, bio = ''] = d || [];
 </script>
@@ -15,12 +15,12 @@
 		<Bird d={bio} />
 	</div>
 	<div class="rm">
-		<a class="icon i-rss" href="/rss" />
+		<a class="icon i-rss" href="/rss"></a>
 		{#if linkedin}
-			<a href={linkedin} target="_blank" class="icon i-LinkedIn" />
+			<a href={linkedin} target="_blank" class="icon i-LinkedIn"></a>
 		{/if}
 		{#if github}
-			<a href={github} target="_blank" class="icon i-github" />
+			<a href={github} target="_blank" class="icon i-github"></a>
 		{/if}
 	</div>
 </div>

@@ -2,63 +2,63 @@ import hjs from 'highlight.js/lib/core';
 const ls = new Set<string>();
 export async function regHjs(lan: Set<string>) {
 	for (const a of lan) {
-    let reg;
-    if (!ls.has(a)) {
-      ls.add(a);
-      switch (a) {
-        case 'ts':
-        case 'typescript':
-          reg = await import('highlight.js/lib/languages/typescript');
-          break;
-        case 'js':
-        case 'javascript':
-          reg = await import('highlight.js/lib/languages/javascript');
-          break;
-        case 'css':
-          reg = await import('highlight.js/lib/languages/css');
-          break;
-        case 'dart':
-          reg = await import('highlight.js/lib/languages/dart');
-          break;
-        case 'lua':
-          reg = await import('highlight.js/lib/languages/lua');
-          break;
-        case 'sh':
-        case 'bash':
-          reg = await import('highlight.js/lib/languages/bash');
-          break;
-        case 'scss':
-          reg = await import('highlight.js/lib/languages/scss');
-          break;
-        case 'yml':
-        case 'yaml':
-          reg = await import('highlight.js/lib/languages/yaml');
-          break;
-        case 'json':
-          reg = await import('highlight.js/lib/languages/json');
-          break;
-        case 'xml':
-        case 'html':
-          reg = await import('highlight.js/lib/languages/xml');
-          break;
-        case 'v':
-          reg = await import('./lang/v.js');
-          break;
-        case 'go':
-          reg = await import('highlight.js/lib/languages/go');
-          break;
-        case 'java':
-          reg = await import('highlight.js/lib/languages/java');
-          break;
-        case 'nginx':
-          reg = await import('highlight.js/lib/languages/nginx');
-          bre'\''
-      }
-      if (reg) {
-        hjs.registerLanguage(a, reg.default);
-      }
-    }
-  }
+		let reg;
+		if (!ls.has(a)) {
+			ls.add(a);
+			switch (a) {
+				case 'ts':
+				case 'typescript':
+					reg = await import('highlight.js/lib/languages/typescript');
+					break;
+				case 'js':
+				case 'javascript':
+					reg = await import('highlight.js/lib/languages/javascript');
+					break;
+				case 'css':
+					reg = await import('highlight.js/lib/languages/css');
+					break;
+				case 'dart':
+					reg = await import('highlight.js/lib/languages/dart');
+					break;
+				case 'lua':
+					reg = await import('highlight.js/lib/languages/lua');
+					break;
+				case 'sh':
+				case 'bash':
+					reg = await import('highlight.js/lib/languages/bash');
+					break;
+				case 'scss':
+					reg = await import('highlight.js/lib/languages/scss');
+					break;
+				case 'yml':
+				case 'yaml':
+					reg = await import('highlight.js/lib/languages/yaml');
+					break;
+				case 'json':
+					reg = await import('highlight.js/lib/languages/json');
+					break;
+				case 'xml':
+				case 'html':
+					reg = await import('highlight.js/lib/languages/xml');
+					break;
+				case 'v':
+					reg = await import('./lang/v.js');
+					break;
+				case 'go':
+					reg = await import('highlight.js/lib/languages/go');
+					break;
+				case 'java':
+					reg = await import('highlight.js/lib/languages/java');
+					break;
+				case 'nginx':
+					reg = await import('highlight.js/lib/languages/nginx');
+					break;
+			}
+			if (reg) {
+				hjs.registerLanguage(a, reg.default);
+			}
+		}
+	}
 }
 
 const unEscape = (str: string) => {

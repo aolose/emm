@@ -15,12 +15,12 @@
 	import { trim, watch } from '$lib/utils';
 	import Top from '$lib/components/Top.svelte';
 
+	let editor;
 	const getPost = api('posts');
-	let pages = 1;
+	let pages = $state(1);
 	let tmpMark = 1;
-	let view = 0;
-	let autoSave;
-	let ld = 0;
+	let view = $state(0);
+	let ld = $state(0);
 
 	function sel(p) {
 		if (!p) {
@@ -40,9 +40,9 @@
 		editPost.set({ ...o });
 	}
 
-	let sc = '';
-	let el;
-	let ft = 1;
+	let sc = $state('');
+	let el = $state();
+	let ft = $state(1);
 	const wc = watch(sc);
 	const wt = watch(ft);
 
@@ -87,9 +87,10 @@
 			setting.set(0);
 		};
 	});
-	let sty, topSty;
-	let visitor = 0;
-	$: {
+	let sty = $state(''),
+		topSty = $state('');
+	let visitor = $state(0);
+	$effect(() => {
 		sty = $small
 			? `transform:translate3d(${((-view * 100) / 3).toFixed(4)}%,0,0)`
 			: $medium
@@ -104,7 +105,7 @@
 		wt(() => {
 			if (sc) page(1);
 		}, ft);
-	}
+	});
 </script>
 
 <div class="x">
@@ -130,15 +131,15 @@
 		<div class="b">
 			<Editor
 				{close}
-				bind:autoSave
+				bind:this={editor}
 				visitor={() => {
-          visitor = 1;
-          view = 2;
-        }}
+					visitor = 1;
+					view = 2;
+				}}
 				preview={() => {
-          view = 2;
-          visitor = 0;
-        }}
+					view = 2;
+					visitor = 0;
+				}}
 			/>
 		</div>
 		<div class="c">
@@ -146,7 +147,7 @@
 			<Vistior close={() => (view = 1)} bind:act={visitor} id={$editPost.id} />
 		</div>
 		<FileWin w={33.33333} />
-		<Setting {autoSave} />
+		<Setting autoSave={editor?.autoSave} />
 	</div>
 </div>
 
