@@ -1,4 +1,7 @@
-<script>
+<script lang="ts">
+	import Itm from './itm.svelte';
+	import { run } from 'svelte/legacy';
+
 	import Ava from '$lib/components/post/ava.svelte';
 	import { time } from '$lib/utils';
 	import { slide } from 'svelte/transition';
@@ -8,18 +11,10 @@
 	import { method } from '$lib/enum';
 	import { confirm } from '$lib/store';
 
-	export let d = {};
-	export let user = {};
-
-	export let cur = {};
-	export let topic;
 	const own = d._own;
 	const isAdm = d.isAdm;
-	$: name = isAdm ? 'admin' : (own === 1 && user.name) || d._name;
-	$: avatar = isAdm ? -1 : (own === 1 && user.avatar) || d._avatar;
-	let page = 1;
-	export let done;
-	export let remove;
+	let page = $state(1);
+	let { d = $bindable({}), user = {}, cur = {}, topic, done, remove } = $props();
 
 	function reply() {
 		if (cur.reply === d.id) {
@@ -67,8 +62,14 @@
 		});
 	}
 
-	let editMod = false;
-	$: {
+	let editMod = $state(false);
+	const rm = (i) => () => {
+		const itm = d?._cms?.items;
+		if (itm) {
+			d._cms.items = itm.filter((a) => a !== i);
+		}
+	};
+	run(() => {
 		if (editMod) {
 			d.done = (a) => {
 				d = { ...d, ...a };
@@ -78,13 +79,9 @@
 				editMod = false;
 			};
 		}
-	}
-	const rm = (i) => () => {
-		const itm = d?._cms?.items;
-		if (itm) {
-			d._cms.items = itm.filter((a) => a !== i);
-		}
-	};
+	});
+	let name = $derived(isAdm ? 'admin' : (own === 1 && user.name) || d._name);
+	let avatar = $derived(isAdm ? -1 : (own === 1 && user.avatar) || d._avatar);
 </script>
 
 <div class="a" class:m={topic} transition:slide|global>
@@ -113,12 +110,12 @@
 			</p>
 			<div class="n">
 				<div class="u">
-					<button class="icon i-reply" on:click={reply} />
+					<button class="icon i-reply" onclick={reply}></button>
 					{#if own === 1}
-						<button class="icon i-ed" on:click={() => (editMod = 1)} />
+						<button class="icon i-ed" onclick={() => (editMod = 1)}></button>
 					{/if}
 					{#if own}
-						<button class="icon i-del" on:click={del(d.id)} />
+						<button class="icon i-del" onclick={del(d.id)}></button>
 					{/if}
 				</div>
 				<div class="t">
@@ -142,17 +139,17 @@
 				{cur}
 				done={done || ok}
 				reply={{
-          topic: topic || d.id,
-          cm: d.id,
-          name: name
-        }}
+					topic: topic || d.id,
+					cm: d.id,
+					name: name
+				}}
 			/>
 		</div>
 	{/if}
 	{#if !topic}
 		<div class="ls">
 			{#each d._cms?.items || [] as i}
-				<svelte:self d={i} {cur} {user} done={ok} topic={d.id} remove={rm(i)} />
+				<Itm d={i} {cur} {user} done={ok} topic={d.id} remove={rm(i)} />
 			{/each}
 			{#if d._cms?.total > 1}
 				<div class="p">

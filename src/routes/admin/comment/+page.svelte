@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import Select from '$lib/components/select.svelte';
 	import { cmStatus, method } from '$lib/enum';
 	import Item from './item.svelte';
@@ -11,16 +13,16 @@
 	import Detail from './detail.svelte';
 	import { confirm, small } from '$lib/store';
 
-	let view = 0;
-	let sty = '';
-	let status = -1;
-	let total = 1;
-	let page = 1;
-	let allowCm = 0;
-	let checkCm = 0;
-	let cmWatch;
-	let ld = 0;
-	let sel;
+	let view = $state(0);
+	let sty = $state('');
+	let status = $state(-1);
+	let total = $state(1);
+	let page = $state(1);
+	let allowCm = $state(0);
+	let checkCm = $state(0);
+	let cmWatch = $state();
+	let ld = $state(0);
+	let sel = $state();
 	const cStatus = [
 		[-1, 'All'],
 		[cmStatus.Pending, 'Pending'],
@@ -29,7 +31,7 @@
 	];
 
 	const ftWatch = watch(status);
-	let ls = [];
+	let ls = $state([]);
 	const filter = (id) => {
 		if (id === 0) return (sel = 0);
 		ls = ls.filter((a) => {
@@ -59,7 +61,7 @@
 		});
 		go();
 	});
-	$: {
+	run(() => {
 		sty = $small && `transform:translate3d(${(-view * 100) / 2}%,0,0)`;
 		ftWatch(() => {
 			go();
@@ -77,7 +79,7 @@
 				allowCm,
 				checkCm
 			);
-	}
+	});
 </script>
 
 <div class="m">
@@ -87,11 +89,11 @@
 				<h1>Comments</h1>
 				<div class="b">
 					<div>
-						<span class="icon i-status" />
+						<span class="icon i-status"></span>
 						<Select bind:value={status} items={cStatus} />
 					</div>
 				</div>
-				<button class="icon i-refresh" on:click={() => go(page)} />
+				<button class="icon i-refresh" onclick={() => go(page)}></button>
 			</div>
 			<div class="e">
 				<div class="ls">
@@ -101,9 +103,9 @@
 								<Item
 									d={c}
 									ck={() => {
-                    sel = c;
-                    view = 1;
-                  }}
+										sel = c;
+										view = 1;
+									}}
 								/>
 							</div>
 						{/each}
@@ -124,8 +126,8 @@
 				d={sel}
 				{filter}
 				close={() => {
-          sel = view = 0;
-        }}
+					sel = view = 0;
+				}}
 			/>
 		{/if}
 	</div>

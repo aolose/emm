@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Mobile from '$lib/components/Mobile.svelte';
 	import Confirm from '$lib/components/confirm.svelte';
 	import CustomElement from '$lib/components/customent/CustomElement.svelte';
@@ -6,12 +6,18 @@
 	import { navStore } from '$lib/store';
 	import SwNotification from '$lib/components/SwNotification.svelte';
 
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
+
 	beforeNavigate((nav) => {
 		navStore.set(nav);
 	});
 </script>
 
-<slot />
+{@render children?.()}
 <Mobile />
 <Confirm />
 <CustomElement />

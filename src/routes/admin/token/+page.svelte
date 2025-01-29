@@ -11,12 +11,12 @@
 	import { slidLeft } from '$lib/transition';
 	import { confirm } from '$lib/store';
 
-	let ta = 0;
-	let page = 1;
-	let total = 1;
-	let items = [];
-	let loading = 0;
-	let edit;
+	let ta = $state(0);
+	let page = $state(1);
+	let total = $state(1);
+	let items = $state([]);
+	let loading = $state(0);
+	let edit = $state();
 
 	const go = (n = 1) => {
 		loading = 1;
@@ -52,6 +52,8 @@
 		});
 	}
 
+	const btnClick = (a) => edi(a);
+
 	function del() {
 		confirm('sure to delete?').then((ok) => {
 			if (!ok) return;
@@ -63,30 +65,31 @@
 		});
 	}
 
-	let cols;
-	const btnClick = (a) => edi(a);
-	$: cols = [
+	let cols = $derived(
 		[
-			{ check: true },
-			{ name: 'name', key: 'name' },
-			{ name: 'type', cell: ({ type }) => pmsName[permission[type]] },
-			{ name: 'create at', cell: ({ createAt }) => time(createAt) },
-			{ name: 'edit', btn: btnClick, detail: '_post' }
-		],
-		[
-			{ check: true },
-			{ name: 'code', key: 'code' },
-			{ name: 'type', cell: ({ type }) => pmsName[permission[type]] },
-			{ name: 'expire', cell: ({ expire }) => (expire > 0 ? time(expire) : '∞') },
-			{ name: 'create at', cell: ({ createAt }) => time(createAt) },
-			{ name: 'times', cell: ({ times }) => (times > 0 ? times : '∞') },
-			{ name: 'share', cell: ({ share }) => (share ? 'Y' : 'N') },
-			{ name: 'used', cell: ({ used }) => used || 0 },
-			{ detail: '_reqs', btn: btnClick }
-		]
-	][ta];
-	let ids = new Set();
-	$: siz = ids.size;
+			[
+				{ check: true },
+				{ name: 'name', key: 'name' },
+				{ name: 'type', cell: ({ type }) => pmsName[permission[type]] },
+				{ name: 'create at', cell: ({ createAt }) => time(createAt) },
+				{ name: 'edit', btn: btnClick, detail: '_post' }
+			],
+			[
+				{ check: true },
+				{ name: 'code', key: 'code' },
+				{ name: 'type', cell: ({ type }) => pmsName[permission[type]] },
+				{ name: 'expire', cell: ({ expire }) => (expire > 0 ? time(expire) : '∞') },
+				{ name: 'create at', cell: ({ createAt }) => time(createAt) },
+				{ name: 'times', cell: ({ times }) => (times > 0 ? times : '∞') },
+				{ name: 'share', cell: ({ share }) => (share ? 'Y' : 'N') },
+				{ name: 'used', cell: ({ used }) => used || 0 },
+				{ detail: '_reqs', btn: btnClick }
+			]
+		][ta]
+	);
+
+	let ids = $state(new Set());
+	let siz = $derived(ids.size);
 	const act = (n) => () => {
 		if (ta !== n) {
 			ids = new Set();
@@ -100,13 +103,13 @@
 	<div class="a">
 		<div class="t">
 			<div class="v">
-				<button class:act={ta === 0} on:click={act(0)}>permissions</button>
-				<button class:act={ta === 1} on:click={act(1)}>tickets</button>
+				<button class:act={ta === 0} onclick={act(0)}>permissions</button>
+				<button class:act={ta === 1} onclick={act(1)}>tickets</button>
 			</div>
 			<div class="o">
-				<button class="icon i-add" on:click={add} />
+				<button class="icon i-add" onclick={add}></button>
 				{#if siz}
-					<button class="icon i-del" on:click={del} transition:slidLeft|global>{siz}</button>
+					<button class="icon i-del" onclick={del} transition:slidLeft|global>{siz}</button>
 				{/if}
 			</div>
 		</div>

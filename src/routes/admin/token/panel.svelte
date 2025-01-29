@@ -12,40 +12,20 @@
 	import DateInput from '$lib/components/date.svelte';
 	import Ck from '$lib/components/check.svelte';
 	import { trim } from '$lib/utils';
+	import { onMount } from 'svelte';
 
-	let show = 0;
-	let ok;
-	let cancel;
-	let t = 0;
-	let d = { _posts: [], _reqs: [] };
-	let tk = {};
-	let l = 0;
-	let sec;
-	let fine = 0;
-	let hasExp = 0;
-	let editMod = false;
-	$: {
-		if (t) {
-			delete d._posts;
-			const hasPer = /\d/.test(d.type);
-			if (hasPer) d._reqs = d._reqs?.filter((a) => a.type === d.type) || [];
-			fine = hasPer && d._reqs?.length;
-			if (fine) {
-				tk = {
-					type: d.type,
-					share: +d.share || 0,
-					times: +d.times || -1,
-					reqs: d._reqs.map((a) => a.id).join()
-				};
-				if (hasExp) tk.expire = d.expire;
-			}
-		} else {
-			delete d._reqs;
-			d.name = trim(d.name || '');
-			fine = d.name && /\d+/g.test(d.type);
-		}
-		if (d && d.times) d.times = Math.min(Math.max(-1, Math.floor(d.times)), 999);
-	}
+	let { edit = $bindable() } = $props();
+	let show = $state(0);
+	let ok = $state();
+	let cancel = $state();
+	let t = $state(0);
+	let d = $state({ _posts: [], _reqs: [] });
+	let tk = $state({});
+	let l = $state(0);
+	let sec = $state();
+	let fine = $state(0);
+	let hasExp = $state(0);
+	let editMod = $state(false);
 
 	function save(d, type) {
 		l = 1;
@@ -70,43 +50,72 @@
 		[permission.Read, pmsName.Read],
 		[permission.Admin, pmsName.Admin]
 	];
-	export const edit = (type, data) => {
-		editMod = !!data;
-		t = type;
-		show = 1;
-		d = { ...(data || {}) };
-		hasExp = d.expire > 0;
-		return new Promise((rs) => {
-			ok = () => {
-				const o = { ...d };
-				if (!type) {
-					if (o.type === permission.Post) o._postIds = (d._posts || []).map((a) => a.id).join();
-					delete o._posts;
-				}
-				save(o, type)
-					.then((o) => {
-						if (o) {
-							if (!type) {
-								const [id, ca] = o.split(' ');
-								d.id = id;
-								d.createAt = +ca;
-							} else {
-								o._reqs = d._reqs;
+	onMount(() => {
+		edit = (type, data) => {
+			editMod = !!data;
+			t = type;
+			show = 1;
+			d = { ...(data || {}) };
+			hasExp = d.expire > 0;
+			return new Promise((rs) => {
+				ok = () => {
+					const o = { ...d };
+					if (!type) {
+						if (o.type === permission.Post) o._postIds = (d._posts || []).map((a) => a.id).join();
+						delete o._posts;
+					}
+					save(o, type)
+						.then((o) => {
+							if (o) {
+								if (!type) {
+									const [id, ca] = o.split(' ');
+									d.id = id;
+									d.createAt = +ca;
+								} else {
+									o._reqs = d._reqs;
+								}
 							}
-						}
-						show = 0;
-						rs(type ? o : d);
-					})
-					.catch((a) => {
-						confirm(a.message || a.data, '', 'ok');
-					});
-			};
-			cancel = () => {
-				rs();
-				show = 0;
-			};
-		});
-	};
+							show = 0;
+							rs(type ? o : d);
+						})
+						.catch((a) => {
+							confirm(a.message || a.data, '', 'ok');
+						});
+				};
+				cancel = () => {
+					rs();
+					show = 0;
+				};
+			});
+		};
+	});
+	const key = () => `${t} ${JSON.stringify(d)}`;
+	let a;
+	$effect(() => {
+		const k = key();
+		if (k === a) return;
+		a = k;
+		if (t) {
+			delete d._posts;
+			const hasPer = /\d/.test(d.type);
+			if (hasPer) d._reqs = d._reqs?.filter((a) => a.type === d.type) || [];
+			fine = hasPer && d._reqs?.length;
+			if (fine) {
+				tk = {
+					type: d.type,
+					share: +d.share || 0,
+					times: +d.times || -1,
+					reqs: d._reqs.map((a) => a.id).join()
+				};
+				if (hasExp) tk.expire = d.expire;
+			}
+		} else {
+			delete d._reqs;
+			d.name = trim(d.name || '');
+			fine = d.name && /\d+/g.test(d.type);
+		}
+		if (d && d.times) d.times = Math.min(Math.max(-1, Math.floor(d.times)), 999);
+	});
 </script>
 
 {#if show}
@@ -114,7 +123,7 @@
 		<div class="a">
 			<div class="t">
 				<span>{['permission', 'ticket'][t]}</span>
-				<button class="icon i-close" on:click={cancel} />
+				<button class="icon i-close" onclick={cancel}></button>
 			</div>
 			<div class="b">
 				{#if !t}
@@ -134,7 +143,7 @@
 						{:else}
 							<Se type={t} bind:items={d._posts} inline />
 						{/if}
-						<button class="icon i-ed" on:click={ed} />
+						<button class="icon i-ed" onclick={ed}></button>
 					</div>
 				{/if}
 				{#if t}
@@ -166,11 +175,11 @@
 			</div>
 			<div class="n">
 				{#if fine}
-					<button transition:slidLeft|global on:click={ok}
+					<button transition:slidLeft|global onclick={ok}
 					>{t && editMod ? 'create' : 'submit'}</button
 					>
 				{/if}
-				<button on:click={cancel}>cancel</button>
+				<button onclick={cancel}>cancel</button>
 			</div>
 			<Ld act={l} />
 			<List permission={d.type} type={t} bind:select={sec} />

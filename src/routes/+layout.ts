@@ -47,34 +47,34 @@ const ps = async (p: Page) => {
 
 const save = (a: saveData) => {
 	cacheData = { ...cacheData, ...a };
-  if (!loaded) return;
-  saveCache('statue', undefined, cacheData, cacheTime);
+	if (!loaded) return;
+	saveCache('statue', undefined, cacheData, cacheTime);
 };
 
 const su = async (s: number) => {
-  save({ statue: (stu = s) } as saveData);
-  await jump();
+	save({ statue: (stu = s) } as saveData);
+	await jump();
 };
 
 if (browser) {
-  page.subscribe(ps);
-  status.subscribe(su);
+	page.subscribe(ps);
+	status.subscribe(su);
 }
 export const load = apiLoad('statue', undefined, {
-  cache: cacheTime,
-  method: method.GET,
-  done: async (d: unknown, ctx) => {
-    loaded = 1;
-    cacheData = d as headInfo & { statue: number; sys: number };
-    pathname = (ctx as { url: URL }).url.pathname;
-    sys = cacheData.sys;
-    stu = cacheData.statue;
-    h.update((a) => ({ ...a, ...cacheData }));
-    if (browser) {
-      statueSys.set(sys);
-      status.set(stu);
-    } else {
-      await su(stu);
-    }
-  }
+	cache: cacheTime,
+	method: method.GET,
+	done: async (d: unknown, ctx) => {
+		loaded = 1;
+		cacheData = d as headInfo & { statue: number; sys: number };
+		pathname = (ctx as { url: URL }).url.pathname;
+		sys = cacheData.sys;
+		stu = cacheData.statue;
+		h.update((a) => ({ ...a, ...cacheData }));
+		if (browser) {
+			statueSys.set(sys);
+			status.set(stu);
+		} else {
+			await su(stu);
+		}
+	}
 });

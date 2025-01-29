@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Posts from '$lib/components/post/list.svelte';
 	import { onMount } from 'svelte';
 	import Head from '$lib/components/Head.svelte';
@@ -7,7 +7,7 @@
 	onMount(() => {
 		sessionStorage.hasBack = 1;
 	});
-	export let data = {};
+	let { data = {} } = $props();
 </script>
 
 <Head title={`${$h.title} - Posts`} />

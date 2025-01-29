@@ -1,16 +1,20 @@
-<script>
-	export let idx = 1;
-	export let cls = '';
-	export let size = 60;
-	export let click = null;
+<script lang="ts">
+	interface Props {
+		idx?: number;
+		cls?: string;
+		size?: number;
+		click?: any;
+	}
+
+	let { idx = 1, cls = '', size = 60, click = null }: Props = $props();
 </script>
 
 <i
 	style={`width:${size}px;height:${size}px`}
 	class={`a av${idx} ${cls}`}
 	class:c={!!click}
-	on:click={click}
-/>
+	onclick={click}
+></i>
 
 <style lang="scss">
   @use './av.css' as *;

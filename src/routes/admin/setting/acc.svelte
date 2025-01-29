@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import { sys } from './sys';
 	import Card from './Card.svelte';
@@ -6,26 +8,26 @@
 	import { req } from '$lib/req';
 	import { getErr, trim, watch } from '$lib/utils';
 
-	let pw;
-	let pw2;
-	let msg;
-	let un;
-	let ld;
+	let pw = $state();
+	let pw2 = $state();
+	let msg = $state();
+	let un = $state();
+	let ld = $state();
 	onMount(() =>
 		sys.subscribe((a) => {
 			un = a.admUsr;
 			pw = a.admPwd;
 		})
 	);
-	let err;
-	let act;
+	let err = $state();
+	let act = $state();
 	const w = watch(act);
-	$: {
+	run(() => {
 		un = trim(un);
 		w(() => {
 			if (act) setTimeout(() => (act = 0), 2e3);
 		}, act);
-	}
+	});
 	const save = () => {
 		act = 0;
 		err = 1;

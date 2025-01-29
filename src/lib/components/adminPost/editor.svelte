@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import Editor from '$lib/components/editor.svelte';
 	import {
@@ -18,12 +20,10 @@
 	import { method } from '$lib/enum';
 	import { applyStrPatch } from '$lib/setStrPatchFn';
 
-	export let close;
-	let title = '';
-	let draft = '';
+	let title = $state('');
+	let draft = $state('');
 	let cid = 0;
-	export let preview;
-	export let visitor;
+	let { close, preview, visitor } = $props();
 	const ctxWatch = watch(draft, title);
 	const tSet = {
 		name: 'setting',
@@ -124,8 +124,8 @@
 		className: 'icon i-view',
 		title: 'preview'
 	};
-	let tools = [];
-	$: {
+	let tools = $state([]);
+	run(() => {
 		ctxWatch(
 			() => {
 				editPost.update((p) => {
@@ -139,7 +139,7 @@
 			draft,
 			title
 		);
-	}
+	});
 	const delaySave = api('post', { delay: 3e3 });
 	const save = api('post');
 	const loadTag = () => {
@@ -242,10 +242,10 @@
 	<div class="a" class:fu={$full} transition:fade|global>
 		<div class="t">
 			<input bind:value={title} />
-			<button class="icon i-close" on:click={close} />
+			<button class="icon i-close" onclick={close}></button>
 		</div>
 		<div class="e">
-			<button on:click={() => full.set(0)} class="icon i-shrink" />
+			<button onclick={() => full.set(0)} class="icon i-shrink"></button>
 			{#key $editPost._ || $editPost.id}
 				<Editor bind:value={draft} toolbar={tools} />
 				{#if $editPost.save}

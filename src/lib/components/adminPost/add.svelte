@@ -1,12 +1,18 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { editPost, originPost } from '$lib/store';
 	import { randNum, trim } from '$lib/utils';
 
-	export let done;
-	export let a = '';
-	$: {
-		a = trim(a, true);
+	interface Props {
+		done: any;
+		a?: string;
 	}
+
+	let { done, a = $bindable('') }: Props = $props();
+	run(() => {
+		a = trim(a, true);
+	});
 
 	function add() {
 		if (a) {
@@ -26,8 +32,8 @@
 
 <div class="a">
 	<input placeholder="start a new story..." bind:value={a} />
-	<div class="l" />
-	<button class="icon i-pub" class:act={a} on:click={add} />
+	<div class="l"></div>
+	<button class="icon i-pub" class:act={a} onclick={add}></button>
 </div>
 
 <style lang="scss">

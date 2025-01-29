@@ -2,7 +2,11 @@
 	import Card from './Card.svelte';
 	import { clientRestore } from '$lib/utils';
 
-	let msg, err, act, ld, t;
+	let msg = $state(),
+		err = $state(),
+		act = $state(),
+		ld = $state(),
+		t;
 	const m = (a, e) => {
 		msg = a;
 		err = e;
@@ -30,19 +34,19 @@
 
 <Card title="Tools" {msg} {err} {act} {ld}>
 	<div class="r">
-		<button on:click={ex}>
+		<button onclick={ex}>
 			backup
-			<span class="icon i-down" /></button
+			<span class="icon i-down"></span></button
 		>
 		<button>
 			<input
 				type="file"
-				on:change={up}
-				on:click={(e) => (e.target.value = '')}
+				onchange={up}
+				onclick={(e) => (e.target.value = '')}
 				accept="application/zip"
 			/>
 			restore
-			<span class="icon i-upload" />
+			<span class="icon i-upload"></span>
 		</button>
 	</div>
 </Card>

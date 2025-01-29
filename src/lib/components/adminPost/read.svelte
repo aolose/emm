@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { fade } from 'svelte/transition';
 	import Pg from '$lib/components/pg.svelte';
 	import Ld from '$lib/components/loading.svelte';
@@ -6,25 +8,18 @@
 	import { method } from '$lib/enum';
 	import { time, watch } from '$lib/utils';
 
-	export let act = 0;
-	export let close;
-	export let id = 0;
-	const wa = watch(act, id);
-	let page = 1;
-	let ls = [];
-	let total = 1;
-	let ld = 0;
-	$: {
-		wa(
-			() => {
-				if (act && id) {
-					go();
-				}
-			},
-			act,
-			id
-		);
+	interface Props {
+		act?: number;
+		close: any;
+		id?: number;
 	}
+
+	let { act = $bindable(0), close, id = 0 }: Props = $props();
+	const wa = watch(act, id);
+	let page = $state(1);
+	let ls = $state([]);
+	let total = $state(1);
+	let ld = $state(0);
 
 	function go(n = 1) {
 		if (!act || !id) return;
@@ -37,6 +32,18 @@
 			})
 			.finally(() => (ld = 0));
 	}
+
+	run(() => {
+		wa(
+			() => {
+				if (act && id) {
+					go();
+				}
+			},
+			act,
+			id
+		);
+	});
 </script>
 
 {#if act && id}
@@ -45,11 +52,11 @@
 			<span>visitor</span>
 			<button
 				class="icon i-close"
-				on:click={() => {
-          act = 0;
-          close();
-        }}
-			/>
+				onclick={() => {
+					act = 0;
+					close();
+				}}
+			></button>
 		</div>
 		<div class="b">
 			{#if !ls.length}

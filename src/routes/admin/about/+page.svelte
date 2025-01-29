@@ -8,8 +8,8 @@
 	import { getErr } from '$lib/utils';
 	import { onMount } from 'svelte';
 
-	let value = '';
-	let view = 0;
+	let value = $state('');
+	let view = $state(0);
 
 	function save() {
 		req('about', value)
@@ -27,7 +27,7 @@
 <div class="c">
 	<div class="b">
 		<h1>About</h1>
-		<button on:click={save}>save</button>
+		<button onclick={save}>save</button>
 	</div>
 	<div class="f">
 		<div class="a">

@@ -1,130 +1,139 @@
-<script>
-  import { bgColor, goBack, time, watch } from '$lib/utils';
-  import Ctx from '$lib/components/post/ctx.svelte';
-  import Viewer from '$lib/components/viewer.svelte';
-  import PF from '$lib/components/post/pf.svelte';
-  import Tag from '$lib/components/post/tag.svelte';
-  import { expand, small } from '$lib/store';
-  import { imageViewer } from '$lib/use';
-  import Comment from '$lib/components/comment/index.svelte';
-  import Head from '$lib/components/Head.svelte';
-  import Top from '$lib/components/Top.svelte';
-  import { goto } from '$app/navigation';
-  import { page } from '$app/stores';
+<script lang="ts">
+	import { run } from 'svelte/legacy';
 
-  export let data;
-  let d, p, o, c;
-  let sly = '';
-  let style, tag;
-  let desc, view, prev, next;
-  let slug = data.p.slug;
-  const wc = watch(slug);
-  $: {
-    d = data.d;
-    p = data.p;
-    slug = p.slug;
-    wc(() => {
-      if ($small) o.scrollTo(0, 0);
-      else c.scrollTo(0, 0);
-    }, slug);
-    prev = d._u;
-    next = d._n;
-    tag = p.tag;
-    desc = d.desc;
-    view = desc || d._d;
-    if (d.createAt)
-      style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
-    if (d.banner) {
-      sly = `background-image:url(/res/${$small ? '_' + d.banner : d.banner})`;
-    } else sly = '';
-  }
+	import { bgColor, goBack, time, watch } from '$lib/utils';
+	import Ctx from '$lib/components/post/ctx.svelte';
+	import Viewer from '$lib/components/viewer.svelte';
+	import PF from '$lib/components/post/pf.svelte';
+	import Tag from '$lib/components/post/tag.svelte';
+	import { expand, small } from '$lib/store';
+	import { imageViewer } from '$lib/use';
+	import Comment from '$lib/components/comment/index.svelte';
+	import Head from '$lib/components/Head.svelte';
+	import Top from '$lib/components/Top.svelte';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+
+	let { data } = $props();
+	let d = $state(),
+		p = $state(),
+		o = $state(),
+		c = $state();
+	let sly = $state('');
+	let style = $state(),
+		tag = $state();
+	let desc = $state(),
+		view = $state(),
+		prev = $state(),
+		next = $state();
+	let slug = $state(data.p.slug);
+	const wc = watch(slug);
+	run(() => {
+		d = data.d;
+		p = data.p;
+		slug = p.slug;
+		wc(() => {
+			if ($small) o.scrollTo(0, 0);
+			else c.scrollTo(0, 0);
+		}, slug);
+		prev = d._u;
+		next = d._n;
+		tag = p.tag;
+		desc = d.desc;
+		view = desc || d._d;
+		if (d.createAt)
+			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
+		if (d.banner) {
+			sly = `background-image:url(/res/${$small ? '_' + d.banner : d.banner})`;
+		} else sly = '';
+	});
 </script>
 
 <Head title={d.title} description={view}>
-  <meta name="og:type" content="article" />
-  <meta name="og:title" content={d.title} />
-  <meta name="og:description" content={view} />
-  <meta name="og:url" content={$page.url.href} />
-  <meta name="article:published_time" content={time(d.createAt)} />
-  <meta name="article:tag" content={d._tag} />
-  {#if d.banner}
-    <meta name="og:image" content={`${$page.url.origin}/res/_${d.banner}`} />
-  {/if}
-  {#if d.banner}
-    <meta name="image" content={`${$page.url.origin}/res/_${d.banner}`} />
-  {/if}
-  <meta name="og:image:width" content="600" />
-  <meta name="og:image:height" content="400" />
+	<meta name="og:type" content="article" />
+	<meta name="og:title" content={d.title} />
+	<meta name="og:description" content={view} />
+	<meta name="og:url" content={$page.url.href} />
+	<meta name="article:published_time" content={time(d.createAt)} />
+	<meta name="article:tag" content={d._tag} />
+	{#if d.banner}
+		<meta name="og:image" content={`${$page.url.origin}/res/_${d.banner}`} />
+	{/if}
+	{#if d.banner}
+		<meta name="image" content={`${$page.url.origin}/res/_${d.banner}`} />
+	{/if}
+	<meta name="og:image:width" content="600" />
+	<meta name="og:image:height" content="400" />
 </Head>
 
 {#if d}
-  <div class={'bk icon i-close'} on:click={() => goBack()} />
-  <div class="pg" bind:this={o}>
-    {#if $small}
-      <Top />
-    {/if}
-    <div class="bg" style={sly}>
-      <div class="ft" {style} />
-      <div class="fc" />
-    </div>
-    <div class="co" class:ex={$expand} bind:this={c}>
-      {#if !$small}
-        <Top />
-      {/if}
-      <Ctx>
-        <div class="v">
-          <div class="h">
-            <h1>{d.title}</h1>
-            {#if d.desc}<p>{d.desc}</p>{/if}
-            <div class="i">
-              <span><span class="icon i-view" />{d._r}</span>
-              <span>{time(d.createAt)}</span>
-            </div>
-          </div>
-          <div class="art">
-            <div class="ct" use:imageViewer>
-              <Viewer ctx={d} />
-            </div>
-            <div class="ss" />
-            <PF />
-            <div class="tg">
-              {#if d._tag}
-                <label class="icon i-tags" />
-                <Tag t={d._tag} />
-              {/if}
-            </div>
-            <div class="sl">
-              {#if prev}
-                <p>
-                  <span>newer:</span>
-                  <button
-                    on:click={() =>
-                      goto(`/post/${tag ? `${tag}/` : ''}${prev.slug}`, { replaceState: true })}
-                  >{prev.title}</button
-                  >
-                </p>
-              {:else}<p />{/if}
-              {#if next}
-                <p>
-                  <span>older:</span>
-                  <button
-                    on:click={() =>
-                      goto(`/post/${tag ? `${tag}/` : ''}${next.slug}`, { replaceState: true })}
-                  >{next.title}</button
-                  >
-                </p>
-              {/if}
-            </div>
-            <div class="cm">
-              {#if d._cm}
-                <Comment slug={p.slug} />
-              {/if}
-            </div>
-          </div>
-        </div>
-      </Ctx>
-    </div>
-  </div>
+	<div class={'bk icon i-close'} onclick={() => goBack()}></div>
+	<div class="pg" bind:this={o}>
+		{#if $small}
+			<Top />
+		{/if}
+		<div class="bg" style={sly}>
+			<div class="ft" {style}></div>
+			<div class="fc"></div>
+		</div>
+		<div class="co" class:ex={$expand} bind:this={c}>
+			{#if !$small}
+				<Top />
+			{/if}
+			<Ctx>
+				<div class="v">
+					<div class="h">
+						<h1>{d.title}</h1>
+						{#if d.desc}<p>{d.desc}</p>{/if}
+						<div class="i">
+							<span><span class="icon i-view"></span>{d._r}</span>
+							<span>{time(d.createAt)}</span>
+						</div>
+					</div>
+					<div class="art">
+						<div class="ct" use:imageViewer>
+							<Viewer ctx={d} />
+						</div>
+						<div class="ss"></div>
+						<PF />
+						<div class="tg">
+							{#if d._tag}
+								<label class="icon i-tags"></label>
+								<Tag t={d._tag} />
+							{/if}
+						</div>
+						<div class="sl">
+							{#if prev}
+								<p>
+									<span>newer:</span>
+									<button
+										onclick={() =>
+											goto(`/post/${tag ? `${tag}/` : ''}${prev.slug}`, { replaceState: true })}
+									>{prev.title}</button
+									>
+								</p>
+							{:else}<p></p>{/if}
+							{#if next}
+								<p>
+									<span>older:</span>
+									<button
+										onclick={() =>
+											goto(`/post/${tag ? `${tag}/` : ''}${next.slug}`, { replaceState: true })}
+									>{next.title}</button
+									>
+								</p>
+							{/if}
+						</div>
+						<div class="cm">
+							{#if d._cm}
+								<Comment slug={p.slug} />
+							{/if}
+						</div>
+					</div>
+				</div>
+			</Ctx>
+		</div>
+	</div>
 {/if}
 
 <style lang="scss">

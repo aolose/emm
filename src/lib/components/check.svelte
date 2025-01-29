@@ -1,10 +1,14 @@
-<script>
-	export let name = '';
-	export let value = false;
-	export let revert = false;
+<script lang="ts">
+	interface Props {
+		name?: string;
+		value?: boolean;
+		revert?: boolean;
+	}
+
+	let { name = '', value = $bindable(), revert = false }: Props = $props();
 </script>
 
-<div class="a" class:act={revert ? !value : value} on:click={() => (value = !value)}>
+<div class="a" class:act={revert ? !value : value} onclick={() => (value = !value)}>
 	<i>✓</i>
 	<span>{name}</span>
 </div>

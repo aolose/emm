@@ -1,12 +1,18 @@
-<script>
-	import { onMount } from 'svelte';
+<script lang="ts">
+	import { run } from 'svelte/legacy';
 
-	export let query;
+	import { onMount } from 'svelte';
 
 	let mql;
 	let mqlListener;
-	let wasMounted = false;
-	export let matches = false;
+	let wasMounted = $state(false);
+
+	interface Props {
+		query: any;
+		matches?: boolean;
+	}
+
+	let { query, matches = $bindable(false) }: Props = $props();
 
 	onMount(() => {
 		wasMounted = true;
@@ -14,13 +20,6 @@
 			removeActiveListener();
 		};
 	});
-
-	$: {
-		if (wasMounted) {
-			removeActiveListener();
-			addNewListener(query);
-		}
-	}
 
 	function addNewListener(query) {
 		mql = window.matchMedia(query);
@@ -34,4 +33,11 @@
 			mql.removeListener(mqlListener);
 		}
 	}
+
+	run(() => {
+		if (wasMounted) {
+			removeActiveListener();
+			addNewListener(query);
+		}
+	});
 </script>

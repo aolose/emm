@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import Canvas from '$lib/components/ctx.svelte';
 	import UpDownScroll from '$lib/components/upDownScroll.svelte';
 	import Ph from '$lib/components/post/hd.svelte';
@@ -14,12 +16,12 @@
 	import Head from '$lib/components/Head.svelte';
 	import { h, status } from '$lib/store';
 
-	let a;
+	let a = $state();
 	let sc;
-	export let data;
-	let { admin, read, post } = data.d;
-	let { share = [] } = data.d;
-	let inf = [];
+	let { data } = $props();
+	let { admin, read, post } = $state(data.d);
+	let { share = [] } = $state(data.d);
+	let inf = $state([]);
 
 	async function scTop() {
 		await tick();
@@ -30,13 +32,13 @@
 		}
 	}
 
-	let tm;
+	let tm = $state();
 	let ld = 0;
-	let code = '';
-	let err = '';
-	let e = 0;
+	let code = $state('');
+	let err = $state('');
+	let e = $state(0);
 	const we = watch(err);
-	$: {
+	run(() => {
 		inf = [
 			[1, 'leave a comment'],
 			[post, 'show secret posts', 1],
@@ -54,7 +56,7 @@
 				tm = setTimeout(() => (e = 0), 2e3);
 			}
 		}, err);
-	}
+	});
 
 	function check() {
 		if (ld) return;
@@ -91,36 +93,36 @@
 			});
 	}
 
-	let s = 0;
-	let o = {};
-	let idx;
+	let s = $state(0);
+	let o = $state({});
+	let idx = $state();
 </script>
 
 <Head title={`${$h.title} - Ticket`} />
 <UpDownScroll bind:down={a} />
-<svelte:window on:sveltekit:navigation-end={scTop} />
+<svelte:window onsveltekit:navigation-end={scTop} />
 <Canvas type={1} />
 <div class="o" class:e={$expand} transition:fade|global>
 	<Ph bind:shrink={a}>Ticket</Ph>
 	<div class="j">
 		<div class="i">
 			<div class="v">
-				<input bind:value={code} on:focus={(e) => e.target.select()} placeholder="enter code" />
-				<button on:click={check}>Check</button>
+				<input bind:value={code} onfocus={(e) => e.target.select()} placeholder="enter code" />
+				<button onclick={check}>Check</button>
 			</div>
 			<span class="er" class:act={e}>{err}</span>
 			<h1>Permissions</h1>
 			{#each inf as [act, t, c], index}
 				<div class="r" class:act>
-					<div class="icon" class:i-ok={act} />
+					<div class="icon" class:i-ok={act}></div>
 					<span>{t}</span>
 					{#if act && c}
 						<buttin
 							class="mr icon"
-							on:click={() => (idx = idx === index ? -1 : index)}
+							onclick={() => (idx = idx === index ? -1 : index)}
 							class:i-add={idx !== index}
 							class:i-no={idx === index}
-						/>
+						></buttin>
 					{/if}
 				</div>
 				{#if act && idx === index}
@@ -152,7 +154,7 @@
 			<div class="m">
 				<p>You got a ticket</p>
 				<Ticket d={o} {inf} view={1} />
-				<button on:click={() => (s = 0)}>OK</button>
+				<button onclick={() => (s = 0)}>OK</button>
 			</div>
 		</div>
 	{/if}

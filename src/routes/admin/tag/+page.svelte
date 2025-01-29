@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import P from './panel.svelte';
 	import T from './item.svelte';
 	import FileWin from '$lib/components/fileManager.svelte';
@@ -8,12 +10,12 @@
 	import { confirm, small } from '$lib/store';
 	import { getErr, trim } from '$lib/utils';
 
-	let ls = [];
-	let name = '';
-	let ok = false;
-	let sel = {};
-	let view = 0;
-	let sty;
+	let ls = $state([]);
+	let name = $state('');
+	let ok = $state(false);
+	let sel = $state({});
+	let view = $state(0);
+	let sty = $state();
 
 	function allTags() {
 		req('tagLS').then((d) => {
@@ -52,12 +54,12 @@
 	onMount(() => {
 		allTags();
 	});
-	$: {
+	run(() => {
 		sty = $small && `transform:translate3d(${(-view * 100) / 2}%,0,0)`;
 		name = trim(name);
 		ok = name && !ls.find((a) => a.name === name);
-	}
-	let setTag;
+	});
+	let setTag = $state();
 
 	function del(id) {
 		req('tag', id, { method: method.DELETE })
@@ -75,9 +77,9 @@
 		<div class="a">
 			<div class="r h" class:o={ok}>
 				<span>Tags</span>
-				<s />
+				<s></s>
 				<input placeholder="tag name" bind:value={name} />
-				<button class="icon i-add" on:click={add} />
+				<button class="icon i-add" onclick={add}></button>
 			</div>
 			<div class="ls">
 				{#each ls as i}

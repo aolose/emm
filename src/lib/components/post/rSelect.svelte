@@ -1,16 +1,22 @@
-<script>
-	export let items = [];
-	export let inline = 0;
+<script lang="ts">
+	import { stopPropagation } from 'svelte/legacy';
+
+	interface Props {
+		items?: any;
+		inline?: number;
+	}
+
+	let { items = $bindable(), inline = 0 }: Props = $props();
 	const del = (p) => () => {
-		items = items.filter((a) => a.id !== p.id);
+		items = items?.filter((a) => a.id !== p.id) || [];
 	};
 </script>
 
 <div class="v" class:i={inline}>
 	{#each items || [] as p}
-		<div title={`ID: ${p.id}`} class="p" on:click|stopPropagation={del(p)}>
+		<div title={`ID: ${p.id}`} class="p" onclick={stopPropagation(del(p))}>
 			<span>{p.title || p.name}</span>
-			<button class="icon i-close" />
+			<button class="icon i-close"></button>
 		</div>
 	{/each}
 </div>

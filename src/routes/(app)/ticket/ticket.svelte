@@ -1,27 +1,27 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { permission } from '$lib/enum';
 	import { clipboard } from '$lib/use';
 	import { time, watch } from '$lib/utils';
 	import { goto } from '$app/navigation';
 
-	export let d = {};
-	export let view;
-	export let inf;
+	let { d = {}, view, inf } = $props();
 	const { code, type, expire, times } = d;
-	let k = 0;
+	let k = $state(0);
 	const w = watch(k);
 
 	function cb() {
 		k++;
 	}
 
-	let t;
-	$: {
+	let t = $state();
+	run(() => {
 		w(() => {
 			clearTimeout(t);
 			if (k) t = setTimeout(() => (k = 0), 2e3);
 		}, k);
-	}
+	});
 
 	function desc(t) {
 		switch (t) {
@@ -48,7 +48,7 @@
 		<span><b>times</b>{times ? times : 'unlimited'}</span>
 	</div>
 </div>
-<button class="icon i-sys" on:click={() => goto('/admin', { replaceState: true })} />
+<button class="icon i-sys" onclick={() => goto('/admin', { replaceState: true })}></button>
 
 <style lang="scss">
   .i {

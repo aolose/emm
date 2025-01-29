@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import { sys } from './sys';
 	import Card from './Card.svelte';
@@ -6,18 +8,18 @@
 	import { getErr, trim } from '$lib/utils';
 	import { req } from '$lib/req';
 
-	let up;
-	let msg;
-	let th;
-	let ld;
+	let up = $state();
+	let msg = $state();
+	let th = $state();
+	let ld = $state();
 	onMount(() =>
 		sys.subscribe((a) => {
 			up = a.uploadDir;
 			th = a.thumbDir;
 		})
 	);
-	let act;
-	let err;
+	let act = $state();
+	let err = $state();
 	const save = () => {
 		if (th && up) {
 			ld = 1;
@@ -40,11 +42,11 @@
 				.finally(() => (ld = 0));
 		}
 	};
-	$: {
+	run(() => {
 		th = trim(th);
 		up = trim(up);
 		if (act) setTimeout(() => (act = 0), 3e3);
-	}
+	});
 </script>
 
 <Card {act} {msg} {err} title="Files" {save} {ld}>
