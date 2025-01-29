@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { marked } from 'marked';
 	import { delay, watch } from '$lib/utils';
 	import { highlight } from '$lib/hjs';
@@ -6,12 +8,10 @@
 	import { fade } from 'svelte/transition';
 
 	marked.setOptions({ headerIds: true });
-	let patchMod = false;
-	let el;
-	let mor;
-	export let close;
-	export let preview;
-	export let value;
+	let patchMod = $state(false);
+	let el = $state();
+	let mor = $state();
+	let { close, preview, value } = $props();
 	const fx = (s) =>
 		s &&
 		s
@@ -21,12 +21,12 @@
 				'<a class=\'head\' href="#$2" id="$2"><$1>$3</$1></a>'
 			);
 	const md = () => fx(`${marked.parse(value || '')}`);
-	let v = md();
+	let v = $state(md());
 	const vw = watch(v);
 	const wc = watch('');
 	const rd = () => (v = highlight(md()));
 	const dRd = delay(rd, 100);
-	$: {
+	run(() => {
 		wc(() => {
 			if (preview) dRd();
 			else rd();
@@ -44,7 +44,7 @@
 				el.innerHTML = v;
 			}
 		}, v);
-	}
+	});
 	onMount(async () => {
 		if (preview) {
 			const d = await import('morphdom');
@@ -58,7 +58,7 @@
 	{#if preview}
 		<div class="t">
 			{#if close}
-				<button class="icon i-close" on:click={close} />
+				<button class="icon i-close" onclick={close}></button>
 			{/if}
 		</div>
 	{/if}

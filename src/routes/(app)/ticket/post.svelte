@@ -4,10 +4,10 @@
 	import { req } from '$lib/req';
 	import { onMount } from 'svelte';
 
-	let ls = [];
-	let page = 1;
-	let total = 0;
-	let ld = 0;
+	let ls = $state([]);
+	let page = $state(1);
+	let total = $state(0);
+	let ld = $state(0);
 	const go = (n) => {
 		if (n) page += n;
 		if (page < 1) page = 1;
@@ -46,13 +46,13 @@
 		{/if}
 	</div>
 	<div class="b">
-		<button on:click={() => go()}>refresh</button>
+		<button onclick={() => go()}>refresh</button>
 		{#if total}
 			{#if page > 1}
-				<button on:click={() => go(-1)}> newer</button>
+				<button onclick={() => go(-1)}> newer</button>
 			{/if}
 			{#if page < total}
-				<button on:click={() => go(1)}> older</button>
+				<button onclick={() => go(1)}> older</button>
 			{/if}
 			<p>{page} / {total}</p>
 		{/if}

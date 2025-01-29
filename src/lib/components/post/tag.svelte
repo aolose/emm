@@ -1,5 +1,9 @@
-<script>
-	export let t = '';
+<script lang="ts">
+	interface Props {
+		t?: string;
+	}
+
+	let { t = '' }: Props = $props();
 </script>
 
 {#each t.split(',').filter((a) => !!a) as g}

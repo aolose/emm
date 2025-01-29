@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import Card from './Card.svelte';
 	import Ld from '$lib/components/loading.svelte';
 	import { onMount } from 'svelte';
@@ -7,28 +9,28 @@
 	import { method } from '$lib/enum';
 	import Ck from '$lib/components/check.svelte';
 
-	let type;
-	let start;
-	let t = 0;
-	let ld = 0;
+	let type = $state();
+	let start = $state();
+	let t = $state(0);
+	let ld = $state(0);
 	const d = 3600 * 1e3 * 24;
 	const n = [1, 3, 7, 30, 90];
 	const wt = watch(-1);
-	let cvs;
+	let cvs = $state();
 	let ctx;
-	let pv = [];
-	let uv = [];
-	let ur = [];
-	let rv = [];
-	let nx = [];
-	let ny = [];
-	let avg = [];
-	let total = [];
-	let h;
-	let w;
-	let max = 0,
-		min = 0;
-	let data = [];
+	let pv = $state([]);
+	let uv = $state([]);
+	let ur = $state([]);
+	let rv = $state([]);
+	let nx = $state([]);
+	let ny = $state([]);
+	let avg = $state([]);
+	let total = $state([]);
+	let h = $state();
+	let w = $state();
+	let max = $state(0),
+		min = $state(0);
+	let data = $state([]);
 	const genStep = (arr, n) => {
 		const l = arr.length;
 		if (l <= n) return arr;
@@ -43,7 +45,7 @@
 		}
 		return [s, ...v, e];
 	};
-	const ck = { 0: 1, 1: 1, 2: 0, 3: 0 };
+	const ck = $state({ 0: 1, 1: 1, 2: 0, 3: 0 });
 	const cors = ['#8c72ce', '#d3a84b', '#65b9e7', '#bcff94'];
 	const nms = ['valid requests', 'valid ip', 'ip', 'requests'];
 	const getD = () => {
@@ -143,7 +145,7 @@
 		draw();
 	};
 
-	$: {
+	run(() => {
 		data = [pv, uv, ur, rv];
 		const s = [];
 		data.forEach((a, i) => {
@@ -160,17 +162,19 @@
 		if (cvs) {
 			wt(getD, t);
 		}
-	}
+	});
 	onMount(render);
 </script>
 
 <Card title="Analytics">
-	<button class="icon i-refresh" slot="btn" on:click={getD} />
+	{#snippet btn()}
+		<button class="icon i-refresh" onclick={getD}></button>
+	{/snippet}
 	<div class="v">
 		<div class="bn">
 			<span>last: </span>
 			{#each n as a, index}
-				<button on:click={() => (t = index)} class:act={index === t}>{a}D</button>
+				<button onclick={() => (t = index)} class:act={index === t}>{a}D</button>
 			{/each}
 		</div>
 		<div class="a">
@@ -181,7 +185,7 @@
 			</div>
 			<div class="c">
 				<div bind:offsetWidth={w} bind:offsetHeight={h} class="e">
-					<canvas bind:this={cvs} height={h} width={w} />
+					<canvas bind:this={cvs} height={h} width={w}></canvas>
 				</div>
 				<div class="x">
 					{#each nx as x}
@@ -192,17 +196,17 @@
 		</div>
 		<div class="i">
 			{#each nms as n, index}
-				<button class:act={ck[index]} on:click={() => (ck[index] = 1 - ck[index])}>
+				<button class:act={ck[index]} onclick={() => (ck[index] = 1 - ck[index])}>
 					<span>{n}</span>
 					<span>{avg[index] || 0} / {type ? 'd' : 'h'} total: {total[index] || 0}</span>
-					<b style={`color:${cors[index]}`} />
+					<b style={`color:${cors[index]}`}></b>
 				</button>
 			{/each}
 		</div>
 		<Ld act={ld} />
 	</div>
 </Card>
-<svelte:window on:resize={render} />
+<svelte:window onresize={render} />
 
 <style lang="scss">
   .bn {

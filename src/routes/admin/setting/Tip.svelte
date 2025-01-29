@@ -1,9 +1,7 @@
-<script>
+<script lang="ts">
 	import { fly } from 'svelte/transition';
 
-	export let err;
-	export let act;
-	export let text;
+	let { err, act, text } = $props();
 </script>
 
 {#if act}

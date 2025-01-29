@@ -12,7 +12,7 @@
 		<Nav />
 	</div>
 	<div class="g">
-		<i />
+		<i></i>
 		<h1>Oops!</h1>
 		<h3>error {error.status || status}</h3>
 		<p>{error.message}</p>

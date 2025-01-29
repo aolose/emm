@@ -1,12 +1,16 @@
 <script>
-	export const ck = () => (value = !value);
-	export let value = false;
+	import { onMount } from 'svelte';
+
+	let { value = $bindable(), children, ck = $bindable() } = $props();
+	onMount(() => {
+		ck = () => (value = !value);
+	});
 </script>
 
-<div class="a" class:c={value} on:click={ck}>
+<div class="a" class:c={value} onclick={ck}>
 	{value ? '✓' : ''}
 </div>
-<span on:click={ck}><slot /></span>
+<span onclick={ck}>{@render children?.()}</span>
 
 <style>
     span {

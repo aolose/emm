@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Ph from '$lib/components/post/hd.svelte';
 	import Canvas from '$lib/components/ctx.svelte';
 	import { bubbles, getColor } from '$lib/utils';
@@ -7,8 +7,8 @@
 	import { fade } from 'svelte/transition';
 	import Head from '$lib/components/Head.svelte';
 
-	let a = 0;
-	export let data;
+	let a = $state(0);
+	let { data } = $props();
 	const d = data.d.split(',').filter((a) => a);
 </script>
 
@@ -21,7 +21,7 @@
 		<div class="ls">
 			{#each d as tag, i}
 				<a
-					on:mouseenter={(e) => bubbles(e.target)}
+					onmouseenter={(e) => bubbles(e.target)}
 					href={`/tag/${tag}`}
 					style={`background:${getColor(i)}`}
 				>

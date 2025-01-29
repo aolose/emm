@@ -1,15 +1,20 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { tick } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { idGen } from '$lib/utils';
 
-	export let tags = [];
-	$: allTags = new Set(tags);
-	export let value = null;
-	let items = new Set(value ? value?.split(',').filter((a) => !!a) : []);
-	let val = '';
-	let ipt;
-	let show = 0;
+	interface Props {
+		tags?: any;
+		value?: any;
+	}
+
+	let { tags = [], value = $bindable() }: Props = $props();
+	let items = $state(new Set(value ? value?.split(',').filter((a) => !!a) : []));
+	let val = $state('');
+	let ipt = $state();
+	let show = $state(0);
 	const rm = (v) => () => {
 		items.delete(v);
 		items = new Set(items);
@@ -46,58 +51,61 @@
 		}
 	};
 	let id = idGen();
-	let dp;
-	let idx = 0;
-	let selects = [];
-	$: pre = show || val ? selects[idx] || val : '';
-	$: (async () => {
-		selects = [...allTags].filter(
-			(a) => !items.has(a) && val !== a && a.toLowerCase().startsWith(val.toLowerCase())
-		);
-		selects.sort((a, b) => (a < b ? -1 : 1));
-		const lh = selects.length;
-		idx = lh && idx % lh;
-		const l = val.length;
-		let s = 0;
-		let h = 0;
-		for (let i = 0; i < l;) {
-			const r = /^[ ,;\t\n\r]+/g;
-			if (r.test(val.substring(i))) {
-				if (s < i) {
-					items.add(val.slice(s, i));
-					h = 1;
-				}
-				i += r.lastIndex;
-				s = i;
-			} else i++;
-		}
-		val = val.substring(s);
-		if (h) {
-			items = new Set(items);
-			await tick();
-			ipt.setSelectionRange(0, 0);
-		}
-		if (dp) {
-			await tick();
-			const a = dp.querySelector('.act');
-			a?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-		}
-		value = [...items].join() || null;
-	})();
+	let dp = $state();
+	let idx = $state(0);
+	let selects = $state([]);
+	let allTags = $derived(new Set(tags));
+	run(() => {
+		(async () => {
+			selects = [...allTags].filter(
+				(a) => !items.has(a) && val !== a && a.toLowerCase().startsWith(val.toLowerCase())
+			);
+			selects.sort((a, b) => (a < b ? -1 : 1));
+			const lh = selects.length;
+			idx = lh && idx % lh;
+			const l = val.length;
+			let s = 0;
+			let h = 0;
+			for (let i = 0; i < l;) {
+				const r = /^[ ,;\t\n\r]+/g;
+				if (r.test(val.substring(i))) {
+					if (s < i) {
+						items.add(val.slice(s, i));
+						h = 1;
+					}
+					i += r.lastIndex;
+					s = i;
+				} else i++;
+			}
+			val = val.substring(s);
+			if (h) {
+				items = new Set(items);
+				await tick();
+				ipt.setSelectionRange(0, 0);
+			}
+			if (dp) {
+				await tick();
+				const a = dp.querySelector('.act');
+				a?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+			value = [...items].join() || null;
+		})();
+	});
+	let pre = $derived(show || val ? selects[idx] || val : '');
 </script>
 
 <label class="a" for={id}>
 	{#if selects.length && (show || val)}
 		<div class="d" bind:this={dp} transition:slide|global>
 			{#each selects as sec, index}
-				<div class:act={idx === index} on:click={() => (val = sec)}>{sec}</div>
+				<div class:act={idx === index} onclick={() => (val = sec)}>{sec}</div>
 			{/each}
 		</div>
 	{/if}
 	{#each [...items] as item}
 		<div class="b">
 			<span>{item}</span>
-			<button class="icon i-close" on:click={rm(item)} />
+			<button class="icon i-close" onclick={rm(item)}></button>
 		</div>
 	{/each}
 	<div class="c">
@@ -107,8 +115,8 @@
 			{id}
 			bind:value={val}
 			bind:this={ipt}
-			on:blur={() => setTimeout(() => (show = 0), 100)}
-			on:keydown={keyPress}
+			onblur={() => setTimeout(() => (show = 0), 100)}
+			onkeydown={keyPress}
 		/>
 	</div>
 </label>

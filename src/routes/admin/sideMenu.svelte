@@ -16,20 +16,20 @@
 </script>
 
 <div class="m">
-	<a class="o" href="/" />
+	<a class="o" href="/"></a>
 	<div class="u">
-		<s />
-		<a use:act href="/admin" class="icon i-post" />
-		<a use:act href="/admin/comment" class="icon i-comment" />
-		<a use:act href="/admin/tag" class="icon i-tag" />
-		<a use:act href="/admin/firewall" class="icon i-safe" />
-		<a use:act href="/admin/token" class="icon i-rq" />
-		<a use:act href="/admin/setting" class="icon i-sys" />
-		<s />
-		<s />
+		<s></s>
+		<a use:act href="/admin" class="icon i-post"></a>
+		<a use:act href="/admin/comment" class="icon i-comment"></a>
+		<a use:act href="/admin/tag" class="icon i-tag"></a>
+		<a use:act href="/admin/firewall" class="icon i-safe"></a>
+		<a use:act href="/admin/token" class="icon i-rq"></a>
+		<a use:act href="/admin/setting" class="icon i-sys"></a>
+		<s></s>
+		<s></s>
 	</div>
 	<div class="v">
-		<button on:click={logout} class="icon i-exit" />
+		<button onclick={logout} class="icon i-exit"></button>
 	</div>
 </div>
 

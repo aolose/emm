@@ -1,14 +1,19 @@
-<script>
+<script lang="ts">
 	import { msg } from '$lib/store';
 	import { onMount } from 'svelte';
 
 	const base =
 		'abcdefghijklmnopqrstuvwxyz齉齾爩鱻' + '癵籱饢驫鲡鹂鸾麣纞虋讟麷鞻韽韾响顟顠饙ㄅㄧㄥㄒㄧㄢㄘㄨ';
 	const l = base.length;
-	let pv = '';
-	let pr = '';
+	let pv = $state('');
+	let pr = $state('');
 	let t = -1;
-	export let defaultText = '';
+
+	interface Props {
+		defaultText?: string;
+	}
+
+	let { defaultText = '' }: Props = $props();
 
 	const autoText = (str) => {
 		clearTimeout(t);

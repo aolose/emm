@@ -1,12 +1,14 @@
-<script>
+<script lang="ts">
+	import { run as run_1 } from 'svelte/legacy';
+
 	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 
-	export let type;
-	let cvs,
-		w,
-		h,
-		task = {};
+	let { type } = $props();
+	let cvs = $state(),
+		w = $state(),
+		h = $state(),
+		task = $state({});
 
 	const r180 = 180 / Math.PI;
 
@@ -37,7 +39,7 @@
 		stop = 1;
 	});
 
-	$: {
+	run_1(() => {
 		if (cvs) {
 			cvs.width = w;
 			cvs.height = h;
@@ -135,11 +137,11 @@
 				draw(th, ww);
 			};
 		}
-	}
+	});
 </script>
 
 <div class="cvs" transition:fade|global bind:offsetWidth={w} bind:offsetHeight={h}>
-	<canvas bind:this={cvs} />
+	<canvas bind:this={cvs}></canvas>
 </div>
 
 <style lang="scss">

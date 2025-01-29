@@ -1,11 +1,15 @@
-<script>
-	export let pic = '';
-	export let href = '1';
+<script lang="ts">
+	interface Props {
+		pic?: string;
+		href?: string;
+	}
+
+	let { pic = '', href = '1' }: Props = $props();
 </script>
 
 <div class="a" class:c={href}>
-	<div class="b" style:background-image={pic ? `url(${pic})` : ''} />
-	<div class="icon i-av" />
+	<div class="b" style:background-image={pic ? `url(${pic})` : ''}></div>
+	<div class="icon i-av"></div>
 </div>
 
 <style lang="scss">

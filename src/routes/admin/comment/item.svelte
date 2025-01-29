@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Ava from '$lib/components/post/ava.svelte';
 	import { time } from '$lib/utils';
 	import { cmStatus } from '$lib/enum';
@@ -16,15 +16,20 @@
 				return 'auto';
 		}
 	};
-	export let topic;
-	export let ck;
-	export let d = {};
-	export let detail = 0;
+
+	interface Props {
+		topic: any;
+		ck: any;
+		d?: any;
+		detail?: number;
+	}
+
+	let { topic, ck, d = {}, detail = 0 }: Props = $props();
 </script>
 
 <div
 	class="a"
-	on:click={() => ck && ck(d)}
+	onclick={() => ck && ck(d)}
 	class:dt={detail}
 	class:tp={topic}
 	transition:slide|global
@@ -51,7 +56,7 @@
 				{#if d._reply}
 					<span class="rp">@{d._reply}</span>
 				{/if}
-				<s />
+				<s></s>
 				<a target="_blank" href={'/post/' + d._post?.slug} rel="noreferrer">
 					{d._post?.title}
 				</a>
@@ -62,8 +67,8 @@
 					class:re={d.state === cmStatus.Reject}
 					class:pe={d.state === cmStatus.Pending}
 				>
-          {stu(d.state)[0]}
-        </span>
+					{stu(d.state)[0]}
+				</span>
 			</div>
 		{/if}
 		<div class="t">

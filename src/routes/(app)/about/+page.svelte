@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Ph from '$lib/components/post/hd.svelte';
 	import Canvas from '$lib/components/ctx.svelte';
 	import UpDownScroll from '$lib/components/upDownScroll.svelte';
@@ -7,8 +7,8 @@
 	import Head from '$lib/components/Head.svelte';
 	import Viewer from '$lib/components/about.svelte';
 
-	let a = 0;
-	export let data;
+	let a = $state(0);
+	let { data } = $props();
 	const { d } = data;
 </script>
 

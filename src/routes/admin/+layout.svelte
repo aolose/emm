@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
 	import Menu from './sideMenu.svelte';
 	import { h, full } from '$lib/store';
 	import Head from '$lib/components/Head.svelte';
 
-	export let data;
+	let { data, children } = $props();
 </script>
 
 <Head title={`${$h.title} - Admin`} />
@@ -12,7 +12,7 @@
 		<Menu />
 	</div>
 	<div class="c">
-		<slot />
+		{@render children?.()}
 	</div>
 </div>
 

@@ -1,16 +1,19 @@
-<script>
+<script lang="ts">
+	import { stopPropagation } from 'svelte/legacy';
+
 	import { confirm, selectFile } from '$lib/store';
 	import { fade } from 'svelte/transition';
 	import { diffObj, getErr } from '$lib/utils';
 	import { req } from '$lib/req';
 	import Pls from '$lib/components/post/rSelect.svelte';
 	import List from '$lib/components/post/rList.svelte';
+	import { onMount } from 'svelte';
 
-	export let close;
-	let ok;
-	let cancel;
-	let show = false;
-	let edit;
+	let { close, setTag = $bindable() } = $props();
+	let ok = $state();
+	let cancel = $state();
+	let show = $state(false);
+	let edit = $state();
 	let opened = 0;
 
 	function setPost() {
@@ -22,38 +25,7 @@
 			.finally(() => (opened = 0));
 	}
 
-	export const setTag = (a) => {
-		if (!a) {
-			show = false;
-			return;
-		}
-		const n = { ...a };
-		d = { ...a };
-		show = !!a;
-		if (opened) setPost();
-		return new Promise((r) => {
-			ok = () => {
-				const o = n.id ? diffObj(n, d) : d;
-				if (o && d.id === n.id) {
-					o.id = d.id;
-					req('tag', o)
-						.then((c) => {
-							if (c) Object.assign(d, c);
-							r(d);
-							close();
-						})
-						.catch((e) => confirm(getErr(e), '', 'ok'));
-				}
-			};
-			cancel = () => {
-				close();
-				r();
-			};
-		}).finally(() => {
-			show = false;
-		});
-	};
-	let d = {};
+	let d = $state({});
 
 	function sel() {
 		selectFile(1, 'image/*').then((a) => {
@@ -61,13 +33,47 @@
 			if (id) d.banner = '' + id;
 		});
 	}
+
+	onMount(() => {
+		setTag = (a) => {
+			if (!a) {
+				show = false;
+				return;
+			}
+			const n = { ...a };
+			d = { ...a };
+			show = !!a;
+			if (opened) setPost();
+			return new Promise((r) => {
+				ok = () => {
+					const o = n.id ? diffObj(n, d) : d;
+					if (o && d.id === n.id) {
+						o.id = d.id;
+						req('tag', o)
+							.then((c) => {
+								if (c) Object.assign(d, c);
+								r(d);
+								close();
+							})
+							.catch((e) => confirm(getErr(e), '', 'ok'));
+					}
+				};
+				cancel = () => {
+					close();
+					r();
+				};
+			}).finally(() => {
+				show = false;
+			});
+		};
+	});
 </script>
 
 {#if show}
 	<div class="b" transition:fade|global>
 		<div class="t">
-			<button class="icon i-close" on:click={cancel} />
-			<button class="s" on:click={ok}>save</button>
+			<button class="icon i-close" onclick={cancel}></button>
+			<button class="s" onclick={ok}>save</button>
 		</div>
 		<div class="c">
 			<div class="r">
@@ -78,26 +84,27 @@
 				<span>desc</span>
 				<div class="x">
 					<p>{d.desc || ''}</p>
-					<textarea bind:value={d.desc} />
+					<textarea bind:value={d.desc}></textarea>
 				</div>
 			</div>
 			<div class="r">
 				<span>banner</span>
 				<div
 					class="p icon"
-					on:click={sel}
+					onclick={sel}
 					class:i-pic={!d.banner}
 					style:background-image={d.banner ? `url(/res/_${d.banner})` : ''}
 				>
 					{#if d.banner}
-						<button on:click|stopPropagation={() => (d.banner = null)} class="icon i-close" />
+						<button onclick={stopPropagation(() => (d.banner = null))} class="icon i-close"
+						></button>
 					{/if}
 				</div>
 			</div>
 			<div class="r">
 				<span>posts</span>
 				<Pls bind:items={d._posts} inline={1} />
-				<button on:click={setPost} class="icon i-ed" />
+				<button onclick={setPost} class="icon i-ed"></button>
 			</div>
 		</div>
 		<List type={0} bind:select={edit} />

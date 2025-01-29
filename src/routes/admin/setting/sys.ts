@@ -7,6 +7,6 @@ import { method } from '$lib/enum';
 export const sys = writable({} as Obj<System>);
 export const load = () => {
 	req('sys', undefined, { method: method.GET }).then((a) => {
-    sys.set(a as Obj<System>);
-  });
+		sys.set(a as Obj<System>);
+	});
 };

@@ -1,9 +1,11 @@
 <script>
+	import { run, stopPropagation } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import { confirmStore } from '$lib/store';
 	import { fade } from 'svelte/transition';
 
-	let cfg = {};
+	let cfg = $state({});
 	onMount(() => {
 		return confirmStore.subscribe((c) => (cfg = c));
 	});
@@ -24,24 +26,25 @@
 		}
 	}
 
-	let bo, bc;
-	$: {
+	let bo = $state(),
+		bc = $state();
+	run(() => {
 		if (typeof cfg.text === 'object') cfg.text = JSON.stringify(cfg.text);
 		if (cfg.show) (bo || bc)?.focus();
-	}
+	});
 </script>
 
-<svelte:window on:keydown={esc} />
+<svelte:window onkeydown={esc} />
 {#if cfg.show}
 	<div class="a" class:act={cfg.show} transition:fade|global>
-		<div class="b" on:click|stopPropagation={() => 0}>
+		<div class="b" onclick={stopPropagation(() => 0)}>
 			<p>{cfg.text}</p>
 			<div class="n">
 				{#if cfg.ok}
-					<button bind:this={bo} on:click={ok}>{cfg.ok}</button>
+					<button bind:this={bo} onclick={ok}>{cfg.ok}</button>
 				{/if}
 				{#if cfg.cancel}
-					<button bind:this={bc} on:click={cancel}>{cfg.cancel}</button>
+					<button bind:this={bc} onclick={cancel}>{cfg.cancel}</button>
 				{/if}
 			</div>
 		</div>
