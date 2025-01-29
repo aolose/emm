@@ -8,9 +8,9 @@
 	import { confirm, statueSys, status } from '$lib/store';
 	import Head from '$lib/components/Head.svelte';
 
-	export let data;
-	let act;
-	let step = $statueSys;
+	let { data } = $props();
+	let act = $state();
+	let step = $state($statueSys);
 	const defaultPath = 'blog.db';
 	const steps = [
 		'Set database path',
@@ -19,11 +19,11 @@
 		'Set ipLocation (optional)'
 	];
 	const fx = (db = '') => trim(db);
-	let o = {
+	let o = $state({
 		usr: '',
 		pwd: '',
 		pwd2: ''
-	};
+	});
 
 	let rows = [
 		['usr', 'Username', [/^[a-z0-9]{2,20}$/i, 'username requires 2-20 letters or numbers'], 'text'],
@@ -31,13 +31,15 @@
 		['pwd2', 'Confirm password', [{ test: (n) => n === o.pwd }, 'passwords not match'], 'password']
 	];
 
-	let db = '';
-	let err = '';
-	let upDir = '';
-	let tbDir = '';
-	let ipDir = '';
-	let ipTk = '';
-	$: {
+	let db = $state('');
+	let err = $state('');
+	let upDir = $state('');
+	let tbDir = $state('');
+	let ipDir = $state('');
+	let ipTk = $state('');
+	let tip = $state('');
+
+	$effect(() => {
 		switch (step) {
 			case 0:
 				db = fx(db);
@@ -52,14 +54,12 @@
 			case 3:
 				break;
 		}
-	}
+	});
 	const swi = (n) => {
 		statueSys.set(n);
 		step = n - 0.5;
 		setTimeout(() => (step = n), 1e3);
 	};
-
-	let tip = '';
 	const fail = (e) => {
 		err = e?.data || e;
 	};
@@ -137,16 +137,18 @@
 	<div class="b">
 		<div class="o">Configure</div>
 		<Step value={step} info={steps} />
-		<button class="up">
-			<input
-				accept="application/zip"
-				type="file"
-				on:click={(e) => (e.target.value = '')}
-				on:change={ch}
-			/>
-			Restore
-			<span class="icon i-upload" />
-		</button>
+		{#if $statueSys > 1}
+			<button class="up">
+				<input
+					accept="application/zip"
+					type="file"
+					onclick={(e) => (e.target.value = '')}
+					onchange={ch}
+				/>
+				Restore
+				<span class="icon i-upload"></span>
+			</button>
+		{/if}
 	</div>
 	<div class="fm">
 		{#if step === 0}
@@ -155,9 +157,9 @@
 				<div class="q">
 					<div class="r">
 						<input placeholder={defaultPath} bind:value={db} />
-						<i />
+						<i></i>
 					</div>
-					<button on:click={submit}>submit</button>
+					<button onclick={submit}>submit</button>
 				</div>
 			</div>
 		{/if}
@@ -168,10 +170,10 @@
 					<div class="r" class:act={o[key]}>
 						<input
 							{type}
-							on:blur={() => ck(key)}
-							on:input={(e) => (o[key] = e.target.value)}
+							onblur={() => ck(key)}
+							oninput={(e) => (o[key] = e.target.value)}
 							value={o[key]}
-						/><i />
+						/><i></i>
 						<span>{name}</span>
 					</div>
 				{/each}
@@ -180,20 +182,20 @@
 						{tip}
 					</div>
 				{/if}
-				<button class="h" on:click={submit}>submit</button>
+				<button class="h" onclick={submit}>submit</button>
 			</div>
 		{/if}
 		{#if step === 2}
 			<div class="f" transition:fade|global class:act={tbDir && tbDir}>
 				<h1>{steps[2]}</h1>
-				<div class="r" class:act={upDir} on:blur={ck2}>
+				<div class="r" class:act={upDir} onblur={ck2}>
 					<input bind:value={upDir} />
-					<i />
+					<i></i>
 					<span>Upload directory</span>
 				</div>
 				<div class="r" class:act={tbDir}>
-					<input bind:value={tbDir} on:blur={ck2} />
-					<i />
+					<input bind:value={tbDir} onblur={ck2} />
+					<i></i>
 					<span>Thumbnail directory</span>
 				</div>
 				{#if tip}
@@ -201,7 +203,7 @@
 						{tip}
 					</div>
 				{/if}
-				<button class="h" on:click={submit}>submit</button>
+				<button class="h" onclick={submit}>submit</button>
 			</div>
 		{/if}
 		{#if step === 3}
@@ -209,7 +211,7 @@
 				<h1>{steps[3]}</h1>
 				<div class="r l" class:act={ipTk}>
 					<input bind:value={ipTk} />
-					<i />
+					<i></i>
 					<span>IpLocation Database Token</span>
 					<a rel="noreferrer" href="https://lite.ip2location.com/database-download" target="_blank"
 					>where to find?</a
@@ -217,7 +219,7 @@
 				</div>
 				<div class="r" class:act={ipDir}>
 					<input bind:value={ipDir} />
-					<i />
+					<i></i>
 					<span>Download directory</span>
 				</div>
 				{#if tip}
@@ -225,9 +227,9 @@
 						{tip}
 					</div>
 				{/if}
-				<button class="h" on:click={submit}>submit</button>
+				<button class="h" onclick={submit}>submit</button>
 			</div>
-			<button class="k" on:click={submit}>Skip</button>
+			<button class="k" onclick={submit}>Skip</button>
 		{/if}
 		{#if err}
 			<div class="e" transition:slide|global>

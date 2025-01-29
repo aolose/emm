@@ -1,9 +1,8 @@
-<script>
+<script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { onDestroy } from 'svelte';
 
-	export let act = 0;
-	let s = 0;
+	let s = $state(0);
 	let v = 1;
 	const t = setInterval(function() {
 		s = s + v;
@@ -12,17 +11,23 @@
 	onDestroy(() => {
 		return () => clearInterval(t);
 	});
-	export let text = 'loading';
+
+	interface Props {
+		act?: number;
+		text?: string;
+	}
+
+	let { act = 0, text = 'loading' }: Props = $props();
 </script>
 
 {#if act}
-  <span transition:fade|global class="load">
-    <i />
-    <span class="a">
-      {text}
+	<span transition:fade|global class="load">
+		<i></i>
+		<span class="a">
+			{text}
 			<span class="b">{'.'.repeat(s)}</span>
-    </span>
-  </span>
+		</span>
+	</span>
 {/if}
 
 <style lang="scss">

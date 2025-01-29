@@ -1,10 +1,16 @@
-<script>
+<script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { expand } from '$lib/store';
+
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 </script>
 
 <div class="ctx" class:ex={$expand} transition:fade|global>
-	<slot />
+	{@render children?.()}
 </div>
 
 <style lang="scss">

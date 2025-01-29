@@ -1,10 +1,10 @@
-<script>
-	export let items = [];
-	let allSet;
-	export let cols = [];
-	export let sel = new Set();
-	let st = 0;
-	$: {
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
+	let allSet = $state();
+	let { items = [], cols = [], sel = $bindable(new Set()) } = $props();
+	let st = $state(0);
+	run(() => {
 		allSet = new Set(
 			items.map((a) => {
 				return a.id;
@@ -21,7 +21,7 @@
 			if (lf) st = 1;
 			else st = 2;
 		}
-	}
+	});
 </script>
 
 <table>
@@ -33,10 +33,10 @@
 				{#if check}
 					<div
 						class="k"
-						on:click={() => {
-                if (st === 2) sel = new Set([...sel].filter((a) => !allSet.has(a)));
-                else sel = new Set([...sel, ...allSet]);
-              }}
+						onclick={() => {
+								if (st === 2) sel = new Set([...sel].filter((a) => !allSet.has(a)));
+								else sel = new Set([...sel, ...allSet]);
+							}}
 						class:act={st}
 					>
 						{['', '-', '✓'][st]}
@@ -58,17 +58,17 @@
 							<div
 								class="k"
 								class:act={sel.has(row.id)}
-								on:click={() => {
-                    if (sel.has(row.id)) sel.delete(row.id);
-                    else sel.add(row.id);
-                    sel = new Set([...sel]);
-                  }}
+								onclick={() => {
+										if (sel.has(row.id)) sel.delete(row.id);
+										else sel.add(row.id);
+										sel = new Set([...sel]);
+									}}
 							>
 								✓
 							</div>
 						{/if}
 						{#if btn}
-							<button class="icon i-ed" on:click={() => btn(row)} />
+							<button class="icon i-ed" onclick={() => btn(row)}></button>
 						{/if}
 					</div>
 				</td>

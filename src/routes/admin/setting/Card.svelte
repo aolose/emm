@@ -1,15 +1,21 @@
-<script>
+<script lang="ts">
 	import Tip from './Tip.svelte';
 	import Ld from '$lib/components/loading.svelte';
 
-	export let ld;
-	export let msg;
-	export let act;
-	export let err;
-	export let title;
-	export let save;
-	export let saveText = 'Save';
-	export let empty;
+	interface Props {
+		ld: any;
+		msg: any;
+		act: any;
+		err: any;
+		title: any;
+		save: any;
+		saveText?: string;
+		empty: any;
+		btn?: import('svelte').Snippet;
+		children?: import('svelte').Snippet;
+	}
+
+	let { ld, msg, act, err, title, save, saveText = 'Save', empty, btn, children }: Props = $props();
 </script>
 
 <div class="a" class:e={empty}>
@@ -17,11 +23,11 @@
 	<div class="t">
 		<h1>{title}</h1>
 		{#if save}
-			<button on:click={save}>{saveText}</button>
+			<button onclick={save}>{saveText}</button>
 		{/if}
-		<slot name="btn" />
+		{@render btn?.()}
 	</div>
-	<slot />
+	{@render children?.()}
 	<Ld act={ld} />
 </div>
 

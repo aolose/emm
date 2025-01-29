@@ -7,7 +7,7 @@ export const tags = writable([] as Tag[]);
 export const codes = writable(new Set<string>());
 export const publishedPost = writable(new Set<number>());
 export const tagPatcher = Patcher(
-  patchStrSet,
-  diffStrSet,
-  derived(tags, (ts) => new Set<string>([...ts].map((t) => t.name)))
+	patchStrSet,
+	diffStrSet,
+	derived(tags, (ts) => new Set<string>([...ts].map((t) => t.name)))
 );

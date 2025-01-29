@@ -1,10 +1,12 @@
-<script>
+<script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 
+	let { ctx = $bindable({}) } = $props();
 	const ff = ['title', 'content'];
-	let act = 0;
-	let a;
+	let act = $state(0);
+	let a = $state();
+	const ft = $state({});
 	let t;
 
 	function rml() {
@@ -19,12 +21,9 @@
 		}, 100);
 	}
 
-	const ft = {};
 	onMount(() => {
 		return () => rml();
 	});
-	export let ctx = {};
-
 	function clear() {
 		ff.forEach((f) => (ft[f] = 0));
 	}
@@ -44,24 +43,20 @@
 		}
 	}
 
-	let size;
-	$: size = Object.values(ft).reduce((a, b) => a + b, 0);
-	$: {
-		ctx.value = ff.filter((f) => ft[f]);
-		ctx.show = show;
-		ctx = { ...ctx };
-	}
+	let size = $derived(Object.values(ft).reduce((a, b) => a + b, 0));
+	ctx.value = ff.filter((f) => ft[f]);
+	ctx.show = show;
 </script>
 
 {#if act}
 	<div class="a" transition:fade|global bind:this={a}>
 		{#each ff as f}
-			<div class="r" on:click={tg(f)}>
-				<i class:act={ft[f]} />
+			<div class="r" onclick={tg(f)}>
+				<i class:act={ft[f]}></i>
 				<span> {f}</span>
 			</div>
 		{/each}
-		<button class:act={size} on:click={clear}>clear</button>
+		<button class:act={size} onclick={clear}>clear</button>
 	</div>
 {/if}
 

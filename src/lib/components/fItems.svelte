@@ -1,13 +1,15 @@
-<script>
+<script lang="ts">
+	import { createBubbler } from 'svelte/legacy';
+
+	const bubble = createBubbler();
 	import FileIcon from './fileIcon.svelte';
 	import { getExt } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 
-	let m = null;
-	export let trigger;
-	let sh = 0;
+	let m = $state(null);
+	let sh = $state(0);
 	let x = 15,
 		y = 15;
 	let pos = tweened(
@@ -36,25 +38,35 @@
 		changePosition();
 		return trigger.subscribe(changePosition);
 	});
-	export let file = {
-		id: 0,
-		name: '',
-		type: '',
-		size: 0
-	};
-	export let act = false;
-	let pic = '';
+
+	interface Props {
+		trigger: any;
+		file?: any;
+		act?: boolean;
+	}
+
+	let {
+		trigger,
+		file = $bindable({
+			id: 0,
+			name: '',
+			type: '',
+			size: 0
+		}),
+		act = false
+	}: Props = $props();
+	let pic = $state('');
 	if (file.type.startsWith('image/')) {
 		pic = `/res/_${file.id}`;
 	}
 </script>
 
-<div class="m" bind:this={m} />
+<div class="m" bind:this={m}></div>
 <div
 	class="a m"
 	style:transform={`translate3d(${$pos.x}px,${$pos.y}px,0)`}
 	class:act
-	on:click
+	onclick={bubble('click')}
 	class:sh
 >
 	<div class="p" style:background-image={pic ? `url(${pic})` : ''}>

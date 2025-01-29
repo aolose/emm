@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { marked } from 'marked';
 	import { onMount } from 'svelte';
 	import { editPost } from '$lib/store';
@@ -10,15 +12,19 @@
 
 	marked.setOptions({ headerIds: true });
 	regElement('x-file', File);
-	let el;
-	let mor;
-	let patchMod = false;
+	let el = $state();
+	let mor = $state();
+	let patchMod = $state(false);
 
-	export let ctx = {};
-	export let close;
-	export let preview = false;
-	let title = '';
-	let content = '';
+	interface Props {
+		ctx?: any;
+		close: any;
+		preview?: boolean;
+	}
+
+	let { ctx = {}, close, preview = false }: Props = $props();
+	let title = $state('');
+	let content = $state('');
 	const fx = (s) =>
 		s &&
 		s
@@ -27,19 +33,19 @@
 				/<(h\d) id="(.+?)">(.+?)<\/\1>/g,
 				'<a class=\'head\' href="#$2" id="$2"><$1>$3</$1></a>'
 			);
-	$: {
+	run(() => {
 		if (!preview) {
 			title = ctx.title;
 			content = ctx.content;
 		}
-	}
+	});
 	const md = () => fx(`${marked.parse(content || '')}`);
-	let v = md();
+	let v = $state(md());
 	const vw = watch(v);
 	const wc = watch('');
 	const rd = () => (v = highlight(md()));
 	const dRd = delay(rd, 100);
-	$: {
+	run(() => {
 		wc(() => {
 			if (preview) dRd();
 			else rd();
@@ -57,7 +63,7 @@
 				el.innerHTML = v;
 			}
 		}, v);
-	}
+	});
 	onMount(async () => {
 		if (preview) {
 			const d = await import('morphdom');
@@ -77,7 +83,7 @@
 			<div class="t">
 				<h1>{title || ''}</h1>
 				{#if close}
-					<button class="icon i-close" on:click={close} />
+					<button class="icon i-close" onclick={close}></button>
 				{/if}
 			</div>
 		{/if}

@@ -9,8 +9,18 @@
 	import { msg, status } from '$lib/store';
 
 	let wt = 0;
-	let w = 0;
-
+	let w = $state(0);
+	let mf;
+	let ftt = $state('');
+	let usr = $state('');
+	let ke = $state(1),
+		bk = $state(0),
+		br = $state();
+	let ft = $state();
+	let pwd = $state('');
+	let iu = $state(),
+		ip = $state();
+	let dis = $derived(usr.length < 2 || pwd.length < 4 || pwd.length > 30 || usr.length > 20);
 	const setMsg = (m) => {
 		msg.set(m);
 	};
@@ -38,20 +48,6 @@
 			.finally(() => {
 				w = 0;
 			});
-	}
-
-	let dis;
-	let ke = 1,
-		bk = 0,
-		br;
-	let ft;
-	let mf;
-	let ftt = '';
-	let usr = '';
-	let pwd = '';
-	let iu, ip;
-	$: {
-		dis = usr.length < 2 || pwd.length < 4 || pwd.length > 30 || usr.length > 20;
 	}
 
 	function nx(e) {
@@ -88,7 +84,7 @@
 </script>
 
 <div class="g" transition:fade|global>
-	<div class="bg" />
+	<div class="bg"></div>
 	<div class="cc">
 		<div class="bx">
 			<LD act={w} />
@@ -97,27 +93,27 @@
 			</div>
 			<div class="br" style={`left:${ft}px`} class:bk bind:this={br}>
 				{#if $msg}
-					<div class="v" />
+					<div class="v"></div>
 				{/if}
-				{#key ke}<i in:jump|global={{ y: -18, duration: 150 }} />{/key}
+				{#key ke}<i in:jump|global={{ y: -18, duration: 150 }}></i>{/key}
 			</div>
 			<div class="l">
 				<div class="r" class:a={usr}>
-					<input on:input={go} bind:value={usr} bind:this={iu} on:keydown={nx} type="text" />
+					<input oninput={go} bind:value={usr} bind:this={iu} onkeydown={nx} type="text" />
 					<label>Username</label>
 				</div>
 				<form class="r" class:a={pwd} autocomplete="off">
 					<input
 						bind:value={pwd}
 						bind:this={ip}
-						on:keydown={nx}
+						onkeydown={nx}
 						type="password"
 						autocomplete="new-password"
-						on:input={go}
+						oninput={go}
 					/>
 					<label>Password</label>
 				</form>
-				<button class:dis on:click={login}>Login</button>
+				<button class:dis onclick={login}>Login</button>
 			</div>
 			<a href="/">{'<  '}Home</a>
 		</div>

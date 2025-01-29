@@ -1,8 +1,10 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { hds2Str, str2Hds, watch } from '$lib/utils';
 
-	export let value;
-	let fields = [['', '']];
+	let { value = $bindable() } = $props();
+	let fields = $state([['', '']]);
 	let vWatch = watch('');
 	let fWatch = watch(fields);
 
@@ -17,8 +19,8 @@
 		};
 	}
 
-	let t;
-	$: {
+	let t = $state();
+	run(() => {
 		vWatch(() => {
 			let v = [];
 			if (value) v = str2Hds(value);
@@ -37,7 +39,7 @@
 				t = setTimeout(() => (value = hds2Str(fields)), 30);
 			}
 		}, fields);
-	}
+	});
 </script>
 
 <div class="a">
@@ -47,11 +49,11 @@
 				<input class="s" bind:value={fields[index][0]} placeholder="name" />
 				<div class="c">
 					<p>{fields[index][1] || ''}</p>
-					<textarea bind:value={fields[index][1]} placeholder="value" />
+					<textarea bind:value={fields[index][1]} placeholder="value"></textarea>
 				</div>
 			</div>
 			{#if (index && fields[index][0]) || (!index && !fields.find((a) => !a[0]))}
-				<button class:i-no={index} class:i-add={!index} on:click={ck(index)} class="icon" />
+				<button class:i-no={index} class:i-add={!index} onclick={ck(index)} class="icon"></button>
 			{/if}
 		</div>
 	{/each}

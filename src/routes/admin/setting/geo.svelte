@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import { sys } from './sys';
 	import Card from './Card.svelte';
@@ -7,11 +9,11 @@
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
 
-	let token;
-	let dir;
-	let msg;
-	let act = 0;
-	let ld;
+	let token = $state();
+	let dir = $state();
+	let msg = $state();
+	let act = $state(0);
+	let ld = $state();
 
 	onMount(() =>
 		sys.subscribe((a) => {
@@ -19,12 +21,13 @@
 			dir = a.ipLiteDir;
 		})
 	);
-	$: {
+	run(() => {
 		dir = trim(dir);
 		token = trim(token);
-	}
-	let t, err;
-	let geoStatue = '';
+	});
+	let t,
+		err = $state();
+	let geoStatue = $state('');
 	const cl = () => clearInterval(t);
 	const getGeoStatus = () => {
 		geoStatue = 'waiting';
@@ -66,11 +69,11 @@
 			})
 			.finally(() => (ld = 0));
 	};
-	$: {
+	run(() => {
 		w(() => {
 			if (act) setTimeout(() => (act = 0), 2e3);
 		}, act);
-	}
+	});
 </script>
 
 <Card {act} {msg} {err} title="IpLite Database" {save} {ld}>
@@ -80,7 +83,7 @@
 	<a href="https://lite.ip2location.com/database-download" target="_blank" rel="noreferrer"
 	>where is my token?</a
 	>
-	<s />
+	<s></s>
 </Card>
 
 <style>

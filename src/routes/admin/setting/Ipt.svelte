@@ -1,15 +1,11 @@
-<script>
-	export let label;
-	export let value;
-	export let placeholder;
-	export let box;
-	export let password;
+<script lang="ts">
+	let { label, value = $bindable(), placeholder, box, password } = $props();
 </script>
 
 <form class="r" autocomplete="off">
 	<span>{label}</span>
 	{#if box}
-		<textarea bind:value {placeholder} />
+		<textarea bind:value {placeholder}></textarea>
 	{:else if password}
 		<input type="password" bind:value {placeholder} />
 	{:else}

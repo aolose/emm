@@ -1,13 +1,17 @@
-<script>
+<script lang="ts">
 	import { small } from '$lib/store';
 
-	export let value = 0;
-	export let info = [];
+	interface Props {
+		value?: number;
+		info?: any;
+	}
+
+	let { value = 0, info = [] }: Props = $props();
 	const l = [0, [0, 30, 60, 90], [10, 40, 70, 100]];
 	const fx = (a) => Math.floor(a + 0.5);
-	let cc;
-	$: cc = (n) =>
-		$small ? 'none' : `polygon(0 0,100% 0,100% ${l[n][fx(value)]}%, 0 ${l[n][fx(value)]}%)`;
+	let cc = $derived((n) =>
+		$small ? 'none' : `polygon(0 0,100% 0,100% ${l[n][fx(value)]}%, 0 ${l[n][fx(value)]}%)`
+	);
 </script>
 
 <div class="k">
@@ -15,7 +19,7 @@
 		<div class="a" class:f={n === 1} class:e={n === 2} style:clip-path={n && cc(n)}>
 			{#each info as i, index}
 				<div class="s" class:d={fx(value) > index} class:c={fx(value) === index}>
-					{#if index !== 3}<i />{/if}
+					{#if index !== 3}<i></i>{/if}
 					<span>{index + 1}.</span>
 					<p>{i}</p>
 				</div>

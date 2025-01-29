@@ -1,8 +1,12 @@
-<script>
+<script lang="ts">
 	import { upDownScroller } from '$lib/utils';
 
-	export let down = 0;
+	interface Props {
+		down?: number;
+	}
+
+	let { down = $bindable(0) }: Props = $props();
 	const ons = upDownScroller((v) => (down = v));
 </script>
 
-<svelte:body on:scroll|capture={ons} />
+<svelte:body onscrollcapture={ons} />

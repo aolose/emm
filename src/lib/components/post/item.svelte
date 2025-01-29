@@ -1,8 +1,7 @@
-<script>
+<script lang="ts">
 	import { bgColor, clipWords } from '$lib/utils';
 
-	export let p = {};
-	export let path;
+	let { p = {}, path } = $props();
 	const { banner, slug, title, desc, createAt } = p;
 	const sty = banner ? `background-image:url(/res/_${banner})` : '';
 	const tm = new Date(createAt);
@@ -10,24 +9,21 @@
 	const m = tm.getMonth() + 1;
 	const d = tm.getDate();
 	const showY = new Date().getFullYear() !== y;
-	let ds;
-	$: {
-		ds = clipWords(desc, 60);
-	}
+	let ds = $derived(clipWords(desc, 60));
 </script>
 
 <div class="s p" style={`background-color:${bgColor(createAt)}`}>
-	<div class="x" style={sty} />
+	<div class="x" style={sty}></div>
 	<div class="t">
 		{m}/{d}
 		{#if showY}
 			{y}{/if}
 	</div>
 	<a class="f" href={`/post${path}/${slug}`}>
-		<div class="c" class:ex={!banner} />
+		<div class="c" class:ex={!banner}></div>
 		<h1>{title}</h1>
 		<h1>{title}</h1>
-		<div class="ss" />
+		<div class="ss"></div>
 		<p>{ds}...</p>
 	</a>
 </div>

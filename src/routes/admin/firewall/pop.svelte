@@ -7,14 +7,36 @@
 	import { trim } from '$lib/utils';
 	import { slide } from 'svelte/transition';
 	import { fwRespLs } from '$lib/store';
+	import { onMount } from 'svelte';
 
-	let d = {};
-	let show = 0;
-	let tp = 0; // 0- filter 1-editor 2-create
-	let ok = () => 0;
-	let cancel = () => 0;
-	let hasV;
-	$: {
+	let { pop = $bindable() } = $props();
+	onMount(() => {
+		pop = (type, data = {}) => {
+			tp = type;
+			if (tp === 2) {
+				data.active = data.log = true;
+			}
+			return new Promise((resolve) => {
+				show = 1;
+				d = { ...data };
+				ok = () => {
+					resolve({ ...d });
+					show = 0;
+				};
+				cancel = () => {
+					resolve();
+					show = 0;
+				};
+			});
+		};
+	});
+	let d = $state({});
+	let show = $state(0);
+	let tp = $state(0); // 0- filter 1-editor 2-create
+	let ok = $state(() => 0);
+	let cancel = $state(() => 0);
+	let hasV = $state();
+	$effect(() => {
 		if (tp < 4) {
 			d.ip = trim(d.ip);
 			d.mark = trim(d.mark, true);
@@ -41,25 +63,7 @@
 			if (d.status < 0 || d.status > 510) d.status = 403;
 			hasV = trim(d.name) && d.status;
 		}
-	}
-	export const pop = (type, data = {}) => {
-		tp = type;
-		if (tp === 2) {
-			data.active = data.log = true;
-		}
-		return new Promise((resolve) => {
-			show = 1;
-			d = { ...data };
-			ok = () => {
-				resolve({ ...d });
-				show = 0;
-			};
-			cancel = () => {
-				resolve();
-				show = 0;
-			};
-		});
-	};
+	});
 </script>
 
 {#if show}
@@ -75,9 +79,9 @@
 					'Edit Response'
 				][tp]}
 			</h1>
-			<button class="clo" on:click={cancel}>
-				<i />
-				<i />
+			<button class="clo" onclick={cancel}>
+				<i></i>
+				<i></i>
 			</button>
 			{#if tp < 4 && tp && tp !== 3}
 				<div class="f1">
@@ -174,9 +178,9 @@
 				{/if}
 			</div>
 			<div class="fn">
-				<button on:click={() => (d = {})}>clear</button>
+				<button onclick={() => (d = {})}>clear</button>
 				{#if !tp || hasV}
-					<button transition:slidLeft|global on:click={ok}>
+					<button transition:slidLeft|global onclick={ok}>
 						{['search', 'save', 'create', 'save', 'create', 'save'][tp]}
 					</button>
 				{/if}

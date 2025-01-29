@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import Ava from '$lib/components/post/ava.svelte';
 	import { getErr } from '$lib/utils';
 	import Ld from '$lib/components/loading.svelte';
@@ -6,22 +8,32 @@
 	import { req } from '$lib/req';
 	import { msg } from './msg';
 
-	export let admin = 0;
-	export let slug;
-	export let reply;
-	export let done;
-	export let edit;
-	export let user = {};
-	export let cur = {};
-	let sh = 0;
-	let cm = edit ? edit.content : '';
-	let dis;
-	let ed = 0;
-	let ld = 0;
-	$: {
-		if (cur.name?.length > 10) cur.set({ name: cur.name.slice(0, 10) });
+	interface Props {
+		admin?: number;
+		slug: any;
+		reply: any;
+		done: any;
+		edit: any;
+		user?: any;
+		cur?: any;
+		av?: any;
 	}
-	export let av = [];
+
+	let {
+		admin = 0,
+		slug,
+		reply,
+		done,
+		edit,
+		user = {},
+		cur = $bindable({}),
+		av = []
+	}: Props = $props();
+	let sh = $state(0);
+	let cm = $state(edit ? edit.content : '');
+	let dis = $state();
+	let ed = $state(0);
+	let ld = $state(0);
 	const limit = 512;
 
 	function se() {
@@ -71,10 +83,13 @@
 		});
 	}
 
-	$: {
+	run(() => {
+		if (cur.name?.length > 10) cur.set({ name: cur.name.slice(0, 10) });
+	});
+	run(() => {
 		cm = (cm || '').replace(/\n+/g, '\n').slice(0, limit);
 		dis = (!admin && !cur.name?.length) || !cm?.length;
-	}
+	});
 </script>
 
 <div class="c" class:m={reply} class:ed={edit} class:am={admin}>
@@ -86,9 +101,9 @@
 					size={40}
 					cls={'av' + (a === cur.avatar ? ' act' : '')}
 					click={() => {
-            cur.avatar = a;
-            sh = 0;
-          }}
+						cur.avatar = a;
+						sh = 0;
+					}}
 				/>
 			{/each}
 		</div>
@@ -99,37 +114,37 @@
 				{#if !reply}
 					<Ava idx={cur.avatar} size="34" click={() => (sh = 1)} />
 					{#if ed}
-						<input bind:value={cur.name} placeholder="name" on:blur={() => (ed = 0)} />
+						<input bind:value={cur.name} placeholder="name" onblur={() => (ed = 0)} />
 					{:else}
 						<span class="n">{cur.name}</span>
-						<button class="icon i-refresh" on:click={cur.refresh} />
-						<button class="icon i-ed" on:click={se} />
+						<button class="icon i-refresh" onclick={cur.refresh}></button>
+						<button class="icon i-ed" onclick={se}></button>
 					{/if}
 				{:else}
 					<p>reply @{reply.name}</p>
 				{/if}
-				<div class="s" />
+				<div class="s"></div>
 			</div>
 			{#if !admin}
-				<button class="icon i-pub" class:dis on:click={cmt} />
+				<button class="icon i-pub" class:dis onclick={cmt}></button>
 			{/if}
 		</div>
 	{/if}
 	<div class="sd">
 		<div class="v">{cm}</div>
-		<textarea placeholder="write something~" bind:value={cm} />
+		<textarea placeholder="write something~" bind:value={cm}></textarea>
 		<div class="ft">
 			{#if edit}
 				<div class="bn">
-					<button class="icon i-ok" on:click={edi} />
-					<button class="icon i-close" on:click={edit.close} />
+					<button class="icon i-ok" onclick={edi}></button>
+					<button class="icon i-close" onclick={edit.close}></button>
 				</div>
 			{/if}
 			<span class="t">{cm?.length || 0} / {limit}</span>
 		</div>
 	</div>
 	{#if admin}
-		<button class="pu" class:dis on:click={cmt}> reply</button>
+		<button class="pu" class:dis onclick={cmt}> reply</button>
 	{/if}
 	<Ld act={ld} text="submitting" />
 </div>

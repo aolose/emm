@@ -1,29 +1,24 @@
 <script>
 	import Filter from './filters.svelte';
-	import { delay, trim, watch } from '$lib/utils';
+	import { delay, trim } from '$lib/utils';
 
-	export let change;
+	let { change, value = '' } = $props();
+	let ctx = $state({});
 	const dCh = delay(change, 500);
-	export let value = '';
-	let ctx = {};
-	const wc = watch(value, ctx);
-	$: {
-		value = trim(value);
-		wc(
-			() => {
-				dCh(value, new Set(ctx.value));
-			},
-			value,
-			ctx
-		);
-	}
+	$effect(() => {
+		const val = trim(value);
+		if (ctx.value !== val) {
+			ctx.value = val;
+			dCh(val, new Set(val));
+		}
+	});
 </script>
 
 <div class="a">
-	<i class="icon i-filter" class:act={ctx.value?.length} on:click={ctx.show} />
+	<i class="icon i-filter" class:act={ctx.value?.length} onclick={ctx.show}></i>
 	<input bind:value placeholder="search..." />
-	<div class="l" />
-	<i class="icon i-search" class:act={value} />
+	<div class="l"></div>
+	<i class="icon i-search" class:act={value}></i>
 	<Filter bind:ctx />
 </div>
 

@@ -1,4 +1,6 @@
-<script>
+<script lang="ts">
+	import { stopPropagation } from 'svelte/legacy';
+
 	import CheckBox from '$lib/components/check.svelte';
 	import Tags from '$lib/components/tags.svelte';
 	import { onMount } from 'svelte';
@@ -10,11 +12,11 @@
 	import Sel from '$lib/components/post/rSelect.svelte';
 	import { permission } from '$lib/enum';
 
-	let setPms;
-	let post = {};
-	export let autoSave;
+	let setPms = $state();
+	let post = $state({});
+	let { autoSave } = $props();
 	const getSlug = api('slug');
-	let slugInfo = '';
+	let slugInfo = $state('');
 	let t = -1;
 	const checkSlug = () => {
 		clearTimeout(t);
@@ -74,22 +76,22 @@
 	<div class="m" transition:fade|global>
 		<div class="a">
 			<div class="h">
-				<button class="icon i-ok" on:click={ok}>
+				<button class="icon i-ok" onclick={ok}>
 					<span>save</span>
 				</button>
 				<span>Setting</span>
-				<button class="icon i-close" on:click={cancel}>
+				<button class="icon i-close" onclick={cancel}>
 					<span>cancel</span>
 				</button>
 			</div>
 			<div class="f">
 				<div class="r">
 					<h3>Slug<span>{slugInfo}</span></h3>
-					<input bind:value={post.slug} on:blur={checkSlug} />
+					<input bind:value={post.slug} onblur={checkSlug} />
 				</div>
 				<div class="r">
 					<h3>Description</h3>
-					<textarea bind:value={post.desc} />
+					<textarea bind:value={post.desc}></textarea>
 				</div>
 				<div class="r">
 					<h3>Banner</h3>
@@ -97,14 +99,11 @@
 						class:act={post.banner}
 						style:background-image={post.banner ? `url(/res/_${post.banner})` : ''}
 						class="p icon i-pic"
-						on:click={pickPic}
+						onclick={pickPic}
 					>
 						{#if post.banner}
-							<button
-								on:click|stopPropagation={rmPic}
-								class="icon i-close"
-								transition:fade|global
-							/>
+							<button onclick={stopPropagation(rmPic)} class="icon i-close" transition:fade|global
+							></button>
 						{/if}
 					</div>
 				</div>
@@ -118,7 +117,7 @@
 					<h3>Tokens</h3>
 					<div class="n">
 						<Sel bind:items={post._reqs} inline={1} />
-						<button on:click={selReq} class="icon i-ed" />
+						<button onclick={selReq} class="icon i-ed"></button>
 					</div>
 				</div>
 				<div class="r">
@@ -168,7 +167,7 @@
     flex-direction: column;
     max-height: 90%;
     background: var(--bg1);
-    width: 400px;
+    width: 480px;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 10px;
     @include s() {
       max-height: 100%;

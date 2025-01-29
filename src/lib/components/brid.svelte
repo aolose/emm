@@ -1,10 +1,10 @@
-<script>
+<script lang="ts">
 	import Msg from '$lib/components/typeMsg.svelte';
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { msg } from '$lib/store';
 
-	export let d;
+	let { d } = $props();
 	onMount(() => {
 		let stop;
 		if (d) {
@@ -37,23 +37,23 @@
 	<div class="h">
 		<div class="mg">
 			<Msg defaultText={'welcome to my blog!'} />
-			<i />
+			<i></i>
 		</div>
-		<div class="m" />
-		<div class="s" />
-		<div class="y" />
+		<div class="m"></div>
+		<div class="s"></div>
+		<div class="y"></div>
 	</div>
 	<div class="w">
-		<div />
+		<div></div>
 	</div>
 	<div class="l">
 		<div class="f f0">
-			<div class="v" />
-			<div class="v1" />
+			<div class="v"></div>
+			<div class="v1"></div>
 		</div>
 		<div class="f f1">
-			<div class="v" />
-			<div class="v1" />
+			<div class="v"></div>
+			<div class="v1"></div>
 		</div>
 	</div>
 </div>

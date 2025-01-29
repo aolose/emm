@@ -1,35 +1,35 @@
 <script>
-  import Link from './link.svelte';
-  import { expand } from '$lib/store';
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
+	import Link from './link.svelte';
+	import { expand } from '$lib/store';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 
-  let type;
-  onMount(() =>
-    page.subscribe((pg) => {
-      const p = pg.url.pathname;
-      if (p === '/') type = 1;
-      else if (p.startsWith('/post/')) type = 0;
-      else type = 2;
-    })
-  );
+	let type = $state();
+	onMount(() =>
+		page.subscribe((pg) => {
+			const p = pg.url.pathname;
+			if (p === '/') type = 1;
+			else if (p.startsWith('/post/')) type = 0;
+			else type = 2;
+		})
+	);
 </script>
 
-<div class="e" on:click={() => expand.update((a) => 1 - a)} class:act={$expand}>
-  <i class="e0" />
-  <i class="e1" />
-  <i class="e2" />
+<div class="e" onclick={() => expand.update((a) => 1 - a)} class:act={$expand}>
+	<i class="e0"></i>
+	<i class="e1"></i>
+	<i class="e2"></i>
 </div>
 <nav class:act={$expand} class:n={type === 1} class:m={type === 2}>
-  <div class="a">
-    {#if $expand}
-      <Link href="/">Home</Link>
-      <Link href="/posts" exact={false}>Posts</Link>
-      <Link href="/tags" exact={false}>Tags</Link>
-      <Link href="/about" exact={false}>About</Link>
-    {/if}
-  </div>
-  <div class="a" />
+	<div class="a">
+		{#if $expand}
+			<Link href="/">Home</Link>
+			<Link href="/posts" exact={false}>Posts</Link>
+			<Link href="/tags" exact={false}>Tags</Link>
+			<Link href="/about" exact={false}>About</Link>
+		{/if}
+	</div>
+	<div class="a"></div>
 </nav>
 
 <style lang="scss">

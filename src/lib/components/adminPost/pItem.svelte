@@ -1,20 +1,20 @@
-<script>
+<script lang="ts">
 	import Date from './timLabel.svelte';
 	import { slide } from 'svelte/transition';
 
-	export let sel = () => 0;
-	export let p = {};
-	let title, desc;
-	$: isPublish = p.published;
-	$: hasDraft = p.save > (p.modify || p.publish || 0);
-	$: title = p.title || p.title_d;
-	$: title_d = title === p.title_d ? '' : p.title_d;
-	$: desc = (p.content_d || p.content || '').substring(0, 128);
+	let title = $derived(p.title || p.title_d),
+		desc = $derived((p.content_d || p.content || '').substring(0, 128));
 
 	import { editPost } from '$lib/store';
+
+	let { sel = () => 0, p = {} } = $props();
+	let isPublish = $derived(p.published);
+	let hasDraft = $derived(p.save > (p.modify || p.publish || 0));
+
+	let title_d = $derived(title === p.title_d ? '' : p.title_d);
 </script>
 
-<div class="pi" on:click={() => sel(p)} class:act={$editPost.id === p.id} transition:slide>
+<div class="pi" onclick={() => sel(p)} class:act={$editPost.id === p.id} transition:slide>
 	<div class="v">
 		{#if hasDraft}<span class="vd" title="draft">D</span>{/if}
 		{#if isPublish}<span class="vp" title="published">P</span>{/if}

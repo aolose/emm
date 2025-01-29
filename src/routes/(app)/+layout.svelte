@@ -1,6 +1,12 @@
-<script>
+<script lang="ts">
 	import Nav from '$lib/components/nav.svelte';
 	import { expand } from '$lib/store';
+
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	let b = '';
 </script>
@@ -10,7 +16,7 @@
 		<Nav />
 	</div>
 	<div class="g" class:ex={$expand}>
-		<slot />
+		{@render children?.()}
 	</div>
 </div>
 
