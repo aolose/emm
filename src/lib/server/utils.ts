@@ -35,10 +35,7 @@ import fse from 'fs-extra';
 import type { Post } from '$lib/server/model';
 import type { SQLQueryBindings } from 'bun:sqlite';
 import archiver from 'archiver';
-import { fromBuffer } from 'yauzl';
-import { createWriteStream } from 'node:fs';
 import { iter, type ZipItem } from 'but-unzip';
-import { type Readable } from 'node:stream';
 
 export const is_dev = process.env.NODE_ENV !== 'production';
 export const sqlVal = (values: SQLQueryBindings[]) =>
