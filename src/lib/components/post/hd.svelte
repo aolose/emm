@@ -39,7 +39,11 @@
       font-weight: 200;
       text-transform: uppercase;
       text-shadow: rgba(20, 30, 60, 0.4) 1px 1px 30px;
-
+			@include s() {
+				text-align: center;
+				left: -10px;
+				right: 10px;
+			}
       p {
         font-size: 13px;
         color: var(--darkgrey-h);

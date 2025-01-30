@@ -157,9 +157,10 @@
 
       pre {
         & > code {
-          border: rgba(0, 0, 0, 0.1) 1px solid;
+					border-radius: 8px;
+          border-right: rgba(0, 0, 0, 0.1) 1px solid;
           max-width: 100%;
-          overflow: auto;
+          overflow: hidden;
           line-height: 1.5;
           font-size: 14px;
           box-shadow: rgba(0, 0, 0, 0.4) 0 2px 8px -5px;
@@ -167,16 +168,15 @@
           background: rgba(7, 8, 10, 0.4);
           padding: 32px 0 3px;
           display: flex;
-          word-break: break-all;
-
           .code {
+						white-space: pre;
             padding: 0.1em 10px 0.5em;
+						overflow: auto;
+						scrollbar-width: thin;
           }
-
           .line {
             flex-shrink: 0;
             background: rgba(0, 0, 0, 0.5);
-            border-right: 1px solid rgba(100, 120, 150, 0.2);
             display: flex;
             flex-direction: column;
             user-select: none;
@@ -192,7 +192,20 @@
               align-items: flex-start;
               display: flex;
               font-size: 12px;
+							width: 100%;
+							padding-right: 8px;
               flex: 1;
+							position: relative;
+							&:before{
+								content: '';
+								border-bottom: 1px solid rgba(0, 0, 0, 0.64);
+								position: absolute;
+								display: block;
+								left: 100%;
+								top: 0;
+								bottom: 0;
+								width: 100vw;
+							}
             }
           }
 
@@ -217,7 +230,7 @@
             left: 0;
             right: 0;
             line-height: 30px;
-            background: rgba(76, 116, 173, 0.23);
+            background: rgba(75, 87, 126, 0.23);
           }
         }
       }

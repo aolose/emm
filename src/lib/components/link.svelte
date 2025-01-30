@@ -19,7 +19,7 @@
   @use '../../lib/break' as *;
 
   .k {
-    color: #485c72;
+    color: #b9c6d5;
     width: 36px;
     height: 36px;
     display: flex;
@@ -28,7 +28,7 @@
     margin: 0 20px;
 
     &:hover {
-      color: #509eff;
+      color: #fff;
     }
 
     @include s() {
