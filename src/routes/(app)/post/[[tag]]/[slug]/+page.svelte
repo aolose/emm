@@ -143,14 +143,6 @@
 
   $bg: var(--bg6);
   $bg2: var(--bg7);
-  @keyframes bg {
-    0% {
-      background-position: 0 0;
-    }
-    100% {
-      background-position: 100% 100%;
-    }
-  }
 
   .sl {
     padding: 20px 0;
@@ -361,7 +353,7 @@
     width: 36px;
     opacity: 0.8;
     cursor: pointer;
-    color: #6fa1da;
+    color: #fff;
     top: 12px;
     right: 12px;
     z-index: 100;
@@ -382,10 +374,8 @@
     height: 90%;
     max-height: 100%;
     min-height: 400px;
-    //bottom: 0;
     background: url('$lib/components/img/1.jpg') center no-repeat;
     background-size: cover;
-    animation: bg 360s linear infinite alternate-reverse;
     @include s() {
       position: relative;
       border-bottom: none;

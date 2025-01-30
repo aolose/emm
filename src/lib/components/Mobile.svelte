@@ -1,14 +1,12 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Q from './mediaQuery.svelte';
-	import { medium, small } from '$lib/store';
-
+	import { expand, medium, small } from '$lib/store';
 	let mobile = $state(0);
 	let normal = $state(0);
-	run(() => {
+	$effect(() => {
 		small.set(mobile);
 		medium.set(normal);
+		expand.set(+!mobile);
 	});
 </script>
 

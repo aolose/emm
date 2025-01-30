@@ -164,7 +164,7 @@ editPost.subscribe((p) => {
 
 export const msg = writable('');
 
-export const expand = writable(1);
+export const expand = writable(0);
 export const small = writable(0);
 export const medium = writable(0);
 export const statueSys = writable(0);
