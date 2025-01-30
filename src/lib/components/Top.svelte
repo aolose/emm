@@ -62,25 +62,22 @@
 	.t {
 		transition: 0.2s ease-in-out;
 		border-radius: 50%;
-		line-height: 1;
+		line-height: 40px;
 		font-size: 20px;
 		color: #fff;
 		height: 40px;
 		width: 40px;
-		border: 1px solid rgba(180, 200, 225, 0.3);
-		background: rgba(60, 140, 245, 0.8);
-		background-clip: content-box;
-		box-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px -2px;
+		border: none;
+		background: linear-gradient(130deg, rgba(44, 68, 101, 0.8), rgba(44, 17, 76, 0.8));
+		box-shadow: rgba(23, 8, 8, 0.2) 0 2px 5px -2px;
 		display: block;
 		opacity: 0;
 		pointer-events: none;
-
 		&:hover {
 			opacity: 1;
 			border-color: rgba(80, 130, 250, 0.8);
 			background: rgba(60, 140, 245, 0.4);
 		}
-
 		&.a {
 			opacity: 0.8;
 			pointer-events: auto;

@@ -14,7 +14,7 @@
 		if (serviceWorker) {
 			let register = await serviceWorker.getRegistration();
 			if (!register) {
-				register = await serviceWorker.register('service-worker.js', {
+				register = await serviceWorker.register('/service-worker.js', {
 					type: dev ? 'module' : 'classic',
 					scope: '/'
 				});
