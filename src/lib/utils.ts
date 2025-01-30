@@ -360,10 +360,10 @@ export function createFileMd(f: fView | File, u = '') {
 		return `![${name}](${u})`;
 	}
 	if (type.startsWith('audio/')) {
-		return `<label class="x-audio">${name}<audio controls><source src="${u}" type="${type}"></audio></label>`;
+		return `<div class="x-audio" style="text-align: center;">${name}<audio controls><source src="${u}" type="${type}"></audio></div>`;
 	}
 	if (type.startsWith('video/')) {
-		return `<label class="x-video">${name}<video controls><source src="${u}" type="${type}"></video></label>`;
+		return `<div class="x-video" style="text-align: center;">${name}<video loop autoplay muted><source src="${u}" type="${type}"></video></div>`;
 	}
 	return `<x-file name="${name}" type="${getExt(f)}" size="${size}" src="${u}"></x>`;
 }
