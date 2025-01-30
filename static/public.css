@@ -16,7 +16,7 @@ a {
 	--bg3: #0e1015;
 	--bg4: #20232c;
 	--bg5: #1a1e26;
-	--bg6: #161b22;
+	--bg6: #12141d;
 	--bg7: #0d1117;
 }
 
@@ -91,6 +91,7 @@ span {
 
 *::-webkit-scrollbar {
 	width: 8px;
+	height: 8px;
 	background: rgba(0, 0, 0, 0.1);
 }
 
