@@ -402,6 +402,7 @@
 		height: 100%;
 		overflow: auto;
 		@include s() {
+			scrollbar-width: auto;
 			min-height: 100%;
 			background: var(--bg6);
 		}
