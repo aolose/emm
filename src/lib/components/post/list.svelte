@@ -77,12 +77,16 @@
   @use '../../break' as *;
 
   $w: 15px;
+	$round:16px;
   .nn {
     width: 90%;
     margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    @include s() {
+      justify-content: center;
+    }
   }
 
   .t {
@@ -95,9 +99,14 @@
     padding: 80px 0 0;
     transition: 0.3s ease-in-out;
     transform: translate3d(0, 0, 0);
-    clip-path: inset(80px 0 0 0);
+    clip-path: inset(110px 0 0 0);
     @include s() {
+			margin: 0 20px;
+			scrollbar-width: none;
       bottom: 10px;
+      padding: 130px 0 0;
+      clip-path: inset(130px 0 0 0 round $round);
+			top: 10px;
     }
   }
 
@@ -146,7 +155,7 @@
   .v {
     @include s() {
       &.t {
-        clip-path: inset(0px 0px 40px 0);
+        clip-path: inset(0px 0px 40px 0 round $round);
       }
       &.n {
         transform: translate3d(0, 50px, 0);

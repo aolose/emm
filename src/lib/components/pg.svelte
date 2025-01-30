@@ -102,7 +102,7 @@
 
   .lt {
     * {
-      color: rgba(80, 100, 150, 0.9);
+      color: rgba(100, 116, 156, 0.9);
     }
 
     .nv {
@@ -110,15 +110,13 @@
       padding: 5px 8px;
       height: 24px;
       width: auto;
-      border-radius: 2px;
-      border: 1px solid currentColor;
+      border-radius: 111px;
     }
 
     .act,
     .nv:hover {
       color: #fff;
-      border-color: transparent;
-      background: var(--darkgrey-h);
+      background: var(--darkgrey);
     }
   }
 </style>
