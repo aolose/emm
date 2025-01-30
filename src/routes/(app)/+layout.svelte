@@ -29,6 +29,9 @@
 			border-radius: 10px;
 			background-color: color.adjust(#222f48, $alpha: -0.4);
 		}
+		@include s(){
+      scrollbar-width: thin;
+		}
 	}
 
 	.nv {

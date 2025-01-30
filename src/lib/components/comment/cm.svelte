@@ -281,6 +281,11 @@
 		position: absolute;
 		height: auto;
 		color: #fff;
+		&::placeholder{
+      color: transparent;
+      background: linear-gradient(142deg, rgb(65, 178, 255), rgb(255, 213, 213));
+      background-clip: text;
+		}
 	}
 
 	.m {
