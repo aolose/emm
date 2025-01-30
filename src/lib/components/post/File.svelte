@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import FileIcon from '$lib/components/fileIcon.svelte';
 	import { fileSize } from '$lib/utils';
 
@@ -17,48 +17,48 @@
 </div>
 
 <style lang="scss">
-  .a {
-    border-radius: 5px;
-    width: 240px;
-    align-items: center;
-    display: flex;
-    background: linear-gradient(rgba(80, 100, 150, 0.3), rgba(80, 100, 150, 0.2));
-    margin: 10px;
-  }
+	.a {
+		border-radius: 5px;
+		width: 240px;
+		align-items: center;
+		display: flex;
+		background: linear-gradient(rgba(80, 100, 150, 0.3), rgba(80, 100, 150, 0.2));
+		margin: 10px;
+	}
 
-  .i {
-    padding: 10px;
-  }
+	.i {
+		padding: 10px;
+	}
 
-  .b {
-    font-size: 13px;
-    white-space: nowrap;
-    flex: 1;
-    padding: 10px 10px 4px;
-    flex-direction: column;
+	.b {
+		font-size: 13px;
+		white-space: nowrap;
+		flex: 1;
+		padding: 10px 10px 4px;
+		flex-direction: column;
 
-    b {
-      width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-weight: 200;
-      display: block;
-      line-height: 1.4;
-      color: #dddddd;
-    }
+		b {
+			width: 100px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			font-weight: 200;
+			display: block;
+			line-height: 1.4;
+			color: #dddddd;
+		}
 
-    span {
-      display: block;
-    }
-  }
+		span {
+			display: block;
+		}
+	}
 
-  a {
-    opacity: 0.5;
-    color: #dddddd !important;
-    display: block;
-    border-left: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 10px 14px;
-    font-size: 19px;
-    text-decoration: none !important;
-  }
+	a {
+		opacity: 0.5;
+		color: #dddddd !important;
+		display: block;
+		border-left: 1px solid rgba(255, 255, 255, 0.2);
+		padding: 10px 14px;
+		font-size: 19px;
+		text-decoration: none !important;
+	}
 </style>

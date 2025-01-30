@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import Ph from '$lib/components/post/hd.svelte';
 	import Canvas from '$lib/components/ctx.svelte';
 	import UpDownScroll from '$lib/components/upDownScroll.svelte';
@@ -25,27 +25,27 @@
 </div>
 
 <style lang="scss">
-  @use '../../../lib/break' as *;
+	@use '../../../lib/break' as *;
 
-  .ct {
-    width: 90%;
-    max-width: 600px;
-  }
+	.ct {
+		width: 90%;
+		max-width: 600px;
+	}
 
-  .o {
-    transition: 0.3s ease-in-out;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
+	.o {
+		transition: 0.3s ease-in-out;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
 
-  .e {
-    transform: translate3d(0, 30px, 0);
-  }
+	.e {
+		transform: translate3d(0, 30px, 0);
+	}
 
-  .v {
-    padding: 10px 5% 100px;
-    overflow: auto;
-    border-radius: 1rem;
-  }
+	.v {
+		padding: 10px 5% 100px;
+		overflow: auto;
+		border-radius: 1rem;
+	}
 </style>

@@ -41,46 +41,46 @@
 <FileWin />
 
 <style lang="scss">
-  .c {
-    display: flex;
-    flex-direction: column;
-    background: var(--bg2);
-    height: 100%;
-  }
+	.c {
+		display: flex;
+		flex-direction: column;
+		background: var(--bg2);
+		height: 100%;
+	}
 
-  .f {
-    display: flex;
-    max-width: 1200px;
-    flex: 1;
-  }
+	.f {
+		display: flex;
+		max-width: 1200px;
+		flex: 1;
+	}
 
-  .d {
-    flex: 1;
-  }
+	.d {
+		flex: 1;
+	}
 
-  .a {
-    flex: 1;
+	.a {
+		flex: 1;
 
-    :global {
-      .editor-toolbar,
-      .CodeMirror-scroll {
-        padding: 10px 20px;
-      }
-    }
-  }
+		:global {
+			.editor-toolbar,
+			.CodeMirror-scroll {
+				padding: 10px 20px;
+			}
+		}
+	}
 
-  .b {
-    height: 60px;
-    border-bottom: 1px solid rgba(200, 200, 200, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-  }
+	.b {
+		height: 60px;
+		border-bottom: 1px solid rgba(200, 200, 200, 0.1);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 20px;
+	}
 
-  h1 {
-    font-weight: 400;
-    font-size: 18px;
-    color: #6d7f94;
-  }
+	h1 {
+		font-weight: 400;
+		font-size: 18px;
+		color: #6d7f94;
+	}
 </style>

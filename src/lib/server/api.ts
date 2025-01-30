@@ -85,8 +85,6 @@ import { postList, postPatch, pubPostList } from '$lib/server/posts';
 import { restore } from '$lib/server/restore';
 import { getRuv } from '$lib/server/puv';
 import type { SQLQueryBindings } from 'bun:sqlite';
-import { Readable } from 'node:stream';
-import * as buffer from 'node:buffer';
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
 	if (!sysStatue) return resp('system uninitialized', 500);
@@ -454,7 +452,7 @@ const apis: APIRoutes = {
 	},
 	bks: {
 		post: auth(Read, async (req) => {
-			const r = new Uint8Array(await req.arrayBuffer());
+			const r = new Uint16Array(await req.arrayBuffer());
 			const p = r[0];
 			const s = r[1];
 			return blackLists(p, s);
@@ -484,7 +482,7 @@ const apis: APIRoutes = {
 			return;
 		}),
 		post: auth(Read, async (req) => {
-			const r = new Uint8Array(await req.arrayBuffer());
+			const r = new Uint16Array(await req.arrayBuffer());
 			const p = r[0];
 			const s = r[1];
 			const o = lsRules(p, s);
@@ -718,7 +716,7 @@ const apis: APIRoutes = {
 			return resp('post not found', 404);
 		},
 		delete: auth(Admin, async (req) => {
-			const i = new Uint8Array(await req.arrayBuffer());
+			const i = new Uint16Array(await req.arrayBuffer());
 			i.forEach(readManager.rm);
 			return db.delByPk(Post, [...i]).changes;
 		}),

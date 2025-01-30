@@ -23,22 +23,22 @@
 </div>
 
 <style lang="scss">
-  @use '../../../lib/break' as *;
+	@use '../../../lib/break' as *;
 
-  .m {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    overflow: auto;
-    padding: 10px 5px;
-    flex-direction: column;
-    @include s() {
-      flex-direction: row;
-    }
-  }
+	.m {
+		display: flex;
+		flex-wrap: wrap;
+		align-content: flex-start;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		overflow: auto;
+		padding: 10px 5px;
+		flex-direction: column;
+		@include s() {
+			flex-direction: row;
+		}
+	}
 </style>

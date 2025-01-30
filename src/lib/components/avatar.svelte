@@ -1,10 +1,5 @@
-<script lang="ts">
-	interface Props {
-		pic?: string;
-		href?: string;
-	}
-
-	let { pic = '', href = '1' }: Props = $props();
+<script>
+	let { pic = '', href = '1' } = $props();
 </script>
 
 <div class="a" class:c={href}>
@@ -13,37 +8,37 @@
 </div>
 
 <style lang="scss">
-  .c {
-    cursor: pointer;
+	.c {
+		cursor: pointer;
 
-    &:hover {
-      box-shadow: var(--blue) 0 0 13px -7px;
-    }
-  }
+		&:hover {
+			box-shadow: var(--blue) 0 0 13px -7px;
+		}
+	}
 
-  .a {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    background: var(--bg2);
-    border-radius: 50%;
-    border: 2px solid #293042;
-  }
+	.a {
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		background: var(--bg2);
+		border-radius: 50%;
+		border: 2px solid #293042;
+	}
 
-  .b {
-    z-index: 1;
-  }
+	.b {
+		z-index: 1;
+	}
 
-  .icon {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #8fbb74;
-    opacity: 0.9;
-    font-size: 30px;
-  }
+	.icon {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #8fbb74;
+		opacity: 0.9;
+		font-size: 30px;
+	}
 </style>

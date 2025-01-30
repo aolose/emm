@@ -1,15 +1,6 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
-
-	interface Props {
-		total?: number;
-		page?: number;
-		go: any;
-		tm: any;
-		length?: number;
-	}
-
-	let { total = 1, page = $bindable(1), go, tm, length = 4 }: Props = $props();
+	let { total = 1, page = $bindable(1), go, tm, length = 4 } = $props();
 	let first = $state(),
 		isF = $state(),
 		f = $state(),
@@ -65,58 +56,58 @@
 </nav>
 
 <style lang="scss">
-  :root {
-    --act: var(--bg0);
-  }
+	:root {
+		--act: var(--bg0);
+	}
 
-  nav {
-    align-items: center;
-    justify-content: center;
-    display: flex;
+	nav {
+		align-items: center;
+		justify-content: center;
+		display: flex;
 
-    * {
-      color: rgb(78, 96, 115);
-    }
+		* {
+			color: rgb(78, 96, 115);
+		}
 
-    .act {
-      color: antiquewhite;
-      background: var(--act);
-    }
+		.act {
+			color: antiquewhite;
+			background: var(--act);
+		}
 
-    .nv {
-      font-size: 12px;
-      cursor: pointer;
-      height: 24px;
-      min-width: 24px;
-      padding: 0 5px;
-      display: flex;
-      margin: 0 5px;
-      justify-content: center;
-      align-items: center;
+		.nv {
+			font-size: 12px;
+			cursor: pointer;
+			height: 24px;
+			min-width: 24px;
+			padding: 0 5px;
+			display: flex;
+			margin: 0 5px;
+			justify-content: center;
+			align-items: center;
 
-      &:hover {
-        color: #65b9e7;
-      }
-    }
-  }
+			&:hover {
+				color: #65b9e7;
+			}
+		}
+	}
 
-  .lt {
-    * {
-      color: rgba(100, 116, 156, 0.9);
-    }
+	.lt {
+		* {
+			color: rgba(100, 116, 156, 0.9);
+		}
 
-    .nv {
-      background: none;
-      padding: 5px 8px;
-      height: 24px;
-      width: auto;
-      border-radius: 111px;
-    }
+		.nv {
+			background: none;
+			padding: 5px 8px;
+			height: 24px;
+			width: auto;
+			border-radius: 111px;
+		}
 
-    .act,
-    .nv:hover {
-      color: #fff;
-      background: var(--darkgrey);
-    }
-  }
+		.act,
+		.nv:hover {
+			color: #fff;
+			background: var(--darkgrey);
+		}
+	}
 </style>

@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import Bird from '$lib/components/brid.svelte';
 	import Ctx from '$lib/components/ctx.svelte';
 	import Head from '$lib/components/Head.svelte';
@@ -26,51 +26,51 @@
 </div>
 
 <style lang="scss">
-  @use '../../lib/break' as *;
+	@use '../../lib/break' as *;
 
-  .b {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding-bottom: 100px;
-  }
+	.b {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-bottom: 100px;
+	}
 
-  .bb {
-    width: 50%;
-    max-width: 80px;
-  }
+	.bb {
+		width: 50%;
+		max-width: 80px;
+	}
 
-  .rm {
-    position: absolute;
-    bottom: 30px;
-    left: 10px;
-    display: flex;
-    align-items: center;
+	.rm {
+		position: absolute;
+		bottom: 30px;
+		left: 10px;
+		display: flex;
+		align-items: center;
 
-    a {
-      font-size: 22px;
-      margin-left: 0.8rem;
-      transition: 0.2s;
-      color: #fff;
-      opacity: 0.8;
+		a {
+			font-size: 22px;
+			margin-left: 0.8rem;
+			transition: 0.2s;
+			color: #fff;
+			opacity: 0.8;
 
-      &:hover {
-        opacity: 1;
-        transform: scale(1.1);
-      }
-    }
+			&:hover {
+				opacity: 1;
+				transform: scale(1.1);
+			}
+		}
 
-    .i-rss {
-      font-size: 16px;
-    }
-  }
+		.i-rss {
+			font-size: 16px;
+		}
+	}
 
-  @include s() {
-    .rm {
-      bottom: 20px;
-    }
-  }
+	@include s() {
+		.rm {
+			bottom: 20px;
+		}
+	}
 </style>

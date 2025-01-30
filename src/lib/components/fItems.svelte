@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { createBubbler } from 'svelte/legacy';
 
 	const bubble = createBubbler();
@@ -38,13 +38,6 @@
 		changePosition();
 		return trigger.subscribe(changePosition);
 	});
-
-	interface Props {
-		trigger: any;
-		file?: any;
-		act?: boolean;
-	}
-
 	let {
 		trigger,
 		file = $bindable({
@@ -54,7 +47,7 @@
 			size: 0
 		}),
 		act = false
-	}: Props = $props();
+	} = $props();
 	let pic = $state('');
 	if (file.type.startsWith('image/')) {
 		pic = `/res/_${file.id}`;
@@ -80,64 +73,64 @@
 </div>
 
 <style lang="scss">
-  .f {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+	.f {
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
 
-  .m {
-    pointer-events: none;
-    width: 100px;
-    height: 124px;
-    margin: 5px;
-  }
+	.m {
+		pointer-events: none;
+		width: 100px;
+		height: 124px;
+		margin: 5px;
+	}
 
-  .a {
-    pointer-events: all;
-    opacity: 0;
-    left: 0;
-    top: 0;
-    position: absolute;
-    transition: 0.3s linear opacity;
-    cursor: pointer;
-    background: var(--bg0);
-    border: 1px solid transparent;
+	.a {
+		pointer-events: all;
+		opacity: 0;
+		left: 0;
+		top: 0;
+		position: absolute;
+		transition: 0.3s linear opacity;
+		cursor: pointer;
+		background: var(--bg0);
+		border: 1px solid transparent;
 
-    &:hover {
-      border-color: var(--darkgrey);
-    }
+		&:hover {
+			border-color: var(--darkgrey);
+		}
 
-    &.act {
-      border-color: #5679a8;
-      box-shadow: rgba(0, 0, 0, 0.2) 1px 2px 4px;
-    }
-  }
+		&.act {
+			border-color: #5679a8;
+			box-shadow: rgba(0, 0, 0, 0.2) 1px 2px 4px;
+		}
+	}
 
-  .sh {
-    opacity: 1;
-  }
+	.sh {
+		opacity: 1;
+	}
 
-  .p {
-    border-radius: inherit;
-    padding-top: 100%;
-    background: var(--bg2) center;
-    background-size: cover;
-  }
+	.p {
+		border-radius: inherit;
+		padding-top: 100%;
+		background: var(--bg2) center;
+		background-size: cover;
+	}
 
-  .n {
-    width: 90%;
-    margin: 0 auto;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 12px;
-    line-height: 2;
-    text-align: center;
-  }
+	.n {
+		width: 90%;
+		margin: 0 auto;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font-size: 12px;
+		line-height: 2;
+		text-align: center;
+	}
 </style>

@@ -123,82 +123,82 @@
 </div>
 
 <style lang="scss">
-  @use '../../../lib/break' as *;
+	@use '../../../lib/break' as *;
 
-  .t {
-    justify-content: space-between;
-    display: flex;
-    padding: 12px 20px;
-    @include s() {
-      padding-right: 5px;
-    }
+	.t {
+		justify-content: space-between;
+		display: flex;
+		padding: 12px 20px;
+		@include s() {
+			padding-right: 5px;
+		}
 
-    button {
-      padding: 0 10px;
-    }
-  }
+		button {
+			padding: 0 10px;
+		}
+	}
 
-  .v,
-  .o {
-    display: flex;
-  }
+	.v,
+	.o {
+		display: flex;
+	}
 
-  .v {
-    border-radius: 4px;
+	.v {
+		border-radius: 4px;
 
-    button {
-      text-align: center;
-      width: 100px;
-      border-radius: 4px 0 0 4px;
-      opacity: 0.8;
-      font-size: 13px;
-      color: #5f768f;
-      padding: 5px;
-      border: currentColor 1px solid;
-      border-right-width: 0;
+		button {
+			text-align: center;
+			width: 100px;
+			border-radius: 4px 0 0 4px;
+			opacity: 0.8;
+			font-size: 13px;
+			color: #5f768f;
+			padding: 5px;
+			border: currentColor 1px solid;
+			border-right-width: 0;
 
-      & + button {
-        border-right-width: 1px;
-        border-left: 0;
-        border-radius: 0 4px 4px 0;
-      }
+			& + button {
+				border-right-width: 1px;
+				border-left: 0;
+				border-radius: 0 4px 4px 0;
+			}
 
-      &:hover {
-        opacity: 1;
-      }
-    }
+			&:hover {
+				opacity: 1;
+			}
+		}
 
-    .act {
-      color: #fff;
-      border-color: transparent;
-      background: var(--darkgrey-h);
-    }
-  }
+		.act {
+			color: #fff;
+			border-color: transparent;
+			background: var(--darkgrey-h);
+		}
+	}
 
-  .x {
-    height: 100%;
-    background: var(--bg3);
-  }
+	.x {
+		height: 100%;
+		background: var(--bg3);
+	}
 
-  .a {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    background: var(--bg1);
-    padding-bottom: 15px;
-    @include s() {
-      padding-bottom: 5px;
-    }
-  }
+	.a {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		background: var(--bg1);
+		padding-bottom: 15px;
+		@include s() {
+			padding-bottom: 5px;
+		}
+	}
 
-  .ls {
-    flex: 1;
-    overflow: auto;
-    @include s() {
-      margin-bottom: 5px;
-      &::-webkit-scrollbar {
-        height: 5px;
-      }
-    }
-  }
+	.ls {
+		flex: 1;
+		overflow: auto;
+		@include s() {
+			margin-bottom: 5px;
+			&::-webkit-scrollbar {
+				height: 5px;
+			}
+		}
+	}
 </style>

@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run as run_1 } from 'svelte/legacy';
 
 	import { onDestroy, onMount } from 'svelte';
@@ -145,17 +145,17 @@
 </div>
 
 <style lang="scss">
-  canvas {
-    display: block;
-  }
+	canvas {
+		display: block;
+	}
 
-  .cvs {
-    transition: 0.3s ease-in-out;
-    pointer-events: none;
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-  }
+	.cvs {
+		transition: 0.3s ease-in-out;
+		pointer-events: none;
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+	}
 </style>
