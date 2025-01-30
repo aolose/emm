@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
 
 	import { marked } from 'marked';
@@ -70,49 +70,49 @@
 </div>
 
 <style lang="scss">
-  @import 'highlight.js/styles/github-dark.css';
+	@import 'highlight.js/styles/github-dark.css';
 
-  .p {
-    overflow: auto;
-    height: 100%;
-    background: var(--bg1);
-  }
+	.p {
+		overflow: auto;
+		height: 100%;
+		background: var(--bg1);
+	}
 
-  .a {
-    padding: 20px;
-    line-height: 1.8;
-    color: var(--darkgrey-h);
+	.a {
+		padding: 20px;
+		line-height: 1.8;
+		color: var(--darkgrey-h);
 
-    :global {
-      ul,
-      ol {
-        margin: 0 0 10px 20px;
-      }
+		:global {
+			ul,
+			ol {
+				margin: 0 0 10px 20px;
+			}
 
-      img {
-        margin: 1rem auto;
-        border-radius: 1rem;
-        max-width: 100%;
-        height: auto;
-      }
+			img {
+				margin: 1rem auto;
+				border-radius: 1rem;
+				max-width: 100%;
+				height: auto;
+			}
 
-      a {
-        color: var(--blue);
+			a {
+				color: var(--blue);
 
-        &:hover {
-          color: #fff;
-        }
-      }
+				&:hover {
+					color: #fff;
+				}
+			}
 
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6 {
-        color: var(--darkgrey-h);
-        font-weight: 400;
-      }
-    }
-  }
+			h1,
+			h2,
+			h3,
+			h4,
+			h5,
+			h6 {
+				color: var(--darkgrey-h);
+				font-weight: 400;
+			}
+		}
+	}
 </style>

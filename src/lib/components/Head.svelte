@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { h } from '$lib/store';
 
 	let { title, description, keywords, children } = $props();

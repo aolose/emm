@@ -23,51 +23,51 @@
 </div>
 
 <style lang="scss">
-  @use '../../break' as *;
+	@use '../../break' as *;
 
-  .a {
-    background: rgba(0, 0, 0, 0.24);
-    display: flex;
-    width: 300px;
-    margin: 20px auto;
-    height: 40px;
-    border-radius: 4px;
-    align-items: center;
-    @include s() {
-      width: 80%;
-    }
-  }
+	.a {
+		background: rgba(0, 0, 0, 0.24);
+		display: flex;
+		width: 300px;
+		margin: 20px auto;
+		height: 40px;
+		border-radius: 4px;
+		align-items: center;
+		@include s() {
+			width: 80%;
+		}
+	}
 
-  input {
-    flex: 1;
-    padding: 0;
-    outline: none;
-    border: none;
+	input {
+		flex: 1;
+		padding: 0;
+		outline: none;
+		border: none;
 
-    &::placeholder {
-      color: #3b5572;
-    }
-  }
+		&::placeholder {
+			color: #3b5572;
+		}
+	}
 
-  .icon {
-    top: 1px;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.3s;
-    width: 40px;
-    line-height: 1;
-    background: transparent;
-    color: #4b6c91;
-    cursor: pointer;
+	.icon {
+		top: 1px;
+		font-size: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: 0.3s;
+		width: 40px;
+		line-height: 1;
+		background: transparent;
+		color: #4b6c91;
+		cursor: pointer;
 
-    &:hover {
-      opacity: 1;
-    }
-  }
+		&:hover {
+			opacity: 1;
+		}
+	}
 
-  .act {
-    color: var(--blue);
-  }
+	.act {
+		color: var(--blue);
+	}
 </style>

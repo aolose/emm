@@ -81,32 +81,32 @@
 	<Ipt label="Download Path" bind:value={dir} placeholder="dir" />
 	<Ipt label="Token" bind:value={token} placeholder="token" box />
 	<a href="https://lite.ip2location.com/database-download" target="_blank" rel="noreferrer"
-	>where is my token?</a
+		>where is my token?</a
 	>
 	<s></s>
 </Card>
 
 <style>
-    span {
-        padding: 0 30px;
-    }
+	span {
+		padding: 0 30px;
+	}
 
-    b {
-        margin-left: 40px;
-        font-weight: 200;
-        color: cornflowerblue;
-    }
+	b {
+		margin-left: 40px;
+		font-weight: 200;
+		color: cornflowerblue;
+	}
 
-    s {
-        padding: 5px;
-    }
+	s {
+		padding: 5px;
+	}
 
-    a {
-        opacity: 0.8;
-        bottom: 20px;
-        right: 30px;
-        position: absolute;
-        color: dodgerblue;
-        text-decoration: underline;
-    }
+	a {
+		opacity: 0.8;
+		bottom: 20px;
+		right: 30px;
+		position: absolute;
+		color: dodgerblue;
+		text-decoration: underline;
+	}
 </style>

@@ -206,192 +206,192 @@
 {/if}
 
 <style lang="scss">
-  @use '../../lib/break' as *;
+	@use '../../lib/break' as *;
 
-  .g {
-    display: flex;
-    align-items: center;
-  }
+	.g {
+		display: flex;
+		align-items: center;
+	}
 
-  .v {
-    white-space: nowrap;
-    background: var(--bg0);
-    font-size: 12px;
-    padding: 0 5px;
-    color: #707e94;
-  }
+	.v {
+		white-space: nowrap;
+		background: var(--bg0);
+		font-size: 12px;
+		padding: 0 5px;
+		color: #707e94;
+	}
 
-  s {
-    flex: 1;
-  }
+	s {
+		flex: 1;
+	}
 
-  .u {
-    transition: 0.3s ease-in-out;
-    border: 15px solid transparent;
-    border-bottom: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    height: 100px;
-    overflow: auto;
+	.u {
+		transition: 0.3s ease-in-out;
+		border: 15px solid transparent;
+		border-bottom: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-content: center;
+		height: 100px;
+		overflow: auto;
 
-    button {
-      font-size: 12px;
-      padding: 3px;
-      cursor: pointer;
-    }
+		button {
+			font-size: 12px;
+			padding: 3px;
+			cursor: pointer;
+		}
 
-    span {
-      width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 13px;
-    }
+		span {
+			width: 100px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			font-size: 13px;
+		}
 
-    .t {
-      height: 4px;
-      flex: 1;
-      background: var(--darkgrey);
+		.t {
+			height: 4px;
+			flex: 1;
+			background: var(--darkgrey);
 
-      div {
-        transition: 0.1s linear;
-        height: 100%;
-        background: #3a596b;
-      }
-    }
-  }
+			div {
+				transition: 0.1s linear;
+				height: 100%;
+				background: #3a596b;
+			}
+		}
+	}
 
-  .r {
-    height: 30px;
-    padding: 0 20px;
-    display: flex;
-    width: 50%;
-    align-items: center;
-  }
+	.r {
+		height: 30px;
+		padding: 0 20px;
+		display: flex;
+		width: 50%;
+		align-items: center;
+	}
 
-  [type='file'] {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: auto;
-    opacity: 0;
-    display: block;
-    appearance: none;
-  }
+	[type='file'] {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		width: auto;
+		opacity: 0;
+		display: block;
+		appearance: none;
+	}
 
-  .dp {
-    pointer-events: none;
-    position: absolute;
-    left: 10px;
-    top: 10px;
-    right: 10px;
-    bottom: 10px;
-    border: 5px dashed #fff;
-    border-radius: 10px;
-    opacity: 0;
-    transition: 0.2s;
-  }
+	.dp {
+		pointer-events: none;
+		position: absolute;
+		left: 10px;
+		top: 10px;
+		right: 10px;
+		bottom: 10px;
+		border: 5px dashed #fff;
+		border-radius: 10px;
+		opacity: 0;
+		transition: 0.2s;
+	}
 
-  .dr > .dp {
-    opacity: 0.2;
-  }
+	.dr > .dp {
+		opacity: 0.2;
+	}
 
-  .icon {
-    background: var(--darkgrey);
-    font-size: 18px;
-    padding: 10px;
-    border: none;
-    color: #a2afc5;
-    background: none;
-    cursor: pointer;
-    transition: 0.2s ease-in-out;
+	.icon {
+		background: var(--darkgrey);
+		font-size: 18px;
+		padding: 10px;
+		border: none;
+		color: #a2afc5;
+		background: none;
+		cursor: pointer;
+		transition: 0.2s ease-in-out;
 
-    &:hover {
-      color: #fff;
-    }
-  }
+		&:hover {
+			color: #fff;
+		}
+	}
 
-  .i-close {
-    margin-left: 10px;
-  }
+	.i-close {
+		margin-left: 10px;
+	}
 
-  input {
-    width: 0;
-    outline: none;
-    flex: 1;
-    height: inherit;
-    border: 0;
-    padding: 0;
-  }
+	input {
+		width: 0;
+		outline: none;
+		flex: 1;
+		height: inherit;
+		border: 0;
+		padding: 0;
+	}
 
-  .s {
-    box-shadow: inset rgba(0, 0, 0, 0.1) 0 0 4px;
-    border-radius: 4px;
-    display: flex;
-    width: 300px;
-    padding: 0 10px;
-    background: var(--bg1);
-    align-items: center;
+	.s {
+		box-shadow: inset rgba(0, 0, 0, 0.1) 0 0 4px;
+		border-radius: 4px;
+		display: flex;
+		width: 300px;
+		padding: 0 10px;
+		background: var(--bg1);
+		align-items: center;
 
-    button {
-      padding-left: 0;
-    }
-  }
+		button {
+			padding-left: 0;
+		}
+	}
 
-  .h {
-    align-items: center;
-    padding: 10px 10px;
-    display: flex;
-  }
+	.h {
+		align-items: center;
+		padding: 10px 10px;
+		display: flex;
+	}
 
-  .a {
-    z-index: 5;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(1px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    @include s() {
-      backdrop-filter: none;
-    }
-  }
+	.a {
+		z-index: 5;
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		left: 0;
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(1px);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		@include s() {
+			backdrop-filter: none;
+		}
+	}
 
-  .b {
-    width: 600px;
-    height: 600px;
-    background: var(--bg0);
-    display: flex;
-    flex-direction: column;
-    box-shadow: rgba(0, 0, 0, 0.5) 0 10px 50px;
-    @include s() {
-      width: var(--w);
-      height: 100%;
-      box-shadow: none;
-    }
-  }
+	.b {
+		width: 600px;
+		height: 600px;
+		background: var(--bg0);
+		display: flex;
+		flex-direction: column;
+		box-shadow: rgba(0, 0, 0, 0.5) 0 10px 50px;
+		@include s() {
+			width: var(--w);
+			height: 100%;
+			box-shadow: none;
+		}
+	}
 
-  .ls {
-    background: var(--bg1);
-    flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-    overflow: auto;
-    padding: 10px;
-    align-content: flex-start;
-  }
+	.ls {
+		background: var(--bg1);
+		flex: 1;
+		display: flex;
+		flex-wrap: wrap;
+		overflow: auto;
+		padding: 10px;
+		align-content: flex-start;
+	}
 
-  .p {
-    display: flex;
-    align-items: center;
-    height: 50px;
-    justify-content: center;
-  }
+	.p {
+		display: flex;
+		align-items: center;
+		height: 50px;
+		justify-content: center;
+	}
 </style>

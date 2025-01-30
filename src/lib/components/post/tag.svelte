@@ -1,9 +1,5 @@
-<script lang="ts">
-	interface Props {
-		t?: string;
-	}
-
-	let { t = '' }: Props = $props();
+<script>
+	let { t = '' } = $props();
 </script>
 
 {#each t.split(',').filter((a) => !!a) as g}
@@ -11,16 +7,16 @@
 {/each}
 
 <style lang="scss">
-  a {
-    font-size: 14px;
-    color: #68758f;
-    border-radius: 3px;
-    background: var(--bg4);
-    padding: 3px 10px;
-    margin-left: 5px;
+	a {
+		font-size: 14px;
+		color: #68758f;
+		border-radius: 3px;
+		background: var(--bg4);
+		padding: 3px 10px;
+		margin-left: 5px;
 
-    &:hover {
-      color: #fff;
-    }
-  }
+		&:hover {
+			color: #fff;
+		}
+	}
 </style>

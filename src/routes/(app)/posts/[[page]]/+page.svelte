@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import Posts from '$lib/components/post/list.svelte';
 	import { onMount } from 'svelte';
 	import Head from '$lib/components/Head.svelte';
