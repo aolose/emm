@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
 
 	import { permission } from '$lib/enum';
@@ -51,73 +51,73 @@
 <button class="icon i-sys" onclick={() => goto('/admin', { replaceState: true })}></button>
 
 <style lang="scss">
-  .i {
-    text-align: center;
-    font-size: 14px;
-    top: -5px;
-    transition: 0.3s;
-  }
+	.i {
+		text-align: center;
+		font-size: 14px;
+		top: -5px;
+		transition: 0.3s;
+	}
 
-  .o {
-    color: orange;
-  }
+	.o {
+		color: orange;
+	}
 
-  button {
-    width: 90%;
-    display: block;
-    padding: 5px 10px;
-    margin: 10px auto 0;
-  }
+	button {
+		width: 90%;
+		display: block;
+		padding: 5px 10px;
+		margin: 10px auto 0;
+	}
 
-  .tk {
-    border: 2px dashed rgba(80, 100, 150, 0.5);
-    padding: 10px 15px 15px;
-    margin: 10px;
-  }
+	.tk {
+		border: 2px dashed rgba(80, 100, 150, 0.5);
+		padding: 10px 15px 15px;
+		margin: 10px;
+	}
 
-  .v {
-    border: 0;
-    margin: 0;
-    background: rgba(0, 0, 0, 0.2);
+	.v {
+		border: 0;
+		margin: 0;
+		background: rgba(0, 0, 0, 0.2);
 
-    div {
-      margin: 0 auto;
-      width: 180px;
-    }
-  }
+		div {
+			margin: 0 auto;
+			width: 180px;
+		}
+	}
 
-  code {
-    color: #b1837a;
-    font-size: 28px;
-    display: block;
-    text-align: center;
-    padding: 10px;
-  }
+	code {
+		color: #b1837a;
+		font-size: 28px;
+		display: block;
+		text-align: center;
+		padding: 10px;
+	}
 
-  p {
-    text-align: center;
-    margin-bottom: 10px;
-    color: #5278a8;
-  }
+	p {
+		text-align: center;
+		margin-bottom: 10px;
+		color: #5278a8;
+	}
 
-  span {
-    padding: 0 10px;
-    display: flex;
-    font-size: 13px;
-  }
+	span {
+		padding: 0 10px;
+		display: flex;
+		font-size: 13px;
+	}
 
-  b {
-    font-weight: 200;
-    display: block;
-    flex: 1;
-    padding-right: 10px;
-  }
+	b {
+		font-weight: 200;
+		display: block;
+		flex: 1;
+		padding-right: 10px;
+	}
 
-  .i-sys {
-    position: fixed;
-    bottom: 10px;
-    right: 0;
-    opacity: 0.2;
-    width: auto;
-  }
+	.i-sys {
+		position: fixed;
+		bottom: 10px;
+		right: 0;
+		opacity: 0.2;
+		width: auto;
+	}
 </style>

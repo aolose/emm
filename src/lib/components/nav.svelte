@@ -33,110 +33,109 @@
 </nav>
 
 <style lang="scss">
-  @use '../../lib/break' as *;
+	@use '../../lib/break' as *;
 
-  nav {
-    display: flex;
-    transition: 0.3s ease-in-out;
-    opacity: 0;
-    pointer-events: none;
-    align-items: center;
-    position: fixed;
-    padding: 0 15px 0 60px;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(180deg, rgba(13, 18, 27, 0.7), transparent);
-    @include s() {
-      opacity: 1;
-      padding-left: 50px;
-    }
-
-    &.m {
-
-    }
-
-    &.n {
-      background: none!important;
-    }
-
-    span {
-      color: inherit;
-      font-size: 26px;
-    }
-  }
-
-  .a {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    height: 60px;
-    @include s() {
-      margin-right: 40px;
-      & + .a {
-        display: none;
-      }
-    }
-  }
-
-  .e {
-    z-index: 5;
-    cursor: pointer;
-    position: fixed;
-    left: 15px;
-    top: 11px;
-    transform: translate3d(0, 0, 0);
-    height: 36px;
-    width: 36px;
-    color: #fff;
-
-    i {
-      transition: 0.3s ease-in-out;
-      color: inherit;
-      left: 9px;
-      position: absolute;
-      display: block;
-      width: 50%;
-      height: 1px;
-      background: currentColor;
-      transform: translate3d(0, 0, 0);
-    }
-
-    .e0 {
-      top: 12px;
-    }
-
-    .e1 {
-      top: 18px;
-    }
-
-    .e2 {
-      top: 24px;
-    }
-  }
-
-  nav.act {
-    opacity: 1;
-    pointer-events: auto;
-		@include s(){
-      background: linear-gradient(180deg, rgba(15, 19, 25, 1), rgba(15, 19, 25, 0.8));
+	nav {
+		display: flex;
+		transition: 0.3s ease-in-out;
+		opacity: 0;
+		pointer-events: none;
+		align-items: center;
+		position: fixed;
+		padding: 0 15px 0 60px;
+		top: 0;
+		left: 0;
+		right: 0;
+		background: linear-gradient(180deg, rgba(13, 18, 27, 0.7), transparent);
+		@include s() {
+			opacity: 1;
+			padding-left: 50px;
 		}
-  }
 
-  .act.e {
-    opacity: 1;
-    color: rgba(250, 250, 250, 1);
+		&.m {
+		}
 
-    .e0 {
-      transform: translate3d(1px, 3px, 0) rotate(34deg) scaleX(0.6);
-    }
+		&.n {
+			background: none !important;
+		}
 
-    .e1 {
-      transform: translate3d(0, 0, 0) scale(0);
-    }
+		span {
+			color: inherit;
+			font-size: 26px;
+		}
+	}
 
-    .e2 {
-      transform: translate3d(1px, -3px, 0) rotate(-34deg) scaleX(0.6);
-    }
-  }
+	.a {
+		flex-grow: 1;
+		display: flex;
+		align-items: center;
+		height: 60px;
+		@include s() {
+			margin-right: 40px;
+			& + .a {
+				display: none;
+			}
+		}
+	}
+
+	.e {
+		z-index: 5;
+		cursor: pointer;
+		position: fixed;
+		left: 15px;
+		top: 11px;
+		transform: translate3d(0, 0, 0);
+		height: 36px;
+		width: 36px;
+		color: #fff;
+
+		i {
+			transition: 0.3s ease-in-out;
+			color: inherit;
+			left: 9px;
+			position: absolute;
+			display: block;
+			width: 50%;
+			height: 1px;
+			background: currentColor;
+			transform: translate3d(0, 0, 0);
+		}
+
+		.e0 {
+			top: 12px;
+		}
+
+		.e1 {
+			top: 18px;
+		}
+
+		.e2 {
+			top: 24px;
+		}
+	}
+
+	nav.act {
+		opacity: 1;
+		pointer-events: auto;
+		@include s() {
+			background: linear-gradient(180deg, rgba(15, 19, 25, 1), rgba(15, 19, 25, 0.8));
+		}
+	}
+
+	.act.e {
+		opacity: 1;
+		color: rgba(250, 250, 250, 1);
+
+		.e0 {
+			transform: translate3d(1px, 3px, 0) rotate(34deg) scaleX(0.6);
+		}
+
+		.e1 {
+			transform: translate3d(0, 0, 0) scale(0);
+		}
+
+		.e2 {
+			transform: translate3d(1px, -3px, 0) rotate(-34deg) scaleX(0.6);
+		}
+	}
 </style>

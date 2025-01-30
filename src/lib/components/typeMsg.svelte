@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { msg } from '$lib/store';
 	import { onMount } from 'svelte';
 
@@ -8,12 +8,7 @@
 	let pv = $state('');
 	let pr = $state('');
 	let t = -1;
-
-	interface Props {
-		defaultText?: string;
-	}
-
-	let { defaultText = '' }: Props = $props();
+	let { defaultText = '' } = $props();
 
 	const autoText = (str) => {
 		clearTimeout(t);
@@ -58,10 +53,10 @@
 </p>
 
 <style lang="scss">
-  p {
-    font-size: inherit;
-    font-family: 'Architects Daughter';
-    color: inherit;
-    text-align: inherit;
-  }
+	p {
+		font-size: inherit;
+		font-family: 'Architects Daughter';
+		color: inherit;
+		text-align: inherit;
+	}
 </style>

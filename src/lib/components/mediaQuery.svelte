@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
 
 	import { onMount } from 'svelte';
@@ -6,13 +6,7 @@
 	let mql;
 	let mqlListener;
 	let wasMounted = $state(false);
-
-	interface Props {
-		query: any;
-		matches?: boolean;
-	}
-
-	let { query, matches = $bindable(false) }: Props = $props();
+	let { query, matches = $bindable(false) } = $props();
 
 	onMount(() => {
 		wasMounted = true;

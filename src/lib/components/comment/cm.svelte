@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
 
 	import Ava from '$lib/components/post/ava.svelte';
@@ -7,28 +7,7 @@
 	import { fade } from 'svelte/transition';
 	import { req } from '$lib/req';
 	import { msg } from './msg';
-
-	interface Props {
-		admin?: number;
-		slug: any;
-		reply: any;
-		done: any;
-		edit: any;
-		user?: any;
-		cur?: any;
-		av?: any;
-	}
-
-	let {
-		admin = 0,
-		slug,
-		reply,
-		done,
-		edit,
-		user = {},
-		cur = $bindable({}),
-		av = []
-	}: Props = $props();
+	let { admin = 0, slug, reply, done, edit, user = {}, cur = $bindable({}), av = [] } = $props();
 	let sh = $state(0);
 	let cm = $state(edit ? edit.content : '');
 	let dis = $state();
@@ -44,15 +23,15 @@
 		ld = 1;
 		const o = admin
 			? {
-				isAdm: 1,
-				content: cm
-			}
+					isAdm: 1,
+					content: cm
+				}
 			: {
-				_slug: slug,
-				_name: cur.name,
-				_avatar: cur.avatar,
-				content: cm
-			};
+					_slug: slug,
+					_name: cur.name,
+					_avatar: cur.avatar,
+					content: cm
+				};
 		if (reply?.cm) o.reply = reply.cm;
 		if (reply?.topic) o.topic = reply.topic;
 		req('cm', o)
@@ -150,262 +129,262 @@
 </div>
 
 <style lang="scss">
-  @use '../../../lib/break' as *;
+	@use '../../../lib/break' as *;
 
-  :root {
-    --bg: rgba(0, 0, 0, 0.15);
-  }
+	:root {
+		--bg: rgba(0, 0, 0, 0.15);
+	}
 
-  .ft {
-    display: flex;
-    justify-content: space-between;
+	.ft {
+		display: flex;
+		justify-content: space-between;
 
-    button {
-      margin-right: 15px;
-      padding: 0 3px;
-    }
-  }
+		button {
+			margin-right: 15px;
+			padding: 0 3px;
+		}
+	}
 
-  .t {
-    position: absolute;
-    right: 10px;
-    bottom: 5px;
-    font-size: 13px;
-    color: #2e4a65;
-  }
+	.t {
+		position: absolute;
+		right: 10px;
+		bottom: 5px;
+		font-size: 13px;
+		color: #2e4a65;
+	}
 
-  .dis {
-    opacity: 0;
-    pointer-events: none;
-  }
+	.dis {
+		opacity: 0;
+		pointer-events: none;
+	}
 
-  input,
-  .n {
-    display: flex;
-    align-items: center;
-    height: 30px;
-    font-weight: 200;
-    min-width: 80px;
-    font-size: 15px;
-    max-width: 300px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 130px;
-    margin-left: 10px;
-  }
+	input,
+	.n {
+		display: flex;
+		align-items: center;
+		height: 30px;
+		font-weight: 200;
+		min-width: 80px;
+		font-size: 15px;
+		max-width: 300px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		width: 130px;
+		margin-left: 10px;
+	}
 
-  input {
-    border: none;
-    background: var(--bg1);
-  }
+	input {
+		border: none;
+		background: var(--bg1);
+	}
 
-  .sd {
-    border-top: 1px solid #0d1926;
-    padding-bottom: 1px;
-  }
+	.sd {
+		border-top: 1px solid #0d1926;
+		padding-bottom: 1px;
+	}
 
-  .i-pub {
-    background: #477dc1;
-    color: #fff;
-    font-size: 18px;
-    width: 40px;
-    height: 30px;
-    border-radius: 3px;
-  }
+	.i-pub {
+		background: #477dc1;
+		color: #fff;
+		font-size: 18px;
+		width: 40px;
+		height: 30px;
+		border-radius: 3px;
+	}
 
-  .nf {
-    display: flex;
-    align-items: center;
-    flex: 1;
+	.nf {
+		display: flex;
+		align-items: center;
+		flex: 1;
 
-    p {
-      font-size: 13px;
-      color: var(--darkgrey);
-    }
-  }
+		p {
+			font-size: 13px;
+			color: var(--darkgrey);
+		}
+	}
 
-  .n {
-    margin-right: 10px;
-    width: auto;
-  }
+	.n {
+		margin-right: 10px;
+		width: auto;
+	}
 
-  .c {
-    margin-top: 20px;
-    border-radius: 4px;
-    border: 1px solid rgba(80, 100, 150, 0.07);
-    background: rgba(80, 100, 150, 0.07);
-  }
+	.c {
+		margin-top: 20px;
+		border-radius: 4px;
+		border: 1px solid rgba(80, 100, 150, 0.07);
+		background: rgba(80, 100, 150, 0.07);
+	}
 
-  .as {
-    padding: 7px;
-    position: absolute;
-    height: 150px;
-    top: -160px;
-    width: 210px;
-    overflow: hidden;
-    background: rgba(10, 15, 20, 0.5);
-    backdrop-filter: blur(15px);
-    border: 1px solid #1d283a;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 3px 8px -3px;
-    border-radius: 5px;
-    display: flex;
-    flex-wrap: wrap;
+	.as {
+		padding: 7px;
+		position: absolute;
+		height: 150px;
+		top: -160px;
+		width: 210px;
+		overflow: hidden;
+		background: rgba(10, 15, 20, 0.5);
+		backdrop-filter: blur(15px);
+		border: 1px solid #1d283a;
+		box-shadow: rgba(0, 0, 0, 0.2) 0 3px 8px -3px;
+		border-radius: 5px;
+		display: flex;
+		flex-wrap: wrap;
 
-    :global {
-      .av {
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: auto 80%;
-        margin: 3px;
-        border-radius: 6px;
+		:global {
+			.av {
+				background-position: center;
+				background-repeat: no-repeat;
+				background-size: auto 80%;
+				margin: 3px;
+				border-radius: 6px;
 
-        &.act,
-        &:hover {
-          background-color: #000;
-        }
-      }
-    }
-  }
+				&.act,
+				&:hover {
+					background-color: #000;
+				}
+			}
+		}
+	}
 
-  .o {
-    padding: 10px;
-    display: flex;
-    align-items: center;
-  }
+	.o {
+		padding: 10px;
+		display: flex;
+		align-items: center;
+	}
 
-  .v {
-    opacity: 0;
-    pointer-events: none;
-    min-height: 60px;
-    overflow: hidden;
-    max-height: 150px;
-  }
+	.v {
+		opacity: 0;
+		pointer-events: none;
+		min-height: 60px;
+		overflow: hidden;
+		max-height: 150px;
+	}
 
-  .v,
-  textarea {
-    padding: 10px 30px;
-    white-space: pre-wrap;
-    line-height: 1.5;
-    font-size: 14px;
-    margin-bottom: 20px;
-  }
+	.v,
+	textarea {
+		padding: 10px 30px;
+		white-space: pre-wrap;
+		line-height: 1.5;
+		font-size: 14px;
+		margin-bottom: 20px;
+	}
 
-  textarea {
-    border: none;
-    width: 100%;
-    resize: none;
-    left: 0;
-    right: 0;
-    top: 5px;
-    bottom: 10px;
-    position: absolute;
-    height: auto;
-    color: #fff;
-  }
+	textarea {
+		border: none;
+		width: 100%;
+		resize: none;
+		left: 0;
+		right: 0;
+		top: 5px;
+		bottom: 10px;
+		position: absolute;
+		height: auto;
+		color: #fff;
+	}
 
-  .m {
-    margin: 0;
-    height: auto;
-    background: rgba(0, 0, 0, 0.05);
+	.m {
+		margin: 0;
+		height: auto;
+		background: rgba(0, 0, 0, 0.05);
 
-    .i-pub {
-      font-size: 14px;
-      width: 32px;
-      height: 24px;
-      margin-top: 5px;
-    }
+		.i-pub {
+			font-size: 14px;
+			width: 32px;
+			height: 24px;
+			margin-top: 5px;
+		}
 
-    .o {
-      padding: 5px 10px;
-    }
+		.o {
+			padding: 5px 10px;
+		}
 
-    .sd {
-      border: none;
-    }
+		.sd {
+			border: none;
+		}
 
-    .v,
-    textarea {
-      padding: 0 10px;
-    }
+		.v,
+		textarea {
+			padding: 0 10px;
+		}
 
-    .t {
-      right: 10px;
-      bottom: 5px;
-      font-size: 12px;
-    }
+		.t {
+			right: 10px;
+			bottom: 5px;
+			font-size: 12px;
+		}
 
-    .v {
-      min-height: 50px;
-    }
-  }
+		.v {
+			min-height: 50px;
+		}
+	}
 
-  .ed {
-    background: rgba(100, 100, 100, 0.05);
-    margin: 0;
+	.ed {
+		background: rgba(100, 100, 100, 0.05);
+		margin: 0;
 
-    .v,
-    textarea {
-      padding: 10px;
-    }
+		.v,
+		textarea {
+			padding: 10px;
+		}
 
-    .t {
-      right: 5px;
-      bottom: 3px;
-    }
-  }
+		.t {
+			right: 5px;
+			bottom: 3px;
+		}
+	}
 
-  .am,
-  .sd {
-    display: flex;
-    flex-direction: column;
-  }
+	.am,
+	.sd {
+		display: flex;
+		flex-direction: column;
+	}
 
-  .am {
-    height: 300px;
-    @include s() {
-      height: 200px;
-      padding: 10px;
-      .pu {
-        font-size: 13px;
-        border-radius: 3px;
-        width: 80px;
-        height: 24px;
-        margin: 0;
-        left: 20px;
-        bottom: 15px;
-        position: absolute;
-      }
-      .t {
-        right: 0;
-      }
-    }
+	.am {
+		height: 300px;
+		@include s() {
+			height: 200px;
+			padding: 10px;
+			.pu {
+				font-size: 13px;
+				border-radius: 3px;
+				width: 80px;
+				height: 24px;
+				margin: 0;
+				left: 20px;
+				bottom: 15px;
+				position: absolute;
+			}
+			.t {
+				right: 0;
+			}
+		}
 
-    .sd {
-      padding: 0 10px;
-      flex-grow: 1;
-      max-height: 200px;
+		.sd {
+			padding: 0 10px;
+			flex-grow: 1;
+			max-height: 200px;
 
-      .v,
-      textarea {
-        padding: 0 20px;
-      }
-    }
+			.v,
+			textarea {
+				padding: 0 20px;
+			}
+		}
 
-    .v {
-      flex-grow: 1;
-      max-height: none;
-    }
-  }
+		.v {
+			flex-grow: 1;
+			max-height: none;
+		}
+	}
 
-  .pu {
-    width: 100px;
-    transition: 0.2s;
-    border-radius: 4px;
-    position: relative;
-    background: #496cad;
-    margin: 10px 20px 20px auto;
-    height: 30px;
-    color: #ddd;
-  }
+	.pu {
+		width: 100px;
+		transition: 0.2s;
+		border-radius: 4px;
+		position: relative;
+		background: #496cad;
+		margin: 10px 20px 20px auto;
+		height: 30px;
+		color: #ddd;
+	}
 </style>

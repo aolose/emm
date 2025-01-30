@@ -1,18 +1,8 @@
-<script lang="ts">
+<script>
 	import { run, stopPropagation } from 'svelte/legacy';
 
 	import { slide } from 'svelte/transition';
 	import { onDestroy } from 'svelte';
-
-	interface Props {
-		getValue: any;
-		getText: any;
-		defaultValue?: string;
-		multiply?: boolean;
-		value?: any;
-		items?: any;
-	}
-
 	let {
 		getValue,
 		getText,
@@ -20,7 +10,7 @@
 		multiply = true,
 		value = $bindable(),
 		items = []
-	}: Props = $props();
+	} = $props();
 	let s = $state(new Set());
 	let e = $state();
 	const ck = (v) => (ev) => {
@@ -70,54 +60,54 @@
 </div>
 
 <style lang="scss">
-  .a {
-    height: 34px;
-    width: 0;
-    resize: none;
-    border: 1px solid #304565;
-    background: var(--bg1);
-    flex: 1;
-    box-shadow: inset var(--bg0) 0 0 5px;
-    display: flex;
-    align-items: center;
+	.a {
+		height: 34px;
+		width: 0;
+		resize: none;
+		border: 1px solid #304565;
+		background: var(--bg1);
+		flex: 1;
+		box-shadow: inset var(--bg0) 0 0 5px;
+		display: flex;
+		align-items: center;
 
-    span {
-      overflow: hidden;
-      width: 100%;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      padding: 0 10px;
-      color: rgba(222, 226, 232, 0.6);
-    }
-  }
+		span {
+			overflow: hidden;
+			width: 100%;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			padding: 0 10px;
+			color: rgba(222, 226, 232, 0.6);
+		}
+	}
 
-  .b {
-    cursor: pointer;
-    position: absolute;
-    z-index: 10;
-    top: 35px;
-    opacity: 0.9;
-    background: var(--bg1);
-    width: 100%;
-    left: 0;
-    color: #6c7a93;
-    font-size: 13px;
+	.b {
+		cursor: pointer;
+		position: absolute;
+		z-index: 10;
+		top: 35px;
+		opacity: 0.9;
+		background: var(--bg1);
+		width: 100%;
+		left: 0;
+		color: #6c7a93;
+		font-size: 13px;
 
-    div {
-      padding: 8px 20px;
+		div {
+			padding: 8px 20px;
 
-      &:hover {
-        background: rgba(0, 0, 0, 0.1);
-      }
+			&:hover {
+				background: rgba(0, 0, 0, 0.1);
+			}
 
-      & + div {
-        border-top: 1px solid #273644;
-      }
-    }
+			& + div {
+				border-top: 1px solid #273644;
+			}
+		}
 
-    .s {
-      background: rgba(23, 39, 59, 0.2);
-      color: #fff;
-    }
-  }
+		.s {
+			background: rgba(23, 39, 59, 0.2);
+			color: #fff;
+		}
+	}
 </style>

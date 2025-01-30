@@ -61,51 +61,51 @@
 </div>
 
 <style lang="scss">
-  .a {
-    width: 200px;
-  }
+	.a {
+		width: 200px;
+	}
 
-  .i {
-    width: 260px;
-    margin-bottom: 10px;
-    alignment: center;
-    display: flex;
-    justify-content: space-between;
+	.i {
+		width: 260px;
+		margin-bottom: 10px;
+		alignment: center;
+		display: flex;
+		justify-content: space-between;
 
-    span {
-      font-size: 13px;
-      opacity: 0.5;
-    }
+		span {
+			font-size: 13px;
+			opacity: 0.5;
+		}
 
-    a {
-      text-decoration: underline;
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+		a {
+			text-decoration: underline;
+			flex: 1;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 
-    * {
-      font-size: 15px;
-      line-height: 1.5;
-    }
-  }
+		* {
+			font-size: 15px;
+			line-height: 1.5;
+		}
+	}
 
-  .b {
-    margin-top: 10px;
-    display: flex;
-  }
+	.b {
+		margin-top: 10px;
+		display: flex;
+	}
 
-  button {
-    font-size: 14px;
-    color: #1c93ff;
-    margin-right: 10px;
-  }
+	button {
+		font-size: 14px;
+		color: #1c93ff;
+		margin-right: 10px;
+	}
 
-  p {
-    text-align: right;
-    font-size: 13px;
-    flex: 1;
-    opacity: 0.8;
-  }
+	p {
+		text-align: right;
+		font-size: 13px;
+		flex: 1;
+		opacity: 0.8;
+	}
 </style>
