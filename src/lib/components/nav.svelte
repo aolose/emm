@@ -46,17 +46,18 @@
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(15, 19, 25, 0.9);
+    background: linear-gradient(180deg, rgba(13, 18, 27, 0.7), transparent);
     @include s() {
+      opacity: 1;
       padding-left: 50px;
     }
 
     &.m {
-      background: linear-gradient(90deg, rgba(15, 19, 25, 1), rgba(15, 19, 25, 0.4));
+
     }
 
     &.n {
-      background: none;
+      background: none!important;
     }
 
     span {
@@ -117,6 +118,9 @@
   nav.act {
     opacity: 1;
     pointer-events: auto;
+		@include s(){
+      background: linear-gradient(180deg, rgba(15, 19, 25, 1), rgba(15, 19, 25, 0.8));
+		}
   }
 
   .act.e {

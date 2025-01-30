@@ -50,7 +50,7 @@
 
   .p {
     overflow: hidden;
-    border-radius: 3px;
+    border-radius: 16px;
     width: 300px;
     height: 240px;
     transition: 0.3s ease-in-out;
@@ -59,8 +59,8 @@
     padding: 20px;
     margin: 10px;
     @include s() {
-      width: 95%;
-      margin: 10px auto;
+      width: 100%;
+      margin: 10px 0;
     }
 
     &:hover {
