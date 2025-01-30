@@ -121,22 +121,12 @@
 
       blockquote {
         border-radius: 8px;
-        background: rgba(13, 17, 23, 0.49);
+        background: rgba(37, 43, 57, 0.49);
         margin: 1.5em 0;
         font-size: 14px;
         padding: 20px 24px;
       }
 
-      blockquote:before {
-        color: transparent;
-        background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
-        background-clip: text;
-        content: open-quote;
-        font-size: 2em;
-        line-height: 0.1em;
-        margin-right: 0.1em;
-        vertical-align: -0.2em;
-      }
 
       blockquote p {
         color: #92a9b8;
@@ -234,9 +224,12 @@
       }
 
       p {
+				padding: 0 12px;
+        word-break: break-all;
+				text-align: justify;
         line-height: 2;
         margin-bottom: 20px;
-        color: rgba(172, 195, 225, 0.78);
+        color: rgba(195, 209, 227, 0.78);
       }
 
       img {
@@ -324,27 +317,29 @@
         background-clip: text;
       }
 
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6 {
-        color: transparent;
-        background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
-        background-clip: text;
-        font-weight: 400;
-        line-height: 2;
-        margin: 10px 0;
-
-        &:before {
-          color: transparent;
-          background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
-          background-clip: text;
-          content: '#';
-          padding-right: 5px;
-        }
-      }
+     &>{
+       h1,
+       h2,
+       h3,
+       h4,
+       h5,
+       h6 {
+         color: transparent;
+         background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
+         background-clip: text;
+         font-weight: 400;
+         line-height: 3;
+         margin: 10px 0;
+         text-align: center;
+         &:before {
+           color: transparent;
+           background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
+           background-clip: text;
+           content: '#';
+           padding-right: 5px;
+         }
+       }
+		 }
 
       ul,
       ol {
