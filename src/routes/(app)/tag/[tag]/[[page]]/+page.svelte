@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
 
 	import Posts from '$lib/components/post/list.svelte';

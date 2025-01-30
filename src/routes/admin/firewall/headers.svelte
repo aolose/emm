@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
 
 	import { hds2Str, str2Hds, watch } from '$lib/utils';
@@ -60,91 +60,91 @@
 </div>
 
 <style lang="scss">
-  @use '../../../lib/break.scss' as *;
+	@use '../../../lib/break.scss' as *;
 
-  .e {
-    flex: 1;
-    display: flex;
-    @include s() {
-      flex-direction: column;
-    }
-  }
+	.e {
+		flex: 1;
+		display: flex;
+		@include s() {
+			flex-direction: column;
+		}
+	}
 
-  input {
-    font-size: 13px;
-    width: 100px;
-    border-width: 0;
-    border-right-width: 1px;
-    @include s() {
-      width: 100%;
-      border-right: none;
-      border-bottom-width: 1px;
-    }
-  }
+	input {
+		font-size: 13px;
+		width: 100px;
+		border-width: 0;
+		border-right-width: 1px;
+		@include s() {
+			width: 100%;
+			border-right: none;
+			border-bottom-width: 1px;
+		}
+	}
 
-  button {
-    padding: 0 5px;
-    border-left: 1px solid #304565;
-  }
+	button {
+		padding: 0 5px;
+		border-left: 1px solid #304565;
+	}
 
-  .c {
-    flex-grow: 1;
-    @include s() {
-      width: 100%;
-      min-height: 32px;
-    }
-  }
+	.c {
+		flex-grow: 1;
+		@include s() {
+			width: 100%;
+			min-height: 32px;
+		}
+	}
 
-  textarea {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    resize: none;
-    width: 100%;
-    overflow: hidden;
-  }
+	textarea {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		resize: none;
+		width: 100%;
+		overflow: hidden;
+	}
 
-  p {
-    opacity: 0;
-    pointer-events: none;
-  }
+	p {
+		opacity: 0;
+		pointer-events: none;
+	}
 
-  p,
-  textarea {
-    line-height: 30px;
-    display: flex;
-    height: 100%;
-    border: none;
-    margin: 0;
-    word-break: break-all;
-    white-space: normal;
-    padding: 0 10px;
-    font-size: 13px;
-  }
+	p,
+	textarea {
+		line-height: 30px;
+		display: flex;
+		height: 100%;
+		border: none;
+		margin: 0;
+		word-break: break-all;
+		white-space: normal;
+		padding: 0 10px;
+		font-size: 13px;
+	}
 
-  .b {
-    width: 100%;
-    display: flex;
+	.b {
+		width: 100%;
+		display: flex;
 
-    &:hover {
-      background: rgba(0, 0, 0, 0.3);
-    }
+		&:hover {
+			background: rgba(0, 0, 0, 0.3);
+		}
 
-    & + .b {
-      border-top: inherit;
-      @include s() {
-        border-top-width: 2px;
-      }
-    }
-  }
+		& + .b {
+			border-top: inherit;
+			@include s() {
+				border-top-width: 2px;
+			}
+		}
+	}
 
-  .a {
-    resize: none;
-    border: 1px solid #304565;
-    background: var(--bg1);
-    flex-grow: 1;
-    box-shadow: inset var(--bg0) 0 0 5px;
-  }
+	.a {
+		resize: none;
+		border: 1px solid #304565;
+		background: var(--bg1);
+		flex-grow: 1;
+		box-shadow: inset var(--bg0) 0 0 5px;
+	}
 </style>

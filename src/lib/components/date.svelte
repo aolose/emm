@@ -188,28 +188,28 @@
 </div>
 
 <style lang="scss">
-  .a {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-  }
+	.a {
+		flex-grow: 1;
+		display: flex;
+		align-items: center;
+	}
 
-  span {
-    padding: 0 2px;
-  }
+	span {
+		padding: 0 2px;
+	}
 
-  input {
-    flex-grow: 1;
-    font-size: 13px;
-    text-align: center;
-    padding: 0 6px;
-    width: 28px;
-    border: 1px solid rgba(140, 181, 236, 0.1);
-    background: var(--bg3);
-    height: 40px;
+	input {
+		flex-grow: 1;
+		font-size: 13px;
+		text-align: center;
+		padding: 0 6px;
+		width: 28px;
+		border: 1px solid rgba(140, 181, 236, 0.1);
+		background: var(--bg3);
+		height: 40px;
 
-    &:first-child {
-      width: 45px;
-    }
-  }
+		&:first-child {
+			width: 45px;
+		}
+	}
 </style>

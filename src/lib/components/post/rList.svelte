@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import S from './rSelect.svelte';
 	import Ld from '$lib/components/loading.svelte';
 	import Pg from '$lib/components/pg.svelte';
@@ -125,137 +125,137 @@
 {/if}
 
 <style lang="scss">
-  @use 'sass:color';
+	@use 'sass:color';
 
-  .s {
-    display: flex;
-    padding: 2px 1.5em 0 0.8em;
-    align-items: center;
-    color: var(--darkgrey);
+	.s {
+		display: flex;
+		padding: 2px 1.5em 0 0.8em;
+		align-items: center;
+		color: var(--darkgrey);
 
-    &.act {
-      color: #1c93ff;
-    }
+		&.act {
+			color: #1c93ff;
+		}
 
-    input {
-      color: var(--darkgrey-h);
-      padding: 0 25px;
-      border-radius: 100px;
-      line-height: 40px;
-      margin-left: 7px;
-      width: 0;
-      flex: 1;
-      border: 0;
-      background: var(--bg2);
+		input {
+			color: var(--darkgrey-h);
+			padding: 0 25px;
+			border-radius: 100px;
+			line-height: 40px;
+			margin-left: 7px;
+			width: 0;
+			flex: 1;
+			border: 0;
+			background: var(--bg2);
 
-      &::placeholder {
-        color: var(--darkgrey);
-      }
-    }
-  }
+			&::placeholder {
+				color: var(--darkgrey);
+			}
+		}
+	}
 
-  .p {
-    display: flex;
-    align-items: center;
-    padding: 5px 30px;
+	.p {
+		display: flex;
+		align-items: center;
+		padding: 5px 30px;
 
-    span {
-      min-width: 100px;
-    }
+		span {
+			min-width: 100px;
+		}
 
-    &:nth-child(2n) {
-      background: color.adjust(#122336, $alpha: -0.8);
-    }
+		&:nth-child(2n) {
+			background: color.adjust(#122336, $alpha: -0.8);
+		}
 
-    &:hover {
-      background: color.adjust(#0b3054, $alpha: -0.5);
-    }
-  }
+		&:hover {
+			background: color.adjust(#0b3054, $alpha: -0.5);
+		}
+	}
 
-  .m {
-    pointer-events: none;
-    background: var(--bg1);
+	.m {
+		pointer-events: none;
+		background: var(--bg1);
 
-    .k {
-      opacity: 0;
-    }
-  }
+		.k {
+			opacity: 0;
+		}
+	}
 
-  .t {
-    height: 40px;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    justify-content: space-between;
+	.t {
+		height: 40px;
+		display: flex;
+		align-items: center;
+		padding: 0 20px;
+		justify-content: space-between;
 
-    .i-ok {
-      padding: 0 20px;
-    }
+		.i-ok {
+			padding: 0 20px;
+		}
 
-    button {
-      line-height: 2;
-      transition: 0.2s;
-      opacity: 0.6;
+		button {
+			line-height: 2;
+			transition: 0.2s;
+			opacity: 0.6;
 
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
+			&:hover {
+				opacity: 1;
+			}
+		}
+	}
 
-  .c {
-    flex: 1;
-    flex-direction: column;
-    display: flex;
-    align-items: center;
-  }
+	.c {
+		flex: 1;
+		flex-direction: column;
+		display: flex;
+		align-items: center;
+	}
 
-  .b {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-  }
+	.b {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		overflow: auto;
+	}
 
-  .ls {
-    padding: 20px 0;
-    background: color.adjust(black, $alpha: -0.8);
-    overflow: auto;
-    flex: 1;
-    margin-bottom: 10px;
-  }
+	.ls {
+		padding: 20px 0;
+		background: color.adjust(black, $alpha: -0.8);
+		overflow: auto;
+		flex: 1;
+		margin-bottom: 10px;
+	}
 
-  .a {
-    z-index: 5;
-    padding-bottom: 10px;
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--bg1);
-    border-radius: inherit;
-  }
+	.a {
+		z-index: 5;
+		padding-bottom: 10px;
+		display: flex;
+		flex-direction: column;
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: var(--bg1);
+		border-radius: inherit;
+	}
 
-  .k {
-    border-radius: 4px;
-    background: var(--bg3);
-    width: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    height: 18px;
-    border: 1px solid #1d2e48;
-    color: transparent;
-    cursor: pointer;
-    margin-right: 20px;
-    padding: 0 !important;
+	.k {
+		border-radius: 4px;
+		background: var(--bg3);
+		width: 18px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 12px;
+		height: 18px;
+		border: 1px solid #1d2e48;
+		color: transparent;
+		cursor: pointer;
+		margin-right: 20px;
+		padding: 0 !important;
 
-    &.s {
-      color: #fff;
-    }
-  }
+		&.s {
+			color: #fff;
+		}
+	}
 </style>

@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
 
 	import Canvas from '$lib/components/ctx.svelte';
@@ -161,210 +161,210 @@
 </div>
 
 <style lang="scss">
-  @use '../../../lib/break.scss' as *;
+	@use '../../../lib/break.scss' as *;
 
-  .p {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(3px);
-  }
+	.p {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		backdrop-filter: blur(3px);
+	}
 
-  .m {
-    box-shadow: rgba(0, 0, 0, 0.2) 0 5px 20px -5px;
-    background: var(--bg7);
-    border-radius: 4px;
-    width: 300px;
-    padding: 20px 0;
+	.m {
+		box-shadow: rgba(0, 0, 0, 0.2) 0 5px 20px -5px;
+		background: var(--bg7);
+		border-radius: 4px;
+		width: 300px;
+		padding: 20px 0;
 
-    p {
-      margin-bottom: 20px;
-      text-align: center;
-    }
+		p {
+			margin-bottom: 20px;
+			text-align: center;
+		}
 
-    button {
-      padding: 5px 0;
-      width: 100px;
-      display: block;
-      margin: 20px auto 0;
-      border: 1px solid rgba(80, 100, 150, 0.5);
-    }
-  }
+		button {
+			padding: 5px 0;
+			width: 100px;
+			display: block;
+			margin: 20px auto 0;
+			border: 1px solid rgba(80, 100, 150, 0.5);
+		}
+	}
 
-  .ts {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    padding: 1px;
-    margin: 20px 0;
-  }
+	.ts {
+		display: flex;
+		flex-wrap: wrap;
+		align-content: flex-start;
+		padding: 1px;
+		margin: 20px 0;
+	}
 
-  .er {
-    opacity: 0;
-    background: rgba(190, 100, 150, 0.1);
-    line-height: 2;
-    padding: 5px 20px;
-    border-radius: 4px;
-    color: #c9a6a6;
-    transition: 0.5s ease-in-out;
+	.er {
+		opacity: 0;
+		background: rgba(190, 100, 150, 0.1);
+		line-height: 2;
+		padding: 5px 20px;
+		border-radius: 4px;
+		color: #c9a6a6;
+		transition: 0.5s ease-in-out;
 
-    &.act {
-      opacity: 1;
-    }
-  }
+		&.act {
+			opacity: 1;
+		}
+	}
 
-  $r: 6px;
-  .o {
-    display: flex;
-    flex-direction: column;
-    transition: 0.3s ease-in-out;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+	$r: 6px;
+	.o {
+		display: flex;
+		flex-direction: column;
+		transition: 0.3s ease-in-out;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
 
-    &.e {
-      padding-top: 30px;
-    }
-  }
+		&.e {
+			padding-top: 30px;
+		}
+	}
 
-  .j {
-    flex: 1;
-    overflow: auto;
-    @include s() {
-      position: absolute;
-      flex: none;
-      top: 60px;
-      left: 0;
-      right: 0;
-      padding-top: 70px;
-      bottom: 0;
-    }
-  }
+	.j {
+		flex: 1;
+		overflow: auto;
+		@include s() {
+			position: absolute;
+			flex: none;
+			top: 60px;
+			left: 0;
+			right: 0;
+			padding-top: 70px;
+			bottom: 0;
+		}
+	}
 
-  .i {
-    padding: 20px;
-    width: 90%;
-    margin: 0 auto;
-    @include s() {
-      width: 100%;
-      padding: 10px 7%;
-    }
-  }
+	.i {
+		padding: 20px;
+		width: 90%;
+		margin: 0 auto;
+		@include s() {
+			width: 100%;
+			padding: 10px 7%;
+		}
+	}
 
-  h1 {
-    color: #ddd;
-    font-size: 30px;
-    line-height: 2;
-    font-weight: 200;
-    margin-top: 40px;
-  }
+	h1 {
+		color: #ddd;
+		font-size: 30px;
+		line-height: 2;
+		font-weight: 200;
+		margin-top: 40px;
+	}
 
-  input {
-    flex-grow: 1;
-    width: 0;
-    height: 100%;
-    text-align: center;
-    font-size: 25px;
-    letter-spacing: 3px;
-    padding: 0 20px;
-    border-radius: $r 0 0 $r;
-  }
+	input {
+		flex-grow: 1;
+		width: 0;
+		height: 100%;
+		text-align: center;
+		font-size: 25px;
+		letter-spacing: 3px;
+		padding: 0 20px;
+		border-radius: $r 0 0 $r;
+	}
 
-  .v {
-    height: 60px;
-    width: 400px;
-    box-shadow: rgba(0, 0, 0, 0.1) 2px 10px -5px;
-    margin: 30px 0 0;
-    display: flex;
-    align-items: center;
+	.v {
+		height: 60px;
+		width: 400px;
+		box-shadow: rgba(0, 0, 0, 0.1) 2px 10px -5px;
+		margin: 30px 0 0;
+		display: flex;
+		align-items: center;
 
-    button {
-      text-transform: uppercase;
-      font-size: 16px;
-      color: #fff;
-      background: var(--darkgrey-h);
-      width: 120px;
-      height: 100%;
-      border-radius: 0 $r $r 0;
-    }
+		button {
+			text-transform: uppercase;
+			font-size: 16px;
+			color: #fff;
+			background: var(--darkgrey-h);
+			width: 120px;
+			height: 100%;
+			border-radius: 0 $r $r 0;
+		}
 
-    @include s() {
-      width: 95%;
-      margin: 30px auto 10px;
-      height: 50px;
-      input {
-        font-size: 18px;
-      }
-      button {
-        width: 30%;
-        font-size: 14px;
-      }
-    }
-  }
+		@include s() {
+			width: 95%;
+			margin: 30px auto 10px;
+			height: 50px;
+			input {
+				font-size: 18px;
+			}
+			button {
+				width: 30%;
+				font-size: 14px;
+			}
+		}
+	}
 
-  .r {
-    padding: 3px;
-    display: flex;
-    align-items: center;
-    font-size: 20px;
+	.r {
+		padding: 3px;
+		display: flex;
+		align-items: center;
+		font-size: 20px;
 
-    .icon {
-      width: 20px;
-      height: 20px;
-      font-size: 18px;
-      border: 1px solid;
-      border-radius: 50%;
-      margin-right: 10px;
-    }
+		.icon {
+			width: 20px;
+			height: 20px;
+			font-size: 18px;
+			border: 1px solid;
+			border-radius: 50%;
+			margin-right: 10px;
+		}
 
-    .mr {
-      cursor: pointer;
-      opacity: 0.8;
-      margin-left: 10px;
-      color: #fff !important;
-      border: none;
+		.mr {
+			cursor: pointer;
+			opacity: 0.8;
+			margin-left: 10px;
+			color: #fff !important;
+			border: none;
 
-      &:hover {
-        opacity: 1;
-      }
-    }
+			&:hover {
+				opacity: 1;
+			}
+		}
 
-    * {
-      color: var(--darkgrey-h);
-    }
+		* {
+			color: var(--darkgrey-h);
+		}
 
-    &.act {
-      .icon {
-        color: green;
-      }
+		&.act {
+			.icon {
+				color: green;
+			}
 
-      span {
-        color: #2c7e38;
-      }
-    }
-  }
+			span {
+				color: #2c7e38;
+			}
+		}
+	}
 
-  a {
-    color: #ddd;
+	a {
+		color: #ddd;
 
-    &:hover {
-      text-decoration: underline;
-    }
-  }
+		&:hover {
+			text-decoration: underline;
+		}
+	}
 
-  .dt {
-    padding: 5px 30px 20px;
+	.dt {
+		padding: 5px 30px 20px;
 
-    span {
-      font-size: 13px;
-      margin-left: 20px;
-    }
-  }
+		span {
+			font-size: 13px;
+			margin-left: 20px;
+		}
+	}
 </style>

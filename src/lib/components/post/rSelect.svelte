@@ -1,12 +1,6 @@
-<script lang="ts">
+<script>
 	import { stopPropagation } from 'svelte/legacy';
-
-	interface Props {
-		items?: any;
-		inline?: number;
-	}
-
-	let { items = $bindable(), inline = 0 }: Props = $props();
+	let { items = $bindable(), inline = 0 } = $props();
 	const del = (p) => () => {
 		items = items?.filter((a) => a.id !== p.id) || [];
 	};
@@ -22,53 +16,53 @@
 </div>
 
 <style lang="scss">
-  @use '../../../lib/break' as *;
+	@use '../../../lib/break' as *;
 
-  .v {
-    padding: 20px;
-    height: 150px;
-    overflow: auto;
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-    flex-grow: 1;
-    background: var(--bg2);
-    align-content: flex-start;
-    border-bottom: 1px solid #16212a;
+	.v {
+		padding: 20px;
+		height: 150px;
+		overflow: auto;
+		display: flex;
+		flex-wrap: wrap;
+		width: 100%;
+		flex-grow: 1;
+		background: var(--bg2);
+		align-content: flex-start;
+		border-bottom: 1px solid #16212a;
 
-    &.i {
-      padding: 2px 3px;
-      height: auto;
-      width: 0;
-      min-height: 34px;
-      border: 1px solid rgba(140, 181, 236, 0.1);
-      background: var(--bg3);
-    }
-  }
+		&.i {
+			padding: 2px 3px;
+			height: auto;
+			width: 0;
+			min-height: 34px;
+			border: 1px solid rgba(140, 181, 236, 0.1);
+			background: var(--bg3);
+		}
+	}
 
-  .p {
-    display: flex;
-    align-items: center;
-    align-self: flex-start;
-    min-height: 28px;
-    background: #20263c;
-    margin: 3px 2px;
+	.p {
+		display: flex;
+		align-items: center;
+		align-self: flex-start;
+		min-height: 28px;
+		background: #20263c;
+		margin: 3px 2px;
 
-    span {
-      padding: 5px 10px;
-      @include s() {
-        padding: 5px;
-      }
-    }
+		span {
+			padding: 5px 10px;
+			@include s() {
+				padding: 5px;
+			}
+		}
 
-    button {
-      padding: 5px;
-      border-left: 1px solid #171b2a;
-      color: #627184;
+		button {
+			padding: 5px;
+			border-left: 1px solid #171b2a;
+			color: #627184;
 
-      &:hover {
-        color: #8aa3ab;
-      }
-    }
-  }
+			&:hover {
+				color: #8aa3ab;
+			}
+		}
+	}
 </style>

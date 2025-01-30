@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
 
 	import { onMount } from 'svelte';
@@ -8,13 +8,7 @@
 
 	let e = $state('');
 	let editor = $state();
-
-	interface Props {
-		value?: string;
-		toolbar?: any;
-	}
-
-	let { value = $bindable(''), toolbar = [] }: Props = $props();
+	let { value = $bindable(''), toolbar = [] } = $props();
 	const wb = watch(toolbar);
 	const wv = watch(value);
 	let ts = '';
@@ -116,21 +110,21 @@
 </div>
 
 <style lang="scss">
-  @use '../../lib/break' as *;
-  @import url(./font/fas.css);
+	@use '../../lib/break' as *;
+	@import url(./font/fas.css);
 
-  .d {
-    display: none;
-  }
+	.d {
+		display: none;
+	}
 
-  .e {
-    height: 100%;
-    overflow: hidden;
-    line-height: 2;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-  }
+	.e {
+		height: 100%;
+		overflow: hidden;
+		line-height: 2;
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+	}
 </style>

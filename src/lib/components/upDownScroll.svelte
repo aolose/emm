@@ -1,11 +1,6 @@
-<script lang="ts">
+<script>
 	import { upDownScroller } from '$lib/utils';
-
-	interface Props {
-		down?: number;
-	}
-
-	let { down = $bindable(0) }: Props = $props();
+	let { down = $bindable(0) } = $props();
 	const ons = upDownScroller((v) => (down = v));
 </script>
 

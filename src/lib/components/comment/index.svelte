@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { run } from 'svelte/legacy';
 
 	import Cm from '$lib/components/comment/cm.svelte';
@@ -15,12 +15,7 @@
 	let page = $state(1);
 	let total = $state(1);
 	let ld = 0;
-
-	interface Props {
-		slug?: string;
-	}
-
-	let { slug = '' }: Props = $props();
+	let { slug = '' } = $props();
 	const ws = watch(slug);
 	const cur = $state({
 		act: 0,
@@ -112,44 +107,44 @@
 <Cm av={avLs} {slug} {cur} {user} {done} />
 
 <style lang="scss">
-  @use 'sass:color';
+	@use 'sass:color';
 
-  @use '../../../lib/break' as *;
+	@use '../../../lib/break' as *;
 
-  .p {
-    display: flex;
-    justify-content: center;
-  }
+	.p {
+		display: flex;
+		justify-content: center;
+	}
 
-  .a {
-    margin-bottom: 60px;
-    @include s() {
-      margin-bottom: 40px;
-    }
-  }
+	.a {
+		margin-bottom: 60px;
+		@include s() {
+			margin-bottom: 40px;
+		}
+	}
 
-  .tp {
-    text-align: center;
-    min-width: 200px;
-    max-width: 90%;
-    position: fixed;
-    z-index: 99;
-    border-radius: 6px;
-    box-shadow: rgba(0, 0, 0, 0.25) 0 3px 10px -4px;
-    padding: 10px;
-    top: 60px;
-    min-height: 30px;
-    transform: translateX(-50%);
-    left: 50%;
-    color: #fff;
-    backdrop-filter: blur(2px);
-  }
+	.tp {
+		text-align: center;
+		min-width: 200px;
+		max-width: 90%;
+		position: fixed;
+		z-index: 99;
+		border-radius: 6px;
+		box-shadow: rgba(0, 0, 0, 0.25) 0 3px 10px -4px;
+		padding: 10px;
+		top: 60px;
+		min-height: 30px;
+		transform: translateX(-50%);
+		left: 50%;
+		color: #fff;
+		backdrop-filter: blur(2px);
+	}
 
-  .su {
-    background-color: color.adjust(#16b005, $alpha: -0.3);
-  }
+	.su {
+		background-color: color.adjust(#16b005, $alpha: -0.3);
+	}
 
-  .fa {
-    background-color: color.adjust(#ff0044, $alpha: -0.8);
-  }
+	.fa {
+		background-color: color.adjust(#ff0044, $alpha: -0.8);
+	}
 </style>

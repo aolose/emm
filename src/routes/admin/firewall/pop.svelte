@@ -49,13 +49,13 @@
 			d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 			hasV = trim(
 				tp === 3 ||
-				(d.trigger ? '' : d.ip) ||
-				(d.trigger ? d.status : '') ||
-				d.path ||
-				d.headers ||
-				d.mark ||
-				(d.trigger ? '' : d.country) ||
-				''
+					(d.trigger ? '' : d.ip) ||
+					(d.trigger ? d.status : '') ||
+					d.path ||
+					d.headers ||
+					d.mark ||
+					(d.trigger ? '' : d.country) ||
+					''
 			);
 		} else {
 			d.name = trim(d.name, true);
@@ -190,203 +190,203 @@
 {/if}
 
 <style lang="scss">
-  @use '../../../lib/break' as *;
+	@use '../../../lib/break' as *;
 
-  s {
-    flex: 1;
-  }
+	s {
+		flex: 1;
+	}
 
-  h1 {
-    width: 100%;
-    background: var(--bg1);
-    pointer-events: none;
-    top: 0;
-    padding: 0 20px;
-    border-radius: 10px 10px 0 0;
-    left: 0;
-    color: #465469;
-    font-size: 22px;
-    line-height: 60px;
-    font-weight: 200;
-    position: absolute;
-    @include s() {
-      font-size: 18px;
-      line-height: 50px;
-    }
-  }
+	h1 {
+		width: 100%;
+		background: var(--bg1);
+		pointer-events: none;
+		top: 0;
+		padding: 0 20px;
+		border-radius: 10px 10px 0 0;
+		left: 0;
+		color: #465469;
+		font-size: 22px;
+		line-height: 60px;
+		font-weight: 200;
+		position: absolute;
+		@include s() {
+			font-size: 18px;
+			line-height: 50px;
+		}
+	}
 
-  .clo {
-    position: absolute;
-    transition: 0.2s ease-in-out;
-    right: 10px;
-    top: 5px;
-    width: 50px;
-    height: 50px;
-    color: #3a537c;
+	.clo {
+		position: absolute;
+		transition: 0.2s ease-in-out;
+		right: 10px;
+		top: 5px;
+		width: 50px;
+		height: 50px;
+		color: #3a537c;
 
-    &:hover {
-      color: #00d2ff;
+		&:hover {
+			color: #00d2ff;
 
-      i {
-        transform: rotate(35deg);
-        transform-origin: right;
-        width: 20px;
-        margin-left: 20px;
+			i {
+				transform: rotate(35deg);
+				transform-origin: right;
+				width: 20px;
+				margin-left: 20px;
 
-        & + i {
-          transform: rotate(-35deg);
-        }
-      }
-    }
+				& + i {
+					transform: rotate(-35deg);
+				}
+			}
+		}
 
-    i {
-      transition: inherit;
-      transform: rotate(45deg);
-      position: absolute;
-      top: 0;
-      left: 0;
-      margin: 24px 10px;
-      background: currentColor;
-      width: 30px;
-      height: 1px;
+		i {
+			transition: inherit;
+			transform: rotate(45deg);
+			position: absolute;
+			top: 0;
+			left: 0;
+			margin: 24px 10px;
+			background: currentColor;
+			width: 30px;
+			height: 1px;
 
-      & + i {
-        transform: rotate(-45deg);
-      }
-    }
+			& + i {
+				transform: rotate(-45deg);
+			}
+		}
 
-    @include s() {
-      top: 3px;
-      right: 10px;
-      width: 40px;
-      height: 40px;
-      &:hover {
-        color: #3a537c;
+		@include s() {
+			top: 3px;
+			right: 10px;
+			width: 40px;
+			height: 40px;
+			&:hover {
+				color: #3a537c;
 
-        i {
-          transform-origin: center;
-          transform: rotate(45deg);
+				i {
+					transform-origin: center;
+					transform: rotate(45deg);
 
-          & + i {
-            transform: rotate(-45deg);
-          }
-        }
-      }
-    }
-  }
+					& + i {
+						transform: rotate(-45deg);
+					}
+				}
+			}
+		}
+	}
 
-  .fn {
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	.fn {
+		height: 80px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
-    button {
-      font-size: 14px;
-      width: 150px;
-      border-radius: 20px;
-      cursor: pointer;
-      color: #354e65;
-      border: 1px solid currentColor;
-      margin: 0 20px;
-      padding: 7px 20px;
-      transition: 0.3s ease-in-out;
-      @include s() {
-        width: 100px;
-        margin: 0 10px;
-      }
+		button {
+			font-size: 14px;
+			width: 150px;
+			border-radius: 20px;
+			cursor: pointer;
+			color: #354e65;
+			border: 1px solid currentColor;
+			margin: 0 20px;
+			padding: 7px 20px;
+			transition: 0.3s ease-in-out;
+			@include s() {
+				width: 100px;
+				margin: 0 10px;
+			}
 
-      &:hover {
-        background: #1c93ff;
-        color: #fff;
-        border-color: transparent;
-      }
-    }
-  }
+			&:hover {
+				background: #1c93ff;
+				color: #fff;
+				border-color: transparent;
+			}
+		}
+	}
 
-  label {
-    font-size: 15px;
-    align-items: flex-start;
+	label {
+		font-size: 15px;
+		align-items: flex-start;
 
-    display: flex;
-    padding: 10px;
+		display: flex;
+		padding: 10px;
 
-    input {
-      width: 0;
-      resize: none;
-      border: 1px solid #304565;
-      background: var(--bg1);
-      flex: 1;
-      box-shadow: inset var(--bg0) 0 0 5px;
-    }
+		input {
+			width: 0;
+			resize: none;
+			border: 1px solid #304565;
+			background: var(--bg1);
+			flex: 1;
+			box-shadow: inset var(--bg0) 0 0 5px;
+		}
 
-    span {
-      line-height: 32px;
-      color: #8092a9;
-      text-align: right;
-      padding-right: 10px;
-      width: 80px;
-      flex-shrink: 0;
-    }
-  }
+		span {
+			line-height: 32px;
+			color: #8092a9;
+			text-align: right;
+			padding-right: 10px;
+			width: 80px;
+			flex-shrink: 0;
+		}
+	}
 
-  .f {
-    transition: 0.3s ease-in-out;
-    height: 640px;
-    padding: 60px 0 0;
-    display: flex;
-    flex-direction: column;
-    width: 500px;
-    background: var(--bg0);
-    border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.3) 0 10px 30px;
-    @include s() {
-      height: 100%;
-    }
-  }
+	.f {
+		transition: 0.3s ease-in-out;
+		height: 640px;
+		padding: 60px 0 0;
+		display: flex;
+		flex-direction: column;
+		width: 500px;
+		background: var(--bg0);
+		border-radius: 10px;
+		box-shadow: rgba(0, 0, 0, 0.3) 0 10px 30px;
+		@include s() {
+			height: 100%;
+		}
+	}
 
-  .f0 {
-    flex: 1;
-    padding: 20px;
-    overflow: auto;
-  }
+	.f0 {
+		flex: 1;
+		padding: 20px;
+		overflow: auto;
+	}
 
-  .f1 {
-    background: rgba(0, 0, 0, 0.2);
-    display: flex;
-    padding: 0 20px;
+	.f1 {
+		background: rgba(0, 0, 0, 0.2);
+		display: flex;
+		padding: 0 20px;
 
-    span {
-      width: auto;
-      text-align: left;
-      padding-left: 10px;
-    }
+		span {
+			width: auto;
+			text-align: left;
+			padding-left: 10px;
+		}
 
-    @include s() {
-      flex-wrap: wrap;
-      label {
-        white-space: nowrap;
-        width: auto;
-        flex: 1;
-      }
-    }
-  }
+		@include s() {
+			flex-wrap: wrap;
+			label {
+				white-space: nowrap;
+				width: auto;
+				flex: 1;
+			}
+		}
+	}
 
-  .m {
-    backdrop-filter: blur(1px);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    left: 72px;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    background: rgba(100, 100, 100, 0.1);
-    @include s() {
-      left: 0;
-      top: 48px;
-    }
-  }
+	.m {
+		backdrop-filter: blur(1px);
+		z-index: 100;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: fixed;
+		left: 72px;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		background: rgba(100, 100, 100, 0.1);
+		@include s() {
+			left: 0;
+			top: 48px;
+		}
+	}
 </style>
