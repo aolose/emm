@@ -14,31 +14,26 @@
 </form>
 
 <style lang="scss">
-	.r {
-		font-size: 14px;
-		margin: 10px;
-		display: flex;
-		padding: 10px 20px;
-	}
+  @use '../../../lib/break' as *;
+  .r {
+    font-size: 14px;
+    margin: 10px;
+    display: flex;
+    padding: 10px 20px;
+		flex-wrap: wrap;
+		gap:8px;
+    @include s(){
+      padding: 8px;
+    }
+  }
 
-	span {
-		flex-shrink: 0;
-		padding-top: 6px;
-		width: 88px;
-	}
-
-	input,
-	textarea {
-		padding: 5px 10px;
-		min-height: 34px;
-		resize: none;
-		font-size: 13px;
-		line-height: 1.4;
-		width: 0;
-		flex: 1;
-	}
-
-	textarea {
-		height: 100px;
-	}
+  span {
+    flex-shrink: 0;
+    padding-top: 8px;
+    width: 128px;
+		@include s(){
+			width: 100%;
+			padding-left: 8px;
+		}
+  }
 </style>

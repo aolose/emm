@@ -197,14 +197,14 @@
 	}
 
 	h1 {
-		width: 100%;
-		background: var(--bg1);
 		pointer-events: none;
 		top: 0;
 		padding: 0 20px;
 		border-radius: 10px 10px 0 0;
-		left: 0;
-		color: #465469;
+		left: 6px;
+    color: transparent;
+    background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
+    background-clip: text;
 		font-size: 22px;
 		line-height: 60px;
 		font-weight: 200;
@@ -216,14 +216,17 @@
 	}
 
 	.clo {
+		padding: 0;
 		position: absolute;
 		transition: 0.2s ease-in-out;
 		right: 10px;
 		top: 5px;
+		background: none;
 		width: 50px;
+		overflow: hidden;
 		height: 50px;
 		color: #3a537c;
-
+    transform: scale(.9);
 		&:hover {
 			color: #00d2ff;
 
@@ -260,6 +263,7 @@
 			right: 10px;
 			width: 40px;
 			height: 40px;
+			transform: scale(.7);
 			&:hover {
 				color: #3a537c;
 
@@ -276,31 +280,18 @@
 	}
 
 	.fn {
-		height: 80px;
+		height: 120px;
 		display: flex;
 		align-items: center;
+		gap: 16px;
 		justify-content: center;
-
-		button {
-			font-size: 14px;
-			width: 150px;
-			border-radius: 20px;
-			cursor: pointer;
-			color: #354e65;
-			border: 1px solid currentColor;
-			margin: 0 20px;
-			padding: 7px 20px;
-			transition: 0.3s ease-in-out;
-			@include s() {
-				width: 100px;
-				margin: 0 10px;
-			}
-
-			&:hover {
-				background: #1c93ff;
-				color: #fff;
-				border-color: transparent;
-			}
+		button{
+			width: 100px;
+			border-radius: 111px;
+      filter: hue-rotate(60deg);
+			&+button{
+				filter: hue-rotate(-30deg);
+      }
 		}
 	}
 
@@ -314,14 +305,12 @@
 		input {
 			width: 0;
 			resize: none;
-			border: 1px solid #304565;
 			background: var(--bg1);
 			flex: 1;
-			box-shadow: inset var(--bg0) 0 0 5px;
 		}
 
 		span {
-			line-height: 32px;
+			line-height: 48px;
 			color: #8092a9;
 			text-align: right;
 			padding-right: 10px;
@@ -338,7 +327,7 @@
 		flex-direction: column;
 		width: 500px;
 		background: var(--bg0);
-		border-radius: 10px;
+		border-radius: 16px;
 		box-shadow: rgba(0, 0, 0, 0.3) 0 10px 30px;
 		@include s() {
 			height: 100%;

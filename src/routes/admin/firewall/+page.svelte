@@ -128,9 +128,9 @@
 					<h1>Logs</h1>
 					<s></s>
 					<div class="tb" class:ac={tab}>
-						<span onclick={tabCk(0)}>real-time</span>
-						<span onclick={tabCk(1)}>firewall</span>
-						<i></i>
+						<button onclick={tabCk(0)}>real-time</button>
+						<button onclick={tabCk(1)}>firewall</button>
+						<button class="i"></button>
 					</div>
 					<Ck name="auto" bind:value={loop} />
 					<button onclick={() => loadLog()} class="icon i-refresh"></button>
@@ -181,6 +181,7 @@
 	}
 
 	.sd {
+		background: var(--bg6);
 		width: 600px;
 		display: flex;
 		flex-direction: column;
@@ -199,46 +200,44 @@
 	}
 
 	.tb {
-		margin-right: 10px;
 		display: flex;
-		height: 20px;
+		height: 30px;
 		align-items: center;
-		border-radius: 100px;
 		background: var(--bg0);
-
-		i {
-			border-radius: inherit;
-			position: absolute;
-			left: 0;
-			top: 0;
-			bottom: 0;
-			right: 50%;
-			transition: 0.1s ease-in-out;
-			background: var(--darkgrey);
-		}
-
-		span {
-			height: 100%;
+    @include s(){
+     margin-right: 8px;
+    }
+		button {
+			margin: 0;
+			height: inherit;
+			padding: 0;
 			cursor: pointer;
 			transition: 0.1s ease-in-out;
 			font-size: 12px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			width: 80px;
+			width: 100px;
 			line-height: 1;
 			color: #8aa4af;
 			z-index: 3;
-
-			& + span {
-				color: #858fa1;
-				margin-left: -10px;
-			}
+      &:not(.i){
+        background: none;
+      }
 		}
+    .i {
+			z-index: 0;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 50%;
+      transition: 0.1s ease-in-out;
+    }
 	}
 
 	.ac {
-		i {
+		.i {
 			transform: translateX(100%);
 		}
 
@@ -255,30 +254,35 @@
 		font-weight: 400;
 		font-size: 18px;
 		padding: 0 10px;
-		color: #6d7f94;
+
 		@include s() {
 			display: none;
 		}
 	}
 
 	.h {
-		height: 60px;
+		height: 88px;
 		align-items: center;
 		background: var(--bg2);
 		display: flex;
 		width: 100%;
 		padding: 0 10px;
-
+    @include s(){
+      height: 60px;
+			padding: 0 20px;
+			button{
+				margin: 0;
+				width: 80px;
+			}
+    }
 		s {
 			flex: 1;
 		}
 	}
 
 	.d {
-		border-bottom: 1px solid #1e222c;
 		flex-wrap: wrap;
 		display: flex;
-		background: var(--bg2);
 	}
 
 	.e {
@@ -308,7 +312,6 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
-		//width: 600px;
 		width: 100%;
 		@include s() {
 			width: 50%;

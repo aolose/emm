@@ -10,16 +10,18 @@ on:
       - '.github/**'
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 'latest'
       - name: Install dependencies
-        run: bun  install
+        run: bun i
       - name: Build
-        run: bun  run build
+        run: bun run build
+      - name: Ls
+        run: ls -al dist
       - name: Depoly
         uses: kostya-ten/ssh-server-deploy@v4
         with:

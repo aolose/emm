@@ -34,18 +34,19 @@
 			padding: 2px 3px;
 			height: auto;
 			width: 0;
-			min-height: 34px;
-			border: 1px solid rgba(140, 181, 236, 0.1);
-			background: var(--bg3);
+			border-radius: 8px;
+			min-height: 48px;
+			background: var(--bg1);
 		}
 	}
 
 	.p {
 		display: flex;
+		border-radius: 4px;
 		align-items: center;
 		align-self: flex-start;
 		min-height: 28px;
-		background: #20263c;
+		background: linear-gradient(132deg, rgba(28, 39, 62, 0.67), rgba(33, 31, 48, 0.56));
 		margin: 3px 2px;
 
 		span {

@@ -211,9 +211,9 @@
 
 	.c {
 		margin-top: 20px;
-		border-radius: 4px;
+		border-radius: 8px;
 		border: 1px solid rgba(80, 100, 150, 0.07);
-		background: rgba(80, 100, 150, 0.07);
+		background: rgba(108, 113, 126, 0.07);
 	}
 
 	.as {
@@ -281,6 +281,7 @@
 		position: absolute;
 		height: auto;
 		color: #fff;
+		background: none;
 		&::placeholder {
 			color: transparent;
 			background: linear-gradient(142deg, rgb(65, 178, 255), rgb(255, 213, 213));

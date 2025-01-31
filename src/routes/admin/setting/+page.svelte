@@ -13,21 +13,29 @@
 </script>
 
 <div class="m">
-	<P />
-	<R />
-	<T />
-	<C />
-	<G />
-	<A />
-	<B />
+	<div class="a">
+		<P />
+		<C />
+		<B />
+		<T />
+		<A />
+		<R />
+		<G />
+	</div>
 </div>
 
 <style lang="scss">
 	@use '../../../lib/break' as *;
-
+  .a{
+		border-radius: 16px;
+		background: var(--bg2);
+		max-width: 800px;
+		padding: 1px;
+		@include s() {
+			border-radius: 0;
+    }
+	}
 	.m {
-		display: flex;
-		flex-wrap: wrap;
 		align-content: flex-start;
 		position: absolute;
 		top: 0;
@@ -35,9 +43,10 @@
 		left: 0;
 		right: 0;
 		overflow: auto;
-		padding: 10px 5px;
+		padding:20px;
 		flex-direction: column;
 		@include s() {
+			padding: 0;
 			flex-direction: row;
 		}
 	}

@@ -149,29 +149,22 @@
 		button {
 			text-align: center;
 			width: 100px;
-			border-radius: 4px 0 0 4px;
 			opacity: 0.8;
 			font-size: 13px;
 			color: #5f768f;
 			padding: 5px;
-			border: currentColor 1px solid;
 			border-right-width: 0;
-
-			& + button {
-				border-right-width: 1px;
-				border-left: 0;
-				border-radius: 0 4px 4px 0;
-			}
 
 			&:hover {
 				opacity: 1;
 			}
 		}
-
+    button:not(.act){
+			background: none;
+		}
 		.act {
 			color: #fff;
 			border-color: transparent;
-			background: var(--darkgrey-h);
 		}
 	}
 

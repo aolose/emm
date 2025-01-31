@@ -6,7 +6,7 @@ export const load = apiLoad(
 	({ params: { page, tag } }) => {
 		return {
 			page: +(page || 1),
-			size: 10,
+			size: 12,
 			tag
 		};
 	},

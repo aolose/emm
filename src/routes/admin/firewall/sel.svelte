@@ -61,13 +61,12 @@
 
 <style lang="scss">
 	.a {
-		height: 34px;
+		height: 48px;
 		width: 0;
 		resize: none;
-		border: 1px solid #304565;
+		border-radius: 8px;
 		background: var(--bg1);
 		flex: 1;
-		box-shadow: inset var(--bg0) 0 0 5px;
 		display: flex;
 		align-items: center;
 
