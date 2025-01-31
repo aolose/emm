@@ -47,10 +47,10 @@
 	.a {
 		cursor: pointer;
 		display: flex;
-		border: 1px solid rgba(140, 181, 236, 0.1);
 		align-items: center;
-		background: var(--bg3);
-		height: 40px;
+		background: var(--bg1);
+		height: 48px;
+		border-radius: 8px;
 		padding: 0 10px;
 
 		span {

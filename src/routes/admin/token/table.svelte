@@ -101,7 +101,7 @@
 	}
 
 	thead {
-		background: var(--bg3);
+		background: var(--bg2);
 
 		th {
 			line-height: 3;

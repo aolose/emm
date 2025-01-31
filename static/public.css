@@ -16,7 +16,7 @@ a {
 	--bg3: #0e1015;
 	--bg4: #20232c;
 	--bg5: #1a1e26;
-	--bg6: #1a1c23;
+	--bg6: #14161d;
 	--bg7: #0d1117;
 }
 
@@ -64,26 +64,41 @@ body {
 	color: rgba(212, 219, 238, 0.8);
 }
 
-input:not([type$='box']),
+input,
 textarea {
-	background: none;
-	display: block;
-	border: 1px solid rgba(119, 129, 138, 0.3);
-	color: rgba(222, 226, 232, 0.6);
-	font-size: 15px;
-	padding: 0 10px;
-	line-height: 32px;
-	transition: 0.2s ease-in-out;
+	color: currentColor;
+	min-height: 48px;
+	padding: 8px 20px;
+	border-radius: 8px;
+	background: rgba(0, 0, 0, .25);
+	border: 0 none;
+	resize: none;
+	font-size: 13px;
+	line-height: 1.4;
+	width: 0;
+	flex: 1;
+}
+
+textarea {
+	height: 100px;
 }
 input:not([type$='box']):focus,
 textarea:focus {
 	border-color: rgba(100, 129, 158, 0.6);
 }
-button {
-	background: transparent;
-	border: none;
+button{
 	color: currentColor;
-	cursor: pointer;
+}
+button:not(.icon) {
+	background: linear-gradient(132deg, rgb(23, 47, 78), rgb(61, 64, 122));;
+	padding: 8px 24px;
+	border: none;
+	border-radius: 8px;
+	transition: 0.2s ease-in-out;
+	&:hover,&:active {
+		color: #fff;
+		background: linear-gradient(132deg, rgb(55, 89, 135), rgb(48, 41, 135));;
+	}
 }
 span {
 	color: rgba(127, 146, 161, 0.75);

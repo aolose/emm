@@ -43,7 +43,7 @@
 		padding: 0;
 		outline: none;
 		border: none;
-
+    background: none;
 		&::placeholder {
 			color: #3b5572;
 		}

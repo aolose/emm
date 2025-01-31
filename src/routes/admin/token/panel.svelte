@@ -203,15 +203,11 @@
 	.i-ed {
 		position: absolute;
 		left: 100%;
-		top: 7px;
+		top: 10px;
 		margin-left: 5px;
 		padding: 5px;
-		border: 1px solid #1c340a;
-		border-radius: 4px;
-		color: #52718f;
-		background: var(--bg1);
+		color: rgba(255, 255, 255, 0.45);
 		transition: 0.2s;
-
 		&:hover {
 			color: #869bb4;
 		}
@@ -227,7 +223,7 @@
 		bottom: 0;
 		right: 0;
 		backdrop-filter: blur(2px);
-		background: rgba(80, 100, 150, 0.1);
+		background: rgba(14, 15, 18, 0.3);
 		@include s() {
 			backdrop-filter: none;
 		}
@@ -242,7 +238,7 @@
 		max-width: 100%;
 		height: 700px;
 		max-height: 100%;
-		background: var(--bg1);
+		background: var(--bg2);
 		box-shadow: var(--bg3) 0 20px 50px -30px;
 		@include s() {
 			height: 100%;
@@ -260,7 +256,9 @@
 
 	.t {
 		span {
-			color: #5a6875;
+      color: transparent;
+      background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
+      background-clip: text;
 		}
 
 		button {
@@ -283,25 +281,16 @@
 		align-items: center;
 		justify-content: space-between;
 	}
-
 	.n {
 		justify-content: center;
-		height: 60px;
-
-		button {
-			color: var(--darkgrey-h);
-			height: 30px;
-			display: flex;
-			margin: 0 10px;
-			align-items: center;
-			width: 100px;
-			border-radius: 100px;
-			justify-content: center;
-			border: 1px solid currentColor;
-			transition: 0.2s;
-
-			&:hover {
-				color: #566f85;
+		height: 100px;
+    gap: 16px;
+		button{
+			border-radius: 111px;
+			width: 150px;
+      filter: hue-rotate(-30deg);
+			&+button{
+				filter: hue-rotate(60deg);
 			}
 		}
 	}
@@ -315,7 +304,6 @@
 			.a {
 				margin: 0;
 			}
-
 			i {
 				top: 2px;
 				background: var(--bg3);
@@ -325,7 +313,7 @@
 
 		& > span {
 			color: #455564;
-			line-height: 40px;
+			line-height: 48px;
 			width: 90px;
 			text-align: right;
 			padding-right: 20px;
@@ -334,8 +322,7 @@
 		input {
 			width: 0;
 			flex-grow: 1;
-			border: 1px solid rgba(140, 181, 236, 0.1);
-			background: var(--bg3);
+			background: var(--bg1);
 		}
 	}
 

@@ -86,24 +86,30 @@
 	h1 {
 		transform: translate3d(0, 0, 0);
 		transition: 0.5s ease-in-out;
-		font-size: 24px;
+		font-size: 20px;
 		text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 3px;
-		color: #ddd;
+    overflow: hidden;
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    color: #ddd;
 		font-weight: 100;
 		position: absolute;
 		left: 20px;
 		right: 90px;
 		top: 20px;
-		word-break: break-all;
 
 		& + h1 {
 			opacity: 0;
-			font-size: 30px;
+			font-size: 24px;
 			width: 80%;
 			text-align: center;
 			left: 50%;
 			top: 50%;
 			transform: translate3d(-50%, -50%, 0);
+      line-clamp:4;
+      -webkit-line-clamp:4;
 		}
 	}
 

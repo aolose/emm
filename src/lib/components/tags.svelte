@@ -27,13 +27,8 @@
 					return idx++;
 			}
 		}
-
-		if (code === 'Backquote') {
-			e.preventDefault();
-			show = 1 - show;
-		}
 		if (code === 'Enter') {
-			val = val.slice(0, s) + ',' + val.slice(s);
+			val = (pre || val.slice(0, s) )+ ',' + val.slice(s);
 		} else if (code === 'Backspace') {
 			if (!s) {
 				const siz = [...items][items.size - 1];
@@ -106,10 +101,12 @@
 		<span>{val}</span>
 		<span>{pre.replace(val, '')}</span>
 		<input
+			autocomplete="off"
 			{id}
 			bind:value={val}
 			bind:this={ipt}
-			onblur={() => setTimeout(() => (show = 0), 100)}
+			onfocus={()=>show=1}
+			onblur={() => show = 0}
 			onkeydown={keyPress}
 		/>
 	</div>
@@ -194,6 +191,7 @@
 			padding: 5px 0;
 			background: none;
 			border: none;
+			min-height: 0;
 			line-height: inherit;
 			outline: none;
 			font-size: 15px;

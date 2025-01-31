@@ -32,7 +32,10 @@
 
 <style lang="scss">
 	@use '../../break' as *;
-
+  input {
+		border-radius: 0;
+		background: none;
+	}
 	.a {
 		width: 300px;
 		display: flex;
