@@ -52,39 +52,48 @@
 </Card>
 
 <style lang="scss">
-	.r {
-		padding: 0 30px;
-		display: flex;
-		align-items: center;
-		justify-content: space-evenly;
-	}
+  .r {
+    padding: 0 20px 30px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
+  }
 
-	input {
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		bottom: 0;
-		width: auto;
-		border: none;
-		appearance: none;
-		opacity: 0;
-	}
+  input {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: auto;
+    border: none;
+    appearance: none;
+    opacity: 0;
+  }
 
-	span {
-		padding-left: 3px;
-	}
+  span {
+		color: inherit;
+  }
 
-	button {
-		display: flex;
-		align-items: center;
-		border-radius: 4px;
-		font-size: 13px;
-		padding: 8px 20px 8px 26px;
-		background: rgba(50, 90, 170, 0.5);
+  button {
+    flex: 1;
+		color: #fff;
+    justify-content: center;
+    max-width: 200px;
+    display: flex;
+    align-items: center;
+    opacity: .8;
+		gap: 4px;
+		font-size: 16px;
+    height: 48px;
+    filter: hue-rotate(-40deg);
+    &:hover {
+      opacity: 1;
+    }
 
-		&:hover {
-			background: rgba(50, 90, 170, 0.8);
-		}
-	}
+    & + button {
+			filter: hue-rotate(40deg);
+    }
+  }
 </style>

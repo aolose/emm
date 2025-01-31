@@ -19,25 +19,23 @@
 
 <style lang="scss">
 	@use '../../../lib/break' as *;
-
 	.a {
 		display: flex;
-		align-self: flex-start;
-		align-items: stretch;
+		margin: 9px;
+		border-radius: 16px;
+    background: rgba(40, 44, 55, 0.1);
 		flex-direction: column;
-		border: 1px solid #000;
-		width: 400px;
-		margin: 10px 0 0 10px;
 		padding-bottom: 20px;
-		background: var(--bg2);
-		border-radius: 4px;
-		box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px -1px;
+		:global {
+			button{
+				min-width: 100px;
+			}
+		}
 		@include s() {
 			width: 96%;
 			margin: 5px auto;
 		}
 	}
-
 	.e {
 		padding: 0;
 
@@ -49,7 +47,6 @@
 	.t {
 		align-items: center;
 		margin-bottom: 20px;
-		background: rgba(100, 110, 120, 0.05);
 		border-bottom: 1px solid rgba(10, 20, 40, 0.1);
 		padding: 8px 30px;
 		display: flex;
@@ -57,20 +54,10 @@
 	}
 
 	h1 {
-		font-weight: 200;
-		color: var(--darkgrey-h);
+    color: transparent;
+    background: linear-gradient(132deg, rgb(195, 201, 205), rgb(134, 153, 220));
+    background-clip: text;
 		font-size: 18px;
-	}
-
-	button {
-		background: rgba(50, 90, 170, 0.5);
-		padding: 3px 10px;
-		right: -10px;
-		border-radius: 3px;
-		transition: 0.2s ease-in-out;
-
-		&:hover {
-			background: rgba(50, 90, 170, 0.8);
-		}
+		line-height: 3;
 	}
 </style>

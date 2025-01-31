@@ -54,7 +54,6 @@
 			font-weight: 800;
 			padding: 0 !important;
 			opacity: 0.5;
-			border: 1px solid currentColor;
 		}
 	}
 

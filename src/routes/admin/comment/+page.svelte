@@ -191,19 +191,16 @@
 		height: 100%;
 	}
 
-	h1 {
-		font-size: 18px;
-		font-weight: 200;
-		color: #54647a;
-	}
-
 	.t {
-		height: 70px;
+		height: 88px;
 		padding: 0 25px;
 		display: flex;
 		align-items: center;
 		background: rgba(0, 0, 0, 0.1);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    @include s(){
+      height: 60px;
+    }
 	}
 
 	.b {

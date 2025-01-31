@@ -101,9 +101,6 @@
 		flex-direction: column;
 
 		:global {
-			* {
-				line-height: 2;
-			}
 
 			del {
 				color: rgba(100, 120, 150, 0.8);
@@ -136,6 +133,7 @@
 				border-radius: 4px;
 				overflow: hidden;
 				padding: 0 5px;
+				margin: 16px 0;
 				color: #659a62;
 				background: rgba(10, 20, 40, 0.4);
 			}
@@ -153,7 +151,6 @@
 					background: #0d1117;
 					padding: 32px 0 3px;
 					display: flex;
-
 					.code {
 						color: #b7c0dc;
 						white-space: pre;
@@ -224,10 +221,9 @@
 			}
 
 			p {
-				padding: 0 12px;
 				word-break: break-all;
 				text-align: justify;
-				line-height: 2;
+				line-height: 2.1;
 				margin-bottom: 20px;
 				color: rgba(195, 209, 227, 0.78);
 			}
@@ -328,15 +324,13 @@
 					background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
 					background-clip: text;
 					font-weight: 400;
-					line-height: 3;
-					margin: 10px 0;
-					text-align: center;
-					&:before {
-						color: transparent;
-						background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
-						background-clip: text;
-						content: '#';
-						padding-right: 5px;
+					line-height: 1.5;
+					padding: 1rem 0;
+          text-align: center;
+					*{
+            background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255)) left center;
+						background-size: 100vw 100vh;
+            background-clip: text;
 					}
 				}
 			}

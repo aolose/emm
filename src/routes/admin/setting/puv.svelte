@@ -213,16 +213,18 @@
 		padding: 0 20px;
 		margin-bottom: 20px;
 		display: flex;
+		align-items: center;
+		button {
+			min-width: 0;
+      padding:8px;
+		}
 	}
 
 	button {
 		flex: 1;
-		border-radius: 3px;
 		font-size: 12px;
-		padding: 1px 8px;
 		margin: 0 5px;
 		opacity: 0.5;
-		background: var(--darkgrey);
 	}
 
 	.icon {
@@ -240,31 +242,32 @@
 
 	.act {
 		opacity: 1;
-		background: #3767b9;
 		color: #fff;
 	}
 
 	.i {
 		margin-top: 10px;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-
+		display: grid;
+		justify-content: end;
+		grid-template-columns:  repeat(auto-fill, 300px);
 		span {
 			color: rgba(130, 140, 180, 1);
 			display: block;
 			padding: 0 3px;
 			font-size: 13px;
+			white-space: nowrap;
 		}
 
 		button {
+			flex-shrink: 0;
 			opacity: 0.5;
+			padding: 0;
 			margin-bottom: 3px;
 			justify-content: flex-end;
 			align-items: center;
 			font-size: 13px;
-			display: flex;
-			background: none;
+			display: inline-flex;
+			background: none!important;
 		}
 
 		.act {

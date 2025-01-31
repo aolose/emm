@@ -111,7 +111,6 @@
 
 	@include s() {
 		.o {
-			background-color: rgba(60, 90, 140, 0.4);
 			background-size: 50%;
 			width: 45px;
 			height: 100%;
@@ -120,6 +119,7 @@
 		.m,
 		.u {
 			flex-direction: row;
+			background: none;
 		}
 		.v {
 			height: 100%;
