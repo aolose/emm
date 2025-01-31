@@ -227,7 +227,7 @@
 	.bx {
 		border-radius: 16px;
 		width: 340px;
-		height: 260px;
+		height: 300px;
 		background: var(--bg0);
 		box-shadow: rgba(0, 0, 0, 0.3) 0 20px 40px -10px;
 	}
@@ -244,12 +244,9 @@
 			width: 100%;
 			border: 0;
 			color: #d3dbe8;
+			border-radius: 0;
 			border-bottom: 1px solid #1d314a;
 			transition: ease-in-out 0.3s;
-
-			&:focus {
-				border-color: #1c93ff;
-			}
 		}
 	}
 
@@ -275,16 +272,9 @@
 		margin: 30px auto 0;
 		cursor: pointer;
 		transition: 0.3s ease-in-out;
-		border: 1px solid currentColor;
-		color: #67a2d2;
 		width: 80%;
 		height: 40px;
-		border-radius: 3px;
-
-		&:hover {
-			color: #000;
-			background: #67a2d2;
-		}
+		border-radius: 111px;
 	}
 
 	i {
