@@ -69,9 +69,9 @@ Firewall
 
 <img src="doc/fw.webp" width="460">
 
-Blog Management (Long picture, please view the whole picture in a new tab)
+Blog Management
 
-<img src="doc/manage.webp" style="width: 460px; height: 400px;object-fit: cover;object-position: top">
+<img src="doc/manage.webp" width="460">
 
 
 ### For mobile view
