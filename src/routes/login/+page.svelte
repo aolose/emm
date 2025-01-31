@@ -225,7 +225,7 @@
 	}
 
 	.bx {
-    border-radius: 16px;
+		border-radius: 16px;
 		width: 340px;
 		height: 260px;
 		background: var(--bg0);

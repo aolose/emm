@@ -1,10 +1,11 @@
 <script>
 	import { onMount } from 'svelte';
 	import { dev } from '$app/environment';
-
+	let hasUpdate = false;
 	const channel = new BroadcastChannel('sw-messages');
 	channel.onmessage = (event) => {
-		if (event.data?.type === 'CACHE_DONE') {
+		if (hasUpdate && event.data?.type === 'CACHE_DONE') {
+			hasUpdate = false;
 			show = true;
 		}
 	};
@@ -21,7 +22,10 @@
 			}
 			setInterval(() => {
 				const { waiting, installing } = register;
-				if (!waiting && !installing) register.update().catch(console.error);
+				if (!waiting && !installing) {
+					hasUpdate = true;
+					register.update().catch(console.error);
+				}
 			}, 12e4); // 2min
 		}
 	};
