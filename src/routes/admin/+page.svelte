@@ -153,7 +153,6 @@
 
 <style lang="scss">
 	@use '../../lib/break' as *;
-
 	.x {
 		width: 100%;
 		height: 100%;
@@ -196,6 +195,9 @@
 		display: flex;
 		flex-direction: column;
 		padding-bottom: 10px;
+    @include s(){
+      background: var(--bg3);
+		}
 	}
 
 	.ls {

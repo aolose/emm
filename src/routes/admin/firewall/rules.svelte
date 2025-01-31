@@ -227,20 +227,21 @@
 	.t {
 		background: var(--bg2);
 		border-radius: 6px;
-
+		display: flex;
 		button {
+			left: 0;
 			color: var(--darkgrey-h);
 			transition: 0.2s ease-in-out;
 			font-size: 13px;
 			line-height: 1;
-			height: 30px;
-			padding: 0 15px !important;
-			border-radius: inherit;
+		  &:not(.act){
+        background: none;
+			}
 		}
+
 
 		.act {
 			color: #eee;
-			background: #26548c;
 		}
 	}
 
@@ -253,9 +254,10 @@
 	}
 
 	.u {
-		margin: 10px;
+		margin: 4px;
 		overflow: hidden;
-		border-radius: 2px;
+		padding: 10px;
+		border-radius: 8px;
 		background: var(--bg0);
 
 		button {
@@ -269,8 +271,6 @@
 	}
 
 	.act {
-		background: #0f1c38;
-
 		.m {
 			padding-right: 10px;
 			color: #94abc0;
@@ -366,14 +366,15 @@
 		display: flex;
 		align-items: center;
 		padding: 0 0 0 10px;
-		height: 60px;
-
+		height: 88px;
+    @include s(){
+      height: 60px;
+    }
 		button {
 			padding: 10px 20px;
 			@include s() {
 				padding: 10px 15px;
 			}
-
 			&:hover {
 				color: #fff;
 			}
@@ -410,7 +411,7 @@
 	.tr {
 		&.act {
 			.i {
-				background: #0f3826;
+				background: rgba(15, 56, 38, 0.21);
 			}
 		}
 	}

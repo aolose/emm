@@ -141,10 +141,12 @@
 	textarea,
 	.i-ed,
 	.p {
+		border-radius: 8px;
+		min-height: 48px;
+		height: auto;
 		flex-grow: 1;
-		border: 1px solid rgba(140, 181, 236, 0.1);
+		background: var(--bg1);
 	}
-
 	.x {
 		max-height: 400px;
 
@@ -152,7 +154,7 @@
 		textarea {
 			padding: 0 10px;
 			border: none;
-			min-height: 34px;
+			min-height: 48px;
 			white-space: pre-wrap;
 			word-break: break-all;
 			width: 100%;
@@ -191,7 +193,7 @@
 		color: color.adjust(#fff, $alpha: -0.8);
 		cursor: pointer;
 		transition: 0.2s;
-		background: center no-repeat;
+		background: var(--bg1) center no-repeat;
 		background-size: contain;
 
 		&:hover {
@@ -243,7 +245,6 @@
 		font-size: 16px;
 		color: #485c6c;
 		padding: 5px 20px;
-		border: 1px solid currentColor;
 		transition: 0.2s;
 
 		&:hover {
@@ -274,12 +275,10 @@
 		display: flex;
 		flex-wrap: wrap;
 		padding: 10px 50px;
-
 		span {
 			line-height: 30px;
 			width: 100px;
 		}
-
 		&:global {
 			.v {
 				min-height: 50px !important;

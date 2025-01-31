@@ -168,7 +168,8 @@
 		button {
 			color: var(--darkgrey-h);
 			margin-left: 10px;
-
+      background: none;
+			padding: 0;
 			&:hover {
 				color: #b1bbc5;
 				text-decoration: underline;
@@ -209,7 +210,7 @@
 		padding: 60px 80px;
 		box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
 		@include s() {
-			padding: 20px 20px;
+			padding: 20px 32px;
 			margin: 0;
 			min-height: 67vh;
 		}
@@ -331,7 +332,6 @@
 	}
 
 	h1 {
-		max-width: 70%;
 		color: inherit;
 		margin: 14px 0 20px;
 		font-weight: 100;

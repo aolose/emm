@@ -33,10 +33,10 @@ const load = () => {
 	urls.push({ url: '/', lastMod: start });
 	urls.push({ url: '/about', lastMod: start });
 	urls.push({ url: '/tags', lastMod: lastMod });
-	page('/posts/', pMap.size, 10);
+	page('/posts/', pMap.size, 20);
 	allTags.forEach((a) => {
 		const posts = tagPostCache.getPostIds(a.id).filter((a) => allPSet.has(a));
-		page('/tag/' + a.name + '/', posts.length, 10);
+		page('/tag/' + a.name + '/', posts.length, 20);
 		posts.forEach((n) => {
 			const p = pMap.get(n);
 			if (p) urls.push({ url: '/post/' + a.name + '/' + p.slug, lastMod: p.last });

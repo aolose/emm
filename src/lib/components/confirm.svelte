@@ -67,43 +67,37 @@
 	}
 
 	.b {
-		width: 280px;
-		padding: 15px 10px 15px;
+		padding: 30px;
 		border-radius: 6px;
-		background: var(--bg2);
-		box-shadow: rgba(0, 0, 0, 0.2) 2px 3px 9px;
+		background: var(--bg1);
+		box-shadow: rgba(0, 0, 0, 0.2) 2px 2px 9px;
 	}
 
 	.n {
 		display: flex;
 		justify-content: center;
+		gap: 16px;
 	}
 
 	p {
 		padding: 0 10px;
 		line-height: 2;
 		font-size: 15px;
-		margin: 0 0 20px;
+		margin: 10px 0 30px;
 		text-align: center;
 	}
 
 	button {
 		cursor: pointer;
-		margin: 0 15px;
-		background: none;
 		color: #b6bac0;
 		padding: 4px 8px;
 		min-width: 60px;
-		border: 1px solid var(--darkgrey);
-		background: rgba(255, 255, 255, 0.05);
-
-		&:hover {
-			color: #fff;
-			background: var(--darkgrey-h);
+		border-radius: 111px;
+		width: 100px;
+		filter: hue-rotate(-30deg);
+	  &+button {
+      filter: hue-rotate(30deg);
 		}
 	}
 
-	button + button {
-		background: none;
-	}
 </style>

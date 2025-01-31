@@ -164,6 +164,7 @@
 
 	.a {
 		display: flex;
+		border-radius: 16px;
 		flex-direction: column;
 		max-height: 90%;
 		background: var(--bg1);
@@ -272,8 +273,8 @@
 		width: 100%;
 		outline: none;
 		padding: 10px;
+		border-radius: 8px;
 		box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
-		border-radius: 3px;
 		resize: none;
 	}
 

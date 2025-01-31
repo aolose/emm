@@ -322,6 +322,7 @@
 		}
 
 		input {
+			background: none;
 			padding-right: 30px;
 			margin: 0;
 		}

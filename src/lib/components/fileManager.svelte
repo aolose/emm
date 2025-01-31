@@ -319,6 +319,7 @@
 	}
 
 	input {
+		background: none;
 		width: 0;
 		outline: none;
 		flex: 1;
@@ -365,6 +366,7 @@
 	}
 
 	.b {
+		border-radius: 16px;
 		width: 600px;
 		height: 600px;
 		background: var(--bg0);

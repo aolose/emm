@@ -76,7 +76,7 @@
 	<div class="c" style={sty}>
 		<div class="a">
 			<div class="r h" class:o={ok}>
-				<span>Tags</span>
+				<h1>Tags</h1>
 				<s></s>
 				<input placeholder="tag name" bind:value={name} />
 				<button class="icon i-add" onclick={add}></button>
