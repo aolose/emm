@@ -2,7 +2,6 @@
 	import Menu from './sideMenu.svelte';
 	import { h, full } from '$lib/store';
 	import Head from '$lib/components/Head.svelte';
-
 	let { data, children } = $props();
 </script>
 
@@ -38,6 +37,7 @@
 
   .c {
     background: var(--bg1);
+		overflow: hidden;
     flex: 1;
 
     :global {
@@ -60,10 +60,13 @@
       flex-direction: column-reverse;
     }
     .b {
+			padding: 0 7%;
       transition: 0.3s linear;
       width: 100%;
-      height: 48px;
+      height: 64px;
       overflow: hidden;
+			background: linear-gradient(180deg, rgb(20, 22, 28), rgb(14, 17, 21));
+			box-shadow: rgba(0,0,0,.5) 0 0 10px;
     }
     :global {
       .editor-toolbar {

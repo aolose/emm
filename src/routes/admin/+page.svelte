@@ -171,6 +171,9 @@
 		background: var(--bg1);
 		display: flex;
 		flex-direction: column;
+    @include s() {
+      background: var(--bg6);
+		}
 		@include m() {
 			z-index: 3;
 			left: -400px;
