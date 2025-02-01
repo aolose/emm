@@ -399,7 +399,7 @@
 
 		@include s() {
 			.EasyMDEContainer .CodeMirror {
-				background: rgba(50, 80, 90, 0.07);
+				background: var(--bg6);
 			}
 		}
 	}

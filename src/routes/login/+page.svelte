@@ -127,7 +127,7 @@
 		right: 0;
 		top: 0;
 		bottom: 0;
-		padding: 40px 0 0 0;
+		padding: 36px 0 0 0;
 	}
 
 	.v {
@@ -157,7 +157,6 @@
 		transform: translate3d(-50%, 0, 0);
 		left: 50%;
 		top: -75px;
-
 		width: 80px;
 		height: 80px;
 		position: absolute;
@@ -226,8 +225,8 @@
 
 	.bx {
 		border-radius: 16px;
-		width: 340px;
-		height: 300px;
+		width: 300px;
+		height: 290px;
 		background: var(--bg0);
 		box-shadow: rgba(0, 0, 0, 0.3) 0 20px 40px -10px;
 	}

@@ -253,7 +253,7 @@
 	h1 {
 		font-weight: 400;
 		font-size: 18px;
-		padding: 0 10px;
+		padding: 0 30px;
 
 		@include s() {
 			display: none;
@@ -266,7 +266,6 @@
 		background: var(--bg2);
 		display: flex;
 		width: 100%;
-		padding: 0 10px;
     @include s(){
       height: 60px;
 			padding: 0 20px;

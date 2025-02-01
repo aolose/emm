@@ -51,33 +51,20 @@ technology stack.
 ### partial preview
 
 #### For PC View
-View Article
-
+<img src="doc/list.webp" width="460">
 <img src="doc/view.webp" width="460">
-
-
-Login In
-
 <img src="doc/login.webp" width="460">
-
-Write Article
-
 <img src="doc/write.webp" width="460">
-
-
-Firewall
-
 <img src="doc/fw.webp" width="460">
-
-Blog Management
-
 <img src="doc/manage.webp" width="460">
 
 
 ### For mobile view
+<img src="doc/list_m.webp" width="280">
 <img src="doc/view_m.webp" width="280">
 <img src="doc/manage_m.webp" width="280">
 <img src="doc/write_m.webp" width="280">
+<img src="doc/fw_m.webp" width="280">
 
 ### Deploy
 

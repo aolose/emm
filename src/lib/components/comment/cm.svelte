@@ -17,6 +17,11 @@
 
 	function se() {
 		ed = 1;
+		setTimeout(()=>{
+			const i = document.querySelector(`[placeholder="name"]`)
+			i.focus();
+			i.select()
+		})
 	}
 
 	async function cmt() {
@@ -212,8 +217,8 @@
 	.c {
 		margin-top: 20px;
 		border-radius: 8px;
-		border: 1px solid rgba(80, 100, 150, 0.07);
-		background: rgba(108, 113, 126, 0.07);
+		border: 1px solid rgba(8, 12, 19, 0.17);
+		background: rgba(12, 15, 19, 0.4);
 	}
 
 	.as {

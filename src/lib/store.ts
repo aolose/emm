@@ -5,6 +5,8 @@ import { randNum } from '$lib/utils';
 import type { SvelteComponent } from 'svelte';
 import type { BeforeNavigate } from '@sveltejs/kit';
 import type { FwResp } from '$lib/server/model';
+import { req } from '$lib/req';
+import { method } from '$lib/enum';
 
 const user = writable({
 	token: 'test'
@@ -171,3 +173,12 @@ export const statueSys = writable(0);
 export const elmCpm: { [key: string]: SvelteComponent } = {};
 export const elmProps = writable<{ [key: string]: object }>({});
 export const elmTmpl = writable<{ [key: string]: HTMLElement }>({});
+
+export 	function logout() {
+	confirm('Log out?').then((a) => {
+		if (a)
+			req('logout', undefined, { method: method.GET }).then(() => {
+				status.set(0);
+			});
+	});
+}

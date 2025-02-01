@@ -101,7 +101,7 @@
 	}
 
 	thead {
-		background: var(--bg2);
+		background: var(--bg6);
 
 		th {
 			line-height: 3;
@@ -112,7 +112,7 @@
 	tbody {
 		tr {
 			&:nth-child(2n) {
-				background: var(--bg2);
+				background: var(--bg6);
 			}
 		}
 	}

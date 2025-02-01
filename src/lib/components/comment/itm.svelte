@@ -10,12 +10,10 @@
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
 	import { confirm } from '$lib/store';
-
+	let { d = $bindable({}), user = {}, cur = {}, topic, done, remove } = $props();
 	const own = d._own;
 	const isAdm = d.isAdm;
 	let page = $state(1);
-	let { d = $bindable({}), user = {}, cur = {}, topic, done, remove } = $props();
-
 	function reply() {
 		if (cur.reply === d.id) {
 			cur.set({ reply: 0 });

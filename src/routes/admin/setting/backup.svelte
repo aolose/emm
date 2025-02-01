@@ -32,7 +32,7 @@
 	};
 </script>
 
-<Card title="Tools" {msg} {err} {act} {ld}>
+<Card {msg} {err} {act} {ld}>
 	<div class="r">
 		<button onclick={ex}>
 			backup
@@ -52,6 +52,8 @@
 </Card>
 
 <style lang="scss">
+  @use '../../../lib/break' as *;
+
   .r {
     padding: 0 20px 30px;
     display: flex;
@@ -73,27 +75,32 @@
   }
 
   span {
-		color: inherit;
+    color: inherit;
   }
 
   button {
     flex: 1;
-		color: #fff;
+    color: #fff;
     justify-content: center;
     max-width: 200px;
     display: flex;
     align-items: center;
     opacity: .8;
-		gap: 4px;
-		font-size: 16px;
+    gap: 4px;
+    font-size: 16px;
     height: 48px;
+    @include s() {
+      height: 38px;
+      font-size: 14px;
+    }
     filter: hue-rotate(-40deg);
+
     &:hover {
       opacity: 1;
     }
 
     & + button {
-			filter: hue-rotate(40deg);
+      filter: hue-rotate(40deg);
     }
   }
 </style>

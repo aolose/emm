@@ -59,6 +59,11 @@
   .e {
     position: relative;
     flex: 1;
+		:global {
+      .editor-toolbar{
+				height: auto;
+			}
+		}
   }
 
   .c {
@@ -88,7 +93,20 @@
       position: fixed;
       inset: 0;
     }
-
+    :global{
+      .i-close {
+				display: none;
+				font-size: 24px;
+				position: fixed;
+				right: 30px;
+				top: 30px;
+				background: var(--bg6);
+				z-index: 10;
+        @include s() {
+					display: block;
+				}
+			}
+		}
     &.s {
       transform: translate3d(0, 0, 0);
     }

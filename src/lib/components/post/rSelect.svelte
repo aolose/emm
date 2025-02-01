@@ -6,26 +6,32 @@
 	};
 </script>
 
-<div class="v" class:i={inline}>
-	{#each items || [] as p}
-		<div title={`ID: ${p.id}`} class="p" onclick={stopPropagation(del(p))}>
-			<span>{p.title || p.name}</span>
-			<button class="icon i-close"></button>
-		</div>
-	{/each}
+<div class="o">
+	<div class="v" class:i={inline}>
+		{#each items || [] as p}
+			<div title={`ID: ${p.id}`} class="p" onclick={stopPropagation(del(p))}>
+				<span>{p.title || p.name}</span>
+				<button class="icon i-close"></button>
+			</div>
+		{/each}
+	</div>
 </div>
 
 <style lang="scss">
 	@use '../../../lib/break' as *;
-
+  .o{
+		position: relative;
+		height: 100%;
+		flex: 1;
+		width: 100%;
+	}
 	.v {
 		padding: 20px;
-		height: 150px;
+		position: absolute;
+		inset: 0;
 		overflow: auto;
 		display: flex;
 		flex-wrap: wrap;
-		width: 100%;
-		flex-grow: 1;
 		background: var(--bg2);
 		align-content: flex-start;
 		border-bottom: 1px solid #16212a;
@@ -33,7 +39,6 @@
 		&.i {
 			padding: 2px 3px;
 			height: auto;
-			width: 0;
 			border-radius: 8px;
 			min-height: 48px;
 			background: var(--bg1);

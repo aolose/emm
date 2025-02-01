@@ -126,10 +126,9 @@
 
 <style lang="scss">
 	@use 'sass:color';
-
 	.s {
 		display: flex;
-		padding: 2px 1.5em 0 0.8em;
+		padding: 8px 8px 8px 14px;
 		align-items: center;
 		color: var(--darkgrey);
 
@@ -163,9 +162,6 @@
 			min-width: 100px;
 		}
 
-		&:nth-child(2n) {
-			background: color.adjust(#122336, $alpha: -0.8);
-		}
 
 		&:hover {
 			background: color.adjust(#0b3054, $alpha: -0.5);
@@ -174,7 +170,7 @@
 
 	.m {
 		pointer-events: none;
-		background: var(--bg1);
+		background: var(--bg2);
 
 		.k {
 			opacity: 0;
