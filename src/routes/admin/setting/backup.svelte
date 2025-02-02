@@ -89,16 +89,14 @@
     gap: 4px;
     font-size: 16px;
     height: 48px;
+    filter: hue-rotate(-40deg);
     @include s() {
       height: 38px;
       font-size: 14px;
     }
-    filter: hue-rotate(-40deg);
-
     &:hover {
       opacity: 1;
     }
-
     & + button {
       filter: hue-rotate(40deg);
     }
