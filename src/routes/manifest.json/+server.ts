@@ -25,8 +25,8 @@ export const GET: RequestHandler = ({ request }) => {
 		description: sys?.seoDesc,
 		shortcuts: [
 			{
-				name: 'Login',
-				url: '/login'
+				name: 'Write',
+				url: '/admin'
 			}
 		],
 		icons: icons
