@@ -37,7 +37,7 @@
 		"globals": "^15.14.0",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
-		"sass-embedded": "^1.83.4",
+		"sass": "^1.83.4",
 		"svelte": "^5.19.6",
 		"svelte-adapter-bun": "^0.5.2",
 		"svelte-check": "^4.1.4",
