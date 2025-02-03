@@ -1,39 +1,29 @@
 # A personal blog system
+![Static Badge](https://img.shields.io/badge/sveltekit-v2-f96743?style=flat&logo=svelte&link=https%3A%2F%2Fsvelte.dev%2Fdocs%2Fkit%2Fintroduction)
+![Static Badge](https://img.shields.io/badge/typescript-5.7-3178c6?style=flat&link=https%3A%2F%2Fwww.typescriptlang.org)
+![Static Badge](https://img.shields.io/badge/bun-latest-f472b6?style=flat&logo=bun&link=https%3A%2F%2Fbun.sh)
+![Static Badge](https://img.shields.io/badge/bun-sqlite-f472b6?style=flat&logo=bun&link=https%3A%2F%2Fbun.sh%2Fdocs%2Fapi%2Fsqlite)
+![Static Badge](https://img.shields.io/badge/sass-1.83.4-bf4080?style=flat&logo=sass&link=https%3A%2F%2Fsass-lang.com)
+![Static Badge](https://img.shields.io/badge/isbot-5.1.22-007ec6?style=flat&logo=isbot&link=https%3A%2F%2Fisbot.js.org)
+![Static Badge](https://img.shields.io/badge/marked-15-yellow?style=flat&logo=marked&link=https%3A%2F%2Fmarked.js.org)
+![Static Badge](https://img.shields.io/badge/easymde-2.18-green?style=flat&link=https%3A%2F%2Fgithub.com%2FIonaru%2Feasy-markdown-editor)
 
 Here is my personal blog. I am currently using it to 
 record my daily life and a small amount of technical
-experience. I have been looking for a lightweight, 
-fully functional (meeting my needs) blog. I hope it 
-has a friendly writing experience, convenient file 
-management, built-in comment integration and a 
-beautiful interface, but unfortunately, I didn't 
-find it. So I made such a blog. It is suitable for 
-deployment on a vps with a bun environment (bun is 
-great because it has built-in sqlite support). I 
-didn't do any functional support in the direction of 
-SEO or business, emm... it is only suitable for 
-writing, and the theme cannot be modified. If you 
-are interested in it, welcome to fork it.
+experience. It is suitable for deployment on a vps with 
+a bun environment. I didn't do any functional support 
+in the direction of SEO or business, emm... it is only 
+suitable for writing, and the theme cannot be modified. 
+If you are interested in it, welcome to fork it.
 
 
 The code of the current project is still very messy 
 and far from the standard of an open source project. 
-I hope to standardize it, but unfortunately I am lazy 
-and busy in my daily life. But I will keep it updated 
-and spend a few days every year to synchronize the 
-technology stack.
-
-### Tech Stack
-
-[Bun](https://bun.sh/) +
-[SvelteKit](https://github.com/sveltejs/kit) +
-[bun:sqlite](https://bun.sh/docs/api/sqlite)
 
 ### Features
 
 - SSR+PWA
-- Mobile friendly (safari may not)
-- Modified [EasyMDE](https://github.com/Ionaru/easy-markdown-editor) editor
+- Responsive web design for mobile and pc
 - Comments management
 - Firewall
 - Article management
@@ -44,13 +34,9 @@ technology stack.
 - backup to local and upload recovery
 - Image upload compression
 
-### Features may be added
+### Screenshots
 
--[ ] Comment Notification, using email or bot 
-
-### partial preview
-
-#### For PC View
+#### PC
 <img src="doc/list.webp" width="460">
 <img src="doc/view.webp" width="460">
 <img src="doc/login.webp" width="460">
@@ -59,7 +45,7 @@ technology stack.
 <img src="doc/manage.webp" width="460">
 
 
-### For mobile view
+### Mobile
 <img src="doc/list_m.webp" width="280">
 <img src="doc/view_m.webp" width="280">
 <img src="doc/manage_m.webp" width="280">
@@ -67,22 +53,12 @@ technology stack.
 <img src="doc/fw_m.webp" width="280">
 
 ### Deploy
-
-You need a bun environment vps.
-
-- step1: build locally
+1. Build
   ```bash
-  bun --bun run build
+  bun run build
   ```
-- step2: add package.json
-  ```bash
-  bun --bun run publish
-  ```
-- step3: upload the dist folder to your vps
-
-- optional: crete the `.env` in dist folder if you want change the bind port
-
-- step4: run it (If you need to run in the background, you could add a service)
+2. Upload the dist folder to your vps.
+3. Run
   ```bash
   bun --bun run start
   ```
