@@ -8,17 +8,19 @@
 ![Static Badge](https://img.shields.io/badge/marked-15-yellow?style=flat&logo=marked&link=https%3A%2F%2Fmarked.js.org)
 ![Static Badge](https://img.shields.io/badge/easymde-2.18-green?style=flat&link=https%3A%2F%2Fgithub.com%2FIonaru%2Feasy-markdown-editor)
 
-Here is my personal blog. I am currently using it to 
+![home](doc/home.webp)
+
+Here is my personal blog. I am currently using it to
 record my daily life and a small amount of technical
-experience. It is suitable for deployment on a vps with 
-a bun environment. I didn't do any functional support 
-in the direction of SEO or business, emm... it is only 
-suitable for writing, and the theme cannot be modified. 
+experience. It is suitable for deployment on a vps with
+a bun environment. I didn't do any functional support
+in the direction of SEO or business, emm... it is only
+suitable for writing, and the theme cannot be modified.
 If you are interested in it, welcome to fork it.
 
 
-The code of the current project is still very messy 
-and far from the standard of an open source project. 
+The code of the current project is still very messy
+and far from the standard of an open source project.
 
 ### Features
 
@@ -34,31 +36,37 @@ and far from the standard of an open source project.
 - backup to local and upload recovery
 - Image upload compression
 
-### Screenshots
-
-#### PC
-<img src="doc/list.webp" width="460">
-<img src="doc/view.webp" width="460">
-<img src="doc/login.webp" width="460">
-<img src="doc/write.webp" width="460">
-<img src="doc/fw.webp" width="460">
-<img src="doc/manage.webp" width="460">
-
-
-### Mobile
-<img src="doc/list_m.webp" width="280">
-<img src="doc/view_m.webp" width="280">
-<img src="doc/manage_m.webp" width="280">
-<img src="doc/write_m.webp" width="280">
-<img src="doc/fw_m.webp" width="280">
 
 ### Deploy
 1. Build
-  ```bash
-  bun run build
-  ```
+```bash
+bun i
+bun run build
+```
 2. Upload the dist folder to your vps.
 3. Run
-  ```bash
-  bun --bun run start
-  ```
+```bash
+cd dist
+bun i
+bun --bun run start
+```
+
+
+### Screenshots
+
+#### PC
+![screenshot](doc/list.webp)
+![screenshot](doc/view.webp)
+![screenshot](doc/login.webp)
+![screenshot](doc/write.webp)
+![screenshot](doc/fw.webp)
+![screenshot](doc/manage.webp)
+
+
+### Mobile
+![screenshot](doc/list_m.webp)
+![screenshot](doc/view_m.webp)
+![screenshot](doc/manage_m.webp)
+![screenshot](doc/write_m.webp)
+![screenshot](doc/fw_m.webp)
+
