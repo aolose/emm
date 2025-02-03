@@ -64,9 +64,9 @@ bun --bun run start
 
 
 ### Mobile
-![screenshot](doc/list_m.webp)
-![screenshot](doc/view_m.webp)
-![screenshot](doc/manage_m.webp)
-![screenshot](doc/write_m.webp)
-![screenshot](doc/fw_m.webp)
+<img width=400 src="doc/list_m.webp"/>
+<img width=400 src="doc/view_m.webp"/>
+<img width=400 src="doc/manage_m.webp"/>
+<img width=400 src="doc/write_m.webp"/>
+<img width=400 src="doc/fw_m.webp"/>
 
