@@ -83,12 +83,12 @@
 
 	.t {
 		position: absolute;
-		top: 60px;
-		bottom: 50px;
+		top: 40px;
+		bottom: 60px;
 		left: 0;
 		right: 0;
 		overflow: auto;
-		padding: 80px 0 0;
+		padding: 100px 0 0;
 		transition: 0.3s ease-in-out;
 		transform: translate3d(0, 0, 0);
 		clip-path: inset(110px 0 0 0);
