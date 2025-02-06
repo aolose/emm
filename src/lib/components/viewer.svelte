@@ -220,10 +220,10 @@
 				}
 			}
 
-			p {
+			p,li {
 				word-break: break-all;
 				text-align: justify;
-				line-height: 2.1;
+				line-height: 2;
 				margin-bottom: 20px;
 				color: rgba(195, 209, 227, 0.78);
 			}

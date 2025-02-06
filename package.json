@@ -7,11 +7,12 @@
 	"license": "MIT",
 	"scripts": {
 		"dev": "bun --bun run vite dev",
-		"build": "bun --bun run vite build && bun ./bun-fix.js",
+		"build": "bun --bun run vite build && bun scripts/bunfix.js",
 		"preview": "bun --bun vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": " eslint --fix . && prettier  --check .",
+		"syncReadme": "bun scripts/readme.js",
 		"format": "prettier  --write ."
 	},
 	"devDependencies": {
@@ -37,8 +38,8 @@
 		"globals": "^15.14.0",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
-		"sass": "^1.83.4",
-		"svelte": "^5.19.7",
+		"sass": "^1.84.0",
+		"svelte": "^5.19.8",
 		"svelte-adapter-bun": "^0.5.2",
 		"svelte-check": "^4.1.4",
 		"svelte-preprocess": "^6.0.3",
@@ -46,7 +47,7 @@
 		"tslib": "^2.8.1",
 		"typescript": "^5.7.3",
 		"typescript-eslint": "^8.23.0",
-		"vite": "^6.0.11"
+		"vite": "^6.1.0"
 	},
 	"type": "module",
 	"dependencies": {
