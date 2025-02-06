@@ -1,12 +1,12 @@
 # A personal blog system
-![Static Badge](https://img.shields.io/badge/sveltekit-v2-f96743?style=flat&logo=svelte&link=https%3A%2F%2Fsvelte.dev%2Fdocs%2Fkit%2Fintroduction)
-![Static Badge](https://img.shields.io/badge/typescript-5.7-3178c6?style=flat&link=https%3A%2F%2Fwww.typescriptlang.org)
+![Static Badge](https://img.shields.io/badge/sveltekit-^2.17.1-f96743?style=flat&logo=svelte&link=https%3A%2F%2Fsvelte.dev%2Fdocs%2Fkit%2Fintroduction)
+![Static Badge](https://img.shields.io/badge/typescript-^5.7.3-3178c6?style=flat&link=https%3A%2F%2Fwww.typescriptlang.org)
 ![Static Badge](https://img.shields.io/badge/bun-latest-f472b6?style=flat&logo=bun&link=https%3A%2F%2Fbun.sh)
 ![Static Badge](https://img.shields.io/badge/bun-sqlite-f472b6?style=flat&logo=bun&link=https%3A%2F%2Fbun.sh%2Fdocs%2Fapi%2Fsqlite)
-![Static Badge](https://img.shields.io/badge/sass-1.83.4-bf4080?style=flat&logo=sass&link=https%3A%2F%2Fsass-lang.com)
-![Static Badge](https://img.shields.io/badge/isbot-5.1.22-007ec6?style=flat&logo=isbot&link=https%3A%2F%2Fisbot.js.org)
-![Static Badge](https://img.shields.io/badge/marked-15-yellow?style=flat&logo=marked&link=https%3A%2F%2Fmarked.js.org)
-![Static Badge](https://img.shields.io/badge/easymde-2.18-green?style=flat&link=https%3A%2F%2Fgithub.com%2FIonaru%2Feasy-markdown-editor)
+![Static Badge](https://img.shields.io/badge/sass-^1.84.0-bf4080?style=flat&logo=sass&link=https%3A%2F%2Fsass-lang.com)
+![Static Badge](https://img.shields.io/badge/isbot-^5.1.22-007ec6?style=flat&logo=isbot&link=https%3A%2F%2Fisbot.js.org)
+![Static Badge](https://img.shields.io/badge/marked-^15.0.6-yellow?style=flat&logo=marked&link=https%3A%2F%2Fmarked.js.org)
+![Static Badge](https://img.shields.io/badge/easymde-^2.18.0-green?style=flat&link=https%3A%2F%2Fgithub.com%2FIonaru%2Feasy-markdown-editor)
 
 ![home](doc/home.webp)
 
