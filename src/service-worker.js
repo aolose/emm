@@ -4,6 +4,7 @@ import { build, files, version } from '$service-worker';
 const channel = new BroadcastChannel('sw-messages');
 const cachePrefix = 'sw-';
 const CACHE = `${cachePrefix}${version}`;
+const RES_CACHE = 'res';
 const ASSETS = [
 	...build, // the app itself
 	...files // everything in `static`
@@ -46,7 +47,7 @@ self.addEventListener('fetch', (event) => {
 
 	async function respond() {
 		const url = new URL(event.request.url);
-		const cache = await caches.open(CACHE);
+		const cache = await caches.open(url.pathname.startsWith('/res/') ? RES_CACHE : CACHE);
 		if (ASSETS.includes(url.pathname)) {
 			const response = await cache.match(url.pathname);
 			if (response) {
@@ -58,15 +59,12 @@ self.addEventListener('fetch', (event) => {
 			if (!(response instanceof Response)) {
 				throw new Error('invalid response from fetch');
 			}
-
 			if (response.status === 200) {
 				cache.put(event.request, response.clone());
 			}
-
 			return response;
 		} catch (err) {
 			const response = await cache.match(event.request);
-
 			if (response) {
 				return response;
 			}
