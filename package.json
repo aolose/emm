@@ -65,7 +65,7 @@
 		"ip-matching": "^2.1.2",
 		"ip2location-nodejs": "^9.6.3",
 		"isbot": "^5.1.22",
-		"marked": "^15.0.6",
+		"marked": "^15.0.7",
 		"mime-types": "^2.1.35",
 		"morphdom": "^2.7.4",
 		"sharp": "^0.33.5",
