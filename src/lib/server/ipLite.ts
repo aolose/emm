@@ -8,7 +8,7 @@ import { findEntry, mkdir, saveEntry, unZip } from '$lib/server/utils';
 const ip2location = new IP2Location();
 const db_type = 'DB3';
 const url = `https://www.ip2location.com/download/?token=$TOKEN&file=${db_type}LITEBINIPV6`;
-const maxSize = 1024 * 1024 * 50;
+const maxSize = 1024 * 1024 * 100;
 
 let cancel = new Function();
 let curDownLoad = '';
@@ -25,14 +25,14 @@ async function update() {
 	}
 	const name = `ip_${Date.now()}`;
 	const latest = resolve(dir, name);
-	let siz = 0;
 	if (curDownLoad && curDownLoad === tk) return 0;
 	else {
 		cancel?.();
 	}
 
 	const query = (url: string) => {
-		return new Promise<Uint8Array[]>((resolve, reject) => {
+		let siz = 0;
+		return new Promise<Uint8Array>((resolve, reject) => {
 			const data = [] as Uint8Array[];
 			const req = https.get(url, (res) => {
 				if (res.statusCode && res.statusCode > 300 && res.statusCode < 400) {
@@ -49,7 +49,15 @@ async function update() {
 					data.push(d);
 				});
 				res.on('error', reject);
-				res.on('end', () => resolve(data));
+				res.on('end', () => {
+					const bin = new Uint8Array(siz);
+					let s = 0;
+					data.forEach((a) => {
+						bin.set(a, s);
+						s += a.length;
+					});
+					resolve(bin);
+				});
 			});
 			cancel = () => {
 				curDownLoad = '';
@@ -74,7 +82,7 @@ async function update() {
 						}
 					}
 				});
-				const files = unZip(Uint8Array.from(data));
+				const files = unZip(data);
 				const file = findEntry(files, `IP2LOCATION-LITE-${db_type}.IPV6.BIN`);
 				if (file) {
 					return saveEntry(file, latest).then(() => {
