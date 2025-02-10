@@ -76,7 +76,7 @@
 	});
 </script>
 
-<Card {act} {msg} {err} title="IpLite Database" {save} {ld}>
+<Card {act} {msg} {err} title="Ip2location Database" {save} {ld}>
 	<span>status <b>{geoStatue}</b></span>
 	<Ipt label="Download Path" bind:value={dir} placeholder="dir" />
 	<Ipt label="Token" bind:value={token} placeholder="token" box />
