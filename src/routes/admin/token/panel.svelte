@@ -256,9 +256,9 @@
 
 	.t {
 		span {
-      color: transparent;
-      background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
-      background-clip: text;
+			color: transparent;
+			background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
+			background-clip: text;
 		}
 
 		button {
@@ -284,12 +284,12 @@
 	.n {
 		justify-content: center;
 		height: 100px;
-    gap: 16px;
-		button{
+		gap: 16px;
+		button {
 			border-radius: 111px;
 			width: 150px;
-      filter: hue-rotate(-30deg);
-			&+button{
+			filter: hue-rotate(-30deg);
+			& + button {
 				filter: hue-rotate(60deg);
 			}
 		}

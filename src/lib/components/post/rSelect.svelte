@@ -19,7 +19,7 @@
 
 <style lang="scss">
 	@use '../../../lib/break' as *;
-  .o{
+	.o {
 		position: relative;
 		height: 100%;
 		flex: 1;

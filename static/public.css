@@ -70,7 +70,7 @@ textarea {
 	min-height: 48px;
 	padding: 8px 20px;
 	border-radius: 8px;
-	background: rgba(0, 0, 0, .25);
+	background: rgba(0, 0, 0, 0.25);
 	border: 0 none;
 	resize: none;
 	font-size: 13px;
@@ -86,18 +86,19 @@ input:not([type$='box']):focus,
 textarea:focus {
 	border-color: rgba(100, 129, 158, 0.6);
 }
-button{
+button {
 	color: currentColor;
 }
 button:not(.icon) {
-	background: linear-gradient(132deg, rgb(23, 47, 78), rgb(61, 64, 122));;
+	background: linear-gradient(132deg, rgb(23, 47, 78), rgb(61, 64, 122));
 	padding: 8px 24px;
 	border: none;
 	border-radius: 8px;
 	transition: 0.2s ease-in-out;
-	&:hover,&:active {
+	&:hover,
+	&:active {
 		color: #fff;
-		background: linear-gradient(132deg, rgb(55, 89, 135), rgb(48, 41, 135));;
+		background: linear-gradient(132deg, rgb(55, 89, 135), rgb(48, 41, 135));
 	}
 }
 span {

@@ -17,11 +17,11 @@
 
 	function se() {
 		ed = 1;
-		setTimeout(()=>{
-			const i = document.querySelector(`[placeholder="name"]`)
+		setTimeout(() => {
+			const i = document.querySelector(`[placeholder="name"]`);
 			i.focus();
-			i.select()
-		})
+			i.select();
+		});
 	}
 
 	async function cmt() {

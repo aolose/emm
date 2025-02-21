@@ -234,11 +234,10 @@
 			transition: 0.2s ease-in-out;
 			font-size: 13px;
 			line-height: 1;
-		  &:not(.act){
-        background: none;
+			&:not(.act) {
+				background: none;
 			}
 		}
-
 
 		.act {
 			color: #eee;
@@ -367,9 +366,9 @@
 		align-items: center;
 		padding: 0 0 0 10px;
 		height: 88px;
-    @include s(){
-      height: 60px;
-    }
+		@include s() {
+			height: 60px;
+		}
 		button {
 			padding: 10px 20px;
 			@include s() {

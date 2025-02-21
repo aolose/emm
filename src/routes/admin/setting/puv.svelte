@@ -209,160 +209,161 @@
 <svelte:window onresize={render} />
 
 <style lang="scss">
-  .bn {
-    padding: 0 20px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
+	.bn {
+		padding: 0 20px;
+		margin-bottom: 20px;
+		display: flex;
+		align-items: center;
 
-    button {
-      min-width: 0;
-      padding: 8px;
-    }
-  }
+		button {
+			min-width: 0;
+			padding: 8px;
+		}
+	}
 
-  button {
-    flex: 1;
-    font-size: 12px;
-    margin: 0 5px;
-    opacity: 0.5;
-  }
+	button {
+		flex: 1;
+		font-size: 12px;
+		margin: 0 5px;
+		opacity: 0.5;
+	}
 
-  .icon {
-    flex: none;
-    cursor: pointer;
-    opacity: 1;
-    padding: 3px;
-    right: -10px;
-    background: none;
+	.icon {
+		flex: none;
+		cursor: pointer;
+		opacity: 1;
+		padding: 3px;
+		right: -10px;
+		background: none;
 
-    &:hover {
-      color: #fff;
-    }
-  }
+		&:hover {
+			color: #fff;
+		}
+	}
 
-  .act {
-    opacity: 1;
-    color: #fff;
-  }
+	.act {
+		opacity: 1;
+		color: #fff;
+	}
 
-  .i {
-    margin-top: 10px;
-    display: grid;
-    justify-content: end;
-    grid-template-columns:  repeat(auto-fill, 300px);
+	.i {
+		margin-top: 10px;
+		display: grid;
+		justify-content: end;
+		grid-template-columns: repeat(auto-fill, 300px);
 
-    span {
-      color: rgba(130, 140, 180, 1);
-      display: block;
-      padding: 0 3px;
-      font-size: 13px;
-      white-space: nowrap;
-    }
+		span {
+			color: rgba(130, 140, 180, 1);
+			display: block;
+			padding: 0 3px;
+			font-size: 13px;
+			white-space: nowrap;
+		}
 
-    button {
-      flex-shrink: 0;
-      opacity: 0.5;
-      padding: 0;
-      margin-bottom: 3px;
-      justify-content: flex-end;
-      align-items: center;
-      font-size: 13px;
-      display: inline-flex;
-      background: none !important;
-    }
+		button {
+			flex-shrink: 0;
+			opacity: 0.5;
+			padding: 0;
+			margin-bottom: 3px;
+			justify-content: flex-end;
+			align-items: center;
+			font-size: 13px;
+			display: inline-flex;
+			background: none !important;
+		}
 
-    .act {
-      opacity: 1;
-    }
+		.act {
+			opacity: 1;
+		}
 
-    b {
-      margin-left: 10px;
-      height: 10px;
-      width: 10px;
-      background: currentColor;
-      display: block;
-    }
-  }
+		b {
+			margin-left: 10px;
+			height: 10px;
+			width: 10px;
+			background: currentColor;
+			display: block;
+		}
+	}
 
-  .v {
-    display: flex;
-    flex-direction: column;
-    min-height: 360px;
-    flex-grow: 1;
-    width: 100%;
-    padding: 0 30px 0 20px;
-  }
+	.v {
+		display: flex;
+		flex-direction: column;
+		min-height: 360px;
+		flex-grow: 1;
+		width: 100%;
+		padding: 0 30px 0 20px;
+	}
 
-  .a {
-    flex-grow: 1;
-    display: flex;
+	.a {
+		flex-grow: 1;
+		display: flex;
 
-    span {
-      display: block;
-    }
-  }
+		span {
+			display: block;
+		}
+	}
 
-  .y {
-    top: -1em;
-    text-align: right;
-    font-size: 12px;
-    display: flex;
-    flex-direction: column-reverse;
-    justify-content: space-between;
-    padding: 20px 5px;
-  }
+	.y {
+		top: -1em;
+		text-align: right;
+		font-size: 12px;
+		display: flex;
+		flex-direction: column-reverse;
+		justify-content: space-between;
+		padding: 20px 5px;
+	}
 
-  .x {
-    display: flex;
-    padding: 0 20px;
-    justify-content: space-between;
+	.x {
+		display: flex;
+		padding: 0 20px;
+		justify-content: space-between;
 
-    span {
-      flex: 1;
-      text-align: center;
-    }
+		span {
+			flex: 1;
+			text-align: center;
+		}
 
-    span:first-child {
-      flex: 0;
-      transform: translateX(-50%);
-    }
+		span:first-child {
+			flex: 0;
+			transform: translateX(-50%);
+		}
 
-    span:last-child {
-      flex: 0;
-      transform: translateX(50%);
-    }
-  }
+		span:last-child {
+			flex: 0;
+			transform: translateX(50%);
+		}
+	}
 
-  .c {
-    width: 0;
-    min-height: 300px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
+	.c {
+		width: 0;
+		min-height: 300px;
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+	}
 
-  .e {
-    flex-grow: 1;
-  }
+	.e {
+		flex-grow: 1;
+	}
 
-  canvas {
-    position: absolute;
-    background: linear-gradient(0deg, rgba(100, 100, 100, 0.5) 0, transparent 1px),
-    linear-gradient(90deg, rgba(100, 100, 100, 0.5) 0, transparent 1px) 18px 10px;
-    background-size: 20px 20px;
-    border: 1px solid #6c7a93;
-    border-top: 0;
-    border-right: 0;
-    top: 0;
-    left: 0;
-  }
+	canvas {
+		position: absolute;
+		background:
+			linear-gradient(0deg, rgba(100, 100, 100, 0.5) 0, transparent 1px),
+			linear-gradient(90deg, rgba(100, 100, 100, 0.5) 0, transparent 1px) 18px 10px;
+		background-size: 20px 20px;
+		border: 1px solid #6c7a93;
+		border-top: 0;
+		border-right: 0;
+		top: 0;
+		left: 0;
+	}
 
-  .i-refresh {
-    color: transparent;
-    background: linear-gradient(142deg, rgb(83, 136, 172), rgb(87, 71, 204));
-    background-clip: text;
-    font-size: 16px;
-    min-width: 0 !important;
-  }
+	.i-refresh {
+		color: transparent;
+		background: linear-gradient(142deg, rgb(83, 136, 172), rgb(87, 71, 204));
+		background-clip: text;
+		font-size: 16px;
+		min-width: 0 !important;
+	}
 </style>

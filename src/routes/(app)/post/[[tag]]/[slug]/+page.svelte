@@ -13,6 +13,7 @@
 	import Top from '$lib/components/Top.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { marked } from 'marked';
 
 	let { data } = $props();
 	let d = $state(),
@@ -66,6 +67,19 @@
 	<meta name="og:image:height" content="400" />
 </Head>
 
+{#snippet h()}
+	<div class="h">
+		<h1>{d.title}</h1>
+		{#if d.desc}<p>
+				{@html marked(d.desc)}
+			</p>{/if}
+		<div class="i">
+			<span><span class="icon i-view"></span>{d._r}</span>
+			<span>{time(d.createAt)}</span>
+		</div>
+	</div>
+{/snippet}
+
 {#if d}
 	<div class={'bk icon i-close'} onclick={() => goBack()}></div>
 	<div class="pg" bind:this={o}>
@@ -75,6 +89,7 @@
 		<div class="bg" style={sly}>
 			<div class="ft" {style}></div>
 			<div class="fc"></div>
+			{@render h()}
 		</div>
 		<div class="co" class:ex={$expand} bind:this={c}>
 			{#if !$small}
@@ -82,14 +97,7 @@
 			{/if}
 			<Ctx>
 				<div class="v">
-					<div class="h">
-						<h1>{d.title}</h1>
-						{#if d.desc}<p>{d.desc}</p>{/if}
-						<div class="i">
-							<span><span class="icon i-view"></span>{d._r}</span>
-							<span>{time(d.createAt)}</span>
-						</div>
-					</div>
+					{@render h()}
 					<div class="art">
 						<div class="ct" use:imageViewer>
 							<Viewer ctx={d} />
@@ -149,7 +157,6 @@
 		display: flex;
 		justify-content: space-between;
 		flex-wrap: wrap;
-
 		p {
 			display: flex;
 			align-items: center;
@@ -168,7 +175,7 @@
 		button {
 			color: var(--darkgrey-h);
 			margin-left: 10px;
-      background: none;
+			background: none;
 			padding: 0;
 			&:hover {
 				color: #b1bbc5;
@@ -284,33 +291,27 @@
 	.h {
 		padding: 30px;
 		color: #f4f6f8;
+		min-height: 300px;
 		opacity: 0.8;
-		display: flex;
+		display: none;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		margin: 30px auto 0;
 		text-align: center;
-		@include s() {
-			height: 250px;
-			position: absolute;
-			bottom: 100%;
-			left: 0;
-			right: 0;
-			margin: 0 auto;
-		}
-
-		* {
-			text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
+		:global {
+      * {
+        color: rgba(244, 246, 248, 0.9);
+        text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
+      }
 		}
 
 		p {
+			text-align: center;
 			line-height: 2;
-			color: #f8f8f8;
-			margin: 10px 0;
+			margin: 10px 0 30px;
 			font-size: 14px;
-			text-align: left;
-			max-width: 80%;
+			max-width: 90%;
 		}
 	}
 
@@ -377,10 +378,18 @@
 		background: url('$lib/components/img/1.jpg') center no-repeat;
 		background-size: cover;
 		@include s() {
+			pointer-events: auto;
+			padding: 20px 1px;
 			position: relative;
 			border-bottom: none;
-			min-height: 0;
-			height: 300px;
+			height: auto;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 300px;
+			.h {
+				display: flex;
+			}
 		}
 	}
 
@@ -427,7 +436,13 @@
 		width: 800px;
 		margin: 0 auto;
 		padding-bottom: 50px;
+		.h {
+			display: flex;
+		}
 		@include s() {
+			.h {
+				display: none;
+			}
 			padding-bottom: 0;
 		}
 	}

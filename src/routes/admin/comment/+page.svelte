@@ -196,9 +196,9 @@
 		padding: 0 25px;
 		display: flex;
 		align-items: center;
-    @include s(){
-      height: 60px;
-    }
+		@include s() {
+			height: 60px;
+		}
 	}
 
 	.b {

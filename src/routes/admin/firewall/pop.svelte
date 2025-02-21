@@ -202,9 +202,9 @@
 		padding: 0 20px;
 		border-radius: 10px 10px 0 0;
 		left: 6px;
-    color: transparent;
-    background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
-    background-clip: text;
+		color: transparent;
+		background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
+		background-clip: text;
 		font-size: 22px;
 		line-height: 60px;
 		font-weight: 200;
@@ -226,7 +226,7 @@
 		overflow: hidden;
 		height: 50px;
 		color: #3a537c;
-    transform: scale(.9);
+		transform: scale(0.9);
 		&:hover {
 			color: #00d2ff;
 
@@ -263,7 +263,7 @@
 			right: 10px;
 			width: 40px;
 			height: 40px;
-			transform: scale(.7);
+			transform: scale(0.7);
 			&:hover {
 				color: #3a537c;
 
@@ -285,13 +285,13 @@
 		align-items: center;
 		gap: 16px;
 		justify-content: center;
-		button{
+		button {
 			width: 100px;
 			border-radius: 111px;
-      filter: hue-rotate(60deg);
-			&+button{
+			filter: hue-rotate(60deg);
+			& + button {
 				filter: hue-rotate(-30deg);
-      }
+			}
 		}
 	}
 

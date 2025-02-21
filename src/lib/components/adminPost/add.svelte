@@ -32,7 +32,7 @@
 
 <style lang="scss">
 	@use '../../break' as *;
-  input {
+	input {
 		border-radius: 0;
 		background: none;
 	}

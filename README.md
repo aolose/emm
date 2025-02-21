@@ -1,4 +1,5 @@
 # A personal blog system
+
 ![Static Badge](https://img.shields.io/badge/sveltekit-^2.17.1-f96743?style=flat&logo=svelte&link=https%3A%2F%2Fsvelte.dev%2Fdocs%2Fkit%2Fintroduction)
 ![Static Badge](https://img.shields.io/badge/typescript-^5.7.3-3178c6?style=flat&link=https%3A%2F%2Fwww.typescriptlang.org)
 ![Static Badge](https://img.shields.io/badge/bun-latest-f472b6?style=flat&logo=bun&link=https%3A%2F%2Fbun.sh)
@@ -18,7 +19,6 @@ in the direction of SEO or business, emm... it is only
 suitable for writing, and the theme cannot be modified.
 If you are interested in it, welcome to fork it.
 
-
 The code of the current project is still very messy
 and far from the standard of an open source project.
 
@@ -36,25 +36,28 @@ and far from the standard of an open source project.
 - backup to local and upload recovery
 - Image upload compression
 
-
 ### Deploy
+
 1. Build
+
 ```bash
 bun i
 bun run build
 ```
+
 2. Upload the dist folder to your vps.
 3. Run
+
 ```bash
 cd dist
 bun i
 bun --bun run start
 ```
 
-
 ### Screenshots
 
 #### PC
+
 ![screenshot](doc/list.webp)
 ![screenshot](doc/view.webp)
 ![screenshot](doc/login.webp)
@@ -62,11 +65,10 @@ bun --bun run start
 ![screenshot](doc/fw.webp)
 ![screenshot](doc/manage.webp)
 
-
 ### Mobile
+
 <img width=400 src="doc/list_m.webp"/>
 <img width=400 src="doc/view_m.webp"/>
 <img width=400 src="doc/manage_m.webp"/>
 <img width=400 src="doc/write_m.webp"/>
 <img width=400 src="doc/fw_m.webp"/>
-

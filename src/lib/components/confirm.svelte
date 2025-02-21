@@ -95,9 +95,8 @@
 		border-radius: 111px;
 		width: 100px;
 		filter: hue-rotate(-30deg);
-	  &+button {
-      filter: hue-rotate(30deg);
+		& + button {
+			filter: hue-rotate(30deg);
 		}
 	}
-
 </style>

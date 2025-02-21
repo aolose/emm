@@ -34,19 +34,22 @@
 				<button onclick={save}>save</button>
 			</div>
 			<div class="e">
-				<Editor bind:value toolbar={$small?{
-		name: 'preview',
-		action() {
-			show = true
-		},
-		className: 'icon i-view',
-		title: 'preview'
-	}:[]} />
+				<Editor
+					bind:value
+					toolbar={$small
+						? {
+								name: 'preview',
+								action() {
+									show = true;
+								},
+								className: 'icon i-view',
+								title: 'preview'
+							}
+						: []}
+				/>
 			</div>
 		</div>
-		<div class="d"
-				 class:s={show}
-				 class:v={$small}>
+		<div class="d" class:s={show} class:v={$small}>
 			<Viewer close={() => (show = 0)} {value} preview={true} />
 		</div>
 	</div>
@@ -54,47 +57,47 @@
 <FileWin />
 
 <style lang="scss">
-  @use '../../../lib/break' as *;
+	@use '../../../lib/break' as *;
 
-  .e {
-    position: relative;
-    flex: 1;
+	.e {
+		position: relative;
+		flex: 1;
 		:global {
-      .editor-toolbar{
+			.editor-toolbar {
 				height: auto;
 			}
 		}
-  }
+	}
 
-  .c {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    background: var(--bg2);
-    overflow: hidden;
-  }
+	.c {
+		display: flex;
+		width: 100%;
+		height: 100%;
+		background: var(--bg2);
+		overflow: hidden;
+	}
 
-  .f {
-    background: var(--bg6);
-    display: flex;
-    max-width: 1200px;
-    flex: 1;
-  }
+	.f {
+		background: var(--bg6);
+		display: flex;
+		max-width: 1200px;
+		flex: 1;
+	}
 
-  .d {
-    overflow: auto;
-    flex: 1;
-    max-width: 800px;
-    @include s() {
-      z-index: 10;
-      flex: none;
-      transition: .3s transform ease-in-out;
-      transform: translate3d(100%, 0, 0);
-      position: fixed;
-      inset: 0;
-    }
-    :global{
-      .i-close {
+	.d {
+		overflow: auto;
+		flex: 1;
+		max-width: 800px;
+		@include s() {
+			z-index: 10;
+			flex: none;
+			transition: 0.3s transform ease-in-out;
+			transform: translate3d(100%, 0, 0);
+			position: fixed;
+			inset: 0;
+		}
+		:global {
+			.i-close {
 				display: none;
 				font-size: 24px;
 				position: fixed;
@@ -102,35 +105,35 @@
 				top: 30px;
 				background: var(--bg6);
 				z-index: 10;
-        @include s() {
+				@include s() {
 					display: block;
 				}
 			}
 		}
-    &.s {
-      transform: translate3d(0, 0, 0);
-    }
-  }
+		&.s {
+			transform: translate3d(0, 0, 0);
+		}
+	}
 
-  .a {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+	.a {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
 
-    :global {
-      .editor-toolbar,
-      .CodeMirror-scroll {
-        padding: 10px 20px;
-      }
-    }
-  }
+		:global {
+			.editor-toolbar,
+			.CodeMirror-scroll {
+				padding: 10px 20px;
+			}
+		}
+	}
 
-  .b {
-    flex-shrink: 0;
-    height: 88px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-  }
+	.b {
+		flex-shrink: 0;
+		height: 88px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 20px;
+	}
 </style>

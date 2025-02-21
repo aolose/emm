@@ -56,6 +56,13 @@
 	};
 	const ok = () => {
 		saveNow.set(1);
+		const cur = get(editPost);
+		if (!post.slug) post.slug = cur.slug;
+		const o = { ...cur, ...post };
+		if (JSON.stringify(o) === JSON.stringify(cur)) {
+			setting.set(0);
+			return;
+		}
 		autoSave({ ...get(editPost), ...post }).then((a) => {
 			if (a) setting.set(0);
 		});
