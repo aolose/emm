@@ -99,7 +99,7 @@
 		align-content: flex-start;
 		display: flex;
 		flex-wrap: wrap;
-		@include s(){
+		@include s() {
 			justify-content: center;
 		}
 	}

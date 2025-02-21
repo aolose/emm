@@ -28,7 +28,7 @@
 			}
 		}
 		if (code === 'Enter') {
-			val = (pre || val.slice(0, s) )+ ',' + val.slice(s);
+			val = (pre || val.slice(0, s)) + ',' + val.slice(s);
 		} else if (code === 'Backspace') {
 			if (!s) {
 				const siz = [...items][items.size - 1];
@@ -105,8 +105,8 @@
 			{id}
 			bind:value={val}
 			bind:this={ipt}
-			onfocus={()=>show=1}
-			onblur={() => show = 0}
+			onfocus={() => (show = 1)}
+			onblur={() => (show = 0)}
 			onkeydown={keyPress}
 		/>
 	</div>

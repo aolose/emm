@@ -204,9 +204,9 @@
 		height: 30px;
 		align-items: center;
 		background: var(--bg0);
-    @include s(){
-     margin-right: 8px;
-    }
+		@include s() {
+			margin-right: 8px;
+		}
 		button {
 			margin: 0;
 			height: inherit;
@@ -221,19 +221,19 @@
 			line-height: 1;
 			color: #8aa4af;
 			z-index: 3;
-      &:not(.i){
-        background: none;
-      }
+			&:not(.i) {
+				background: none;
+			}
 		}
-    .i {
+		.i {
 			z-index: 0;
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      right: 50%;
-      transition: 0.1s ease-in-out;
-    }
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			right: 50%;
+			transition: 0.1s ease-in-out;
+		}
 	}
 
 	.ac {
@@ -266,14 +266,14 @@
 		background: var(--bg2);
 		display: flex;
 		width: 100%;
-    @include s(){
-      height: 60px;
+		@include s() {
+			height: 60px;
 			padding: 0 20px;
-			button{
+			button {
 				margin: 0;
 				width: 80px;
 			}
-    }
+		}
 		s {
 			flex: 1;
 		}

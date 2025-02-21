@@ -665,7 +665,7 @@ const apis: APIRoutes = {
 			const mt = s.match(/(\d*?),(.*)/);
 			if (mt) {
 				const [id, slug] = mt.slice(1);
-				return uniqSlug(+id, slug);
+				if (slug) return uniqSlug(+id, slug);
 			}
 		})
 	},

@@ -60,94 +60,96 @@
 </div>
 
 <style lang="scss">
-  @use '../../../lib/break.scss' as *;
+	@use '../../../lib/break.scss' as *;
 
-  .e {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    @include s() {
-      flex-direction: column;
-    }
-  }
+	.e {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		@include s() {
+			flex-direction: column;
+		}
+	}
 
-  input {
-    font-size: 13px;
-    width: 100px;
-    border-width: 0;
-    border-right-width: 1px;
-    @include s() {
-      width: 100%;
-      border-right: none;
-      border-bottom-width: 1px;
-    }
-  }
+	input {
+		font-size: 13px;
+		width: 100px;
+		border-width: 0;
+		border-right-width: 1px;
+		@include s() {
+			width: 100%;
+			border-right: none;
+			border-bottom-width: 1px;
+		}
+	}
 
-  button {
-    padding: 0 5px;
-  }
+	button {
+		padding: 0 5px;
+	}
 
-  .c {
-    flex-grow: 1;
-    @include s() {
-      width: 100%;
-      min-height: 32px;
-    }
-  }
+	.c {
+		flex-grow: 1;
+		@include s() {
+			width: 100%;
+			min-height: 32px;
+		}
+	}
 
-  textarea {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    resize: none;
-    width: 100%;
-    overflow: hidden;
-  }
+	textarea {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		resize: none;
+		width: 100%;
+		overflow: hidden;
+	}
 
-  p {
-    opacity: 0;
-    pointer-events: none;
-  }
+	p {
+		opacity: 0;
+		pointer-events: none;
+	}
 
-  p,
-  textarea {
-    line-height: 30px;
-    display: flex;
-    height: 100%;
-    border: none;
-    margin: 0;
-    word-break: break-all;
-    white-space: normal;
-    padding: 0 10px;
-    font-size: 13px;
-  }
+	p,
+	textarea {
+		line-height: 30px;
+		display: flex;
+		height: 100%;
+		border: none;
+		margin: 0;
+		word-break: break-all;
+		white-space: normal;
+		padding: 0 10px;
+		font-size: 13px;
+	}
 
-  .b {
-    width: 100%;
-    display: flex;
-  }
+	.b {
+		width: 100%;
+		display: flex;
+	}
 
-  .a {
-    min-height: 48px;
-    resize: none;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+	.a {
+		min-height: 48px;
+		resize: none;
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 
-    input, textarea, p {
-      padding: 10px 20px;
-      line-height: 1.8;
-      min-height: 48px;
-      width: 100%;
-      height: 100%;
-      background: var(--bg1);
-    }
+		input,
+		textarea,
+		p {
+			padding: 10px 20px;
+			line-height: 1.8;
+			min-height: 48px;
+			width: 100%;
+			height: 100%;
+			background: var(--bg1);
+		}
 
-    * {
-      line-height: 48px;
-    }
-  }
+		* {
+			line-height: 48px;
+		}
+	}
 </style>

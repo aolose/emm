@@ -162,7 +162,6 @@
 			min-width: 100px;
 		}
 
-
 		&:hover {
 			background: color.adjust(#0b3054, $alpha: -0.5);
 		}

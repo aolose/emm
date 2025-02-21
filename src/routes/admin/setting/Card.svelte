@@ -23,11 +23,11 @@
 		display: flex;
 		margin: 9px;
 		border-radius: 16px;
-    background: rgba(40, 44, 55, 0.1);
+		background: rgba(40, 44, 55, 0.1);
 		flex-direction: column;
 		padding-bottom: 20px;
 		:global {
-			button{
+			button {
 				min-width: 100px;
 			}
 		}
@@ -54,9 +54,9 @@
 	}
 
 	h1 {
-    color: transparent;
-    background: linear-gradient(132deg, rgb(195, 201, 205), rgb(134, 153, 220));
-    background-clip: text;
+		color: transparent;
+		background: linear-gradient(132deg, rgb(195, 201, 205), rgb(134, 153, 220));
+		background-clip: text;
 		font-size: 18px;
 		line-height: 3;
 	}

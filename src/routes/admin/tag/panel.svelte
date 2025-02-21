@@ -112,195 +112,195 @@
 {/if}
 
 <style lang="scss">
-  @use 'sass:color';
+	@use 'sass:color';
 
-  @use '../../../lib/break' as *;
+	@use '../../../lib/break' as *;
 
-  .b {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    max-width: 600px;
-    height: 100%;
-    background: var(--bg2);
+	.b {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		max-width: 600px;
+		height: 100%;
+		background: var(--bg2);
 
-    :global {
-      .a {
-        .t {
-          height: 75px;
-          @include s() {
-            height: 46px;
-          }
-        }
-      }
-    }
-  }
+		:global {
+			.a {
+				.t {
+					height: 75px;
+					@include s() {
+						height: 46px;
+					}
+				}
+			}
+		}
+	}
 
-  input,
-  .x,
-  textarea,
-  .i-ed,
-  .p {
-    border-radius: 8px;
-    min-height: 48px;
-    height: auto;
-    flex-grow: 1;
-    background: var(--bg1);
-  }
+	input,
+	.x,
+	textarea,
+	.i-ed,
+	.p {
+		border-radius: 8px;
+		min-height: 48px;
+		height: auto;
+		flex-grow: 1;
+		background: var(--bg1);
+	}
 
-  .x {
-    max-height: 400px;
+	.x {
+		max-height: 400px;
 
-    p,
-    textarea {
-      padding: 0 10px;
-      border: none;
-      min-height: 48px;
-      white-space: pre-wrap;
-      word-break: break-all;
-      width: 100%;
-      font-size: 13px;
-      line-height: 34px;
-    }
+		p,
+		textarea {
+			padding: 0 10px;
+			border: none;
+			min-height: 48px;
+			white-space: pre-wrap;
+			word-break: break-all;
+			width: 100%;
+			font-size: 13px;
+			line-height: 34px;
+		}
 
-    textarea {
-      resize: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-    }
+		textarea {
+			resize: none;
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+		}
 
-    p {
-      padding-top: 34px;
-      opacity: 0;
-      pointer-events: none;
-    }
-  }
+		p {
+			padding-top: 34px;
+			opacity: 0;
+			pointer-events: none;
+		}
+	}
 
-  .c {
-    overflow-y: auto;
-    padding-bottom: 20px;
-    padding-top: 40px;
-  }
+	.c {
+		overflow-y: auto;
+		padding-bottom: 20px;
+		padding-top: 40px;
+	}
 
-  .p {
-    height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-    color: color.adjust(#fff, $alpha: -0.8);
-    cursor: pointer;
-    transition: 0.2s;
-    background: var(--bg1) center no-repeat;
-    background-size: contain;
+	.p {
+		height: 200px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 40px;
+		color: color.adjust(#fff, $alpha: -0.8);
+		cursor: pointer;
+		transition: 0.2s;
+		background: var(--bg1) center no-repeat;
+		background-size: contain;
 
-    &:hover {
-      color: #6c7a93;
-    }
+		&:hover {
+			color: #6c7a93;
+		}
 
-    button {
-      color: #6c7a93;
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+		button {
+			color: #6c7a93;
+			position: absolute;
+			top: 0;
+			right: 0;
+			width: 30px;
+			height: 30px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 
-      &:hover {
-        color: #ffffff;
-      }
-    }
+			&:hover {
+				color: #ffffff;
+			}
+		}
 
-    .i-close {
-      text-shadow: #000 1px 1px;
-    }
-  }
+		.i-close {
+			text-shadow: #000 1px 1px;
+		}
+	}
 
-  .t {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 75px;
-    padding: 0 20px;
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--bg1);
+	.t {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		height: 75px;
+		padding: 0 20px;
+		flex-shrink: 0;
+		border-bottom: 1px solid var(--bg1);
 
-    .i-close {
-      color: #485c6c;
-      font-size: 20px;
+		.i-close {
+			color: #485c6c;
+			font-size: 20px;
 
-      &:hover {
-        color: #7987a2;
-      }
-    }
-  }
+			&:hover {
+				color: #7987a2;
+			}
+		}
+	}
 
-  .s {
-    cursor: pointer;
-    border-radius: 100px;
-    font-size: 16px;
-    color: #485c6c;
-    padding: 5px 20px;
-    transition: 0.2s;
+	.s {
+		cursor: pointer;
+		border-radius: 100px;
+		font-size: 16px;
+		color: #485c6c;
+		padding: 5px 20px;
+		transition: 0.2s;
 
-    &:hover {
-      color: #7a91bb;
-    }
-  }
+		&:hover {
+			color: #7a91bb;
+		}
+	}
 
-  .i-ed {
-    flex-grow: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    border-left: 0;
-    background: var(--bg2);
-    color: #6c7a93;
-    font-size: 18px;
-    @include s() {
+	.i-ed {
+		flex-grow: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 50px;
+		height: 50px;
+		border-left: 0;
+		background: var(--bg2);
+		color: #6c7a93;
+		font-size: 18px;
+		@include s() {
 			position: absolute;
 			right: 10px;
 			top: 0;
-    }
+		}
 
-    &:hover {
-      background: var(--bg1);
-    }
-  }
+		&:hover {
+			background: var(--bg1);
+		}
+	}
 
-  .r {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 10px 50px;
-    position: relative;
-    @include s() {
-      flex-direction: column;
-      padding: 10px 24px;
-      gap: 8px;
-      .v {
-        width: 100%!important;
-      }
-    }
+	.r {
+		display: flex;
+		flex-wrap: wrap;
+		padding: 10px 50px;
+		position: relative;
+		@include s() {
+			flex-direction: column;
+			padding: 10px 24px;
+			gap: 8px;
+			.v {
+				width: 100% !important;
+			}
+		}
 
-    span {
-      flex-shrink: 0;
-      line-height: 30px;
-      width: 100px;
-    }
+		span {
+			flex-shrink: 0;
+			line-height: 30px;
+			width: 100px;
+		}
 
-    &:global {
-      .v {
-        min-height: 50px !important;
-        padding: 10px !important;
-      }
-    }
-  }
+		&:global {
+			.v {
+				min-height: 50px !important;
+				padding: 10px !important;
+			}
+		}
+	}
 </style>

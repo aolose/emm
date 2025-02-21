@@ -159,7 +159,7 @@
 				opacity: 1;
 			}
 		}
-    button:not(.act){
+		button:not(.act) {
 			background: none;
 		}
 		.act {

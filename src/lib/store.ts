@@ -174,7 +174,7 @@ export const elmCpm: { [key: string]: SvelteComponent } = {};
 export const elmProps = writable<{ [key: string]: object }>({});
 export const elmTmpl = writable<{ [key: string]: HTMLElement }>({});
 
-export 	function logout() {
+export function logout() {
 	confirm('Log out?').then((a) => {
 		if (a)
 			req('logout', undefined, { method: method.GET }).then(() => {

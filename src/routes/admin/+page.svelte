@@ -171,8 +171,8 @@
 		background: var(--bg1);
 		display: flex;
 		flex-direction: column;
-    @include s() {
-      background: var(--bg6);
+		@include s() {
+			background: var(--bg6);
 		}
 		@include m() {
 			z-index: 3;
@@ -198,8 +198,8 @@
 		display: flex;
 		flex-direction: column;
 		padding-bottom: 10px;
-    @include s(){
-      background: var(--bg3);
+		@include s() {
+			background: var(--bg3);
 		}
 	}
 

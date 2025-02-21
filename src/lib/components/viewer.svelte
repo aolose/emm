@@ -101,7 +101,6 @@
 		flex-direction: column;
 
 		:global {
-
 			del {
 				color: rgba(100, 120, 150, 0.8);
 				text-decoration-color: #6c85ff;
@@ -220,7 +219,8 @@
 				}
 			}
 
-			p,li {
+			p,
+			li {
 				word-break: break-all;
 				text-align: justify;
 				line-height: 2;
@@ -326,11 +326,11 @@
 					font-weight: 400;
 					line-height: 1.5;
 					padding: 1rem 0;
-          text-align: center;
-					*{
-            background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255)) left center;
+					text-align: center;
+					* {
+						background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255)) left center;
 						background-size: 100vw 100vh;
-            background-clip: text;
+						background-clip: text;
 					}
 				}
 			}
