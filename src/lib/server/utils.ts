@@ -209,7 +209,7 @@ export const apiHandle = async (event: RequestEvent): Promise<Response> => {
 	const m = request.method.toLowerCase() as keyof Api;
 	const api = apis[name]?.[m];
 	if (api) {
-		const ip = getClientAddr(event);
+		const ip = event.locals.ip;
 		request.headers.set('x-forwarded-for', ip);
 		const r = await api(request);
 		if (r !== undefined) {
@@ -453,21 +453,7 @@ export const checkStatue = () => {
 };
 
 export const getClientAddr = (event: RequestEvent) => {
-	const req = event.request;
-	let addr = getIp(req).split(/ +/)[0];
-	if (!addr) {
-		try {
-			addr = event.locals.ip || event.getClientAddress();
-			console.log('not found ip', addr, event.locals.ip);
-		} catch (e) {
-			console.error(e);
-		}
-	} else {
-		console.log('write ip to locals', addr);
-		event.locals.ip = addr;
-	}
-	console.log('addr', addr);
-	return addr || '';
+	return event.locals.ip
 };
 
 export const getCookie = (req: Request, key: string) => {
