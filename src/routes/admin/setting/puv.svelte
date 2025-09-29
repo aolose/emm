@@ -7,7 +7,6 @@
 	import { delay, watch } from '$lib/utils';
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
-	import Ck from '$lib/components/check.svelte';
 
 	let type = $state();
 	let start = $state();
@@ -101,12 +100,12 @@
 			const mx = sx + step * i;
 			if (!i) {
 				ctx.moveTo(mx, my);
-				ctx.arc(mx, my, 2, 0, 2 * Math.PI);
-				ctx.fill();
+				// ctx.arc(mx, my, 2, 0, 2 * Math.PI);
+				// ctx.fill();
 			} else {
-				ctx.moveTo(mx, my);
-				ctx.arc(mx, my, 2, 0, 2 * Math.PI);
-				ctx.fill();
+				// ctx.moveTo(mx, my);
+				// ctx.arc(mx, my, 2, 0, 2 * Math.PI);
+				// ctx.fill();
 				ctx.moveTo(px, py);
 				ctx.lineTo(mx, my);
 				ctx.stroke();

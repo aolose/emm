@@ -149,8 +149,8 @@ export function slugGen(title: string) {
 export const uniqSlug = (id: number, slug: string) => {
 	const params: SQLQueryBindings[] = [`slug%`];
 	let sql = `select slug
-             from post
-             where slug like ?`;
+						 from post
+						 where slug like ?`;
 	if (id) {
 		sql = `${sql} and id != ?`;
 		params.push(id);
@@ -454,6 +454,7 @@ export const checkStatue = () => {
 
 export const getClientAddr = (event: RequestEvent) => {
 	const req = event.request;
+	console.log('x-forwarded-for', req.headers.get('x-forwarded-for'));
 	let addr = getIp(req).split(/ +/)[0];
 	if (!addr) {
 		try {
@@ -462,6 +463,7 @@ export const getClientAddr = (event: RequestEvent) => {
 			console.error(e);
 		}
 	}
+	console.log('addr', addr);
 	return addr || '';
 };
 
