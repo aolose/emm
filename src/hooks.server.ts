@@ -17,6 +17,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			cfg = cfg || {};
 			cfg.headers = new Headers(cfg.headers || []);
 			cfg.headers.set('user-agent', ua);
+			cfg.headers.set('x-forwarded-for', event.locals.ip);
 			return fetch(url, cfg);
 		};
 	return await firewallProcess(
