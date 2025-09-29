@@ -6,6 +6,8 @@ import { server } from '$lib/server';
 
 checkStatue();
 export const handle: Handle = async ({ event, resolve }) => {
+	event.locals.ip = (event.request.headers.get('x-forwarded-for') || event.getClientAddress()).split(/ +/)[0];
+	console.log('server handle',event.locals.ip)
 	if (server.maintain && sysStatue > 1) return new Response('In maintenance', { status: 503 });
 	//add headers to page load
 	const fetch = event.fetch;
