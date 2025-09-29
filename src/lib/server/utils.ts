@@ -454,14 +454,17 @@ export const checkStatue = () => {
 
 export const getClientAddr = (event: RequestEvent) => {
 	const req = event.request;
-	console.log('x-forwarded-for', req.headers.get('x-forwarded-for'));
 	let addr = getIp(req).split(/ +/)[0];
 	if (!addr) {
 		try {
-			addr = event.getClientAddress();
+			addr = event.locals.ip || event.getClientAddress();
+			console.log('not found ip', addr, event.locals.ip);
 		} catch (e) {
 			console.error(e);
 		}
+	} else {
+		console.log('write ip to locals', addr);
+		event.locals.ip = addr;
 	}
 	console.log('addr', addr);
 	return addr || '';
