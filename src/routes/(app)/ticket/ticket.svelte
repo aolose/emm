@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { permission } from '$lib/enum';
 	import { clipboard } from '$lib/use';
 	import { time, watch } from '$lib/utils';
@@ -16,7 +14,7 @@
 	}
 
 	let t = $state();
-	run(() => {
+	$effect(() => {
 		w(() => {
 			clearTimeout(t);
 			if (k) t = setTimeout(() => (k = 0), 2e3);

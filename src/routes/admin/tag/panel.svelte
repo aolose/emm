@@ -1,6 +1,4 @@
 <script>
-	import { stopPropagation } from 'svelte/legacy';
-
 	import { confirm, selectFile } from '$lib/store';
 	import { fade } from 'svelte/transition';
 	import { diffObj, getErr } from '$lib/utils';
@@ -96,7 +94,7 @@
 					style:background-image={d.banner ? `url(/res/_${d.banner})` : ''}
 				>
 					{#if d.banner}
-						<button onclick={stopPropagation(() => (d.banner = null))} class="icon i-close"
+						<button onclick={(e) => { e.stopPropagation(); d.banner = null; }} class="icon i-close"
 						></button>
 					{/if}
 				</div>

@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { marked } from 'marked';
 	import { onMount } from 'svelte';
 	import { editPost } from '$lib/store';
@@ -26,7 +24,7 @@
 				/<(h\d) id="(.+?)">(.+?)<\/\1>/g,
 				'<a class=\'head\' href="#$2" id="$2"><$1>$3</$1></a>'
 			);
-	run(() => {
+	$effect(() => {
 		if (!preview) {
 			title = ctx.title;
 			content = ctx.content;
@@ -38,7 +36,7 @@
 	const wc = watch('');
 	const rd = () => (v = highlight(md()));
 	const dRd = delay(rd, 100);
-	run(() => {
+	$effect(() => {
 		wc(() => {
 			if (preview) dRd();
 			else rd();

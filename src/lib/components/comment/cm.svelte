@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Ava from '$lib/components/post/ava.svelte';
 	import { getErr } from '$lib/utils';
 	import Ld from '$lib/components/loading.svelte';
@@ -67,10 +65,10 @@
 		});
 	}
 
-	run(() => {
+	$effect(() => {
 		if (cur.name?.length > 10) cur.set({ name: cur.name.slice(0, 10) });
 	});
-	run(() => {
+	$effect(() => {
 		cm = (cm || '').replace(/\n+/g, '\n').slice(0, limit);
 		dis = (!admin && !cur.name?.length) || !cm?.length;
 	});

@@ -1,7 +1,5 @@
 <script>
 	import Itm from './itm.svelte';
-	import { run } from 'svelte/legacy';
-
 	import Ava from '$lib/components/post/ava.svelte';
 	import { time } from '$lib/utils';
 	import { slide } from 'svelte/transition';
@@ -67,7 +65,7 @@
 			d._cms.items = itm.filter((a) => a !== i);
 		}
 	};
-	run(() => {
+	$effect(() => {
 		if (editMod) {
 			d.done = (a) => {
 				d = { ...d, ...a };

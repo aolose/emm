@@ -1,19 +1,13 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Posts from '$lib/components/post/list.svelte';
 	import { onMount } from 'svelte';
 	import Head from '$lib/components/Head.svelte';
 	import { h } from '$lib/store';
 
 	let { data } = $props();
-	let tag = $state(),
-		d = $state(),
-		p = $state();
-	run(() => {
-		({ d, p } = data);
-		tag = p.tag;
-	});
+	let d = $derived(data.d),
+		p = $derived(data.p),
+		tag = $derived(p.tag);
 
 	onMount(() => {
 		sessionStorage.hasBack = 1;

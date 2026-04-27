@@ -1,6 +1,4 @@
 <script>
-	import { run, stopPropagation } from 'svelte/legacy';
-
 	import { slide } from 'svelte/transition';
 	import { onDestroy } from 'svelte';
 	let {
@@ -37,20 +35,20 @@
 	onDestroy(() => {
 		window.removeEventListener('click', fn);
 	});
-	run(() => {
+	$effect(() => {
 		if (!value) value = defaultValue;
 		if (multiply) s = new Set(value.split(','));
 	});
 </script>
 
-<div class="a" class:c={e} onclick={stopPropagation(fn)}>
+<div class="a" class:c={e} onclick={(ev) => { ev.stopPropagation(); fn(); }}>
 	<span>{getText ? getText(items.find((a) => getValue(a) === value)) : value}</span>
 	{#if e}
 		<div transition:slide|global class="b">
 			{#each items as k}
 				<div
 					class:s={multiply ? s.has(k) : value === getValue ? getValue(k) : k}
-					onclick={stopPropagation(ck(k))}
+					onclick={(ev) => { ev.stopPropagation(); ck(k)(ev); }}
 				>
 					{getText ? getText(k) : k}
 				</div>

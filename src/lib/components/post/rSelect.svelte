@@ -1,7 +1,7 @@
 <script>
-	import { stopPropagation } from 'svelte/legacy';
 	let { items = $bindable(), inline = 0 } = $props();
-	const del = (p) => () => {
+	const del = (p) => (e) => {
+		e.stopPropagation();
 		items = items?.filter((a) => a.id !== p.id) || [];
 	};
 </script>
@@ -9,7 +9,7 @@
 <div class="o">
 	<div class="v" class:i={inline}>
 		{#each items || [] as p}
-			<div title={`ID: ${p.id}`} class="p" onclick={stopPropagation(del(p))}>
+			<div title={`ID: ${p.id}`} class="p" onclick={del(p)}>
 				<span>{p.title || p.name}</span>
 				<button class="icon i-close"></button>
 			</div>

@@ -1,12 +1,10 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import { elmCpm, elmProps, elmTmpl } from '$lib/store';
 
 	let z = $state();
 	const o = $state({});
-	run(() => {
+	$effect(() => {
 		let s = 0;
 		const z = {};
 		for (const [k, v] of Object.entries(o)) {

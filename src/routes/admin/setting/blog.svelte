@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import { sys } from './sys';
 	import Card from './Card.svelte';
@@ -60,7 +58,7 @@
 			})
 			.finally(() => (ld = 0));
 	};
-	run(() => {
+	$effect(() => {
 		nm = trim(nm);
 		bio = trim(bio, true);
 		desc = trim(desc, true);

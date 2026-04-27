@@ -1,6 +1,4 @@
 <script>
-	import { stopPropagation } from 'svelte/legacy';
-
 	import CheckBox from '$lib/components/check.svelte';
 	import Tags from '$lib/components/tags.svelte';
 	import { onMount } from 'svelte';
@@ -109,7 +107,7 @@
 						onclick={pickPic}
 					>
 						{#if post.banner}
-							<button onclick={stopPropagation(rmPic)} class="icon i-close" transition:fade|global
+							<button onclick={(e) => { e.stopPropagation(); rmPic(); }} class="icon i-close" transition:fade|global
 							></button>
 						{/if}
 					</div>

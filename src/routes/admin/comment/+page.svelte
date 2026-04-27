@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Select from '$lib/components/select.svelte';
 	import { cmStatus, method } from '$lib/enum';
 	import Item from './item.svelte';
@@ -61,7 +59,7 @@
 		});
 		go();
 	});
-	run(() => {
+	$effect(() => {
 		sty = $small && `transform:translate3d(${(-view * 100) / 2}%,0,0)`;
 		ftWatch(() => {
 			go();
