@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { tick } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { idGen } from '$lib/utils';
@@ -44,7 +42,7 @@
 	let idx = $state(0);
 	let selects = $state([]);
 	let allTags = $derived(new Set(tags));
-	run(() => {
+	$effect(() => {
 		(async () => {
 			selects = [...allTags].filter(
 				(a) => !items.has(a) && val !== a && a.toLowerCase().startsWith(val.toLowerCase())

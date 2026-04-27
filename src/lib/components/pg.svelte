@@ -1,5 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
 	let { total = 1, page = $bindable(1), go, tm, length = 4 } = $props();
 	let first = $state(),
 		isF = $state(),
@@ -11,7 +10,7 @@
 		go(n);
 		page = n;
 	};
-	run(() => {
+	$effect(() => {
 		last = page === total;
 		first = page === 1;
 		isF = typeof go === 'function';

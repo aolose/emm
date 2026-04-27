@@ -1,10 +1,6 @@
 <script>
-	import { createBubbler } from 'svelte/legacy';
-
-	const bubble = createBubbler();
 	import FileIcon from './fileIcon.svelte';
 	import { getExt } from '$lib/utils';
-	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 
@@ -20,24 +16,14 @@
 		}
 	);
 	const changePosition = async () => {
+		if (!m) return;
 		const { offsetLeft, offsetTop } = m;
 		sh = 1;
 		if (offsetLeft === x && offsetTop === y) return;
 		y = offsetTop;
 		x = offsetLeft;
 		await pos.update(() => ({ x, y }));
-		// },100))
-		// timers.push(setTimeout(() => {
-		//
-		//     left = offsetLeft
-		//     sh = 1
-		//     timers.push(setTimeout(() => top = offsetTop, 300))
-		// }, d))
 	};
-	onMount(() => {
-		changePosition();
-		return trigger.subscribe(changePosition);
-	});
 	let {
 		trigger,
 		file = $bindable({
@@ -46,12 +32,18 @@
 			type: '',
 			size: 0
 		}),
-		act = false
+		act = false,
+		onclick = () => {}
 	} = $props();
 	let pic = $state('');
 	if (file.type.startsWith('image/')) {
 		pic = `/res/_${file.id}`;
 	}
+
+	$effect(() => {
+		trigger;
+		changePosition();
+	});
 </script>
 
 <div class="m" bind:this={m}></div>
@@ -59,7 +51,7 @@
 	class="a m"
 	style:transform={`translate3d(${$pos.x}px,${$pos.y}px,0)`}
 	class:act
-	onclick={bubble('click')}
+	onclick={onclick}
 	class:sh
 >
 	<div class="p" style:background-image={pic ? `url(${pic})` : ''}>

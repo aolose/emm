@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Item from '$lib/components/post/item.svelte';
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Canvas from '$lib/components/ctx.svelte';
@@ -29,14 +27,8 @@
 		oh = $state(0),
 		ih = $state(0);
 	let { path = '', name = '', d = {}, children } = $props();
-	let total = $state(1);
-	run(() => {
-		total = d.total;
-	});
-	let ls = $state([]);
-	run(() => {
-		ls = d.items || [];
-	});
+	let total = $derived(d.total);
+	let ls = $derived(d.items || []);
 	afterNavigate(scTop);
 </script>
 

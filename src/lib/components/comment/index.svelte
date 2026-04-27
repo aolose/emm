@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Cm from '$lib/components/comment/cm.svelte';
 	import Itm from './itm.svelte';
 	import { onMount } from 'svelte';
@@ -73,7 +71,7 @@
 		}
 	}
 
-	run(() => {
+	$effect(() => {
 		if (cur.name) localStorage.nm = cur.name;
 		if (cur.avatar) localStorage.av = cur.avatar;
 		ws(() => go(), slug);

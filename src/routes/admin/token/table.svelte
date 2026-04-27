@@ -1,10 +1,8 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	let allSet = $state();
 	let { items = [], cols = [], sel = $bindable(new Set()) } = $props();
 	let st = $state(0);
-	run(() => {
+	$effect(() => {
 		allSet = new Set(
 			items.map((a) => {
 				return a.id;

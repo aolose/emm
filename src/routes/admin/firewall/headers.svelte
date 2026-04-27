@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { hds2Str, str2Hds, watch } from '$lib/utils';
 
 	let { value = $bindable() } = $props();
@@ -20,7 +18,7 @@
 	}
 
 	let t = $state();
-	run(() => {
+	$effect(() => {
 		vWatch(() => {
 			let v = [];
 			if (value) v = str2Hds(value);

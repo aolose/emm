@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Canvas from '$lib/components/ctx.svelte';
 	import UpDownScroll from '$lib/components/upDownScroll.svelte';
 	import Ph from '$lib/components/post/hd.svelte';
@@ -38,7 +36,7 @@
 	let err = $state('');
 	let e = $state(0);
 	const we = watch(err);
-	run(() => {
+	$effect(() => {
 		inf = [
 			[1, 'leave a comment'],
 			[post, 'show secret posts', 1],

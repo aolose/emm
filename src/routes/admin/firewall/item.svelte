@@ -1,6 +1,4 @@
 <script>
-	import { stopPropagation } from 'svelte/legacy';
-
 	import { str2Hds, time } from '$lib/utils';
 
 	let { data = [], sel, ck } = $props();
@@ -32,7 +30,7 @@
 	<div class="r5">
 		<button
 			class="icon"
-			onclick={stopPropagation(() => (exp = 1 - exp))}
+			onclick={(e) => { e.stopPropagation(); exp = 1 - exp; }}
 			class:i-add={!exp}
 			class:i-no={exp}
 		></button>

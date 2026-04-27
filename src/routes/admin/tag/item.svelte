@@ -1,15 +1,15 @@
 <script>
-	import { stopPropagation } from 'svelte/legacy';
-
 	import { confirm } from '$lib/store';
 	import { getErr } from '$lib/utils';
 	let { d = {}, sel = false, ck, del } = $props();
 
 	function de(id) {
-		return () =>
+		return (e) => {
+			e.stopPropagation();
 			confirm('sure to delete the tag?').then((a) => {
 				if (a) del(id);
 			});
+		};
 	}
 </script>
 
@@ -19,7 +19,7 @@
 	{/if}
 	<div class="t">
 		<h4>{d.name}</h4>
-		<button onclick={stopPropagation(de(d.id))} class="icon i-del"></button>
+		<button onclick={de(d.id)} class="icon i-del"></button>
 	</div>
 	{#if d.desc}<p>{d.desc}</p>{/if}
 </div>

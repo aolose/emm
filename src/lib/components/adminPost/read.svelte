@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { fade } from 'svelte/transition';
 	import Pg from '$lib/components/pg.svelte';
 	import Ld from '$lib/components/loading.svelte';
@@ -26,7 +24,7 @@
 			.finally(() => (ld = 0));
 	}
 
-	run(() => {
+	$effect(() => {
 		wa(
 			() => {
 				if (act && id) {

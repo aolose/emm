@@ -1,6 +1,4 @@
 <script>
-	import { run, stopPropagation } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import { confirmStore } from '$lib/store';
 	import { fade } from 'svelte/transition';
@@ -28,7 +26,7 @@
 
 	let bo = $state(),
 		bc = $state();
-	run(() => {
+	$effect(() => {
 		if (typeof cfg.text === 'object') cfg.text = JSON.stringify(cfg.text);
 		if (cfg.show) (bo || bc)?.focus();
 	});
@@ -37,7 +35,7 @@
 <svelte:window onkeydown={esc} />
 {#if cfg.show}
 	<div class="a" class:act={cfg.show} transition:fade|global>
-		<div class="b" onclick={stopPropagation(() => 0)}>
+		<div class="b" onclick={(e) => e.stopPropagation()}>
 			<p>{cfg.text}</p>
 			<div class="n">
 				{#if cfg.ok}

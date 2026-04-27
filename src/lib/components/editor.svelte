@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import './easymde.scss';
 	import { filesUpload, selectFile } from '$lib/store';
@@ -33,7 +31,7 @@
 		}
 	];
 	let tools = $state();
-	run(() => {
+	$effect(() => {
 		tools = base.concat(toolbar);
 	});
 	const changeTools = () => {
@@ -55,7 +53,7 @@
 		};
 		editor.createToolbar(tools);
 	};
-	run(() => {
+	$effect(() => {
 		wv(() => {
 			if (editor && value !== editor.value()) {
 				editor.value(value);

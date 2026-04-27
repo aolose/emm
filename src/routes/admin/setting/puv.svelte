@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Card from './Card.svelte';
 	import Ld from '$lib/components/loading.svelte';
 	import { onMount } from 'svelte';
@@ -22,14 +20,26 @@
 	let ur = $state([]);
 	let rv = $state([]);
 	let nx = $state([]);
-	let ny = $state([]);
-	let avg = $state([]);
-	let total = $state([]);
 	let h = $state();
 	let w = $state();
 	let max = $state(0),
 		min = $state(0);
-	let data = $state([]);
+	let data = $derived([pv, uv, ur, rv]);
+	let ny = $derived((() => {
+		if (max <= min) return [];
+		const nny = [];
+		const step = Math.max((max - min) / 10, 1);
+		for (let m = min; m < max - step; m += step) {
+			nny.push(Math.floor(m));
+		}
+		nny.push(max);
+		return nny;
+	})());
+	let avg = $derived(data.map(a => {
+		if (!a.length) return 0;
+		return Math.ceil(a.reduce((x, y) => x + y, 0) / a.length);
+	}));
+	let total = $derived(data.map(a => a.reduce((x, y) => x + y, 0)));
 	const genStep = (arr, n) => {
 		const l = arr.length;
 		if (l <= n) return arr;
@@ -123,29 +133,9 @@
 			if (ck[i]) line(cors[i], w, h - 20, max, min, ...a);
 		});
 	}, 100);
-	const render = async () => {
-		const nny = [];
-		const step = Math.max((max - min) / 10, 1);
-		for (let m = min; m < max - step; m += step) {
-			nny.push(Math.floor(m));
-		}
-		nny.push(max);
-		if (JSON.stringify(nny) !== JSON.stringify(ny)) ny = nny;
-		avg.length = 0;
-		total.length = 0;
-		data.forEach((a, i) => {
-			const t = a.reduce((a, b) => a + b, 0);
-			const p = Math.ceil(t / a.length);
-			avg[i] = p;
-			total[i] = t;
-		});
-		avg = [...avg];
-		total = [...total];
-		draw();
-	};
+	const render = draw;
 
-	run(() => {
-		data = [pv, uv, ur, rv];
+	$effect(() => {
 		const s = [];
 		data.forEach((a, i) => {
 			if (ck[i]) {

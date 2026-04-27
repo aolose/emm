@@ -1,6 +1,4 @@
 <script>
-	import { run as run_1 } from 'svelte/legacy';
-
 	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 
@@ -39,7 +37,7 @@
 		stop = 1;
 	});
 
-	run_1(() => {
+	$effect(() => {
 		if (cvs) {
 			cvs.width = w;
 			cvs.height = h;
