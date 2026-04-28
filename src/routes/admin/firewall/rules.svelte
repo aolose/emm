@@ -213,6 +213,7 @@
 		display: flex;
 		flex-direction: column;
 		flex: 1;
+		padding-bottom: 10px;
 	}
 
 	.i-close {

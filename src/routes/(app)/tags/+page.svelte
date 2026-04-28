@@ -61,8 +61,8 @@
 		min-width: 100px;
 		text-align: center;
 		font-size: 14px;
-		margin: 10px 15px;
-		border-radius: 3px;
+		margin: 15px;
+		border-radius: 50px;
 		position: relative;
 
 		span {
@@ -70,12 +70,13 @@
 			color: #fff;
 			border-radius: inherit;
 			padding: 7px 10px;
+			background: rgba(0, 0, 0, 0.5);
 			transition: 0.2s ease-in-out;
 		}
 
 		&:hover {
 			span {
-				background: rgba(0, 0, 0, 0.5);
+				background: rgba(0, 0, 0, 0);
 			}
 		}
 	}

@@ -50,14 +50,14 @@
 
 	.p {
 		overflow: hidden;
-		border-radius: 16px;
+		border-radius: 32px;
 		width: 300px;
 		height: 240px;
 		transition: 0.3s ease-in-out;
 		z-index: 20;
 		position: relative;
 		padding: 20px;
-		margin: 10px;
+		margin: 12px;
 		@include s() {
 			width: 100%;
 			margin: 10px 0;
@@ -167,6 +167,6 @@
 		bottom: 0;
 		border-radius: inherit;
 		padding: inherit;
-		background: linear-gradient(177deg, rgba(30, 48, 63, 0.2), rgba(6, 9, 25, 0.7));
+		background: linear-gradient(177deg, rgba(30, 48, 63, 0.6), rgba(6, 9, 25, 0.9));
 	}
 </style>

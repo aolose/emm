@@ -203,7 +203,7 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 500px;
-		border-radius: 4px;
+		border-radius: 32px;
 		overflow: hidden;
 		background: $bg;
 		padding: 60px 80px;

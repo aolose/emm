@@ -31,7 +31,7 @@
 		width: 300px;
 		margin: 20px auto;
 		height: 40px;
-		border-radius: 4px;
+		border-radius: 32px;
 		align-items: center;
 		@include s() {
 			width: 80%;

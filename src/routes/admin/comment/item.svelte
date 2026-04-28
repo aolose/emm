@@ -170,7 +170,6 @@
 		border-radius: 4px;
 		display: flex;
 		margin: 5px;
-		background: var(--bg);
 		padding: 10px;
 		cursor: pointer;
 		border: 1px solid var(--bg5);

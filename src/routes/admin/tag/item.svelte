@@ -60,6 +60,8 @@
 		cursor: pointer;
 		transition: 0.2s ease-in-out;
 		border: 1px solid transparent;
+		border-radius: 12px;
+		overflow: hidden;
 		width: 46%;
 		min-width: 200px;
 		min-height: 50px;

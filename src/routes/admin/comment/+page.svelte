@@ -186,7 +186,8 @@
 		display: flex;
 		flex-direction: column;
 		background: var(--bg1);
-		height: 100%;
+		margin: 12px 0;
+		border-radius: 32px;
 	}
 
 	.t {

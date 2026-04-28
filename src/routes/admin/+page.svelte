@@ -167,6 +167,8 @@
 	}
 
 	.a {
+		margin: 12px 0;
+		border-radius: 32px;
 		width: 400px;
 		background: var(--bg1);
 		display: flex;
@@ -220,7 +222,8 @@
 	}
 
 	.p {
-		padding-top: 10px;
+		padding-top: 20px;
+		padding-bottom: 10px;
 		height: 60px;
 		display: flex;
 		align-items: center;

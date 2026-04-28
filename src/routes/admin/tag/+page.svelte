@@ -143,10 +143,12 @@
 	}
 
 	.a {
+		margin: 12px 0;
 		background: var(--bg1);
 		width: 100%;
 		max-width: 600px;
-		height: 100%;
+		border-radius: 32px;
+		padding-bottom: 24px;
 		display: flex;
 		flex-direction: column;
 		@include s() {

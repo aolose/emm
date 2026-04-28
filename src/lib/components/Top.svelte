@@ -68,7 +68,7 @@
 		height: 40px;
 		width: 40px;
 		border: none;
-		background: linear-gradient(130deg, rgba(44, 68, 101, 0.8), rgba(44, 17, 76, 0.8));
+		background: var(--bg4);
 		box-shadow: rgba(23, 8, 8, 0.2) 0 2px 5px -2px;
 		display: block;
 		opacity: 0;

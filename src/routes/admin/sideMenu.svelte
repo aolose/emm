@@ -45,14 +45,13 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-
 		:global {
 			.icon {
 				&.act,
 				&:hover {
 					color: #fff;
 					background: var(--blue);
-					border-radius: 5px;
+					border-radius: 50px;
 				}
 			}
 		}

@@ -288,7 +288,7 @@
 		flex-direction: column;
 		overflow: hidden;
 		background: var(--bg2);
-		padding-bottom: 10px;
+		padding-bottom: 20px;
 	}
 
 	button {

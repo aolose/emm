@@ -215,7 +215,7 @@
 		margin-top: 20px;
 		border-radius: 8px;
 		border: 1px solid rgba(8, 12, 19, 0.17);
-		background: rgba(12, 15, 19, 0.4);
+		background: rgb(30 34 51 / 35%);
 	}
 
 	.as {

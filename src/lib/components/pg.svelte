@@ -67,14 +67,13 @@
 
 <style lang="scss">
 	:root {
-		--act: var(--bg0);
+		--act: #65b9e7;
 	}
 
 	nav {
 		align-items: center;
 		justify-content: center;
 		display: flex;
-
 		* {
 			color: rgb(78, 96, 115);
 		}
@@ -82,7 +81,6 @@
 		.act {
 			color: antiquewhite;
 			background: var(--act);
-
 			&.loading {
 				animation: pageloading 1.2s ease-in-out infinite;
 			}
@@ -98,6 +96,7 @@
 			margin: 0 5px;
 			justify-content: center;
 			align-items: center;
+			border-radius: 32px;
 			transition: background 0.3s, color 0.3s, transform 0.3s;
 
 			&:hover {
