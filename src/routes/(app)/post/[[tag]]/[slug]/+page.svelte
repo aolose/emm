@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { bgColor, goBack, time, watch } from '$lib/utils';
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
@@ -16,37 +14,31 @@
 	import { marked } from 'marked';
 
 	let { data } = $props();
-	let d = $state(),
-		p = $state(),
-		o = $state(),
+	let d = $derived(data.d),
+		p = $derived(data.p),
+		slug = $derived(p.slug),
+		tag = $derived(p.tag),
+		desc = $derived(d.desc),
+		view = $derived(desc || d._d),
+		prev = $derived(d._u),
+		next = $derived(d._n);
+	let sly = $derived(
+		d.banner ? `background-image:url(/res/${$small ? '_' + d.banner : d.banner})` : ''
+	);
+	let style = $derived(
+		d.createAt
+			? ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`
+			: undefined
+	);
+	let o = $state(),
 		c = $state();
-	let sly = $state('');
-	let style = $state(),
-		tag = $state();
-	let desc = $state(),
-		view = $state(),
-		prev = $state(),
-		next = $state();
-	let slug = $state(data.p.slug);
+
 	const wc = watch(slug);
-	run(() => {
-		d = data.d;
-		p = data.p;
-		slug = p.slug;
+	$effect(() => {
 		wc(() => {
 			if ($small) o.scrollTo(0, 0);
 			else c.scrollTo(0, 0);
 		}, slug);
-		prev = d._u;
-		next = d._n;
-		tag = p.tag;
-		desc = d.desc;
-		view = desc || d._d;
-		if (d.createAt)
-			style = ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`;
-		if (d.banner) {
-			sly = `background-image:url(/res/${$small ? '_' + d.banner : d.banner})`;
-		} else sly = '';
 	});
 </script>
 

@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import { sys } from './sys';
 	import Card from './Card.svelte';
@@ -22,7 +20,7 @@
 	let err = $state();
 	let act = $state();
 	const w = watch(act);
-	run(() => {
+	$effect(() => {
 		un = trim(un);
 		w(() => {
 			if (act) setTimeout(() => (act = 0), 2e3);

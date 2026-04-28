@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import { req } from '$lib/req';
 	import Itm from './item.svelte';
@@ -27,7 +25,7 @@
 	let ld = $state(false);
 	let filter = $state({});
 	const lsWatch = watch(tab, p, filter);
-	run(() => {
+	$effect(() => {
 		sty = $small ? `transform:translate3d(${(-view * 100) / 2}%,0,0)` : '';
 		lsWatch(
 			() => {

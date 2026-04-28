@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 
 	let mql;
@@ -28,7 +26,7 @@
 		}
 	}
 
-	run(() => {
+	$effect(() => {
 		if (wasMounted) {
 			removeActiveListener();
 			addNewListener(query);

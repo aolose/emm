@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Pg from '$lib/components/pg.svelte';
 	import { confirm, fwRespLs } from '$lib/store';
 	import { req } from '$lib/req';
@@ -98,7 +96,7 @@
 		go(1);
 		return fwRespLs.subscribe(() => (ls = [...ls]));
 	});
-	run(() => {
+	$effect(() => {
 		wa(() => {
 			ls = ta === 2 ? $fwRespLs : [];
 			go(1);

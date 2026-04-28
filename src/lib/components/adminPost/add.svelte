@@ -1,10 +1,8 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { editPost, originPost } from '$lib/store';
 	import { randNum, trim } from '$lib/utils';
 	let { done, a = $bindable('') } = $props();
-	run(() => {
+	$effect(() => {
 		a = trim(a, true);
 	});
 

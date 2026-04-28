@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import { sys } from './sys';
 	import Card from './Card.svelte';
@@ -21,7 +19,7 @@
 			dir = a.ipLiteDir;
 		})
 	);
-	run(() => {
+	$effect(() => {
 		dir = trim(dir);
 		token = trim(token);
 	});
@@ -69,7 +67,7 @@
 			})
 			.finally(() => (ld = 0));
 	};
-	run(() => {
+	$effect(() => {
 		w(() => {
 			if (act) setTimeout(() => (act = 0), 2e3);
 		}, act);

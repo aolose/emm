@@ -6,7 +6,7 @@
 	import { confirm, fileManagerStore, filesUpload, getProgress, upFiles } from '$lib/store';
 	import { api, req } from '$lib/req';
 	import { onMount, tick } from 'svelte';
-	import { get, writable } from 'svelte/store';
+	import { get } from 'svelte/store';
 	import { slidLeft } from '../transition';
 	import { fade, slide } from 'svelte/transition';
 	import { delay, trim, watch } from '$lib/utils';
@@ -23,7 +23,7 @@
 	let loading = false;
 	let { w } = $props();
 	const size = 15;
-	const trigger = writable(0);
+	let trigger = $state(0);
 
 	function ok() {
 		cfg.resolve?.([...selected]);
@@ -78,7 +78,7 @@
 
 	function rePosition() {
 		tick().then(() => {
-			trigger.update((a) => a + 1);
+			trigger++;
 		});
 	}
 
@@ -143,28 +143,28 @@
 		transition:fade|global
 		class="a"
 		class:dr={status === 1}
-		on:dragover|preventDefault={() => (status = 1)}
-		on:drop|preventDefault={upload}
-		on:dragleave|preventDefault={() => (status = 0)}
-		on:dragend|preventDefault={() => (status = 0)}
-		on:click={cancel}
+		ondragover={(e) => { e.preventDefault(); status = 1; }}
+		ondrop={(e) => { e.preventDefault(); upload(e); }}
+		ondragleave={(e) => { e.preventDefault(); status = 0; }}
+		ondragend={(e) => { e.preventDefault(); status = 0; }}
+		onclick={cancel}
 	>
-		<div class="dp" on:click|stopPropagation />
-		<div class="b" on:click|stopPropagation>
+		<div class="dp" onclick={(e) => e.stopPropagation()} />
+		<div class="b" onclick={(e) => e.stopPropagation()}>
 			<div class="h">
 				<div class="g">
 					<button class="icon i-add" title="upload files">
-						<input type="file" accept={cfg.type || '*/*'} on:change={upload} multiple />
+						<input type="file" accept={cfg.type || '*/*'} onchange={upload} multiple />
 					</button>
 					{#if selected.size}
-						<button transition:slidLeft class="icon i-ok" title="use selected" on:click={ok} />
+						<button transition:slidLeft class="icon i-ok" title="use selected" onclick={ok} />
 						<button
 							transition:slidLeft
 							class="icon i-no"
 							title="clear selected"
-							on:click={() => (selected = new Set())}
+							onclick={() => (selected = new Set())}
 						/>
-						<button transition:slidLeft class="icon i-del" title="delete selected" on:click={del} />
+						<button transition:slidLeft class="icon i-del" title="delete selected" onclick={del} />
 						<span class="v">{ss}</span>
 					{/if}
 				</div>
@@ -173,7 +173,7 @@
 					<button class="icon i-search" />
 					<input bind:value={sc} />
 				</div>
-				<button class="icon i-close" on:click={cancel} />
+				<button class="icon i-close" onclick={cancel} />
 			</div>
 			<div class="ls">
 				{#each ls as file, index (file.id)}
@@ -181,7 +181,7 @@
 						bind:file={ls[index]}
 						{trigger}
 						act={selected.has(ls[index])}
-						on:click={sel(ls[index])}
+						onclick={sel(ls[index])}
 					/>
 				{/each}
 			</div>
@@ -193,7 +193,7 @@
 							<div class="t">
 								<div style:width={`${get(u[1])}%`} />
 							</div>
-							<button class="icon i-close" on:click={u[2]} />
+							<button class="icon i-close" onclick={u[2]} />
 						</div>
 					{/each}
 				</div>

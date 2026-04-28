@@ -1,6 +1,4 @@
 <script>
-	import { run, stopPropagation } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 	let { items = [], value = $bindable(), placeholder = '' } = $props();
@@ -11,7 +9,7 @@
 		value = k;
 	};
 	let cur = $state();
-	run(() => {
+	$effect(() => {
 		const i = items.find((a) => a[0] === value);
 		val = i?.[1] || placeholder;
 	});
@@ -24,7 +22,7 @@
 	});
 </script>
 
-<div class="s" bind:this={cur} onclick={stopPropagation(() => 0)}>
+<div class="s" bind:this={cur} onclick={(e) => e.stopPropagation()}>
 	<div class="a" onclick={() => (h = 1 - h)}>
 		<span>{val}</span>
 		<i></i>
@@ -32,7 +30,7 @@
 	{#if h}
 		<div class="b" transition:slide|global={{ duration: 100 }}>
 			{#each items as [k, v]}
-				<div class:e={k === value} onclick={stopPropagation(s(k))}>{v}</div>
+				<div class:e={k === value} onclick={(e) => { e.stopPropagation(); s(k)(); }}>{v}</div>
 			{/each}
 		</div>
 	{/if}

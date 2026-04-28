@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import P from './panel.svelte';
 	import T from './item.svelte';
 	import FileWin from '$lib/components/fileManager.svelte';
@@ -54,7 +52,7 @@
 	onMount(() => {
 		allTags();
 	});
-	run(() => {
+	$effect(() => {
 		sty = $small && `transform:translate3d(${(-view * 100) / 2}%,0,0)`;
 		name = trim(name);
 		ok = name && !ls.find((a) => a.name === name);

@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import Cm from '$lib/components/comment/cm.svelte';
 	import Item from './item.svelte';
 	import { watch } from '$lib/utils';
@@ -39,7 +37,7 @@
 				ld = 0;
 			});
 	};
-	run(() => {
+	$effect(() => {
 		wid(() => {
 			ls = [];
 			ld = 1;

@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { marked } from 'marked';
 	import { delay, watch } from '$lib/utils';
 	import { highlight } from '$lib/hjs';
@@ -26,7 +24,7 @@
 	const wc = watch('');
 	const rd = () => (v = highlight(md()));
 	const dRd = delay(rd, 100);
-	run(() => {
+	$effect(() => {
 		wc(() => {
 			if (preview) dRd();
 			else rd();

@@ -1,6 +1,4 @@
 <script>
-	import { run } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import Editor from '$lib/components/editor.svelte';
 	import {
@@ -125,7 +123,7 @@
 		title: 'preview'
 	};
 	let tools = $state([]);
-	run(() => {
+	$effect(() => {
 		ctxWatch(
 			() => {
 				editPost.update((p) => {
