@@ -8,7 +8,7 @@
 	import UpDownScroll from '$lib/components/upDownScroll.svelte';
 	import { expand } from '$lib/store';
 	import { fade } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import { navigating, page } from '$app/stores';
 	import { afterNavigate } from '$app/navigation';
 
 	let a = $state(0);
@@ -52,7 +52,7 @@
 	</div>
 	<div class="n" class:v={ih > oh && !a}>
 		<div class="nn">
-			<Nav {total} page={+$page.params.page || 1} length="2" go={'/' + name} tm="1" />
+			<Nav {total} page={+$page.params.page || 1} length="2" go={'/' + name} tm="1" loading={Boolean($navigating)} />
 		</div>
 	</div>
 </div>

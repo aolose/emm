@@ -1,15 +1,24 @@
 <script>
-	let { total = 1, page = $bindable(1), go, tm, length = 4 } = $props();
+	import { flip } from 'svelte/animate';
+	let { total = 1, page = $bindable(1), go, tm, length = 4, loading = false } = $props();
 	let first = $state(),
 		isF = $state(),
 		f = $state(),
 		n = $state(),
 		last = $state(),
-		pg = $state();
+		pg = $state(),
+		pending = $state(0);
 	const setPage = (n) => () => {
+		pending = n;
 		go(n);
 		page = n;
 	};
+	const trackClick = (n) => () => {
+		pending = n;
+	};
+	$effect(() => {
+		if (!loading) pending = 0;
+	});
 	$effect(() => {
 		last = page === total;
 		first = page === 1;
@@ -32,24 +41,26 @@
 
 <nav class:lt={tm}>
 	{#if isF}
-		<span class="nv" class:act={first} onclick={setPage(1)}>1</span>
+		<span class="nv" class:act={first} class:loading={loading && first} onclick={setPage(1)}>1</span>
 	{:else}
-		<a class="nv" class:act={first} href={`${go}/1`}>1</a>
+		<a class="nv" class:act={(!loading && first) || (loading && pending === 1)} class:loading={loading && pending === 1} href={`${go}/1`} onclick={trackClick(1)}>1</a>
 	{/if}
 	{#if f}<span>{f}</span>{/if}
-	{#each pg as p}
-		{#if isF}
-			<span class="nv" class:act={page === p} onclick={setPage(p)}>{p}</span>
-		{:else}
-			<a class="nv" class:act={page === p} href={`${go}/${p}`}>{p}</a>
-		{/if}
+	{#each pg as p (p)}
+		<span animate:flip={{ duration: 300 }}>
+			{#if isF}
+				<span class="nv" class:act={page === p} class:loading={loading && page === p} onclick={setPage(p)}>{p}</span>
+			{:else}
+				<a class="nv" class:act={(!loading && page === p) || (loading && pending === p)} class:loading={loading && pending === p} href={`${go}/${p}`} onclick={trackClick(p)}>{p}</a>
+			{/if}
+		</span>
 	{/each}
 	{#if n}<span>{n}</span>{/if}
 	{#if total > 1}
 		{#if isF}
-			<span class="nv" class:act={last} onclick={setPage(total)}>{total}</span>
+			<span class="nv" class:act={last} class:loading={loading && last} onclick={setPage(total)}>{total}</span>
 		{:else}
-			<a class="nv" class:act={last} href={`${go}/${total}`}>{total}</a>
+			<a class="nv" class:act={(!loading && last) || (loading && pending === total)} class:loading={loading && pending === total} href={`${go}/${total}`} onclick={trackClick(total)}>{total}</a>
 		{/if}
 	{/if}
 </nav>
@@ -71,6 +82,10 @@
 		.act {
 			color: antiquewhite;
 			background: var(--act);
+
+			&.loading {
+				animation: pageloading 1.2s ease-in-out infinite;
+			}
 		}
 
 		.nv {
@@ -83,10 +98,21 @@
 			margin: 0 5px;
 			justify-content: center;
 			align-items: center;
+			transition: background 0.3s, color 0.3s, transform 0.3s;
 
 			&:hover {
 				color: #65b9e7;
 			}
+		}
+	}
+
+	@keyframes pageloading {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.35;
 		}
 	}
 
@@ -107,6 +133,10 @@
 		.nv:hover {
 			color: #fff;
 			background: var(--darkgrey);
+		}
+
+		.act.loading {
+			animation: pageloading 1.2s ease-in-out infinite;
 		}
 	}
 </style>
