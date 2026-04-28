@@ -12,3 +12,5 @@ node_modules
 /dist/
 bun.lock
 /tmp_db
+/up/
+/th/
