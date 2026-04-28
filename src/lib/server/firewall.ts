@@ -106,12 +106,10 @@ const hitRule = (
 		if (!mms.has(method.toLowerCase())) return false;
 	}
 	if (rule.headers && !matchHeader(rule.headers, headers || new Headers())) return false;
-	if (rule.ip) {
-		if (!matches(ip, rule.ip)) return false;
-		if (rule.country) {
-			if (!matchRuleValue(rule.country, ipInfoStr(ip))) return false;
-		}
+	if (rule.country) {
+		if (!matchRuleValue(rule.country, ipInfoStr(ip))) return false;
 	}
+	if (rule.ip && !matches(ip, rule.ip)) return false;
 	return true;
 };
 export const getFwResp = (id?: number) =>
@@ -384,8 +382,8 @@ function matchRuleValue(value: string, target: string) {
 		} catch (e) {
 			console.log(e);
 		}
-	} else if (target === value) {
-		hit = true;
+	} else {
+		hit = target.toLowerCase().includes(value.toLowerCase());
 	}
 	return rv ? !hit : hit;
 }
