@@ -52,7 +52,6 @@
 			.finally(() => {
 				ld = 0;
 			});
-		// ld = 0;
 	}
 
 	function edi() {

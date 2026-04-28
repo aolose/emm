@@ -2,10 +2,8 @@ import { randomUUID } from 'crypto';
 import { clientMap } from '$lib/server/cache';
 import { permission } from '$lib/enum';
 import type { TokenInfo } from '$lib/server/model';
-import { TkTick } from '$lib/server/model';
 import type { Obj } from '$lib/types';
-import { debugMode, model } from '$lib/server/utils';
-import { db } from '$lib/server/index';
+import { debugMode } from '$lib/server/utils';
 
 const hasReqClean = 1e3 * 3600 * 24 * 60; // 60days
 const empClean = 1e3 * 60;
@@ -69,11 +67,6 @@ export class Client {
 					if (e !== -1) ct.set(c, Math.max(expire, e) || -1);
 				}
 			}
-		}
-		if (!skip && tk.code) {
-			const t = model(TkTick, { token: this.uuid, ticket: tk.code });
-			const h = db.get(t);
-			if (!h) db.save(t, { create: true });
 		}
 		this.destroy = Date.now() + hasReqClean;
 	}

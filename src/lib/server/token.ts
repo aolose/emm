@@ -1,39 +1,35 @@
-import { randNum, randStr } from '$lib/utils';
-import { codeTokens } from '$lib/server/cache';
 import { permission } from '$lib/enum';
 import { TokenInfo } from '$lib/server/model';
 import type { Obj } from '$lib/types';
 import { model } from '$lib/server/utils';
 
-const h = 1e3 * 3600;
-const expires = new Map([
-	[permission.Admin, h * 24],
-	[permission.Post, h * 24 * 30]
+/** 1 hour in milliseconds */
+const ONE_HOUR_MS = 3_600_000;
+
+/** Default token expiration by permission type (in ms) */
+const DEFAULT_EXPIRES = new Map<permission, number>([
+	[permission.Admin, ONE_HOUR_MS * 24],      // 24 hours
+	[permission.Post, ONE_HOUR_MS * 24 * 30]   // 30 days
 ]);
+
+/** Sentinel value indicating no expiration / already expired */
+const EXPIRE_NONE = -1;
 
 export const genToken = (
 	type: permission,
 	cfg: {
-		code?: boolean;
 		times?: number;
 		expire?: number;
-		share?: number | boolean;
 		_reqs?: Set<number>;
 	} = {}
 ) => {
 	const now = Date.now();
 	const token: Obj<TokenInfo> = model(TokenInfo, {
 		createAt: now,
-		expire: cfg.expire || now + (expires.get(type) || -1),
+		expire: cfg.expire ?? (now + (DEFAULT_EXPIRES.get(type) ?? EXPIRE_NONE)),
 		times: cfg.times,
 		type,
 		_reqs: cfg._reqs
 	});
-	if (cfg.code) {
-		const cd = randStr(randNum(1e4).toString(36));
-		token.code = cd;
-		if (cfg.share) token.share = 1;
-		codeTokens.add(cd, token);
-	}
 	return token as TokenInfo;
 };

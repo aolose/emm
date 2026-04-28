@@ -3,7 +3,7 @@ import { checkStatue, DBProxy, model } from './utils';
 import { Post, Require, System, Tag } from './model';
 import { publishedPost, tags } from '$lib/server/store';
 import { loadGeoDb } from '$lib/server/ipLite';
-import { codeTokens, reqPostCache, requireMap, tagPostCache } from '$lib/server/cache';
+import { reqPostCache, requireMap, tagPostCache } from '$lib/server/cache';
 import { loadRules } from '$lib/server/firewall';
 import { sitemap } from '$lib/sitemap';
 import { loadPuv } from '$lib/server/puv';
@@ -29,7 +29,6 @@ export const server = {
 			sys = DBProxy(System);
 			this.sync();
 			loadGeoDb();
-			// readRes()
 			this.maintain = false;
 		} catch (e) {
 			this.stop();
@@ -55,13 +54,11 @@ export const server = {
 		db.all(model(Require)).forEach((r) => {
 			requireMap.set(r.id, DBProxy(Require, r, false));
 		});
-		codeTokens.load();
 		reqPostCache.load();
 		loadRules();
 		checkStatue();
 		sitemap.refresh();
 		loadPuv();
-		// readRes();
 	},
 	stop() {
 		this.maintain = true;

@@ -382,13 +382,6 @@ export class TokenInfo {
 	createAt = INT;
 }
 
-export class TkTick {
-	@noNull
-	ticket = TEXT;
-	@noNull
-	token = TEXT;
-}
-
 export class RPU {
 	@primary
 	id = INT;

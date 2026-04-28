@@ -36,7 +36,6 @@ import {
 	FWRule,
 	Post,
 	PostRead,
-	Require,
 	Res,
 	System,
 	Tag,
@@ -69,7 +68,6 @@ import { geoClose, geoStatue, ipInfoStr, loadGeoDb } from '$lib/server/ipLite';
 import { tagPatcher, tags } from '$lib/server/store';
 import { get } from 'svelte/store';
 import {
-	codeTokens,
 	eTags,
 	getPostSibling,
 	getPubTags,
@@ -85,6 +83,43 @@ import { postList, postPatch, pubPostList } from '$lib/server/posts';
 import { restore } from '$lib/server/restore';
 import { getRuv } from '$lib/server/puv';
 import type { SQLQueryBindings } from 'bun:sqlite';
+
+/** Parse a comma-separated string of numeric IDs from a request body */
+const parseIds = async (req: Request): Promise<number[]> =>
+	(await req.text())
+		.split(',')
+		.filter((a) => a)
+		.map((v) => +v);
+
+/** Build a SQL WHERE clause from a search string against title/content fields */
+const buildSearchWhere = (
+	sc: string,
+	fields: { ft?: number; v: SQLQueryBindings[]; w: string[] }
+): [string, ...SQLQueryBindings[]] | undefined => {
+	sc = trim(sc);
+	if (!sc) return fields.w.length ? [fields.w.join(' or '), ...fields.v] : undefined;
+	const s = `%${sc}%`;
+	if (!fields.ft || fields.ft & 1) {
+		fields.w.push('(title like ? or title_d like ?)');
+		fields.v.push(s, s);
+	}
+	if (!fields.ft || fields.ft & 2) {
+		fields.w.push('(content like ? or content_d like ?)');
+		fields.v.push(s, s);
+	}
+	return [fields.w.join(' or '), ...fields.v];
+};
+
+/** Page size for hidden-posts listing */
+const REQS_PAGE_SIZE = 4;
+/** Default page size for post listing */
+const POSTS_DEFAULT_SIZE = 10;
+/** Page size for visitor listing */
+const VISITOR_PAGE_SIZE = 20;
+/** Max login attempts before exponential backoff kicks in */
+const LOGIN_TRY_LIMIT = 3;
+/** Base delay multiplier for login rate-limiting (ms) */
+const LOGIN_DELAY_BASE = 10_000;
 
 const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) => {
 	if (!sysStatue) return resp('system uninitialized', 500);
@@ -170,21 +205,6 @@ const apis: APIRoutes = {
 			);
 		}
 	},
-	genCode: {
-		post: auth(Admin, async (req) => {
-			const { expire = -1, type, times, reqs, share } = await req.json();
-			const tk = genToken(type, {
-				expire,
-				times,
-				share,
-				code: true,
-				_reqs: new Set(reqs.split(',').map((a: string) => +a))
-			});
-			const t = { ...tk };
-			delete t.value;
-			return t;
-		})
-	},
 	reqs: {
 		// get allowed hidden posts
 		post: async (req) => {
@@ -211,7 +231,7 @@ const apis: APIRoutes = {
 			if (ids.length)
 				return pageBuilder(
 					page,
-					4,
+					REQS_PAGE_SIZE,
 					Post,
 					['createAt desc'],
 					['title', 'slug', '_p'],
@@ -224,191 +244,6 @@ const apis: APIRoutes = {
 					}
 				);
 		}
-	},
-	ticket: {
-		// get client status
-		get: (req) => {
-			const cli = getClient(req);
-			const share = codeTokens.share(3);
-			if (cli) {
-				cli.clear();
-				const a = debugMode ? -1 : cli.tokens.get(Admin);
-				const r = a || cli.tokens.get(Read);
-				const p = a || cli.tokens.get(permission.Post);
-				return {
-					read: r ? r || -1 : undefined,
-					admin: a ? a || -1 : undefined,
-					post: p ? 1 : undefined,
-					share
-				};
-			}
-			return { share };
-		},
-		post: async (req) => {
-			const code = await req.text();
-			if (code) {
-				const ks = ['type', 'expire', 'times'] as (keyof TokenInfo)[];
-				const tk = codeTokens.get(code);
-				if (tk) {
-					const cli = getClient(req);
-					if (cli?.has(tk)) return filter(tk, ks, false);
-					const n = Date.now();
-					let { expire, times } = tk;
-					expire = expire || -1;
-					times = times || -1;
-					if (expire < 0 || expire > n) {
-						if (times > 0) tk.times = times - 1;
-						tk.used = (tk.used || 0) + 1;
-						db.save(tk);
-						if (times === 1) codeTokens.delete({ code });
-						if (times) {
-							const tt = filter(tk, ks, false);
-							const re = resp(tt);
-							setToken(req, re, tk as TokenInfo);
-							return re;
-						}
-					}
-					codeTokens.delete({ code });
-				}
-			}
-			return resp('invalid code', 500);
-		}
-	},
-	code: {
-		delete: auth(Admin, async (req) => {
-			return codeTokens.delete({
-				id: (await req.text()).split(',').map((a) => +a)
-			});
-		}),
-		get: auth(Admin, (req) => {
-			const page = +(new URL(req.url).searchParams.get('page') || 1);
-			return pageBuilder(page, 10, TokenInfo, ['createAt desc'], undefined, undefined, (c) => {
-				type reqs =
-					| number
-					| {
-							id: number;
-							name?: string;
-					  };
-				type Tk = {
-					value?: string;
-					_reqs?: reqs[];
-				};
-				const b = c as Tk[];
-				const tk = new Set<Tk>();
-				const rq = new Set<number>();
-				const n = new Map<number, Require>();
-				b.forEach((a) => {
-					if (a.value) {
-						a._reqs = a.value.split(',').map((n) => {
-							rq.add(+n);
-							return +n;
-						});
-						tk.add(a);
-						delete a.value;
-					}
-				});
-				if (rq.size) {
-					db.all(model(Require), `id in (${sqlFields(rq.size)})`, ...rq).forEach((k) =>
-						n.set(k.id, k)
-					);
-					for (const t of tk) {
-						t._reqs?.forEach((a, i, c) => {
-							c[i] = {
-								id: a as number,
-								name: n.get(a as number)?.name
-							};
-						});
-					}
-				}
-				return b as TokenInfo[];
-			});
-		})
-	},
-	require: {
-		delete: auth(Admin, async (req) => {
-			const ids = (await req.text()).split(',').map((a) => +a);
-			const ks = new Set(reqPostCache.rm({ postId: ids }));
-			return (
-				db.delByPk(
-					Require,
-					ids.filter((a) => !ks.has(a))
-				).changes + ks.size
-			);
-		}),
-		post: auth(Admin, async (req) => {
-			const token = model(Require, await req.json()) as Require;
-			const { _postIds = '' } = token;
-			const ids = _postIds.split(',').map((a) => +a);
-			const id = token.id;
-			try {
-				db.save(token);
-				reqPostCache.setPosts(token.id, ids);
-			} catch (e) {
-				if (e instanceof Error) {
-					if (e.message.startsWith('UNIQUE constraint')) {
-						return resp('name already exist', 500);
-					}
-				}
-			}
-			return id ? '' : `${token.id} ${token.createAt}`;
-		}),
-		get: auth(Read, async (req) => {
-			const params = new URL(req.url).searchParams;
-			const page = +(params.get('page') || 1) || 1;
-			const name = decodeURI(params.get('name') || '');
-			const type = decodeURI(params.get('type') || '');
-			const where: string[] = [];
-			const pm: unknown[] = [];
-			if (name) {
-				where.push('name like ?');
-				pm.push(`%${name}%`);
-			}
-			if (type !== '') {
-				where.push('type = ?');
-				pm.push(+type);
-			}
-			const after =
-				type === ''
-					? (ls: Require[]) => {
-							let ids: Set<number> = new Set();
-							const mr = new Map<number, Require>();
-							for (const r of ls) {
-								const ds = reqPostCache.get({ reqId: r.id }).map((a) => a.targetId);
-								if (ds.length) {
-									ids = new Set([...ids, ...ds]);
-									mr.set(r.id, r);
-									r._posts = [];
-								}
-							}
-							if (ids.size) {
-								const vs = [...ids];
-								const where = `id in (${sqlFields(vs.length)})`;
-								db.all(model(Post), where, ...vs).forEach((a) => {
-									reqPostCache.get({ postId: a.id }).forEach((n) => {
-										mr.get(n.reqId)?._posts?.push({
-											id: a.id,
-											title: a.title || a.title_d,
-											slug: a.slug
-										});
-									});
-								});
-							}
-							return ls;
-						}
-					: undefined;
-			const wh = where.length
-				? ([where.join(' and '), ...pm] as [string, ...SQLQueryBindings[]])
-				: undefined;
-			return pageBuilder(
-				page,
-				10,
-				Require,
-				['createAt desc'],
-				type === '' ? [] : ['id', 'name'],
-				wh,
-				after
-			);
-		})
 	},
 	log: {
 		post: auth(Read, async (req) => {
@@ -465,19 +300,13 @@ const apis: APIRoutes = {
 			saveBlackList(b);
 		}),
 		delete: auth(Admin, async (req) => {
-			const ids = (await req.text())
-				.split(',')
-				.filter((a) => a)
-				.map((v) => +v);
+			const ids = await parseIds(req);
 			delBlackList(...ids);
 		})
 	},
 	rules: {
 		delete: auth(Admin, async (req) => {
-			const ids = (await req.text())
-				.split(',')
-				.filter((a) => a)
-				.map((v) => +v);
+			const ids = await parseIds(req);
 			delRule(ids);
 			return;
 		}),
@@ -506,8 +335,6 @@ const apis: APIRoutes = {
 	login: {
 		post: async (req) => {
 			if (sysStatue < 2) return resp(-1, 500);
-			const tryTimes = 3;
-			const base = 1e4;
 			const ip = getIp(req);
 			const [q, sv] = blockIp('lg', ip);
 			if (q[1]) {
@@ -523,7 +350,7 @@ const apis: APIRoutes = {
 				return res;
 			} else {
 				q[0]++;
-				q[1] = Math.floor(Math.pow(2, q[0] - tryTimes)) * base;
+				q[1] = Math.floor(Math.pow(2, q[0] - LOGIN_TRY_LIMIT)) * LOGIN_DELAY_BASE;
 				sv();
 				return resp(q[1], 403);
 			}
@@ -626,7 +453,7 @@ const apis: APIRoutes = {
 		get: async (req) => {
 			const params = new URL(req.url).searchParams;
 			const page = +(params.get('page') || 1);
-			const size = +(params.get('size') || 10);
+			const size = +(params.get('size') || POSTS_DEFAULT_SIZE);
 			const tag = decodeURI(params.get('tag') || '');
 			const tagInfo = !!params.get('inf');
 			const skips = noAccessPosts(getClient(req));
@@ -634,28 +461,14 @@ const apis: APIRoutes = {
 		},
 		post: auth(Read, async (req) => {
 			const d = await req.json();
-			let { sc = '' } = d;
 			const { page, size, ft = 1 } = d;
-			const w = [];
-			const v = [];
-			let where: [string, ...SQLQueryBindings[]] | undefined;
+			const w: string[] = [];
+			const v: SQLQueryBindings[] = [];
 			if (!getClient(req)?.ok(Admin)) {
 				w.push('published=?');
 				v.push(1);
 			}
-			sc = trim(sc);
-			if (sc) {
-				const s = `%${sc}%`;
-				if (!ft || ft & 1) {
-					w.push('(title like ? or title_d like ?)');
-					v.push(s, s);
-				}
-				if (!ft || ft & 2) {
-					w.push('(content like ? or content_d like ?)');
-					v.push(s, s);
-				}
-			}
-			if (w.length) where = [w.join(' or '), ...v];
+			const where = buildSearchWhere(d.sc || '', { ft, w, v });
 			return postList(page, size, where);
 		})
 	},
@@ -758,7 +571,7 @@ const apis: APIRoutes = {
 	},
 	res: {
 		delete: auth(Admin, async (req) => {
-			const r = (await req.text()).split(',').map((a) => +a);
+			const r = await parseIds(req);
 			const { changes } = db.delByPk(Res, [...r]);
 			r.forEach(delFile);
 			const ids = new Set([...r]);
@@ -987,7 +800,7 @@ const apis: APIRoutes = {
 			if (!id) return resp('no post id', 500);
 			return pageBuilder(
 				+p,
-				20,
+				VISITOR_PAGE_SIZE,
 				PostRead,
 				['createAt desc'],
 				['ip', 'createAt', 'ua', '_geo'],

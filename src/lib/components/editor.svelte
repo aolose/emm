@@ -9,8 +9,8 @@
 	let { value = $bindable(''), toolbar = [] } = $props();
 	const wb = watch(toolbar);
 	const wv = watch(value);
-	let ts = '';
-	const base = [
+    /** Default EasyMDE toolbar buttons */
+	const TOOLBAR_DEFAULTS = [
 		'bold',
 		'italic',
 		'strikethrough',
@@ -20,20 +20,23 @@
 		'table',
 		{
 			name: 'files',
-			action: async (editor) => {
+			action: async (ed) => {
 				const f = await selectFile();
 				if (f && f.length) {
-					editor.codemirror.replaceSelection(file2Md(f));
+					ed.codemirror.replaceSelection(file2Md(f));
 				}
 			},
 			className: 'icon i-file',
 			title: 'Files'
 		}
 	];
-	let tools = $state();
-	$effect(() => {
-		tools = base.concat(toolbar);
-	});
+	let tools = $derived(TOOLBAR_DEFAULTS.concat(toolbar));
+
+	/**
+	 * EasyMDE doesn't support dynamic toolbar updates, so we monkey-patch
+	 * codemirror.getWrapperElement to intercept the toolbar container creation
+	 * and replace the old toolbar with a fresh one.
+	 */
 	const changeTools = () => {
 		if (!editor) return;
 		const bar = editor.toolbar_div;
@@ -73,22 +76,7 @@
 			previewRender: () => '',
 			syncSideBySidePreviewScroll: false,
 			toolbar: tools,
-			imageUploadFunction: (f) => {
-				const cm = editor.codemirror;
-				const url = createUrl(f);
-				cm.replaceSelection(`${createFileMd(f, url)}`);
-				filesUpload([f], (o) => {
-					const x = createUrl(o);
-					let l = cm.lineCount();
-					while (l--) {
-						const v = cm.getLine(l);
-						const idx = v.indexOf(url);
-						if (idx !== -1) {
-							cm.replaceRange(x, { line: l, ch: idx }, { line: l, ch: idx + url.length });
-						}
-					}
-				});
-			},
+			imageUploadFunction: handleImageUpload,
 			shortcuts: {
 				preview: null,
 				fullscreen: null,
@@ -101,6 +89,28 @@
 		});
 		editor.value(value);
 	});
+
+	/**
+	 * Insert a file placeholder into the editor, upload the file,
+	 * then replace the temporary blob URL with the final server URL.
+	 */
+	async function handleImageUpload(f) {
+		const cm = editor.codemirror;
+		const blobUrl = createUrl(f);
+		cm.replaceSelection(`${createFileMd(f, blobUrl)}`);
+		filesUpload([f], (uploaded) => {
+			const finalUrl = createUrl(uploaded);
+			// Scan bottom-up to avoid position shifts from replacements
+			let line = cm.lineCount();
+			while (line--) {
+				const text = cm.getLine(line);
+				const idx = text.indexOf(blobUrl);
+				if (idx !== -1) {
+					cm.replaceRange(finalUrl, { line, ch: idx }, { line, ch: idx + blobUrl.length });
+				}
+			}
+		});
+	}
 </script>
 
 <div class="e">

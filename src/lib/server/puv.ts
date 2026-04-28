@@ -109,7 +109,7 @@ export const ruv = ({
 	ua: string;
 }) => {
 	const valid =
-		status < 300 && (path === '/' || /^\/((post|tag|)s?|ticket)/.test(path)) && !isbot(ua);
+		status < 300 && (path === '/' || /^\/((post|tag|)s?)/.test(path)) && !isbot(ua);
 	rqD++;
 	rqH++;
 	if (valid) {

@@ -11,7 +11,6 @@
 		<a use:act href="/admin/comment" class="icon i-comment"></a>
 		<a use:act href="/admin/tag" class="icon i-tag"></a>
 		<a use:act href="/admin/firewall" class="icon i-safe"></a>
-		<a use:act href="/admin/token" class="icon i-rq"></a>
 		<a use:act href="/admin/setting" class="icon i-sys"></a>
 		<s></s>
 		<s></s>

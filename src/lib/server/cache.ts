@@ -1,5 +1,5 @@
 import type { Require } from '$lib/server/model';
-import { Post, PostRead, PostTag, RequireMap, Tag, TkTick, TokenInfo } from '$lib/server/model';
+import { Post, PostRead, PostTag, RequireMap, Tag } from '$lib/server/model';
 import { Client } from '$lib/server/client';
 import { DBProxy, getClient, getIp, model, sqlFields } from '$lib/server/utils';
 import { db } from '$lib/server/index';
@@ -8,7 +8,7 @@ import type { DiffFn, Model, Obj, Timer } from '$lib/types';
 import { publishedPost, tags } from '$lib/server/store';
 import { diffStrSet } from '$lib/setStrPatchFn';
 import { get } from 'svelte/store';
-import { arrFilter, rndPick, throttle } from '$lib/utils';
+import { throttle } from '$lib/utils';
 import { isbot } from 'isbot';
 import { permission } from '$lib/enum';
 
@@ -19,16 +19,11 @@ export const clientMap = new Map<string, Client>();
 // auto clean client
 setInterval(() => {
 	if (clientMap.size) {
-		const cs = [];
 		const n = Date.now();
 		for (const [k, v] of clientMap) {
 			if (v.destroy < n) {
 				clientMap.delete(k);
-				cs.push(k);
 			}
-		}
-		if (cs.length) {
-			db.del(model(TkTick), `token in (${sqlFields(cs.length)})`, ...cs);
 		}
 	}
 }, 1e3 * 3600);
@@ -105,101 +100,6 @@ export const tagPostCache = (() => {
 		},
 		getPostIds(tagId: number) {
 			return tps.filter((a) => a.tagId === tagId).map((a) => a.postId);
-		}
-	};
-})();
-export const codeTokens = (() => {
-	const o = new Map<string, Obj<TokenInfo>>();
-	let t: Timer;
-	let next = 0;
-	const dur = 1e3 * 60;
-	return {
-		clear() {
-			const n = Date.now();
-			next = n + dur;
-			const code: string[] = [];
-			const ids = [...o.values()]
-				.filter((a) => (a.expire && a.expire > 0 && a.expire < n) || a.times === 0)
-				.map((a) => {
-					if (a.code) {
-						code.push(a.code);
-					}
-					return a.id;
-				}) as number[];
-			this.delete({ id: ids });
-			if (code.length) {
-				for (const [k, v] of clientMap) {
-					if (!v.clear()) {
-						clientMap.delete(k);
-					}
-				}
-				db.del(model(TkTick), `ticket in (${sqlFields(code.length)})`, ...code);
-			}
-		},
-		load() {
-			codeTokens.clear();
-			const n = Date.now();
-			const ids: number[] = [];
-			db.all(model(TokenInfo)).forEach((a) => {
-				if (+a.expire > 0 && a.expire < n) ids.push(a.id);
-				else if (a.code) {
-					codeTokens.add(a.code, model(TokenInfo, a));
-				}
-			});
-			if (ids.length) db.delByPk(TokenInfo, ids);
-			clearInterval(t);
-			t = setInterval(() => {
-				if (next < n) {
-					this.clear();
-				}
-			}, dur);
-			if (o.size) {
-				const ts = db.all(model(TkTick), `ticket in (${sqlFields(o.size)})`, ...o.keys());
-				if (ts.length) {
-					const clients = new Map<string, Client>();
-					ts.forEach((a) => {
-						let cli = clients.get(a.token);
-						if (!cli) {
-							cli = new Client(false, a.token);
-							clients.set(a.token, cli);
-						}
-						const tk = codeTokens.get(a.ticket) as TokenInfo;
-						if (tk) cli.addToken(tk, true);
-					});
-				}
-			}
-		},
-		add(code: string, token: Obj<TokenInfo>) {
-			o.set(code, token);
-			db.save(token);
-			return token;
-		},
-		has(code: string) {
-			return o.has(code);
-		},
-		share(n = 5) {
-			this.clear();
-			const codes = ([...o.values()] as TokenInfo[]).filter((a) => a.share && a.code);
-			return arrFilter(rndPick(codes, n), ['code', 'expire', 'times', 'type'], false);
-		},
-		get(code: string) {
-			return o.get(code);
-		},
-		delete(filter: { code?: string; id?: number[] }) {
-			const { code, id } = filter;
-			const codes: string[] = [];
-			const ids: number[] = [];
-			if (code) codes.push(code);
-			if (id && id.length) {
-				ids.push(...id);
-				for (const [k, v] of o) {
-					if (ids.includes(v.id as number)) {
-						codes.push(k);
-					}
-				}
-			}
-			codes.forEach((c) => o.delete(c));
-			if (ids.length) return db.delByPk(TokenInfo, ids).changes;
 		}
 	};
 })();
