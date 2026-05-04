@@ -40,44 +40,60 @@
 	let id = idGen();
 	let dp = $state();
 	let idx = $state(0);
-	let selects = $state([]);
 	let allTags = $derived(new Set(tags));
+
+	// Derived: filtered suggestions (was incorrectly written as state in $effect)
+	let selects = $derived(
+		[...allTags]
+			.filter((a) => !items.has(a) && val !== a && a.toLowerCase().startsWith(val.toLowerCase()))
+			.sort((a, b) => (a < b ? -1 : 1))
+	);
+
+	// Effect: parse val for separators and add to items
 	$effect(() => {
-		(async () => {
-			selects = [...allTags].filter(
-				(a) => !items.has(a) && val !== a && a.toLowerCase().startsWith(val.toLowerCase())
-			);
-			selects.sort((a, b) => (a < b ? -1 : 1));
-			const lh = selects.length;
-			idx = lh && idx % lh;
-			const l = val.length;
-			let s = 0;
-			let h = 0;
-			for (let i = 0; i < l; ) {
-				const r = /^[ ,;\t\n\r]+/g;
-				if (r.test(val.substring(i))) {
-					if (s < i) {
-						items.add(val.slice(s, i));
-						h = 1;
-					}
-					i += r.lastIndex;
-					s = i;
-				} else i++;
-			}
-			val = val.substring(s);
-			if (h) {
-				items = new Set(items);
-				await tick();
-				ipt.setSelectionRange(0, 0);
-			}
-			if (dp) {
-				await tick();
+		const v = val;
+		const l = v.length;
+		let s = 0;
+		let h = 0;
+		for (let i = 0; i < l; ) {
+			const r = /^[ ,;\t\n\r]+/g;
+			if (r.test(v.substring(i))) {
+				if (s < i) {
+					items.add(v.slice(s, i));
+					h = 1;
+				}
+				i += r.lastIndex;
+				s = i;
+			} else i++;
+		}
+		if (h) {
+			items = new Set(items);
+			// Defer val reset to avoid synchronous write-back loop
+			tick().then(() => {
+				val = v.substring(s);
+				ipt?.setSelectionRange(0, 0);
+			});
+		}
+	});
+
+	// Effect: clamp idx when selects change, and scroll active item into view
+	$effect(() => {
+		const lh = selects.length;
+		if (idx >= lh) idx = 0;
+
+		if (dp) {
+			tick().then(() => {
 				const a = dp.querySelector('.act');
 				a?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-			}
-			value = [...items].join() || null;
-		})();
+			});
+		}
 	});
+
+	// Effect: sync selected items back to parent via bindable value
+	$effect(() => {
+		value = [...items].join() || null;
+	});
+
 	let pre = $derived(show || val ? selects[idx] || val : '');
 </script>
 
