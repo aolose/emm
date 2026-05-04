@@ -7,10 +7,20 @@
 	let val = $state('');
 	let ipt = $state();
 	let show = $state(0);
+
+	const add = (v) => {
+		v = v.trim();
+		if (v && !items.has(v)) {
+			items.add(v);
+			items = new Set(items);
+		}
+	};
+
 	const rm = (v) => () => {
 		items.delete(v);
 		items = new Set(items);
 	};
+
 	const keyPress = (e) => {
 		const { code } = e;
 		const s = ipt.selectionStart;
@@ -26,57 +36,42 @@
 			}
 		}
 		if (code === 'Enter') {
-			val = (pre || val.slice(0, s)) + ',' + val.slice(s);
+			e.preventDefault();
+			const word = (pre || val).trim();
+			if (word) add(word);
+			val = '';
 		} else if (code === 'Backspace') {
 			if (!s) {
-				const siz = [...items][items.size - 1];
-				if (siz) {
-					items.delete(siz);
+				const arr = [...items];
+				const last = arr[arr.length - 1];
+				if (last) {
+					items.delete(last);
 					items = new Set(items);
 				}
 			}
 		}
 	};
+
+	const onInput = () => {
+		const sepIdx = /[,;\t\n\r]/.exec(val);
+		if (sepIdx) {
+			const word = val.slice(0, sepIdx.index).trim();
+			if (word) add(word);
+			val = val.slice(sepIdx.index + 1);
+		}
+	};
+
 	let id = idGen();
 	let dp = $state();
 	let idx = $state(0);
-	let allTags = $derived(new Set(tags));
 
-	// Derived: filtered suggestions (was incorrectly written as state in $effect)
 	let selects = $derived(
-		[...allTags]
-			.filter((a) => !items.has(a) && val !== a && a.toLowerCase().startsWith(val.toLowerCase()))
+		(Array.isArray(tags) ? tags : [])
+			.filter((a) => !items.has(a) && a !== val && a.toLowerCase().startsWith(val.toLowerCase()))
 			.sort((a, b) => (a < b ? -1 : 1))
 	);
 
-	// Effect: parse val for separators and add to items
-	$effect(() => {
-		const v = val;
-		const l = v.length;
-		let s = 0;
-		let h = 0;
-		for (let i = 0; i < l; ) {
-			const r = /^[ ,;\t\n\r]+/g;
-			if (r.test(v.substring(i))) {
-				if (s < i) {
-					items.add(v.slice(s, i));
-					h = 1;
-				}
-				i += r.lastIndex;
-				s = i;
-			} else i++;
-		}
-		if (h) {
-			items = new Set(items);
-			// Defer val reset to avoid synchronous write-back loop
-			tick().then(() => {
-				val = v.substring(s);
-				ipt?.setSelectionRange(0, 0);
-			});
-		}
-	});
-
-	// Effect: clamp idx when selects change, and scroll active item into view
+	// Clamp idx and scroll active item into view
 	$effect(() => {
 		const lh = selects.length;
 		if (idx >= lh) idx = 0;
@@ -89,19 +84,25 @@
 		}
 	});
 
-	// Effect: sync selected items back to parent via bindable value
+	// Sync selected items back to parent via bindable value
 	$effect(() => {
 		value = [...items].join() || null;
 	});
 
 	let pre = $derived(show || val ? selects[idx] || val : '');
+
+	const selectTag = (sec) => {
+		add(sec);
+		val = '';
+		ipt?.focus();
+	};
 </script>
 
 <label class="a" for={id}>
 	{#if selects.length && (show || val)}
 		<div class="d" bind:this={dp} transition:slide|global>
 			{#each selects as sec, index}
-				<div class:act={idx === index} onclick={() => (val = sec)}>{sec}</div>
+				<div class:act={idx === index} onclick={() => selectTag(sec)}>{sec}</div>
 			{/each}
 		</div>
 	{/if}
@@ -122,6 +123,7 @@
 			onfocus={() => (show = 1)}
 			onblur={() => (show = 0)}
 			onkeydown={keyPress}
+			oninput={onInput}
 		/>
 	</div>
 </label>
