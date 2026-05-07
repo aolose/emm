@@ -31,7 +31,4 @@ jobs:
           scp_source: 'dist.tar.gz'
           scp_target: '/home/aolose/errApp/'
           after_script: |
-            cd /home/aolose/errApp/
-            tar xzf dist.tar.gz --overwrite
-            rm dist.tar.gz
-            echo "${{ secrets.VPS_PWD }}" | sudo -S service errApp restart
+            cd /home/aolose/errApp/ && tar xzf dist.tar.gz --overwrite && rm dist.tar.gz && echo "${{ secrets.VPS_PWD }}" | sudo -S service errApp restart
