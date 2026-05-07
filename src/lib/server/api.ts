@@ -39,10 +39,10 @@ import {
 	Res,
 	System,
 	Tag,
-	TokenInfo
 } from '$lib/server/model';
 import { arrFilter, clipWords, diffObj, enc, filter, getPain, trim } from '$lib/utils';
 import { contentType, dataType, permission } from '$lib/enum';
+import { NULL } from '$lib/server/enum';
 import { dirname, resolve } from 'path';
 import fs from 'fs';
 import { genToken } from '$lib/server/token';
@@ -57,8 +57,8 @@ import {
 	fw2log,
 	fwRespLis,
 	getFwResp,
-	hitRules,
-	logCache,
+	isIpBlocked,
+	getLogCacheEntries,
 	lsRules,
 	patchDetailIpInfo,
 	saveBlackList,
@@ -93,7 +93,7 @@ const parseIds = async (req: Request): Promise<number[]> =>
 
 /** Build a SQL WHERE clause from a search string against title/content fields */
 const buildSearchWhere = (
-	sc: string,
+	sc: string|undefined,
 	fields: { ft?: number; v: SQLQueryBindings[]; w: string[] }
 ): [string, ...SQLQueryBindings[]] | undefined => {
 	sc = trim(sc);
@@ -109,6 +109,26 @@ const buildSearchWhere = (
 	}
 	return [fields.w.join(' or '), ...fields.v];
 };
+
+/** Serialize concurrent requests for the same draft to prevent race-condition duplicates */
+const draftLocks = new Map<string, Promise<void>>();
+async function withDraftLock(uuid: string, fn: () => Promise<void>): Promise<void> {
+	const prev = draftLocks.get(uuid);
+	let resolve: () => void;
+	const next = new Promise<void>((r) => { resolve = r; });
+	draftLocks.set(uuid, (prev || Promise.resolve()).then(() => next));
+	try {
+		await prev;
+		await fn();
+	} finally {
+		resolve!();
+		const cur = draftLocks.get(uuid);
+		// Clean up if no newer lock has been queued
+		if (cur === next || (cur && prev && cur === prev)) {
+			draftLocks.delete(uuid);
+		}
+	}
+}
 
 /** Page size for hidden-posts listing */
 const REQS_PAGE_SIZE = 4;
@@ -142,8 +162,7 @@ const auth = (ps: permission | permission[], fn: RespHandle) => (req: Request) =
 
 // todo: link flag to session
 // need a clientMap
-let curPostFlag = [0, 0];
-const { Admin, Read } = permission;
+	const { Admin, Read } = permission;
 
 const apis: APIRoutes = {
 	alCm: {
@@ -254,7 +273,7 @@ const apis: APIRoutes = {
 				t: number;
 			};
 			const { page, size, type } = t;
-			const lgs = filterLog(type ? db.all(model(FwLog)).map(fw2log) : logCache, t);
+			const lgs = filterLog(type ? db.all(model(FwLog)).map(fw2log) : getLogCacheEntries(), t);
 			const l = lgs.length;
 			const total = Math.floor((l + t.size - 1) / t.size);
 			const st = l - page * size;
@@ -270,7 +289,7 @@ const apis: APIRoutes = {
 		post: auth(Read, async (req) => {
 			const ip = await req.text();
 			if (ip) {
-				const o = hitRules({ ip });
+				const o = isIpBlocked(ip);
 				if (getFwResp(o?.respId)?.status === 403) return 1;
 			}
 		})
@@ -554,16 +573,35 @@ const apis: APIRoutes = {
 			}
 		}),
 		post: auth(Admin, async (req) => {
-			const [flag, id] = curPostFlag;
 			const o = model(Post, await getReqJson(req)) as curPost;
-			if (!o.id) {
-				if (flag === o._) {
-					o.id = id;
-				}
+			if (!o.id && o._) {
+				// Serialize concurrent saves for the same draft uuid to prevent duplicates
+				const uuid = String(o._);
+				await withDraftLock(uuid, async () => {
+					const existing = db.get(
+						model(Post, { draftUuid: uuid })
+					) as Post | undefined;
+					if (existing) {
+						o.id = existing.id;
+					} else {
+						o.draftUuid = uuid;
+						const d = model(Post, o) as { id: number };
+						db.save(d);
+						// Copy back the assigned id so the outer code can use it
+						if (!o.id && d.id) o.id = d.id;
+					}
+				});
 			}
 			const d = model(Post, o) as { id: number };
 			db.save(d);
-			if (o._) curPostFlag = [o._, d.id];
+			// Clear draftUuid on publish — draft has served its purpose
+			if (o._p && o.id) {
+				const current = db.get(model(Post, { id: o.id })) as Post | undefined;
+				if (current?.draftUuid) {
+					current.draftUuid = NULL.TEXT;
+					db.save(current, { skipSave: true });
+				}
+			}
 			const v = diffObj(o as Post, d) as Obj<Post>;
 			if (v) delete v.content;
 			return filter(v, [], false);
