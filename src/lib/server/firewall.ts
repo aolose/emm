@@ -13,7 +13,22 @@ import { error } from '@sveltejs/kit';
 let triggers: FWRule[];
 let rules: FWRule[];
 let blackList: BlackList[];
+const exactBlackIp = new Map<string, FWRule>();
+let cidrBlackRules: FWRule[] = [];
 const fwResp = new Map<number, FwResp>();
+
+const rebuildBlackIndex = () => {
+	exactBlackIp.clear();
+	cidrBlackRules = [];
+	for (const b of blackList) {
+		const r = b.toRule();
+		if (r.ip && /[\/-]/.test(r.ip)) {
+			cidrBlackRules.push(r);
+		} else if (r.ip) {
+			exactBlackIp.set(r.ip, r);
+		}
+	}
+};
 
 const getPathName = (u: URL | string) => {
 	u = new URL(u);
@@ -74,7 +89,7 @@ const isInRange = (str: string, num: number | undefined) => {
 			if (/\d+/g.test(a)) {
 				if (num >= +a) {
 					if (/\d+/g.test(b)) {
-						if (num > +b) return false;
+						if (num > +b) continue;
 					}
 					return true;
 				}
@@ -167,9 +182,7 @@ export function loadRules() {
 		else rules.push(ru);
 	});
 	blackList = db.all(model(BlackList)).map((a) => model(BlackList, a) as BlackList);
-	blackList.forEach((a) => {
-		rules.push(a.toRule());
-	});
+	rebuildBlackIndex();
 	sort();
 	clearTimeout(t);
 	t = setTimeout(loadRules, 1e3 * 3600 * 72);
@@ -187,8 +200,34 @@ type log = {
 	geo?: string;
 	log?: boolean;
 };
-export const logCache: log[] = [];
-const max = 1000;
+
+// #6 ring buffer for logCache — O(1) write, no splice
+const MAX_LOG = 1000;
+const logCache: log[] = new Array(MAX_LOG);
+let logHead = 0;
+let logCount = 0;
+
+const addToLogCache = (r: log) => {
+	logCache[logHead % MAX_LOG] = r;
+	logHead++;
+	if (logCount < MAX_LOG) logCount++;
+};
+
+export const getLogCacheEntries = (): log[] => {
+	const n = logCount;
+	const out: log[] = new Array(n);
+	for (let i = 0; i < n; i++) out[i] = logCache[(logHead - n + i) % MAX_LOG];
+	return out;
+};
+
+const forEachLogReverse = (fn: (log: log) => boolean | void) => {
+	const start = logHead - 1;
+	const end = Math.max(0, logHead - logCount);
+	for (let i = start; i >= end; i--) {
+		const r = logCache[i % MAX_LOG];
+		if (fn(r) === false) break;
+	}
+};
 
 const addBlackListRule = (r: { ip: string; respId: number; mark?: string; log?: boolean }) => {
 	if (blackList.find((a) => a.ip === r.ip)) return;
@@ -196,7 +235,12 @@ const addBlackListRule = (r: { ip: string; respId: number; mark?: string; log?: 
 	if (!fwResp.has(r.respId)) b.respId = 0;
 	db.save(b);
 	blackList.push(b);
-	rules.push(b.toRule());
+	const rule = b.toRule();
+	if (rule.ip && /[\/-]/.test(rule.ip)) {
+		cidrBlackRules.push(rule);
+	} else if (rule.ip) {
+		exactBlackIp.set(rule.ip, rule);
+	}
 };
 
 export const saveBlackList = (b: BlackList) => {
@@ -204,8 +248,7 @@ export const saveBlackList = (b: BlackList) => {
 	const i = blackList.findIndex((a) => a.id === b.id);
 	if (i !== -1) {
 		b = Object.assign(blackList[i], b);
-		const n = rules.findIndex((a) => a.id === -b.id);
-		if (n !== -1) Object.assign(rules[n], b.toRule());
+		rebuildBlackIndex();
 	}
 };
 export const delBlackList = (...id: number[]) => {
@@ -213,7 +256,13 @@ export const delBlackList = (...id: number[]) => {
 	if (!ids.size) return;
 	db.delByPk(BlackList, id);
 	blackList = blackList.filter((a) => !ids.has(a.id));
-	rules = rules.filter((r) => !ids.has(-r.id));
+	rebuildBlackIndex();
+};
+
+export const isIpBlocked = (ip: string): Obj<FWRule> | undefined => {
+	const exact = exactBlackIp.get(ip);
+	if (exact) return exact;
+	return hitRules({ ip }, cidrBlackRules);
 };
 
 export const blackLists = (page = 1, size = 20) => {
@@ -248,10 +297,10 @@ const blackListCheck = (
 		return limiter;
 	});
 	if (ts.length) {
-		for (let i = logCache.length - 1; i > -1; i--) {
-			const log = logCache[i];
+		let matched: FWRule | undefined;
+		forEachLogReverse((log) => {
 			const dur = now - log.createAt;
-			if (log.ip !== r.ip) return;
+			if (log.ip !== r.ip) return; // #1 continue equivalent
 			let over = 0;
 			for (let i = 0; i < ts.length; i++) {
 				if (dur > max[i]) {
@@ -269,12 +318,14 @@ const blackListCheck = (
 							mark: t.mark,
 							log: t.log
 						});
-						return t;
+						matched = t;
+						return false; // stop iteration
 					}
 				}
 			}
-			if (over === max.length) return;
-		}
+			if (over === max.length) return false; // all windows expired
+		});
+		if (matched) return matched;
 	}
 };
 
@@ -297,7 +348,7 @@ const triggersHit = (tr: FWRule[], r: log) => {
 
 export const saveToDb = (r: log) => {
 	db.save(model(FwLog, { ...r, headers: hds2Str(r.headers) }));
-	const del = db.count(FwLog) - (sys.maxFireLogs || max);
+	const del = db.count(FwLog) - (sys.maxFireLogs || MAX_LOG);
 	if (del > 100) {
 		db.db
 			.prepare(
@@ -322,15 +373,10 @@ const logReq = (event: RequestEvent) => {
 		ip,
 		path,
 		headers,
-		ipInfo,
 		method
 	} as log;
 	if (path !== '/api/log') {
-		logCache.push(r);
-		const s = logCache.length - max;
-		if (s > 100) {
-			logCache.splice(0, s);
-		}
+		addToLogCache(r);
 	}
 	return r;
 };
@@ -409,12 +455,19 @@ const fwFilter = (event: RequestEvent, rs = rules): Obj<FWRule> | undefined => {
 	const path = getPathName(event.url);
 	const headers = event.request.headers;
 	const method = event.request.method.toLowerCase();
-	return hitRules({
-		ip,
-		path,
-		headers,
-		method
-	});
+	const r = { ip, path, headers, method };
+
+	// #15 fast-path: O(1) exact IP check for blacklist
+	const exact = exactBlackIp.get(ip);
+	if (exact && hitRule(r, exact)) {
+		return { respId: exact.respId || -1, mark: exact.mark, log: exact.log } as Obj<FWRule>;
+	}
+	// CIDR blacklist check (typically very few entries)
+	const cidrHit = hitRules(r, cidrBlackRules);
+	if (cidrHit?.respId) return cidrHit;
+
+	// user rules (normal scan)
+	return hitRules(r);
 };
 
 type times = number;

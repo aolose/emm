@@ -80,6 +80,7 @@ export class Post {
 	_reqs?: string | { id: number; name: string }[]; // permissions
 	// reqId
 	_r?: number; // read
+	draftUuid = TEXT;
 	onSave(db: DB, now: number) {
 		const { id, title_d, title, content_d } = this;
 		const oo = id ? db.get(model(this.constructor as FunctionConstructor, { id })) : {};
@@ -126,7 +127,7 @@ export class Post {
 				return new Set([...a]);
 			});
 		if ('_tag' in this && id) {
-			const tags = (this._tag || '').split(',').filter(Boolean);
+			const tags = (this._tag || '').split(',').map((t) => t.trim()).filter(Boolean);
 			tagPostCache.setTags(id, tags);
 		}
 		if (this._p || this.published === 0 || (this.published && '_tag' in this)) {

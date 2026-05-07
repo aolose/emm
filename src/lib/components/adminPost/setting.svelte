@@ -119,13 +119,6 @@
 					</div>
 				</div>
 				<div class="r">
-					<h3>Tokens</h3>
-					<div class="n">
-						<Sel bind:items={post._reqs} inline={1} />
-						<button onclick={selReq} class="icon i-ed"></button>
-					</div>
-				</div>
-				<div class="r">
 					<CheckBox name="allow comment" bind:value={post.disCm} revert={1} />
 				</div>
 			</div>

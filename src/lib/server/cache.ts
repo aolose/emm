@@ -31,9 +31,48 @@ setInterval(() => {
 export const eTags = new Map<string, number>();
 export const tagPostCache = (() => {
 	let tps: PostTag[] = [];
+	/** tagId → Set<postId> */
+	const tag2post = new Map<number, Set<number>>();
+	/** postId → Set<tagId> */
+	const post2tag = new Map<number, Set<number>>();
+
+	const addIndex = (postId: number, tagId: number) => {
+		let tp = tag2post.get(tagId);
+		if (!tp) tag2post.set(tagId, (tp = new Set()));
+		tp.add(postId);
+		let pt = post2tag.get(postId);
+		if (!pt) post2tag.set(postId, (pt = new Set()));
+		pt.add(tagId);
+	};
+	const delIndex = (postId?: number | number[], tagId?: number | number[]) => {
+		const pArr = postId ? ([] as number[]).concat(postId) : undefined;
+		const tArr = tagId ? ([] as number[]).concat(tagId) : undefined;
+		if (tArr) {
+			for (const tid of tArr) {
+				const tp = tag2post.get(tid);
+				if (tp) {
+					if (pArr) for (const pid of pArr) tp.delete(pid);
+					else tp.clear();
+					if (!tp.size) tag2post.delete(tid);
+				}
+			}
+		}
+		if (pArr) {
+			for (const pid of pArr) {
+				const pt = post2tag.get(pid);
+				if (pt) {
+					if (tArr) for (const tid of tArr) pt.delete(tid);
+					if (!pt.size) post2tag.delete(pid);
+				}
+			}
+		}
+	};
 	return {
 		load() {
 			tps = db.all(model(PostTag));
+			tag2post.clear();
+			post2tag.clear();
+			for (const { postId, tagId } of tps) addIndex(postId, tagId);
 		},
 		delete(postId?: number | number[], tagId?: number | number[]) {
 			const ids = new Set<number>();
@@ -47,6 +86,7 @@ export const tagPostCache = (() => {
 			});
 			tps = tps.filter((a) => !ids.has(a.id));
 			db.delByPk(PostTag, [...ids]);
+			delIndex(postId, tagId);
 		},
 		setTags(postId: number, tagStr: string[]) {
 			const pTags = this.getTags(postId);
@@ -62,7 +102,9 @@ export const tagPostCache = (() => {
 			if (ts.size) {
 				get(tags).forEach((t) => {
 					if (ts.has(t.name)) {
-						tps.push(DBProxy(PostTag, { postId, tagId: t.id }));
+						const pt = DBProxy(PostTag, { postId, tagId: t.id });
+						tps.push(pt);
+						addIndex(postId, t.id);
 						ts.delete(t.name);
 					}
 				});
@@ -71,7 +113,9 @@ export const tagPostCache = (() => {
 				for (const t of ts) {
 					const nt = DBProxy(Tag, { name: t });
 					tags.update((ts) => ts.concat(nt));
-					tps.push(DBProxy(PostTag, { postId, tagId: nt.id }));
+					const pt = DBProxy(PostTag, { postId, tagId: nt.id });
+					tps.push(pt);
+					addIndex(postId, nt.id);
 				}
 			}
 			if (ids.length) {
@@ -83,7 +127,9 @@ export const tagPostCache = (() => {
 			postId.forEach((p) => {
 				if (pSet.has(p)) pSet.delete(p);
 				else {
-					tps.push(DBProxy(PostTag, { postId: p, tagId }));
+					const pt = DBProxy(PostTag, { postId: p, tagId });
+					tps.push(pt);
+					addIndex(p, tagId);
 				}
 			});
 			if (pSet.size) {
@@ -91,15 +137,17 @@ export const tagPostCache = (() => {
 			}
 		},
 		getTags(postId: number | number[]) {
-			const ids: Set<number> = new Set();
-			const pSet = new Set(([] as number[]).concat(postId));
-			tps.forEach((a) => {
-				if (pSet.has(a.postId)) ids.add(a.tagId);
-			});
+			const pArr = ([] as number[]).concat(postId);
+			const ids = new Set<number>();
+			for (const pid of pArr) {
+				const pt = post2tag.get(pid);
+				if (pt) for (const tid of pt) ids.add(tid);
+			}
 			return get(tags).filter((a) => ids.has(a.id));
 		},
 		getPostIds(tagId: number) {
-			return tps.filter((a) => a.tagId === tagId).map((a) => a.postId);
+			const tp = tag2post.get(tagId);
+			return tp ? [...tp] : [];
 		}
 	};
 })();
@@ -269,18 +317,22 @@ export const readManager = (() => {
 		set(postId: number, req: Request) {
 			const ua = req.headers.get('user-agent');
 			const ip = getIp(req);
-			console.log({ ua, ip });
 			// only human allow
 			if (
 				!/^(::1|127\.0)/.test(ip) &&
 				ua &&
 				!isbot(ua) &&
-				ok(`${postId}-${ip}-${ua}`) &&
+				ok(`${postId}-${ip}`) &&
 				!getClient(req)?.ok(permission.Admin)
 			) {
-				const n = this.get(postId);
-				cMap.set(postId, n + 1);
+				cMap.set(postId, (cMap.get(postId) ?? this.get(postId)) + 1);
 				db.save(model(PostRead, { ip, ua, pid: postId }));
+				// keep max 300 records per post
+				const all = db.all(model(PostRead), `pid = ? order by createAt desc`, postId);
+				if (all.length > 300) {
+					const keepIds = all.slice(0, 300).map((r) => r.id);
+					db.del(model(PostRead), `pid = ? and id not in (${sqlFields(keepIds.length)})`, postId, ...keepIds);
+				}
 			}
 		}
 	};
