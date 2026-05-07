@@ -7,7 +7,6 @@ on:
       - 'doc/**'
       - '**/*.draft.md'
       - '.gitignore'
-      - '.github/**'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,8 +19,8 @@ jobs:
         run: bun i
       - name: Build
         run: bun run build
-      - name: Ls
-        run: ls -al dist
+      - name: Package
+        run: tar czf dist.tar.gz -C dist .
       - name: Depoly
         uses: kostya-ten/ssh-server-deploy@v4
         with:
@@ -29,7 +28,10 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           username: ${{ secrets.VPS_USR }}
           private_key: ${{ secrets.VPS_KEY }}
-          scp_source: 'dist/*'
+          scp_source: 'dist.tar.gz'
           scp_target: '/home/aolose/errApp/'
           after_script: |
-            cd "/home/aolose/errApp/"  && bun i && echo -e "${{ secrets.VPS_PWD }}\n" | sudo -S service errApp restart
+            cd /home/aolose/errApp/
+            tar xzf dist.tar.gz --overwrite
+            rm dist.tar.gz
+            echo "${{ secrets.VPS_PWD }}" | sudo -S service errApp restart

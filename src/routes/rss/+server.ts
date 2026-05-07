@@ -1,43 +1,31 @@
-import type { Post } from '$lib/server/model';
-import { sys } from '$lib/server';
 import type { RequestHandler } from '@sveltejs/kit';
-import { time } from '$lib/utils';
-import { noAccessPosts } from '$lib/server/cache';
-import { pubPostList } from '$lib/server/posts';
-import type { Obj } from '$lib/types';
+import { rssCache } from '$lib/rssCache';
+import { server } from '$lib/server';
 
 export const GET: RequestHandler = async ({ request, url }) => {
-	const skips = noAccessPosts();
-	const page = await pubPostList(1, 20, null, skips);
-	if (page instanceof Response) return page;
-	const body = render(url.origin, page.items);
-	const headers = {
-		'Cache-Control': `max-age=0, s-max-age=${600}`,
+	if (server.maintain) return new Response('Service Unavailable', { status: 503 });
+
+	// ensure cache is built (only rebuilds if dirty)
+	await rssCache.refresh();
+
+	let xml = rssCache.get();
+	if (!xml) return new Response('Service Unavailable', { status: 503 });
+
+	// replace placeholder with actual origin
+	xml = xml.replace(/@/g, url.origin);
+
+	const etag = rssCache.getEtag();
+	const ifNoneMatch = request.headers.get('if-none-match');
+	if (ifNoneMatch && etag && ifNoneMatch === etag) {
+		return new Response(null, { status: 304 });
+	}
+
+	const headers: Record<string, string> = {
+		'Cache-Control': 'max-age=0, s-max-age=600',
 		'Content-Type': 'application/xml'
 	};
-	return new Response(body, {
-		headers
-	});
+	if (etag) {
+		headers['ETag'] = etag;
+	}
+	return new Response(xml, { headers });
 };
-
-const render = (base: string, posts: Obj<Post>[]) => `<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-<channel>
-<atom:link href="${base}/rss" rel="self" type="application/rss+xml" />
-<title>${sys.blogName || ''}</title>
-<link>${base}</link>
-<description>${sys.seoDesc || ''}</description>
-${posts
-	.map(
-		(post) => `<item>
-<guid>${base}/post/${post.slug}</guid>
-<title>${post.title}</title>
-<link>${base}/post/${post.slug}</link>
-<description>${post?.desc}</description>
-<pubDate>${time(post?.publish)}</pubDate>
-</item>`
-	)
-	.join('')}
-</channel>
-</rss>
-`;

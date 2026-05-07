@@ -7,6 +7,7 @@ import { publishedPost } from '$lib/server/store';
 import type { Obj } from '$lib/types';
 import { reqPostCache, tagPostCache } from '$lib/server/cache';
 import { sitemap } from '$lib/sitemap';
+import { rssCache } from '$lib/rssCache';
 
 const { INT, TEXT } = NULL;
 
@@ -132,6 +133,7 @@ export class Post {
 		}
 		if (this._p || this.published === 0 || (this.published && '_tag' in this)) {
 			sitemap.refresh();
+			rssCache.invalidate();
 		}
 		return !df;
 	}
