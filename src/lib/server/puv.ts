@@ -77,8 +77,8 @@ const uvD: UVGroup = makeGroup();
 const _uvH: UVGroup = makeGroup();
 const _uvD: UVGroup = makeGroup();
 
-let dStart = Date.now();
-let hStart = Date.now();
+let currentNd: number;
+let currentNh: number;
 const hour = 3600 * 1e3;
 const day = hour * 24;
 
@@ -86,6 +86,8 @@ export const loadPuv = () => {
 	const now = Date.now();
 	const nh = Math.floor(now / hour);
 	const nd = Math.floor(now / day);
+	currentNh = nh;
+	currentNd = nd;
 	// rotate seed each boot so hashes aren't stable across restarts (#7)
 	hashSeed = (now ^ (now >>> 8)) & 0x7fffffff;
 
@@ -132,11 +134,9 @@ const save = () => {
 	if (sysStatue < 2 || server.maintain) return;
 	changed = 0;
 	const now = Date.now();
-	const nh = Math.floor(now / hour);
-	const nd = Math.floor(now / day);
 	const md = model(RPU, {
 		type: 1,
-		t: nd,
+		t: currentNd,
 		r: rqD,
 		p: pvD,
 		u: groupSize(uvD),
@@ -144,21 +144,21 @@ const save = () => {
 	});
 	const mp = model(RPU, {
 		type: 0,
-		t: nh,
+		t: currentNh,
 		r: rqH,
 		p: pvH,
 		u: groupSize(uvH),
 		ur: groupSize(uvH) + groupSize(_uvH)
 	});
 	// check exist
-	const od = db.get(model(RPU, { type: 1, t: nd }));
-	const op = db.get(model(RPU, { type: 0, t: nh }));
+	const od = db.get(model(RPU, { type: 1, t: currentNd }));
+	const op = db.get(model(RPU, { type: 0, t: currentNh }));
 	if (od) md.id = od.id;
 	if (op) mp.id = op.id;
 	db.save(md);
 	db.save(mp);
 	// clear rec before 90d, every 30d
-	const bf = nh - 24 * 90;
+	const bf = currentNh - 24 * 90;
 	const lastCleanKey = 99;
 	const lastClean = db.get(model(RPUCache, { id: lastCleanKey }))?.value || '0';
 	if (now - +lastClean > 30 * day) {
@@ -171,21 +171,48 @@ const save = () => {
 	db.save(model(RPUCache, { id: 4, value: groupToArr(_uvH).join(',') }));
 };
 
+// flush one slot (type=0 hour, type=1 day) to DB with the given t index
+const flushSlot = (type: number, t: number) => {
+	const isDay = type === 1;
+	const r = isDay ? rqD : rqH;
+	const p = isDay ? pvD : pvH;
+	const u = isDay ? uvD : uvH;
+	const _u = isDay ? _uvD : _uvH;
+	const m = model(RPU, {
+		type,
+		t,
+		r,
+		p,
+		u: groupSize(u),
+		ur: groupSize(u) + groupSize(_u)
+	});
+	const exist = db.get(model(RPU, { type, t }));
+	if (exist) m.id = (exist as RPU).id;
+	db.save(m);
+};
+
 const checkTimeWindow = () => {
 	const now = Date.now();
-	if (now - hStart > hour) {
+	const nh = Math.floor(now / hour);
+	const nd = Math.floor(now / day);
+
+	if (nh !== currentNh) {
+		// save old hour slot before resetting
+		if (changed) flushSlot(0, currentNh);
 		Object.assign(uvH, makeGroup());
 		Object.assign(_uvH, makeGroup());
 		rqH = 0;
 		pvH = 0;
-		hStart = now;
+		currentNh = nh;
 	}
-	if (now - dStart > day) {
+	if (nd !== currentNd) {
+		// save old day slot before resetting
+		if (changed) flushSlot(1, currentNd);
 		Object.assign(uvD, makeGroup());
 		Object.assign(_uvD, makeGroup());
 		rqD = 0;
 		pvD = 0;
-		dStart = now;
+		currentNd = nd;
 	}
 };
 
