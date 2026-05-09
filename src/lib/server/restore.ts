@@ -7,6 +7,7 @@ import type { System } from '$lib/server/model';
 import { existsSync, readFileSync, rename, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 
 export const restore = async (data: ArrayBuffer) => {
+	const isMaintain = server.maintain;
 	const files = unZip(new Uint8Array(data));
 	const dbCfg = findEntry(files, '.dbCfg');
 	if (!dbCfg) return resp('.dbCfg is missing', 500);
@@ -47,6 +48,7 @@ export const restore = async (data: ArrayBuffer) => {
 		});
 	} catch (e) {
 		console.error(e);
+		server.maintain = isMaintain;
 		if (e instanceof Error) return resp(getErr(e), 500);
 	}
 	server.start(dbPath);

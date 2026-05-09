@@ -202,7 +202,7 @@ export const encryptResp = async (params: ApiData, keyNum: number, code = 200) =
 	}
 	return resp('', 500);
 };
-export const getIp = (req: Request) => req.headers.get('x-forwarded-for') || '';
+export const getIp = (req: Request) => (req.headers.get('x-forwarded-for') || '').split(/ +/)[0];
 export const apiHandle = async (event: RequestEvent): Promise<Response> => {
 	const { request, params } = event;
 	const name = params.api as ApiName;
@@ -563,7 +563,7 @@ export const blogExp = () => {
 	const dbpath = fs.readFileSync(dbc).toString();
 	const zip = archiver('zip');
 	console.log('zip start', Date.now());
-	zip.append(dbpath, { name: dbc });
+	zip.append(Buffer.from(dbpath), { name: dbc });
 	zip.append(db.db.serialize(), { name: 'd' });
 	zip.directory(sys.uploadDir, 'u');
 	zip.directory(sys.thumbDir, 't');
