@@ -158,11 +158,12 @@ const save = () => {
 	db.save(md);
 	db.save(mp);
 	// clear rec before 90d, every 30d
-	const bf = currentNh - 24 * 90;
 	const lastCleanKey = 99;
 	const lastClean = db.get(model(RPUCache, { id: lastCleanKey }))?.value || '0';
 	if (now - +lastClean > 30 * day) {
-		db.del(model(RPU), 't <=?', bf);
+		// 按 type 分别清理：小时记录用小时索引，天记录用天索引
+		db.del(model(RPU), 't <=? and type=0', currentNh - 24 * 90);
+		db.del(model(RPU), 't <=? and type=1', currentNd - 90);
 		db.save(model(RPUCache, { id: lastCleanKey, value: String(now) }));
 	}
 	db.save(model(RPUCache, { id: 1, value: groupToArr(uvD).join(',') }));
