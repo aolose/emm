@@ -22,19 +22,7 @@
 	let nx = $state([]);
 	let h = $state();
 	let w = $state();
-	let max = $state(0),
-		min = $state(0);
 	let data = $derived([pv, uv, ur, rv]);
-	let ny = $derived((() => {
-		if (max <= min) return [];
-		const nny = [];
-		const step = Math.max((max - min) / 10, 1);
-		for (let m = min; m < max - step; m += step) {
-			nny.push(Math.floor(m));
-		}
-		nny.push(max);
-		return nny;
-	})());
 	let avg = $derived(data.map(a => {
 		if (!a.length) return 0;
 		return Math.ceil(a.reduce((x, y) => x + y, 0) / a.length);
@@ -43,16 +31,22 @@
 	const genStep = (arr, n) => {
 		const l = arr.length;
 		if (l <= n) return arr;
-		const s = arr[0];
-		const e = arr[l - 1];
+		const step = (l - 1) / (n - 1);
 		const v = [];
-		const step = l / (n - 2);
-		for (let i = s + step; i < e; i += step) {
-			const z = Math.floor(i);
-			if (z <= s || v.includes(z)) continue;
-			v.push(z);
+		for (let i = 0; i < n; i++) {
+			v.push(arr[Math.min(Math.round(i * step), l - 1)]);
 		}
-		return [s, ...v, e];
+		const dedup = [v[0]];
+		for (let i = 1; i < v.length; i++) {
+			if (v[i] !== dedup[dedup.length - 1]) dedup.push(v[i]);
+		}
+		return dedup;
+	};
+	const hexToRgba = (hex, alpha) => {
+		const r = parseInt(hex.slice(1, 3), 16);
+		const g = parseInt(hex.slice(3, 5), 16);
+		const b = parseInt(hex.slice(5, 7), 16);
+		return `rgba(${r},${g},${b},${alpha})`;
 	};
 	const ck = $state({ 0: 1, 1: 1, 2: 0, 3: 0 });
 	const cors = ['#8c72ce', '#d3a84b', '#65b9e7', '#bcff94'];
@@ -96,61 +90,94 @@
 			})
 			.finally(() => (ld = 0));
 	};
-	const line = (color, w, h, max, min, ...d) => {
-		ctx.strokeStyle = ctx.fillStyle = color;
-		const ry = (h - 40) / (max - min || 1);
+	const line = (color, w, h, ys, ...d) => {
+		if (!d.length) return;
+		const dmin = Math.min(...d);
+		const dmax = Math.max(...d);
 		const sy = 20;
-		const sx = 20;
-		const step = (w - sx * 2) / (d.length - 1);
-		const fy = (a) => h - sy - (a - min) * ry;
+		const sx = 65;
+		const ry = (h - 40) / (dmax - dmin || 1);
+		const fy = (a) => h - sy - (a - dmin) * ry;
+		const step = (w - sx - 10) / (d.length - 1);
+		const pts = d.map((a, i) => ({ x: sx + step * i, y: fy(a) }));
+		const baseline = h - sy;
+
+		// gradient fill below line
+		ctx.save();
 		ctx.beginPath();
-		let px, py;
-		d.forEach((a, i) => {
-			const my = fy(a);
-			const mx = sx + step * i;
-			if (!i) {
-				ctx.moveTo(mx, my);
-				// ctx.arc(mx, my, 2, 0, 2 * Math.PI);
-				// ctx.fill();
-			} else {
-				// ctx.moveTo(mx, my);
-				// ctx.arc(mx, my, 2, 0, 2 * Math.PI);
-				// ctx.fill();
-				ctx.moveTo(px, py);
-				ctx.lineTo(mx, my);
-				ctx.stroke();
-			}
-			px = mx;
-			py = my;
+		ctx.moveTo(pts[0].x, baseline);
+		for (const pt of pts) ctx.lineTo(pt.x, pt.y);
+		ctx.lineTo(pts[pts.length - 1].x, baseline);
+		ctx.closePath();
+		const grad = ctx.createLinearGradient(0, sy, 0, baseline);
+		grad.addColorStop(0, hexToRgba(color, 0.1));
+		grad.addColorStop(1, hexToRgba(color, 0.0));
+		ctx.fillStyle = grad;
+		ctx.fill();
+		ctx.restore();
+
+		// stroke line
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 1.5;
+		ctx.lineJoin = 'round';
+		ctx.beginPath();
+		pts.forEach((pt, i) => {
+			if (i === 0) ctx.moveTo(pt.x, pt.y);
+			else ctx.lineTo(pt.x, pt.y);
 		});
+		ctx.stroke();
+
+		// Y-axis labels for this line on the left edge
+		if (ys) {
+			ctx.fillStyle = color;
+			ctx.font = '11px sans-serif';
+			ctx.textAlign = 'right';
+			const labels = [];
+			const lblStep = Math.max((dmax - dmin) / 6, 1);
+			for (let v = Math.ceil(dmin); v <= dmax; v += lblStep) {
+				labels.push(v);
+			}
+			if (!labels.includes(dmax)) labels.push(dmax);
+			for (const v of labels) {
+				const y = fy(v);
+		ctx.fillText(String(Math.round(v)), 50, y + 4);
+			}
+		}
 	};
 	const draw = delay(() => {
 		if (!cvs) return;
 		ctx = cvs.getContext('2d');
 		const [w, h] = [cvs.width, cvs.height];
 		ctx.clearRect(0, 0, w, h);
+		// find first checked line to show its Y labels
+		let firstIdx = -1;
+		for (let i = 0; i < 4; i++) {
+			if (ck[i] && data[i].length) { firstIdx = i; break; }
+		}
 		data.forEach((a, i) => {
-			if (ck[i]) line(cors[i], w, h - 20, max, min, ...a);
+			if (ck[i] && a.length) {
+				line(cors[i], w, h - 20, i === firstIdx, ...a);
+			}
 		});
 	}, 100);
 	const render = draw;
 
 	$effect(() => {
-		const s = [];
-		data.forEach((a, i) => {
-			if (ck[i]) {
-				s.push(...a);
-			}
-		});
-		min = s.length ? Math.min(...s) : 0;
-		max = s.length ? Math.max(...s) : 0;
-		const n = Date.now();
+		// fetch on t change
+		t;
 		type = +!!t;
-		start = n - (t + 1) * d;
-		render();
+		start = Date.now() - (t + 1) * d;
 		if (cvs) {
 			wt(getD, t);
 		}
+	});
+	$effect(() => {
+		// re-render when data or toggle changes
+		const _d = data.map(a => a.slice());
+		const _c = { ...ck };
+		void _d;
+		void _c;
+		render();
 	});
 	onMount(render);
 </script>
@@ -167,14 +194,9 @@
 			{/each}
 		</div>
 		<div class="a">
-			<div class="y" style={`height:${h}px`}>
-				{#each ny as y}
-					<span>{y}</span>
-				{/each}
-			</div>
-			<div class="c">
+			<div class="c" style="width:100%">
 				<div bind:offsetWidth={w} bind:offsetHeight={h} class="e">
-					<canvas bind:this={cvs} height={h} width={w}></canvas>
+					<canvas bind:this={cvs} height={h} width={w + 55}></canvas>
 				</div>
 				<div class="x">
 					{#each nx as x}
@@ -304,7 +326,7 @@
 
 	.x {
 		display: flex;
-		padding: 0 20px;
+		padding: 0 10px;
 		justify-content: space-between;
 
 		span {
@@ -333,19 +355,20 @@
 
 	.e {
 		flex-grow: 1;
+		position: relative;
+		overflow: visible;
+		border-left: 1px solid #6c7a93;
+		border-bottom: 1px solid #6c7a93;
+		background:
+			linear-gradient(0deg, rgba(100, 100, 100, 0.5) 0, transparent 1px),
+			linear-gradient(90deg, rgba(100, 100, 100, 0.5) 0, transparent 1px) 10px 10px;
+		background-size: 20px 20px;
 	}
 
 	canvas {
 		position: absolute;
-		background:
-			linear-gradient(0deg, rgba(100, 100, 100, 0.5) 0, transparent 1px),
-			linear-gradient(90deg, rgba(100, 100, 100, 0.5) 0, transparent 1px) 18px 10px;
-		background-size: 20px 20px;
-		border: 1px solid #6c7a93;
-		border-top: 0;
-		border-right: 0;
 		top: 0;
-		left: 0;
+		left: -55px;
 	}
 
 	.i-refresh {
