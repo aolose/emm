@@ -23,6 +23,7 @@
 	let h = $state();
 	let w = $state();
 	let data = $derived([pv, uv, ur, rv]);
+	const Y_AXIS_COLOR = 'rgba(127, 146, 161, 0.75)';
 	let avg = $derived(data.map(a => {
 		if (!a.length) return 0;
 		return Math.ceil(a.reduce((x, y) => x + y, 0) / a.length);
@@ -90,10 +91,10 @@
 			})
 			.finally(() => (ld = 0));
 	};
-	const line = (color, w, h, ys, ...d) => {
+	const line = (color, w, h, ys, gmin, gmax, ...d) => {
 		if (!d.length) return;
-		const dmin = Math.min(...d);
-		const dmax = Math.max(...d);
+		const dmin = gmin;
+		const dmax = gmax;
 		const sy = 20;
 		const sx = 65;
 		const ry = (h - 40) / (dmax - dmin || 1);
@@ -129,7 +130,7 @@
 
 		// Y-axis labels for this line on the left edge
 		if (ys) {
-			ctx.fillStyle = color;
+			ctx.fillStyle = Y_AXIS_COLOR;
 			ctx.font = '11px sans-serif';
 			ctx.textAlign = 'right';
 			const labels = [];
@@ -149,6 +150,17 @@
 		ctx = cvs.getContext('2d');
 		const [w, h] = [cvs.width, cvs.height];
 		ctx.clearRect(0, 0, w, h);
+		// compute global min/max across all checked datasets
+		let gmin = Infinity, gmax = -Infinity;
+		for (let i = 0; i < 4; i++) {
+			if (ck[i] && data[i].length) {
+				const mn = Math.min(...data[i]);
+				const mx = Math.max(...data[i]);
+				if (mn < gmin) gmin = mn;
+				if (mx > gmax) gmax = mx;
+			}
+		}
+		if (!isFinite(gmin)) return;
 		// find first checked line to show its Y labels
 		let firstIdx = -1;
 		for (let i = 0; i < 4; i++) {
@@ -156,7 +168,7 @@
 		}
 		data.forEach((a, i) => {
 			if (ck[i] && a.length) {
-				line(cors[i], w, h - 20, i === firstIdx, ...a);
+				line(cors[i], w, h - 20, i === firstIdx, gmin, gmax, ...a);
 			}
 		});
 	}, 100);
