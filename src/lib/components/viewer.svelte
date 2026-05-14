@@ -285,10 +285,10 @@
 		:global {
 			& > p::first-letter {
 				padding-left: 2em;
+			}
 
-				* {
-					text-indent: 0;
-				}
+			& > p * {
+				text-indent: 0;
 			}
 
 			a {

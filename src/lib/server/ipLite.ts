@@ -1,170 +1,192 @@
-import fs from 'fs';
-import { IP2Location } from 'ip2location-nodejs';
-import { sys } from '$lib/server/index';
 import { resolve } from 'path';
-import https from 'node:https';
-import { findEntry, mkdir, saveEntry, unZip } from '$lib/server/utils';
+import { sys } from '$lib/server/index';
+import { mkdir, findEntry, saveEntry, unZip } from '$lib/server/utils';
+import { IP2Location } from 'ip2location-nodejs';
 
 const ip2location = new IP2Location();
 const db_type = 'DB3';
 const url = `https://www.ip2location.com/download/?token=$TOKEN&file=${db_type}LITEBINIPV6`;
-const maxSize = 1024 * 1024 * 100;
 
-let cancel = new Function();
+let currentAbortController: AbortController | null = null;
 let curDownLoad = '';
-
-async function update() {
-	clearTimeout(t);
-	const dir = sys.ipLiteDir;
-	const tk = sys.ipLiteToken;
-	if (!tk || !dir) return 0;
-	const err = mkdir(dir);
-	if (err) {
-		console.log(err);
-		return 0;
-	}
-	const name = `ip_${Date.now()}`;
-	const latest = resolve(dir, name);
-	if (curDownLoad && curDownLoad === tk) return 0;
-	else {
-		cancel?.();
-	}
-
-	const query = (url: string) => {
-		let siz = 0;
-		return new Promise<Uint8Array>((resolve, reject) => {
-			const data = [] as Uint8Array[];
-			const req = https.get(url, (res) => {
-				if (res.statusCode && res.statusCode > 300 && res.statusCode < 400) {
-					const lo = res.headers.location;
-					if (lo) return query(lo).then(resolve).catch(reject);
-				}
-				res.on('data', (d) => {
-					siz += d.length;
-					if (siz > maxSize) {
-						const err = new Error('max size limit');
-						req.destroy(err);
-						return reject(err);
-					}
-					data.push(d);
-				});
-				res.on('error', reject);
-				res.on('end', () => {
-					const bin = new Uint8Array(siz);
-					let s = 0;
-					data.forEach((a) => {
-						bin.set(a, s);
-						s += a.length;
-					});
-					resolve(bin);
-				});
-			});
-			cancel = () => {
-				curDownLoad = '';
-				req.destroy(new Error('new task'));
-			};
-		});
-	};
-
-	curDownLoad = tk;
-	const link = tk && url.replace('$TOKEN', tk);
-	downloading = 1;
-	return await query(link)
-		.then((data) => {
-			try {
-				ip2location.close();
-				fs.readdirSync(dir).forEach((a) => {
-					if (/^ip_\d+$/.test(a)) {
-						try {
-							fs.unlinkSync(resolve(dir, a));
-						} catch (e) {
-							console.log('unlink error:', a, '\n', e?.toString());
-						}
-					}
-				});
-				const files = unZip(data);
-				const file = findEntry(files, `IP2LOCATION-LITE-${db_type}.IPV6.BIN`);
-				if (file) {
-					return saveEntry(file, latest).then(() => {
-						load(latest);
-						return 1;
-					});
-				}
-			} catch (e) {
-				console.log(e);
-				return 0;
-			}
-		})
-		.catch((e) => {
-			console.log(e);
-			return 0;
-		})
-		.finally(() => {
-			downloading = 0;
-		});
-}
-
-let t: ReturnType<typeof setTimeout>;
-let geoIp: typeof ip2location | null;
-const load = (file?: string) => {
-	if (!file) return;
-	ip2location.close();
-	ip2location.open(file);
-	if (ip2location.loadBin()) {
-		geoIp = ip2location;
-	} else console.log('fail load bin!');
-};
-export const geoClose = () => {
-	if (geoIp) {
-		geoIp.close();
-		geoIp = null;
-		ip2location.close();
-	}
-};
 let downloading = 0;
-export const geoStatue = () => (downloading ? '-' : (geoIp && geoIp.getDatabaseVersion()) || '');
-export const loadGeoDb = () => {
-	const dir = sys.ipLiteDir && resolve(sys.ipLiteDir);
-	if (dir) {
-		const next = 1e3 * 3600 * 24 * 14;
-		let delay = 0;
-		const err = mkdir(dir);
-		if (err) {
-			console.log(err);
-		} else {
-			const n = Date.now();
-			const file = fs.readdirSync(dir).reduce((a, b) => {
-				if (/^ip_\d+/.test(b)) {
-					const c = +b.replace(/^ip_/, '');
-					if (c < a) return c;
+let dbVersion = '';
+let dbFile: string | undefined;
+let updateTimer: ReturnType<typeof setTimeout>;
+let isInitialized = false;
+
+const DB_FILENAME_PATTERN = /^ip2location_lite_(\d+)\.bin$/i;
+
+// === HTTP helper ===
+const httpGet = async (url: string, signal?: AbortSignal) => {
+	const res = await fetch(url, { signal, redirect: 'follow' });
+	if (!res.ok) throw new Error(`HTTP ${res.status}`);
+	return new Uint8Array(await res.arrayBuffer());
+};
+
+// === Core state ===
+export const geoStatue = () => (downloading ? '-' : dbVersion || '');
+
+export const geoClose = () => {
+	dbVersion = '';
+	dbFile = undefined;
+};
+
+// === DB loading ===
+const load = (file: string) => {
+	if (typeof file !== 'string') return;
+	try {
+		ip2location.open(file);
+		dbVersion = new Date().toISOString().slice(0, 10);
+		dbFile = file;
+	} catch (e) {
+		console.error('IP2Location load error:', e);
+		dbVersion = '';
+		dbFile = undefined;
+	}
+};
+
+// === Local file management ===
+const findLocalFile = async (dir: string): Promise<string | undefined> => {
+	try {
+		let latest = 0;
+		let latestFile = '';
+		const glob = new Bun.Glob('ip2location_lite_*.bin');
+
+		for await (const f of glob.scan({ cwd: dir, absolute: false })) {
+			const m = f.match(DB_FILENAME_PATTERN);
+			if (m) {
+				const ts = +m[1];
+				if (ts > latest) {
+					latest = ts;
+					latestFile = f;
 				}
-				return a;
-			}, n);
-			if (file && file !== n) {
-				load(resolve(dir, `ip_${file}`));
-				delay = next - Date.now() + file;
 			}
 		}
-		setTimeout(() => {
-			update().finally(() => {
-				t = setTimeout(update, next);
-			});
-		}, delay);
+		return latestFile || undefined;
+	} catch {
+		return undefined;
 	}
 };
 
-export const ipInfo = (ip: string) => {
-	if (!ip) return {};
-	if (geoIp) {
-		const r = geoIp.getAll(ip);
-		return {
-			short: r.countryShort,
-			full: r.countryLong,
-			region: r.region,
-			city: r.city
-		};
+const cleanOldFiles = async (dir: string, keepFile: string) => {
+	try {
+		const glob = new Bun.Glob('ip2location_lite_*.bin');
+		for await (const f of glob.scan({ cwd: dir, absolute: false })) {
+			if (f !== keepFile) {
+				try {
+					await Bun.file(resolve(dir, f)).delete();
+				} catch (e: unknown) {
+					console.error('unlink error:', f, e?.toString());
+				}
+			}
+		}
+	} catch (e) {
+		console.error('clean old files error:', e);
 	}
-	return {};
+};
+
+// === Update logic ===
+const checkUpdate = async () => {
+	const tk = sys.ipLiteToken;
+	const dir = sys.ipLiteDir;
+	if (!tk || !dir) return;
+
+	const err = mkdir(dir);
+	if (err) {
+		console.error(err);
+		return;
+	}
+
+	if (curDownLoad && curDownLoad === tk) return;
+
+	currentAbortController?.abort();
+	currentAbortController = new AbortController();
+
+	curDownLoad = tk;
+	downloading = 1;
+
+	try {
+		console.log('ip2location: downloading DB...');
+		const downloadUrl = url.replace('$TOKEN', tk);
+		const data = await httpGet(downloadUrl, currentAbortController.signal);
+
+		const name = `ip2location_lite_${Date.now()}.bin`;
+		const latest = resolve(dir, name);
+
+		// IP2Location returns a ZIP containing the BIN file
+		const files = await unZip(data);
+		const file = findEntry(files, `IP2LOCATION-LITE-${db_type}.IPV6.BIN`);
+		if (!file) {
+			console.error('ip2location: BIN file not found in downloaded ZIP');
+			return;
+		}
+
+		await saveEntry(file, latest);
+		await cleanOldFiles(dir, name);
+		load(latest);
+		console.log('ip2location: DB updated successfully');
+	} catch (e: unknown) {
+		if ((e as Error)?.name !== 'AbortError') {
+			console.error('ip2location update error:', e);
+		}
+	} finally {
+		downloading = 0;
+		curDownLoad = '';
+		currentAbortController = null;
+	}
+};
+
+export const loadGeoDb = async () => {
+	const dir = sys.ipLiteDir && resolve(sys.ipLiteDir);
+	if (!dir) return;
+
+	const err = mkdir(dir);
+	if (err) {
+		console.error(err);
+		return;
+	}
+
+	if (updateTimer) {
+		clearTimeout(updateTimer);
+	}
+
+	if (!isInitialized) {
+		const existing = await findLocalFile(dir);
+		if (existing) {
+			load(resolve(dir, existing));
+		}
+		isInitialized = true;
+	}
+
+	const checkInterval = 1e3 * 3600 * 48; // 48 hours
+
+	const scheduleCheck = async () => {
+		await checkUpdate();
+		updateTimer = setTimeout(scheduleCheck, checkInterval);
+	};
+
+	if (!dbFile) {
+		scheduleCheck();
+	} else {
+		updateTimer = setTimeout(scheduleCheck, checkInterval);
+	}
+};
+
+// === IP query ===
+export const ipInfo = (ip: string) => {
+	if (!ip || !dbFile) return {};
+	try {
+		const r = ip2location.getAll(ip);
+		return {
+			short: r.countryShort || '',
+			full: r.countryLong || '',
+			region: r.region || '',
+			city: r.city || ''
+		};
+	} catch {
+		return {};
+	}
 };
 
 export const ipInfoStr = (ip: string) => {

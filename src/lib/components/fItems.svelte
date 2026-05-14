@@ -1,31 +1,8 @@
 <script>
 	import FileIcon from './fileIcon.svelte';
 	import { getExt } from '$lib/utils';
-	import { tweened } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
 
-	let m = $state(null);
-	let sh = $state(0);
-	let x = 15,
-		y = 15;
-	let pos = tweened(
-		{ x: 15, y: 15 },
-		{
-			duration: 300,
-			easing: cubicOut
-		}
-	);
-	const changePosition = async () => {
-		if (!m) return;
-		const { offsetLeft, offsetTop } = m;
-		sh = 1;
-		if (offsetLeft === x && offsetTop === y) return;
-		y = offsetTop;
-		x = offsetLeft;
-		await pos.update(() => ({ x, y }));
-	};
 	let {
-		trigger,
 		file = $bindable({
 			id: 0,
 			name: '',
@@ -35,25 +12,11 @@
 		act = false,
 		onclick = () => {}
 	} = $props();
-	let pic = $state('');
-	if (file.type.startsWith('image/')) {
-		pic = `/res/_${file.id}`;
-	}
 
-	$effect(() => {
-		trigger;
-		changePosition();
-	});
+	let pic = $derived(file.type?.startsWith('image/') ? `/res/_${file.id}` : '');
 </script>
 
-<div class="m" bind:this={m}></div>
-<div
-	class="a m"
-	style:transform={`translate3d(${$pos.x}px,${$pos.y}px,0)`}
-	class:act
-	onclick={onclick}
-	class:sh
->
+<div class="file-card" class:act onclick={onclick}>
 	<div class="p" style:background-image={pic ? `url(${pic})` : ''}>
 		{#if !pic}
 			<div class="f">
@@ -65,6 +28,17 @@
 </div>
 
 <style lang="scss">
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: scale(0.95);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
 	.f {
 		position: absolute;
 		left: 0;
@@ -76,23 +50,16 @@
 		justify-content: center;
 	}
 
-	.m {
-		pointer-events: none;
+	.file-card {
+		pointer-events: all;
 		width: 100px;
 		height: 124px;
 		margin: 5px;
-	}
-
-	.a {
-		pointer-events: all;
-		opacity: 0;
-		left: 0;
-		top: 0;
-		position: absolute;
-		transition: 0.3s linear opacity;
 		cursor: pointer;
 		background: var(--bg0);
 		border: 1px solid transparent;
+		box-sizing: border-box;
+		animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
 		&:hover {
 			border-color: var(--darkgrey);
@@ -102,10 +69,6 @@
 			border-color: #5679a8;
 			box-shadow: rgba(0, 0, 0, 0.2) 1px 2px 4px;
 		}
-	}
-
-	.sh {
-		opacity: 1;
 	}
 
 	.p {

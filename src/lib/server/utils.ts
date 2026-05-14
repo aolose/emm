@@ -1,8 +1,6 @@
 import { NULL } from './enum';
 import { contentType, dataType, encryptIv, encTypeIndex, geTypeIndex, permission } from '../enum';
 import Pinyin from 'tiny-pinyin';
-import cookie from 'cookie';
-import type { SerializeOptions } from 'cookie';
 import type { Api, ApiData, ApiName, Class, Model, Obj } from '../types';
 import apis from './api';
 import {
@@ -23,7 +21,6 @@ import {
 import { keyPool } from './crypto';
 import { getPrimaryKey } from './model/decorations';
 import { db, server, sys } from './index';
-import crypto from 'crypto';
 import fs from 'fs';
 import { resolve, dirname } from 'path';
 import type { RequestEvent } from '@sveltejs/kit';
@@ -31,11 +28,8 @@ import { clientMap } from '$lib/server/cache';
 import { Client } from '$lib/server/client';
 import type { TokenInfo } from '$lib/server/model';
 import { writable, type Unsubscriber, type Writable } from 'svelte/store';
-import fse from 'fs-extra';
 import type { Post } from '$lib/server/model';
 import type { SQLQueryBindings } from 'bun:sqlite';
-import archiver from 'archiver';
-import { iter, type ZipItem } from 'but-unzip';
 
 export const is_dev = process.env.NODE_ENV !== 'production';
 export const sqlVal = (values: SQLQueryBindings[]) =>
@@ -331,7 +325,6 @@ const countMap = new Map<string, number>();
 export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: object = {}) => {
 	const a = new M() as Obj<T>;
 	const ks = new Set<keyof T>([...(Object.keys(o).filter((n) => n in a) as (keyof T)[])]);
-
 	Object.keys(a).forEach((k) => {
 		const o = k as keyof T;
 		if (typeof a[o] !== 'function') delete a[o];
@@ -339,10 +332,8 @@ export const model = <T extends Model>(M: Class<T> | FunctionConstructor, o: obj
 	return Object.assign(a, filter(o, [...ks]));
 };
 
-export const md5 = (buf: Buffer | string) => {
-	const hashSum = crypto.createHash('md5');
-	hashSum.update(buf);
-	return hashSum.digest('hex');
+export const md5 = (buf: Uint8Array | string) => {
+	return Bun.CryptoHasher.hash('md5', buf, 'hex');
 };
 
 export const mkdir = (dir: string) => {
@@ -358,7 +349,7 @@ export const mkdir = (dir: string) => {
 	}
 };
 
-export const saveFile = (name: string | number, dir: string, buf: Buffer) => {
+export const saveFile = (name: string | number, dir: string, buf: Uint8Array) => {
 	dir = dir && resolve(dir);
 	if (!fs.existsSync(dir)) {
 		fs.mkdirSync(dir, { recursive: true });
@@ -422,7 +413,6 @@ export const setKey = <T extends Model>(o: Obj<T>, key: string, value: unknown) 
 
 export let sysStatue = 0;
 const chk = () => {
-	// step1 config db
 	const dbc = resolve('.dbCfg');
 	let dbOk = false;
 	if (fs.existsSync(dbc)) {
@@ -439,11 +429,8 @@ const chk = () => {
 		} else dbOk = true;
 	}
 	if (!dbOk) return 0;
-	// step2 set admin:
 	if (!sys?.admUsr || !sys?.admPwd) return 1;
-	// step3 set upload
 	if (!sys?.uploadDir || !sys?.thumbDir) return 2;
-	// step4 set geo ip
 	if (sys?.ipLiteToken === null) return 3;
 	return 9;
 };
@@ -453,29 +440,25 @@ export const checkStatue = () => {
 };
 
 export const getClientAddr = (event: RequestEvent) => {
-	return event.locals.ip
+	return event.locals.ip;
 };
 
 export const getCookie = (req: Request, key: string) => {
 	const c = req.headers.get('cookie');
 	if (c) {
-		const ck = cookie.parse(c);
-		return ck[key];
+		return new Bun.CookieMap(c).get(key);
 	}
 };
-const ckCfg = {
+const ckCfg: Bun.CookieInit = {
 	httpOnly: true,
 	sameSite: 'strict',
 	path: '/'
-} as SerializeOptions;
+};
 
 export const delCookie = (resp: Response, key: string) => {
 	resp.headers.append(
 		'set-cookie',
-		cookie.serialize(key, '', {
-			...ckCfg,
-			expires: new Date(0)
-		})
+		new Bun.Cookie(key, '', { ...ckCfg, expires: new Date(0) }).serialize()
 	);
 };
 
@@ -483,7 +466,7 @@ export const setCookie = (resp: Response, key: string, value: string, expires?: 
 	if (value === undefined) throw new Error('undefined cookie value!');
 	const cf = { ...ckCfg };
 	if (expires) cf.expires = new Date(expires);
-	resp.headers.append('set-cookie', cookie.serialize(key, value, cf));
+	resp.headers.append('set-cookie', new Bun.Cookie(key, value, cf).serialize());
 };
 
 export const getClient = (req: Request) => {
@@ -547,7 +530,10 @@ export const mv = (from: string, to: string) => {
 	}
 	if (!err && mv === 2) {
 		try {
-			fse.moveSync(from, to, { overwrite: true });
+			if (fs.existsSync(to)) {
+				fs.rmSync(to, { recursive: true, force: true });
+			}
+			fs.renameSync(from, to);
 		} catch (e) {
 			console.error(e);
 			if (e instanceof Error) {
@@ -558,17 +544,31 @@ export const mv = (from: string, to: string) => {
 	return err;
 };
 
-export const blogExp = () => {
+export const blogExp = async () => {
 	const dbc = '.dbCfg';
-	const dbpath = fs.readFileSync(dbc).toString();
-	const zip = archiver('zip');
+	const dbpath = await Bun.file(dbc).text();
 	console.log('zip start', Date.now());
-	zip.append(Buffer.from(dbpath), { name: dbc });
-	zip.append(db.db.serialize(), { name: 'd' });
-	zip.directory(sys.uploadDir, 'u');
-	zip.directory(sys.thumbDir, 't');
-	zip.finalize().then(Boolean);
-	return zip;
+
+	const entries: Record<string, string | Uint8Array> = {};
+	entries[dbc] = dbpath;
+	entries['d.gz'] = Bun.gzipSync(new Uint8Array(db.db.serialize()));
+
+	const addDirEntries = (dir: string, prefix: string) => {
+		const p = resolve(dir);
+		if (fs.existsSync(p)) {
+			for (const f of fs.readdirSync(p, { recursive: true }) as string[]) {
+				const fp = resolve(p, f);
+				if (fs.statSync(fp).isFile()) {
+					entries[prefix + '/' + f] = new Uint8Array(fs.readFileSync(fp));
+				}
+			}
+		}
+	};
+	addDirEntries(sys.uploadDir, 'u');
+	addDirEntries(sys.thumbDir, 't');
+
+	const zip = new Bun.Archive(entries);
+	return zip.bytes();
 };
 
 export const printSql = (sql: string, value: unknown[]) => {
@@ -576,12 +576,31 @@ export const printSql = (sql: string, value: unknown[]) => {
 	return is_dev ? sql.replace(/\?/g, () => `${value[i++]}`) : '';
 };
 
-type Entry = ZipItem;
+type Entry = { filename: string; read: () => Promise<Uint8Array> };
 
-export const unZip = (bytes: Uint8Array) => {
+import { unzipSync } from 'fflate';
+
+export const unArchive = async (bytes: Uint8Array) => {
+	const archive = new Bun.Archive(bytes);
+	const filesMap = await archive.files();
 	const files: Entry[] = [];
-	for (const entry of iter(bytes)) {
-		files.push(entry);
+	for (const [filename, file] of filesMap) {
+		files.push({
+			filename,
+			read: async () => new Uint8Array(await file.arrayBuffer())
+		});
+	}
+	return files;
+};
+
+export const unZip = async (bytes: Uint8Array) => {
+	const decompressed = unzipSync(bytes);
+	const files: Entry[] = [];
+	for (const [filename, data] of Object.entries(decompressed)) {
+		files.push({
+			filename,
+			read: async () => data
+		});
 	}
 	return files;
 };
@@ -590,7 +609,7 @@ export const saveEntry = async (entry: Entry, rename: string) => {
 	const filename = resolve(rename || entry.filename);
 	mkdir(dirname(filename));
 	const bytes = await entry.read();
-	fs.writeFileSync(filename, bytes, { flag: 'w+' });
+	await Bun.write(filename, bytes);
 };
 
 export const findEntry = (files: Entry[], f: string) => files.find((a) => a.filename === f);

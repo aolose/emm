@@ -1,7 +1,6 @@
 import { req } from './req';
 import { contentType, dataType, encryptIv, encTypeIndex, getIndexType, method } from './enum';
 import type { ApiBodyData, ApiData, fView, Model, Obj, reqOption, reqParams, Timer } from './types';
-import { iter } from 'but-unzip';
 
 import { goto } from '$app/navigation';
 import { confirm, status, statueSys } from '$lib/store';
@@ -819,16 +818,14 @@ export const getErr = (e: Error | { data: { message: string } | string }) => {
 	return e.message;
 };
 
-export const restoreVerify = async (data: ArrayBuffer) => {
-	const files = iter(new Uint8Array(data));
-	let noC = true;
-	let noD = true;
-	for (const { filename } of files) {
-		if (filename === '.dbCfg') noC = false;
-		else if (filename === 'd') noD = false;
+/**
+ * Quick client-side check: verify file is non-empty.
+ * The actual content validation is done server-side during restore.
+ */
+export const restoreVerify = (data: ArrayBuffer) => {
+	if (!data || data.byteLength === 0) {
+		return 'invalid file';
 	}
-	if (noC) return '.dbCfg is missing';
-	if (noD) return 'database is missing';
 };
 
 export const clientRestore =

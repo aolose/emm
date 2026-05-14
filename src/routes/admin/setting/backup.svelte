@@ -43,7 +43,7 @@
 				type="file"
 				onchange={up}
 				onclick={(e) => (e.target.value = '')}
-				accept="application/zip"
+				accept="application/x-tar"
 			/>
 			restore
 			<span class="icon i-upload"></span>

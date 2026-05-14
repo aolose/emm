@@ -140,7 +140,7 @@
 		{#if $statueSys > 1}
 			<button class="up">
 				<input
-					accept="application/zip"
+					accept="application/x-tar"
 					type="file"
 					onclick={(e) => (e.target.value = '')}
 					onchange={ch}

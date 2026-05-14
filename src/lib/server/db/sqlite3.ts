@@ -313,6 +313,9 @@ export class DB {
 				this.db.exec(createTable(s));
 			}
 		}
+		// performance indexes for LIKE queries on Res table
+		this.db.exec('CREATE INDEX IF NOT EXISTS idx_res_name ON Res(name)');
+		this.db.exec('CREATE INDEX IF NOT EXISTS idx_res_type ON Res(type)');
 	}
 
 	tables() {

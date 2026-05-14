@@ -1,12 +1,12 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import fs from 'fs';
 import { resp } from '$lib/server/utils';
 import { resolve } from 'path';
 import { sys, db } from '$lib/server';
 import { Res } from '$lib/server/model';
 import { contentType } from '$lib/enum';
 import { eTags } from '$lib/server/cache';
-export const GET: RequestHandler = ({ params, request }) => {
+
+export const GET: RequestHandler = async ({ params, request }) => {
 	const tag = request.headers.get('If-None-Match');
 	if (tag && eTags.has(tag)) {
 		return new Response(null, { status: 304 });
@@ -22,14 +22,16 @@ export const GET: RequestHandler = ({ params, request }) => {
 		res.id = +p;
 		const r = db.get(res);
 		if (r) {
-			let f: Buffer | undefined;
+			let f: Uint8Array | undefined;
 			const u = resolve(sys.uploadDir, p);
 			const t = resolve(sys.thumbDir, p);
 			if (isThumb && r.thumb) {
-				if (fs.existsSync(t)) f = fs.readFileSync(t);
+				const tf = Bun.file(t);
+				if (await tf.exists) f = await tf.bytes();
 			}
 			if (!f) {
-				if (fs.existsSync(u)) f = fs.readFileSync(u);
+				const uf = Bun.file(u);
+				if (await uf.exists) f = await uf.bytes();
 			}
 			const desc = 'content-disposition';
 			const h = new Headers({
@@ -46,7 +48,7 @@ export const GET: RequestHandler = ({ params, request }) => {
 			} else {
 				h.set(desc, `inline; filename=${name}`);
 			}
-			return new Response(f, {
+			return new Response(f as BodyInit, {
 				headers: h
 			});
 		}

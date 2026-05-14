@@ -1,57 +1,51 @@
-<!-- @migration-task Error while migrating Svelte code: can't migrate `let cfg = {};` to `$state` because there's a variable named status.
-     Rename the variable and try again or migrate by hand. -->
 <script>
 	import Pg from './pg.svelte';
 	import Item from './fItems.svelte';
 	import { confirm, fileManagerStore, filesUpload, getProgress, upFiles } from '$lib/store';
 	import { api, req } from '$lib/req';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
+	import { flip } from 'svelte/animate';
 	import { slidLeft } from '../transition';
 	import { fade, slide } from 'svelte/transition';
 	import { delay, trim, watch } from '$lib/utils';
 
 	const getRes = api('res');
 	let total = $state(1);
-	let status = $state(0);
+	let dragStatus = $state(0);
 	let cfg = $state({
 		show: false,
-		limit: 0
+		limit: 0,
+		type: ''
 	});
 
 	let ls = $state([]);
-	let loading = false;
+	let loading = $state(false);
 	let { w } = $props();
 	const size = 15;
-	let trigger = $state(0);
 
 	function ok() {
 		cfg.resolve?.([...selected]);
 		fileManagerStore.set({});
-		selected = new Set();
+		selected = [];
 	}
 
 	function cancel() {
 		cfg.reject?.();
 		fileManagerStore.set({});
-		selected = new Set();
+		selected = [];
 	}
 
 	function load(page = 1) {
-		loading = 1;
+		loading = true;
+		ls = [];
 		const o = { page, size, type: cfg.type };
 		if (sc) o.name = sc;
 		getRes(o).then(({ total: t, items }) => {
-			loading = 0;
+			loading = false;
 			total = t;
 			ls = items;
-			const n = [...selected];
-			items.forEach((f) => {
-				const idx = n.findIndex((a) => a.id === f.id);
-				if (idx !== -1) n[idx] = f;
-			});
-			selected = new Set(n);
-			rePosition();
+			selected = [];
 		});
 	}
 
@@ -63,7 +57,7 @@
 	});
 
 	function upload(e) {
-		status = 0;
+		dragStatus = 0;
 		let files = e.type === 'drop' ? e.dataTransfer.files : e.target.files;
 		const tp = cfg.type;
 		if (tp && files?.length)
@@ -72,27 +66,19 @@
 			filesUpload(files, (f) => {
 				if (ls.find((a) => a.id === f.id)) return;
 				ls = [f].concat(ls);
-				rePosition();
 			});
 	}
 
-	function rePosition() {
-		tick().then(() => {
-			trigger++;
-		});
-	}
-
 	function del() {
-		const s = selected.size;
+		const s = selected.length;
 		confirm(`Are you sure to delete the selected file${s > 1 ? 's' : ''}?`)
 			.then(() => {
-				return req('res', [...selected].map((a) => a.id).join(), { method: 2 });
+				return req('res', selected.map((a) => a.id).join(), { method: 2 });
 			})
 			.then((a) => {
 				if (a) {
-					ls = ls.filter((a) => !selected.has(a));
-					rePosition();
-					selected = new Set();
+					ls = ls.filter((a) => !selected.includes(a));
+					selected = [];
 				}
 			});
 	}
@@ -111,22 +97,21 @@
 		});
 	});
 	let limit = $derived(cfg.limit);
-	let selected = $state(new Set());
-	let ss = $derived(`${selected.size}${limit ? ' / ' + limit : ''}`);
+	let selected = $state([]);
+	let ss = $derived(`${selected.length}${limit ? ' / ' + limit : ''}`);
 
 	const sel = (f) => () => {
-		if (selected.has(f)) selected.delete(f);
-		else {
-			const n = [...selected];
-			if (limit && limit === selected.size) {
-				n.shift();
+		const index = selected.indexOf(f);
+		if (index > -1) {
+			selected.splice(index, 1);
+		} else {
+			if (limit && selected.length === limit) {
+				selected.shift();
 			}
-			n.push(f);
-			selected = new Set(n);
+			selected.push(f);
 		}
-		selected = new Set(selected);
 	};
-	const sty = `--w:${w}%`;
+	const sty = $derived(`--w:${w}%`);
 	let sc = $state('');
 	const ws = watch(sc);
 	$effect(() => {
@@ -142,11 +127,11 @@
 		style={sty}
 		transition:fade|global
 		class="a"
-		class:dr={status === 1}
-		ondragover={(e) => { e.preventDefault(); status = 1; }}
+		class:dr={dragStatus === 1}
+		ondragover={(e) => { e.preventDefault(); dragStatus = 1; }}
 		ondrop={(e) => { e.preventDefault(); upload(e); }}
-		ondragleave={(e) => { e.preventDefault(); status = 0; }}
-		ondragend={(e) => { e.preventDefault(); status = 0; }}
+		ondragleave={(e) => { e.preventDefault(); dragStatus = 0; }}
+		ondragend={(e) => { e.preventDefault(); dragStatus = 0; }}
 		onclick={cancel}
 	>
 		<div class="dp" onclick={(e) => e.stopPropagation()} />
@@ -156,13 +141,13 @@
 					<button class="icon i-add" title="upload files">
 						<input type="file" accept={cfg.type || '*/*'} onchange={upload} multiple />
 					</button>
-					{#if selected.size}
+					{#if selected.length}
 						<button transition:slidLeft class="icon i-ok" title="use selected" onclick={ok} />
 						<button
 							transition:slidLeft
 							class="icon i-no"
 							title="clear selected"
-							onclick={() => (selected = new Set())}
+							onclick={() => (selected = [])}
 						/>
 						<button transition:slidLeft class="icon i-del" title="delete selected" onclick={del} />
 						<span class="v">{ss}</span>
@@ -176,14 +161,19 @@
 				<button class="icon i-close" onclick={cancel} />
 			</div>
 			<div class="ls">
-				{#each ls as file, index (file.id)}
-					<Item
-						bind:file={ls[index]}
-						{trigger}
-						act={selected.has(ls[index])}
-						onclick={sel(ls[index])}
-					/>
-				{/each}
+				{#if !loading}
+					{#key ls}
+						{#each ls as file, index (file.id)}
+							<div animate:flip={{ duration: 300 }} out:fade={{ duration: 150 }}>
+								<Item
+									bind:file={ls[index]}
+									act={selected.includes(file)}
+									onclick={sel(file)}
+								/>
+							</div>
+						{/each}
+					{/key}
+				{/if}
 			</div>
 			{#if $upFiles.length}
 				<div class="u" transition:slide|global>
@@ -199,7 +189,7 @@
 				</div>
 			{/if}
 			<div class="p">
-				<Pg go={load} {total} />
+				<Pg go={load} {total} {loading} />
 			</div>
 		</div>
 	</div>
@@ -300,7 +290,6 @@
 	}
 
 	.icon {
-		background: var(--darkgrey);
 		font-size: 18px;
 		padding: 10px;
 		border: none;
