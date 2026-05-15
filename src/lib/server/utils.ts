@@ -167,9 +167,8 @@ export const setNull = <T extends object>(o: T, key: string) => {
 };
 
 export const getReqJson = async (req: Request) => {
-	const shareKey = getShareKey(req);
-	const decBuf = shareKey && (await decryptReq(req, shareKey, true));
-	if (decBuf) return decBuf.json();
+	const ct = req.headers.get('content-type') || '';
+	if (ct.includes('application/json')) return await req.json();
 	return await req.json();
 };
 
@@ -515,7 +514,7 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 	return '';
 }
 
-export const debugMode = 0;
+export const debugMode = 1;
 export const sqlFields = (n: number) => ',?'.repeat(n).slice(1);
 
 export const mv = (from: string, to: string) => {
