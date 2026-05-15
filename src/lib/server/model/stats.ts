@@ -6,10 +6,12 @@ const { INT, TEXT } = NULL;
 export class RPU {
 	@primary
 	id = INT;
-	date = INT;
+	t = INT;
 	type = INT;
-	pv = INT;
-	uv = INT;
+	r = INT;
+	p = INT;
+	u = INT;
+	ur = INT;
 }
 
 export class RPUCache {
