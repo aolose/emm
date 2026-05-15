@@ -293,11 +293,18 @@ export const encryptHeader = (req: { headers: Headers }) => req.headers.get(encr
 export const hasOwnProperty = (target: object, p: string) =>
 	Object.prototype.hasOwnProperty.call(target, p);
 
-export const delay = (fn: (...params: never[]) => void, ms = 0) => {
-	let timer: number;
+export const delay = (fn: (...params: never[]) => void, ms = 0, maxMs = 0) => {
+	let timer: ReturnType<typeof setTimeout>;
+	let firstCall = 0;
 	return (...params: unknown[]) => {
+		const now = Date.now();
+		if (!firstCall) firstCall = now;
 		clearTimeout(timer);
-		timer = setTimeout(fn, ms, ...params);
+		const wait = maxMs ? Math.min(ms, firstCall + maxMs - now) : ms;
+		timer = setTimeout(() => {
+			firstCall = 0;
+			fn(...params as never[]);
+		}, Math.max(0, wait));
 	};
 };
 export const filter = <T extends object>(o: Obj<T>, keys: (keyof T)[], nullAble = true) => {
@@ -406,10 +413,27 @@ export function idGen() {
 	return `_${_id++}`;
 }
 
+// Per-instance password salt. Set from statue endpoint response.
+// Empty means legacy mode (hardcoded salt + SHA-256).
+let _pwdSalt = '';
+export const setPwdSalt = (salt: string) => {
+	_pwdSalt = salt;
+};
+
 export async function enc(str: string) {
-	const vi = `2321aSDWas!@#$`;
+	const LEGACY_SALT = '2321aSDWas!@#$';
+	const vi = _pwdSalt || LEGACY_SALT;
+	const algo = _pwdSalt ? 'SHA-512' : 'SHA-256';
 	const d = data2Buf(str + vi) || new Uint8Array([]);
-	return buf2x(await subtle.digest('sha-256', d));
+	return buf2x(await subtle.digest(algo, d));
+}
+
+// Legacy hash for backward-compatible login verification.
+// Uses the original hardcoded salt + SHA-256 regardless of _pwdSalt.
+export async function legacyEnc(str: string) {
+	const LEGACY_SALT = '2321aSDWas!@#$';
+	const d = data2Buf(str + LEGACY_SALT) || new Uint8Array([]);
+	return buf2x(await subtle.digest('SHA-256', d));
 }
 
 export function goBack(root = '/posts') {

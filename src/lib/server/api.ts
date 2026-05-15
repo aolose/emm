@@ -78,7 +78,7 @@ const mimeLookup = (name: string): string => {
 	}[ext]) || '';
 };
 
-import { arrFilter, clipWords, diffObj, enc, filter, getPain, trim } from '$lib/utils';
+import { arrFilter, clipWords, diffObj, enc, legacyEnc, filter, getPain, trim } from '$lib/utils';
 import { contentType, dataType, permission } from '$lib/enum';
 import { NULL } from '$lib/server/enum';
 import { dirname, resolve } from 'path';
@@ -254,7 +254,8 @@ const apis: APIRoutes = {
 					sys: sysStatue,
 					key: sys?.seoKey,
 					desc: sys?.seoDesc,
-					title: sys?.blogName
+					title: sys?.blogName,
+					pwdSalt: sys?.pwdSalt
 				},
 				[],
 				false
@@ -398,7 +399,13 @@ const apis: APIRoutes = {
 				return resp(q[1], 403);
 			}
 			const [u, p, v] = await getReqJson(req);
-			if ((await enc(sys.admUsr + v)) === u && (await enc(sys.admPwd + v)) === p) {
+			// Try current hash first; fall back to legacy if salt not yet migrated.
+			// Legacy hashes are upgraded only on explicit password change (setAdmin).
+			let ok = (await enc(sys.admUsr + v)) === u && (await enc(sys.admPwd + v)) === p;
+			if (!ok && !sys.pwdSalt) {
+				ok = (await legacyEnc(sys.admUsr + v)) === u && (await legacyEnc(sys.admPwd + v)) === p;
+			}
+			if (ok) {
 				const res = resp('');
 				setToken(req, res, genToken(Admin));
 				q[0] = 0;
@@ -806,9 +813,7 @@ await Bun.write(resolve('.dbCfg'), p);
 						(kk === 'ipLiteToken' && o[kk] !== sys[kk])
 					)
 						loadGeo = 1;
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					sys[kk] = n;
+					(sys as Record<string, unknown>)[kk] = n;
 				}
 			}
 			if (loadGeo && sys.ipLiteDir && sys.ipLiteToken) {

@@ -27,7 +27,7 @@ export const restore = async (data: ArrayBuffer) => {
 	const compressed = await dbFile.read();
 	await Bun.write(tmp, Bun.gunzipSync(compressed) as unknown as Uint8Array);
 	let [thumbDir, uploadDir] = ['', ''];
-	console.log('save db files');
+
 	try {
 		const db = new Database(tmp);
 		const { thumbDir: t, uploadDir: u } =

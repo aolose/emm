@@ -104,7 +104,7 @@ export class DB {
 
 	constructor(path = 'db') {
 		this.db = new Database(path);
-		process.on('exit', () => this.db.close());
+		process.once('exit', () => this.db.close());
 	}
 
 	private select(one: boolean, o: Obj<Model>, where = '', values: SQLQueryBindings[]) {
@@ -148,16 +148,16 @@ export class DB {
 		const s = `select *
                from ${o.name}`;
 		const d = order.length ? ` order by ${order.join()}` : '';
-		const l = ` limit ${size * (page - 1)},${size}`;
+		const offset = size * (page - 1);
 		let w = '';
 		let p = [] as SQLQueryBindings[];
 		if (where && where.length) {
 			w = ` where ${where[0]}`;
 			p = where?.slice(1) || [];
 		}
-		const sql = s + w + d + l;
+		const sql = `${s}${w}${d} limit ?,?`;
 		Log.debug('sql', printSql(sql, p));
-		const r = this.db.prepare(sql).all(...p) as T[];
+		const r = this.db.prepare(sql).all(...p, offset, size) as T[];
 		return after ? after(r) : r;
 	}
 
@@ -195,9 +195,7 @@ export class DB {
 		const r = this.db.prepare(sql).run(...values);
 		if (pk && r.changes === 1 && !kv) {
 			const t = typeof kv;
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			o[pk] =
+			(o as Record<string, SQLQueryBindings>)[pk] =
 				t === 'number' || t === 'bigint'
 					? r.lastInsertRowid
 					: (
@@ -207,7 +205,7 @@ export class DB {
                    from ${table}
                    where rowid = ?`
 								)
-								.get(r.lastInsertRowid) as { [key: string]: bigint }
+								.get(r.lastInsertRowid) as Record<string, SQLQueryBindings>
 						)[pk];
 		}
 		return r;

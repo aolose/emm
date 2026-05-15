@@ -82,7 +82,7 @@ const saveCacheToStorage = () => {
 	}
 	localStorage.setItem(cacheData, JSON.stringify(d));
 	localStorage.setItem(cacheKey, k.join());
-	localStorage.setItem(cacheBegin, e.join());
+	localStorage.setItem(cacheExpire, e.join());
 	localStorage.setItem(cacheBegin, now + '');
 };
 

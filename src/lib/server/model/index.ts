@@ -227,6 +227,7 @@ export class System {
 	pageCss = TEXT;
 	robots = TEXT;
 	maxFireLogs = INT;
+	pwdSalt = TEXT;
 }
 
 export class User {
@@ -282,63 +283,47 @@ export class FWRule {
 						}
 					}
 				});
-		rates.sort((a, b) => b[1] / b[0] - a[1] / a[0]);
-		if (!rates.length) rates.push([1, 3600 * 1e3]);
-		// 1  - hit
-		// -1 - over range
-		// 0  - go on
 		return [
-			Math.max(...rates.map((a) => a[1])),
+			Math.max(...rates.map((a) => a[1]), 0),
 			(times: number, dur: number) => {
-				for (const [t, d] of rates) {
-					if (dur < d && times >= t) {
-						return 1;
+				let n = 0;
+				for (const [count, window] of rates) {
+					if (dur <= window && times >= count) {
+						return count;
 					}
 				}
-				return 0;
+				return n;
 			}
 		];
+	}
+
+	onSave() {
+		// nop
+	}
+
+	onDel() {
+		// nop
+	}
+
+	toResp() {
+		return;
 	}
 }
 
 export class FwResp {
 	@primary
 	id = INT;
-	status = INT;
-	@unique
 	name = TEXT;
 	headers = TEXT;
-	body = TEXT;
+	status = INT;
 	createAt = INT;
 
 	toResp() {
-		const body = this.body === '-' || !this.body ? null : this.body;
-		const hds = this.headers === '-' || !this.headers ? '' : this.headers;
-		return new Response(body, {
-			status: this.status || 403,
-			headers: new Headers(str2Hds(hds))
-		});
-	}
-}
-
-export class BlackList {
-	@primary
-	id = INT;
-	ip = TEXT;
-	_geo?: string;
-	createAt = INT;
-	mark = TEXT;
-	respId = INT;
-
-	toRule() {
-		return model(FWRule, {
-			active: true,
-			id: -this.id,
-			ip: this.ip,
-			mark: this.mark || 'blacklist',
-			createAt: this.createAt,
-			respId: this.respId
-		}) as FWRule;
+		const hs = new Headers(str2Hds(this.headers));
+		if (hs.has('location')) {
+			return new Response('', { status: this.status || 302, headers: hs });
+		}
+		return new Response('', { status: this.status || 403, headers: hs });
 	}
 }
 
@@ -347,59 +332,47 @@ export class FwLog {
 	id = INT;
 	ip = TEXT;
 	path = TEXT;
-	method = TEXT;
 	headers = TEXT;
-	save = INT;
-	mark = TEXT;
-	_city = '';
 	status = INT;
+	method = TEXT;
+	createAt = INT;
+	mark = TEXT;
+	geo = TEXT;
 }
 
-export class TokenInfo {
+export class BlackList {
 	@primary
 	id = INT;
-	expire = INT;
-	code? = TEXT;
-	times? = INT;
-	used? = INT;
-	type = INT;
-	value? = TEXT;
-	share? = INT;
-
-	set _reqs(reqs: Set<number> | undefined) {
-		if (reqs === undefined) this.value = TEXT;
-		else this.value = [...reqs].join();
-	}
-
-	get _reqs(): Set<number> | undefined {
-		return this.value
-			? new Set(
-					this.value
-						.split(',')
-						.map((a) => +a)
-						.filter((a) => a)
-				)
-			: undefined;
-	}
-
+	ip = TEXT;
+	mark = TEXT;
 	createAt = INT;
+	respId = INT;
+	_geo?: string;
+
+	toRule(): FWRule {
+		const r = new FWRule();
+		r.ip = this.ip;
+		r.mark = this.mark;
+		r.respId = this.respId || -1;
+		return r;
+	}
 }
 
 export class RPU {
 	@primary
 	id = INT;
-	r = INT;
-	ur = INT;
-	p = INT;
-	u = INT;
-	t = INT;
+	date = INT;
 	type = INT;
+	pv = INT;
+	uv = INT;
 }
 
 export class RPUCache {
 	@primary
 	id = INT;
-	value = TEXT;
+	pid = INT;
+	type = INT;
+	createAt = INT;
 }
 
 export class PostRead {
@@ -408,6 +381,17 @@ export class PostRead {
 	pid = INT;
 	ip = TEXT;
 	ua = TEXT;
-	_geo?: string;
 	createAt = INT;
+	_geo?: string;
+}
+
+export class TokenInfo
+{
+	@primary
+	id = INT;
+	type = INT;
+	_reqs?: Set<number>;
+	createAt = INT;
+	expire = INT;
+	times = INT;
 }

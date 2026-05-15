@@ -354,9 +354,9 @@ export const saveToDb = (r: log) => {
 			.prepare(
 				`DELETE
                    FROM FwLog
-                   WHERE id in (SELECT id FROM FwLog LIMIT ${del})`
+                   WHERE id in (SELECT id FROM FwLog LIMIT ?)`
 			)
-			.run();
+			.run(del);
 	}
 };
 
@@ -426,7 +426,7 @@ function matchRuleValue(value: string, target: string) {
 				hit = true;
 			}
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	} else {
 		hit = target.toLowerCase().includes(value.toLowerCase());
