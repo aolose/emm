@@ -40,7 +40,7 @@
 		} else {
 			err = 0;
 			ld = 1;
-			req('setAdmin', { pwd: pw, usr: un }, { encrypt: true })
+			req('setAdmin', { pwd: pw, usr: un })
 				.then(() => {
 					un = pw = pw2 = '';
 					err = 0;
