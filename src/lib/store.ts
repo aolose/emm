@@ -33,14 +33,19 @@ export const selectFile = (limit = 0, type = '') => {
 			resolve,
 			reject
 		});
-	}).catch(() => void 0);
+	}).catch((err) => {
+		// User cancelled or closed the file selector
+		if (err !== 'cancelled') console.error('selectFile error:', err);
+	});
 };
 
 export const confirm = (msg: string, ok = 'ok', cancel = 'cancel') => {
 	return new Promise((resolve, reject) => {
 		const cfg = { ...confirmCfg, ok, cancel, resolve, reject, show: true, text: msg };
 		confirmStore.set(cfg);
-	}).catch(() => void 0);
+	}).catch((err) => {
+		if (err !== 'cancelled') console.error('confirm error:', err);
+	});
 };
 
 export const getProgress = (f: fileInfo) => {

@@ -1,4 +1,5 @@
 import { saveCache, apiLoad } from '$lib/req';
+import { setPwdSalt } from '$lib/utils';
 import { method } from '$lib/enum';
 import { statueSys, status, h, navStore } from '$lib/store';
 import type { headInfo } from '$lib/types';
@@ -35,7 +36,7 @@ const jump = async (nav?: BeforeNavigate) => {
 };
 
 let loaded = 0;
-type saveData = headInfo & { statue: number; sys: number };
+type saveData = headInfo & { statue: number; sys: number; pwdSalt?: string };
 let cacheData = {} as saveData;
 let sys = 0;
 let stu = 0;
@@ -73,6 +74,7 @@ export const load = apiLoad('statue', undefined, {
 		if (browser) {
 			statueSys.set(sys);
 			status.set(stu);
+			if (cacheData.pwdSalt) setPwdSalt(cacheData.pwdSalt);
 		} else {
 			await su(stu);
 		}

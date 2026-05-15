@@ -224,7 +224,7 @@ const dBProxyErrs = new WeakMap<Model, Writable<Error | number>>();
 export const throwDbProxyError = async <T extends Model>(o: T): Promise<T> => {
 	const err = dBProxyErrs.get(o);
 	let un: Unsubscriber | undefined;
-	let t = setTimeout(Number);
+	let t: ReturnType<typeof setTimeout> | undefined;
 	if (err) {
 		t = setTimeout(() => {
 			err.set(0);
@@ -275,7 +275,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
 		ori = { ...Object.assign(o, changes, ch) };
 		changes = {} as T;
 	};
-	const save = delay(saveSync, 100);
+	const save = delay(saveSync, 100, 1000);
 	if (load) {
 		const k = o[pk];
 		let u = 0;
@@ -432,6 +432,10 @@ const chk = () => {
 	if (!sys?.admUsr || !sys?.admPwd) return 1;
 	if (!sys?.uploadDir || !sys?.thumbDir) return 2;
 	if (sys?.ipLiteToken === null) return 3;
+	// Generate per-instance password salt if not present
+	if (!sys.pwdSalt) {
+		sys.pwdSalt = crypto.randomUUID();
+	}
 	return 9;
 };
 export const checkStatue = () => {
@@ -547,7 +551,7 @@ export const mv = (from: string, to: string) => {
 export const blogExp = async () => {
 	const dbc = '.dbCfg';
 	const dbpath = await Bun.file(dbc).text();
-	console.log('zip start', Date.now());
+
 
 	const entries: Record<string, string | Uint8Array> = {};
 	entries[dbc] = dbpath;
