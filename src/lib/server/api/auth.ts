@@ -120,6 +120,7 @@ const apis: APIRoutes = {
 			if (!vres.ok) return resp(formatErrors(vres.errors), 400);
 			const { usr, pwd } = vres.data;
 			if (usr && pwd) {
+				if (sys.pwdSalt) setPwdSalt(sys.pwdSalt);
 				sys.admUsr = await enc(usr as string);
 				sys.admPwd = await enc(pwd as string);
 				const res = resp('');
