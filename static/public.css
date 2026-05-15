@@ -2,22 +2,45 @@ a {
 	text-decoration: none;
 }
 :root {
-	--green: #3ab744;
-	--orange: orange;
-	--green-h: #40d14c;
+	/* === 语义色 === */
+	--c-primary: #3b82f6;
+	--c-primary-h: #60a5fa;
+	--c-success: #22c55e;
+	--c-warning: #f59e0b;
+	--c-danger: #ef4444;
+
+	/* === 文字层级 === */
+	--t-primary: rgba(235, 240, 255, 0.92);
+	--t-secondary: rgba(180, 195, 220, 0.7);
+	--t-muted: rgba(130, 150, 180, 0.45);
+
+	/* === 背景层级 (从深到浅) === */
+	--bg-deepest: #080b12;  /* 最深 overlay / 暗底色 */
+	--bg-sidebar: #0b0f18;  /* 侧边栏 */
+	--bg-page: #0d101a;     /* 页面内容区基底 */
+	--bg-card: #131822;     /* 卡片 / 列表面板 */
+	--bg-hover: #1b2130;    /* 悬停 / 高亮 */
+	--bg-separator: rgba(255, 255, 255, 0.06);
+
+	/* === 兼容旧变量 (重新映射) === */
+	--bg0: #080b12;
+	--bg1: #131822;
+	--bg2: #0d101a;
+	--bg3: #0c0f18;
+	--bg4: #1b2130;
+	--bg5: #181d2a;
+	--bg6: #080b12;
+	--bg7: #0b0f18;
+
+	/* === 旧功能色 (保留兼容) === */
+	--green: #22c55e;
+	--green-h: #4ade80;
 	--darkgrey: #374354;
 	--darkgrey-h: #54617c;
-	--blue: #2596e3;
-	--yellow: yellow;
+	--blue: #3b82f6;
+	--orange: #f59e0b;
+	--yellow: #facc15;
 	--pink: #f11b86;
-	--bg0: #0e1118;
-	--bg1: #0e0f12;
-	--bg2: #101319;
-	--bg3: #0e1015;
-	--bg4: #20232c;
-	--bg5: #1a1e26;
-	--bg6: #0c0d0f;
-	--bg7: #0d1117;
 }
 
 * {
@@ -124,4 +147,16 @@ span {
 	transition: 0.3s ease-in-out;
 	pointer-events: none;
 	animation: ss 0.3s linear infinite;
+}
+
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 48px 24px;
+	color: var(--t-muted);
+	font-size: 14px;
+	text-align: center;
+	gap: 8px;
 }

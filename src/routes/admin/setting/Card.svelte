@@ -22,7 +22,7 @@
 	.a {
 		display: flex;
 		margin: 9px;
-		border-radius: 16px;
+		border-radius: 14px;
 		background: rgba(40, 44, 55, 0.1);
 		flex-direction: column;
 		padding-bottom: 20px;

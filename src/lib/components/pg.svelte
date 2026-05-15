@@ -95,9 +95,6 @@
 </nav>
 
 <style lang="scss">
-  :root {
-    --act: #65b9e7;
-  }
   nav {
     align-items: center;
     justify-content: center;
@@ -107,7 +104,7 @@
     }
     .act {
       color: antiquewhite;
-      background: var(--act);
+      background: var(--c-primary);
       &.loading {
         animation: pageloading 1.2s ease-in-out infinite;
       }

@@ -33,7 +33,7 @@
 
 			&:hover {
 				color: #fff;
-				background: var(--blue);
+				background: var(--c-primary);
 				border-radius: 5px;
 			}
 		}
@@ -50,7 +50,7 @@
 				&.act,
 				&:hover {
 					color: #fff;
-					background: var(--blue);
+					background: var(--c-primary);
 					border-radius: 50px;
 				}
 			}
@@ -110,7 +110,15 @@
 			background: none;
 		}
 		.v {
-			display: none;
+			display: flex;
+			align-items: center;
+			padding: 0 12px 0 0;
+			width: auto;
+			button {
+				margin: 0;
+				height: 36px;
+				width: 36px;
+			}
 		}
 		.u {
 			flex: 1;
@@ -130,7 +138,7 @@
 
 					&.act,
 					&:hover {
-						background: rgba(90, 110, 180, 0.2);
+						background: rgba(59, 130, 246, 0.25);
 						color: #fff;
 						border-radius: 0;
 					}

@@ -1,6 +1,7 @@
 <script>
 	import P from './panel.svelte';
 	import T from './item.svelte';
+	import { slideSty } from '$lib/slide';
 	import FileWin from '$lib/components/fileManager.svelte';
 	import { req } from '$lib/req';
 	import { onMount } from 'svelte';
@@ -53,7 +54,7 @@
 		allTags();
 	});
 	$effect(() => {
-		sty = $small && `transform:translate3d(${(-view * 100) / 2}%,0,0)`;
+		sty = slideSty(view, 2, $small);
 		name = trim(name);
 		ok = name && !ls.find((a) => a.name === name);
 	});
@@ -83,6 +84,9 @@
 				{#each ls as i}
 					<T d={i} ck={ss(i)} sel={sel === i} {del} />
 				{/each}
+				{#if ls.length === 0}
+					<div class="empty-state">No tags. Create one above.</div>
+				{/if}
 			</div>
 		</div>
 		<P bind:setTag close={() => (view = 0)} />
@@ -99,7 +103,7 @@
 		display: flex;
 		background: var(--bg3);
 		@include s() {
-			transition: 0.3s ease-in-out;
+			transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 			width: 200%;
 		}
 	}
@@ -147,7 +151,7 @@
 		background: var(--bg1);
 		width: 100%;
 		max-width: 600px;
-		border-radius: 32px;
+		border-radius: 14px;
 		padding-bottom: 24px;
 		display: flex;
 		flex-direction: column;

@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { req } from '$lib/req';
+	import { slideSty } from '$lib/slide';
 	import Itm from './item.svelte';
 	import Pg from '$lib/components/pg.svelte';
 	import Ck from '$lib/components/check.svelte';
@@ -26,7 +27,7 @@
 	let filter = $state({});
 	const lsWatch = watch(tab, p, filter);
 	$effect(() => {
-		sty = $small ? `transform:translate3d(${(-view * 100) / 2}%,0,0)` : '';
+		sty = slideSty(view, 2, $small);
 		lsWatch(
 			() => {
 				lastL = 0;
@@ -142,6 +143,9 @@
 					{#each ls as d (d[0] + d[1] + d[2] + tab)}
 						<Itm {ck} data={d} {sel} isDb={tab} />
 					{/each}
+					{#if ls.length === 0 && !ld}
+						<div class="empty-state">No log entries.</div>
+					{/if}
 				</div>
 				<Pg {total} page={p} go={loadLog} />
 			</div>
@@ -259,7 +263,7 @@
 	}
 
 	.h {
-		height: 88px;
+		height: 64px;
 		align-items: center;
 		background: var(--bg2);
 		display: flex;
@@ -301,7 +305,7 @@
 		display: flex;
 		@include s() {
 			width: 200%;
-			transition: 0.3s ease-in-out;
+			transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		}
 	}
 

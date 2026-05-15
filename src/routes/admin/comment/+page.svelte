@@ -1,6 +1,7 @@
 <script>
 	import Select from '$lib/components/select.svelte';
 	import { cmStatus, method } from '$lib/enum';
+	import { slideSty } from '$lib/slide';
 	import Item from './item.svelte';
 	import Pg from '$lib/components/pg.svelte';
 	import Ck from '$lib/components/check.svelte';
@@ -60,7 +61,7 @@
 		go();
 	});
 	$effect(() => {
-		sty = $small && `transform:translate3d(${(-view * 100) / 2}%,0,0)`;
+		sty = slideSty(view, 2, $small);
 		ftWatch(() => {
 			go();
 		}, status);
@@ -107,6 +108,9 @@
 								/>
 							</div>
 						{/each}
+						{#if ls.length === 0 && !ld}
+							<div class="empty-state">No comments found.</div>
+						{/if}
 					</div>
 				</div>
 				<div class="p">
@@ -145,7 +149,7 @@
 		height: 100%;
 		background: var(--bg2);
 		display: flex;
-		transition: 0.3s ease-in-out;
+		transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		@include s() {
 			width: 200%;
 			.a {
@@ -187,11 +191,11 @@
 		flex-direction: column;
 		background: var(--bg1);
 		margin: 12px 0;
-		border-radius: 32px;
+		border-radius: 14px;
 	}
 
 	.t {
-		height: 88px;
+		height: 64px;
 		padding: 0 25px;
 		display: flex;
 		align-items: center;

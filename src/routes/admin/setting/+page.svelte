@@ -8,7 +8,6 @@
 	import P from './puv.svelte';
 	import { onMount } from 'svelte';
 	import { load } from './sys';
-	import { logout } from '$lib/store';
 
 	onMount(load);
 </script>
@@ -22,32 +21,14 @@
 		<A />
 		<R />
 		<G />
-		<div class="o">
-			<button onclick={logout}>Sign out</button>
-		</div>
 	</div>
 </div>
 
 <style lang="scss">
 	@use '../../../lib/break' as *;
 
-	.o {
-		display: none;
-		padding: 40px 20px;
-		justify-content: center;
-		@include s() {
-			display: flex;
-		}
-
-		button {
-			border-radius: 111px;
-			width: 200px;
-			filter: hue-rotate(60deg);
-		}
-	}
-
 	.a {
-		border-radius: 16px;
+		border-radius: 14px;
 		background: var(--bg2);
 		max-width: 800px;
 		padding: 1px;

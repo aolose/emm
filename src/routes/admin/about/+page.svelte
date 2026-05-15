@@ -91,7 +91,7 @@
 		@include s() {
 			z-index: 10;
 			flex: none;
-			transition: 0.3s transform ease-in-out;
+			transition: 0.3s transform cubic-bezier(0.4, 0, 0.2, 1);
 			transform: translate3d(100%, 0, 0);
 			position: fixed;
 			inset: 0;
@@ -130,7 +130,7 @@
 
 	.b {
 		flex-shrink: 0;
-		height: 88px;
+		height: 64px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;

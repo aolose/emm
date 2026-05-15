@@ -120,6 +120,9 @@
 					{#each $posts as p (p._ || p.id)}
 						<PItem {p} {sel} />
 					{/each}
+					{#if $posts.length === 0 && !ld}
+						<div class="empty-state">No posts yet. Click + to create one.</div>
+					{/if}
 					<Top style={topSty} />
 				</div>
 				<div class="p">
@@ -161,14 +164,14 @@
 	}
 
 	.m {
-		transition: 0.3s ease-in-out;
+		transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		display: flex;
 		height: 100%;
 	}
 
 	.a {
 		margin: 12px 0;
-		border-radius: 32px;
+		border-radius: 14px;
 		width: 400px;
 		background: var(--bg1);
 		display: flex;
@@ -241,7 +244,7 @@
 
 	@include s() {
 		.m {
-			transition: 0.3s ease-in-out;
+			transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 			width: 300%;
 			height: 100%;
 		}
