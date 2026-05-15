@@ -4,7 +4,7 @@ import {
 	checkStatue, debugMode, delCookie, getClient, getIp, getReqJson,
 	model, resp, setToken, sysStatue,
 } from '../utils';
-import { enc, legacyEnc, filter } from '$lib/utils';
+import { enc, legacyEnc, filter, setPwdSalt } from '$lib/utils';
 import { validate, formatErrors } from '$lib/server/validate';
 import { contentType, dataType, permission } from '$lib/enum';
 import { genToken } from '$lib/server/token';
@@ -74,6 +74,7 @@ const apis: APIRoutes = {
 			const [u, p, v] = body;
 			if (typeof u !== 'string' || typeof p !== 'string' || (typeof v !== 'string' && typeof v !== 'number'))
 				return resp('invalid request', 400);
+			if (sys.pwdSalt) setPwdSalt(sys.pwdSalt);
 			let ok = (await enc(sys.admUsr + v)) === u && (await enc(sys.admPwd + v)) === p;
 			if (!ok && !sys.pwdSalt) {
 				ok = (await legacyEnc(sys.admUsr + v)) === u && (await legacyEnc(sys.admPwd + v)) === p;
