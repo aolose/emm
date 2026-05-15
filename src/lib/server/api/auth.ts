@@ -72,7 +72,7 @@ const apis: APIRoutes = {
 			const body = await getReqJson(req);
 			if (!Array.isArray(body) || body.length !== 3) return resp('invalid request', 400);
 			const [u, p, v] = body;
-			if (typeof u !== 'string' || typeof p !== 'string' || typeof v !== 'string')
+			if (typeof u !== 'string' || typeof p !== 'string' || (typeof v !== 'string' && typeof v !== 'number'))
 				return resp('invalid request', 400);
 			let ok = (await enc(sys.admUsr + v)) === u && (await enc(sys.admPwd + v)) === p;
 			if (!ok && !sys.pwdSalt) {
