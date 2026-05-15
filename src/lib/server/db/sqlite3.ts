@@ -5,12 +5,11 @@ import { getConstraint, getPrimaryKey, pkMap, primaryKey } from '../model/decora
 import type { Class, dbHooks, Model, Obj } from '$lib/types';
 import { randNum } from '$lib/utils';
 
-const tables = Object.values(models);
 const INTEGER = 'INTEGER';
 const TEXT = 'TEXT';
 
-// model
-type M = (typeof tables)[number];
+// model — constructor type union, derived lazily from the models namespace
+type M = (typeof models)[keyof typeof models];
 
 export function getColumnType(v: SQLQueryBindings) {
 	let type = 'BLOB';
@@ -252,7 +251,7 @@ export class DB {
 		};
 		const exist = new Set(this.tables());
 		let migration = 0;
-		for (const s of tables) {
+		for (const s of Object.values(models)) {
 			const name = s.name;
 			if (exist.has(name)) {
 				const info = {} as { [key: string]: columnInfo };

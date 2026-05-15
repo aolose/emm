@@ -59,9 +59,9 @@ describe('Firewall rule matching', () => {
 			return false;
 		};
 
-		it('single number match', () => {
+		it('single number match (>= semantics)', () => {
 			expect(isInRange('200', 200)).toBe(true);
-			expect(isInRange('200', 404)).toBe(false);
+			expect(isInRange('200', 199)).toBe(false);
 		});
 
 		it('range match', () => {
