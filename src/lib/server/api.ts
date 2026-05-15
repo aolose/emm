@@ -79,6 +79,7 @@ const mimeLookup = (name: string): string => {
 };
 
 import { arrFilter, clipWords, diffObj, enc, legacyEnc, filter, getPain, trim } from '$lib/utils';
+import { validate, formatErrors } from '$lib/server/validate';
 import { contentType, dataType, permission } from '$lib/enum';
 import { NULL } from '$lib/server/enum';
 import { dirname, resolve } from 'path';
@@ -398,7 +399,11 @@ const apis: APIRoutes = {
 				sv();
 				return resp(q[1], 403);
 			}
-			const [u, p, v] = await getReqJson(req);
+			const body = await getReqJson(req);
+			if (!Array.isArray(body) || body.length !== 3) return resp('invalid request', 400);
+			const [u, p, v] = body;
+			if (typeof u !== 'string' || typeof p !== 'string' || typeof v !== 'string')
+				return resp('invalid request', 400);
 			// Try current hash first; fall back to legacy if salt not yet migrated.
 			// Legacy hashes are upgraded only on explicit password change (setAdmin).
 			let ok = (await enc(sys.admUsr + v)) === u && (await enc(sys.admPwd + v)) === p;
@@ -743,7 +748,9 @@ await Bun.write(resolve('.dbCfg'), p);
 			const isAdm = cli?.ok(Admin);
 			if (!isAdm && (!sys || (sys.admUsr && sys.admPwd))) return resp('', 401);
 			const d = await getReqJson(req);
-			const { usr, pwd } = d;
+			const vres = validate(d, { usr: 'string', pwd: 'string' });
+			if (!vres.ok) return resp(formatErrors(vres.errors), 400);
+			const { usr, pwd } = vres.data;
 			if (usr && pwd) {
 				sys.admUsr = await enc(usr);
 				sys.admPwd = await enc(pwd);
