@@ -99,4 +99,133 @@ describe('Firewall rule matching', () => {
 			expect(limiter(100, 1)).toBe(0);
 		});
 	});
+
+	describe('getUaCountThreshold', () => {
+		it('parses numeric string', () => {
+			const rule = new FWRule();
+			rule.uaCount = '5';
+			expect(rule.getUaCountThreshold()).toBe(5);
+		});
+
+		it('defaults to 1 for empty', () => {
+			const rule = new FWRule();
+			expect(rule.getUaCountThreshold()).toBe(1);
+		});
+
+		it('defaults to 1 for zero or negative', () => {
+			const rule = new FWRule();
+			rule.uaCount = '0';
+			expect(rule.getUaCountThreshold()).toBe(1);
+			rule.uaCount = '-3';
+			expect(rule.getUaCountThreshold()).toBe(1);
+		});
+	});
+
+	describe('isInSchedule', () => {
+		const origGetUTCHours = Date.prototype.getUTCHours;
+		function setHour(h: number) {
+			Date.prototype.getUTCHours = () => h;
+		}
+		function restoreHour() {
+			Date.prototype.getUTCHours = origGetUTCHours;
+		}
+
+		it('empty schedule is always active', () => {
+			const rule = new FWRule();
+			expect(rule.isInSchedule()).toBe(true);
+		});
+
+		it('single range hour within', () => {
+			setHour(3);
+			const rule = new FWRule();
+			rule.schedule = '0-6';
+			expect(rule.isInSchedule()).toBe(true);
+			restoreHour();
+		});
+
+		it('single range hour outside', () => {
+			setHour(15);
+			const rule = new FWRule();
+			rule.schedule = '0-6';
+			expect(rule.isInSchedule()).toBe(false);
+			restoreHour();
+		});
+
+		it('boundary values inclusive', () => {
+			const rule = new FWRule();
+			rule.schedule = '10-20';
+			setHour(10);
+			expect(rule.isInSchedule()).toBe(true);
+			setHour(20);
+			expect(rule.isInSchedule()).toBe(true);
+			restoreHour();
+		});
+
+		it('multiple ranges', () => {
+			const rule = new FWRule();
+			rule.schedule = '0-6,18-23';
+			setHour(19);
+			expect(rule.isInSchedule()).toBe(true);
+			setHour(12);
+			expect(rule.isInSchedule()).toBe(false);
+			restoreHour();
+		});
+
+		it('crossing midnight range inside (23-2)', () => {
+			const rule = new FWRule();
+			rule.schedule = '23-2';
+			setHour(23);
+			expect(rule.isInSchedule()).toBe(true);
+			setHour(0);
+			expect(rule.isInSchedule()).toBe(true);
+			setHour(1);
+			expect(rule.isInSchedule()).toBe(true);
+			setHour(2);
+			expect(rule.isInSchedule()).toBe(true);
+			restoreHour();
+		});
+
+		it('crossing midnight range outside (23-2)', () => {
+			const rule = new FWRule();
+			rule.schedule = '23-2';
+			setHour(22);
+			expect(rule.isInSchedule()).toBe(false);
+			setHour(3);
+			expect(rule.isInSchedule()).toBe(false);
+			setHour(12);
+			expect(rule.isInSchedule()).toBe(false);
+			restoreHour();
+		});
+
+		it('mixed same-day and crossing-midnight ranges', () => {
+			const rule = new FWRule();
+			rule.schedule = '8-17,23-2';
+			setHour(10);
+			expect(rule.isInSchedule()).toBe(true);
+			setHour(0);
+			expect(rule.isInSchedule()).toBe(true);
+			setHour(5);
+			expect(rule.isInSchedule()).toBe(false);
+			setHour(20);
+			expect(rule.isInSchedule()).toBe(false);
+			restoreHour();
+		});
+	});
+
+	describe('uaMode and cfUpload defaults', () => {
+		it('uaMode defaults to false', () => {
+			const rule = new FWRule();
+			expect(rule.uaMode).toBe(false);
+		});
+
+		it('cfUpload defaults to false', () => {
+			const rule = new FWRule();
+			expect(rule.cfUpload).toBe(false);
+		});
+
+		it('schedule defaults to TEXT sentinel', () => {
+			const rule = new FWRule();
+			expect(rule.schedule).toBe('-');
+		});
+	});
 });

@@ -53,7 +53,7 @@ const apis: APIRoutes = {
 					key: sys?.seoKey,
 					desc: sys?.seoDesc,
 					title: sys?.blogName,
-					pwdSalt: sys?.pwdSalt
+					pwdSalt: sys?.pwdSalt !== '-' ? sys?.pwdSalt : ''
 				},
 				[],
 				false
@@ -74,9 +74,10 @@ const apis: APIRoutes = {
 			const [u, p, v] = body;
 			if (typeof u !== 'string' || typeof p !== 'string' || (typeof v !== 'string' && typeof v !== 'number'))
 				return resp('invalid request', 400);
-			if (sys.pwdSalt) setPwdSalt(sys.pwdSalt);
+			if (sys.pwdSalt && sys.pwdSalt !== '-') setPwdSalt(sys.pwdSalt);
 			let ok = (await enc(sys.admUsr + v)) === u && (await enc(sys.admPwd + v)) === p;
-			if (!ok && !sys.pwdSalt) {
+			if (!ok) {
+				setPwdSalt('');
 				ok = (await legacyEnc(sys.admUsr + v)) === u && (await legacyEnc(sys.admPwd + v)) === p;
 			}
 			if (ok) {
@@ -120,7 +121,10 @@ const apis: APIRoutes = {
 			if (!vres.ok) return resp(formatErrors(vres.errors), 400);
 			const { usr, pwd } = vres.data;
 			if (usr && pwd) {
-				if (sys.pwdSalt) setPwdSalt(sys.pwdSalt);
+				if (!sys.pwdSalt || sys.pwdSalt === '-') {
+					sys.pwdSalt = crypto.randomUUID();
+				}
+				setPwdSalt(sys.pwdSalt);
 				sys.admUsr = await enc(usr as string);
 				sys.admPwd = await enc(pwd as string);
 				const res = resp('');

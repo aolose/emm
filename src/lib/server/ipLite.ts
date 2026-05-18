@@ -189,13 +189,16 @@ export const ipInfo = (ip: string) => {
 	}
 };
 
-export const ipInfoStr = (ip: string) => {
+export const ipInfoStr = (ip: string, cfCountry?: string) => {
 	const geo = ipInfo(ip);
 	let g0 = '';
 	let g1 = '';
-	if (geo) {
+	if (geo && (geo.region || geo.short)) {
 		g0 = geo.region || geo.short || '';
 		if (geo.full !== g0 && geo.short) g1 = ',' + geo.short;
+	} else if (cfCountry && cfCountry !== 'XX') {
+		// Fallback to Cloudflare CF-IPCountry header when IP2Location DB unavailable
+		g0 = cfCountry;
 	}
 	return g0 + g1;
 };

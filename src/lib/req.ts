@@ -123,12 +123,16 @@ const loadCacheFromStorage = () => {
 };
 loadCacheFromStorage();
 
-let notFirst = false;
 let isLoadFn = false;
+let hydrationDone = false;
+
+/** Call once after SvelteKit hydration completes (root layout onMount).
+ *  Before this point load functions never read cache, avoiding stale SSR data. */
+export const markHydrationDone = () => (hydrationDone = true);
+
 const allowReadCache = () => {
-	const r = !isLoadFn || notFirst;
-	notFirst = true;
-	return r;
+	if (isLoadFn && !hydrationDone) return false; // hydration: always fetch fresh
+	return true;
 };
 const reqCache = (key: string, run: (re?: cacheRecord) => Promise<reqData>): Promise<reqData> => {
 	if (!key) {
@@ -209,6 +213,17 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 					} else return redirect(307, '/login');
 				}
 			}
+			// Turnstile anti-crawl: API request blocked, redirect to challenge page
+			if (r.status === 403 && browser) {
+				try {
+					const body = await r.clone().json();
+					if (body?.tsChallenge && body?.challengeUrl) {
+						window.location.href = body.challengeUrl;
+						// Never resolve — the page will reload after verification
+						return new Promise(() => {});
+					}
+				} catch { /* not JSON, ignore */ }
+			}
 			fal = true;
 			cfg = cfg || {};
 			cfg.cache = 0;
@@ -252,46 +267,28 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 		}
 		if (after) {
 			const r = after(oriParams, ru);
-			if (r) ru = r;
+			if (r !== undefined) ru = r;
 		}
 		return ru;
 	});
 };
-const addGroupKey = (groupKey: string, key: string) => {
-	if (groupKey) {
-		const s = group.get(groupKey) || new Set();
-		s.add(key);
-		group.set(groupKey, s);
+
+const delGroupKey = (key: string) => {
+	for (const [k, s] of group) {
+		if (s.has(key)) {
+			s.delete(key);
+			if (!s.size) group.delete(k);
+		}
 	}
 };
-const delGroupKey = (key: string) => {
-	for (const [k, v] of group) {
-		if (v.has(key)) v.delete(key);
-		if (!v.size) group.delete(k);
-	}
+export const addGroupKey = (groupKey: string, key: string) => {
+	const s = group.get(groupKey) || new Set<string>();
+	s.add(key);
+	group.set(groupKey, s);
 };
 
-export const saveCache = (
-	url: ApiName,
-	params: reqParams | reqData,
-	data: reqData | number,
-	cache?: number,
-	method: MethodNumber = 1,
-	groupKey?: string,
-	customKey?: string
-) => {
-	if (!browser) return;
-	let p: reqParams;
-	let d: reqData;
-	let c: number;
-	if (cache === undefined && typeof data === 'number') {
-		d = params;
-		c = data;
-	} else {
-		p = params as reqParams;
-		d = data;
-		c = cache as number;
-	}
+export const saveCache = (url: string, p: reqParams, method: number, d: reqData, customKey?: string, c?: reqCache, groupKey?: string) => {
+	if (!browser || !reqCacheMap) return;
 	const key = reqKey(url, p, method, customKey);
 	if (groupKey) addGroupKey(groupKey, key);
 	const now = Date.now();

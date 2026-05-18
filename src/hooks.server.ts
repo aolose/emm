@@ -2,7 +2,7 @@ import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { contentType, encryptIv, encTypeIndex } from '$lib/enum';
 import { firewallProcess } from '$lib/server/firewall';
 import { checkStatue, sysStatue } from '$lib/server/utils';
-import { server } from '$lib/server';
+import { server, sys } from '$lib/server';
 
 checkStatue();
 export const handle: Handle = async ({ event, resolve }) => {
@@ -10,6 +10,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// x-forwarded-for format: client, proxy1, proxy2 (RFC 7239)
 	// Also handles space-only separation for non-standard implementations
 	event.locals.ip = rawIp.split(/ *, */)[0].trim();
+	event.locals.cfCountry = event.request.headers.get('cf-ipcountry')?.toUpperCase() || '';
+	event.locals.tsSiteKey = sys?.tsSiteKey || '';
 	if (server.maintain && sysStatue > 1) return new Response('In maintenance', { status: 503 });
 	//add headers to page load
 	const fetch = event.fetch;

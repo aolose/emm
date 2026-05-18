@@ -1,6 +1,6 @@
 // Barrel — merges all domain API modules.
 // Split from a single 916-line file into focused modules:
-//   auth.ts, post.ts, tag.ts, firewall.ts, system.ts, comment.ts, file.ts, backup.ts
+//   auth.ts, post.ts, tag.ts, firewall.ts, system.ts, comment.ts, file.ts, backup.ts, turnstile.ts
 
 import type { APIRoutes } from '../types';
 import authApis from './api/auth';
@@ -11,9 +11,11 @@ import systemApis from './api/system';
 import commentApis from './api/comment';
 import fileApis from './api/file';
 import backupApis from './api/backup';
+import turnstileApis from './api/turnstile';
 
 const apis: APIRoutes = {
 	...authApis,
+	...turnstileApis,
 	...postApis,
 	...tagApis,
 	...firewallApis,

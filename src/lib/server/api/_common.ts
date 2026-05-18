@@ -136,6 +136,9 @@ export const auth = (ps: permission | permission[], fn: RespHandle) => (req: Req
 };
 
 export const sysKs: (keyof import('$lib/server/model').System)[] = [
+	'tsEnabled',
+	'tsSiteKey',
+	'tsVerifyTTL',
 	'blogName',
 	'blogBio',
 	'linkedin',
@@ -146,5 +149,7 @@ export const sysKs: (keyof import('$lib/server/model').System)[] = [
 	'thumbDir',
 	'ipLiteDir',
 	'seoKey',
-	'seoDesc'
+	'seoDesc',
+	'cfAccountId',
+	'cfListId',
 ];

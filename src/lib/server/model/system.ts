@@ -30,6 +30,15 @@ export class System {
 	robots = TEXT;
 	maxFireLogs = INT;
 	pwdSalt = TEXT;
+	// Turnstile anti-crawl
+	tsEnabled = false;
+	tsSiteKey = TEXT;
+	tsSecret = TEXT;
+	tsVerifyTTL = INT; // seconds, default 1800
+	// Cloudflare Lists integration
+	cfAccountId = TEXT;
+	cfApiToken = TEXT;
+	cfListId = TEXT;
 }
 
 export class User {

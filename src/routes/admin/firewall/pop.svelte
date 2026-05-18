@@ -42,19 +42,25 @@
 			d.mark = trim(d.mark, true);
 			d.country = trim(d.country);
 			d.path = trim(d.path);
-			if (tp)
+			if (tp) {
 				d.rate = trim(d.rate || '')
 					.replace(/[^0-9,/]/g, '')
 					.replace(/\/{2,}/g, '/');
+				d.uaCount = trim(d.uaCount || '').replace(/[^0-9]/g, '');
+				d.schedule = trim(d.schedule || '')
+					.replace(/[^0-9,\-]/g, '')
+					.replace(/\-{2,}/g, '-');
+			}
 			d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
+			const isUa = d.uaMode && d.trigger;
 			hasV = trim(
 				tp === 3 ||
-					(d.trigger ? '' : d.ip) ||
-					(d.trigger ? d.status : '') ||
+					(isUa ? (d.path && d.rate) : (d.trigger ? '' : d.ip)) ||
+					(isUa ? '' : (d.trigger ? d.status : '')) ||
 					d.path ||
-					d.headers ||
+					(isUa ? '' : d.headers) ||
 					d.mark ||
-					(d.trigger ? '' : d.country) ||
+					(isUa ? '' : (d.trigger ? '' : d.country)) ||
 					''
 			);
 		} else {
@@ -93,6 +99,11 @@
 							<Ck bind:value={d.trigger}>trigger</Ck>
 						</label>
 					{/if}
+					{#if d.trigger && tp}
+						<label transition:slide|global>
+							<Ck bind:value={d.uaMode}>collection</Ck>
+						</label>
+					{/if}
 					<label transition:slidLeft|global>
 						<Ck bind:value={d.log}>log</Ck>
 					</label>
@@ -108,14 +119,29 @@
 							</label>
 						{/if}
 						<label>
-							<span>path:</span>
+							<span>path{#if d.trigger && d.uaMode}*{/if}:</span>
 							<input bind:value={d.path} />
 						</label>
-						<label>
-							<span>header:</span>
-							<HdsIpt bind:value={d.headers} />
-						</label>
-						{#if d.trigger}
+						{#if !(d.trigger && d.uaMode)}
+							<label>
+								<span>header:</span>
+								<HdsIpt bind:value={d.headers} />
+							</label>
+						{/if}
+						{#if d.trigger && d.uaMode}
+							<label transition:slide|global>
+								<span>ua (regex):</span>
+								<input bind:value={d.ua} placeholder="optional UA regex" />
+							</label>
+							<label transition:slide|global>
+								<span>uaCount:</span>
+								<input bind:value={d.uaCount} placeholder="min distinct IPs" />
+							</label>
+							<label transition:slide|global>
+								<span>rate*:</span>
+								<input bind:value={d.rate} placeholder="min total requests" />
+							</label>
+						{:else if d.trigger}
 							<label transition:slide|global>
 								<span>status:</span>
 								<input bind:value={d.status} />
@@ -137,6 +163,12 @@
 								<input bind:value={d.country} />
 							</label>
 						{/if}
+						{#if d.trigger}
+							<label transition:slide|global>
+								<span>schedule (UTC+0):</span>
+								<input bind:value={d.schedule} placeholder="0-6,18-23,23-2" />
+							</label>
+						{/if}
 					{/if}
 					{#if tp}
 						<label transition:slide|global>
@@ -150,6 +182,11 @@
 								bind:value={d.respId}
 							/>
 						</label>
+						{#if tp !== 3}
+							<label transition:slide|global>
+								<Ck bind:value={d.cfUpload}>CF upload</Ck>
+							</label>
+						{/if}
 					{/if}
 					<label>
 						<span>mark:</span>
