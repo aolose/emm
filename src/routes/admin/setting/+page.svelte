@@ -16,9 +16,9 @@
 
 <div class="m">
 	<div class="a">
+		<P />
 		<Ts />
 		<Cf />
-		<P />
 		<C />
 		<B />
 		<T />
