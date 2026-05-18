@@ -128,6 +128,12 @@
 							<div class="i">
 								<div class="icon i-ip"><span>{r.ip}</span></div>
 								<div class="icon i-geo"><span>{r._geo}</span></div>
+								{#if r.uaMode}
+									<div class="icon i-group"><span>collection</span></div>
+								{/if}
+								{#if r.schedule}
+									<div class="icon i-clock"><span>{r.schedule}</span></div>
+								{/if}
 								{#if r.respId > 0}
 									<div class="icon i-drop"><span>{rspName(r.respId)}</span></div>
 								{/if}
@@ -156,8 +162,14 @@
 							</div>
 						</div>
 					{:else}
-						<div class="u" class:act={r.active} class:tr={r.trigger}>
+						<div class="u" class:act={r.active} class:tr={r.trigger} class:ua={r.uaMode}>
 							<div class="i">
+								{#if r.uaMode}
+									<div class="icon i-group"><span>collection</span></div>
+								{/if}
+								{#if r.schedule}
+									<div class="icon i-clock"><span>{r.schedule}</span></div>
+								{/if}
 								{#if r.respId > 0}
 									<div class="icon i-drop"><span>{rspName(r.respId)}</span></div>
 								{/if}
@@ -182,6 +194,9 @@
 							<div class="r">
 								{#if r.log && !r.trigger}
 									<span class="icon i-log"></span>
+								{/if}
+								{#if r.cfUpload}
+									<span class="icon i-cloud">cf</span>
 								{/if}
 								<span class="m">{r.mark || ''}</span>
 								<button class="icon i-del" onclick={() => del(r.id)}></button>
@@ -412,5 +427,26 @@
 				background: rgba(15, 56, 38, 0.21);
 			}
 		}
+	}
+
+	.ua {
+		&.act {
+			.i {
+				background: rgba(88, 28, 135, 0.21);
+			}
+		}
+	}
+
+	.i-group {
+		color: #a78bfa;
+	}
+
+	.i-clock {
+		color: #f59e0b;
+	}
+
+	.i-cloud {
+		color: #3b82f6;
+		font-size: 12px;
 	}
 </style>

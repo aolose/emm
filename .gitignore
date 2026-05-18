@@ -16,3 +16,8 @@ bun.lock
 /th/
 /ip/
 .deepseek/
+/tests/e2e/playwright/report/
+/tests/e2e/playwright/results/
+/tests/e2e/playwright/test.db
+/tests/e2e/playwright/test.db-shm
+/tests/e2e/playwright/test.db-wal

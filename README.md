@@ -19,7 +19,9 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 - **Markdown Editor** — Full-featured editor with live preview (EasyMDE)
 - **Syntax Highlighting** — Code blocks styled with highlight.js
 - **Comments** — Built-in comment management system
-- **Firewall** — IP-based access control and bot detection
+- **Firewall** — IP-based access control, bot detection, custom rules with time scheduling
+- **UA Collection Detection** — Detect distributed crawlers by grouping IPs sharing the same User-Agent
+- **Cloudflare Integration** — Auto-push blocked IPs to Cloudflare IP Lists for edge-level filtering
 - **Article Management** — Create, edit, and organize markdown posts
 - **Tags** — Categorize content with a tag system
 - **File Management** — Upload and manage static files and images

@@ -6,6 +6,8 @@
 	import C from './backup.svelte';
 	import R from './res.svelte';
 	import P from './puv.svelte';
+	import Ts from './turnstile.svelte';
+	import Cf from './cloudflare.svelte';
 	import { onMount } from 'svelte';
 	import { load } from './sys';
 
@@ -14,6 +16,8 @@
 
 <div class="m">
 	<div class="a">
+		<Ts />
+		<Cf />
 		<P />
 		<C />
 		<B />

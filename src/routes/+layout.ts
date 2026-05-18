@@ -15,9 +15,9 @@ const jump = async (nav?: BeforeNavigate) => {
 	const path = nav?.to?.url.pathname || pathname;
 	const adm = '/admin';
 	const lg = '/login';
-	const cfg = 'config';
+	const cfg = '/config';
 	let rd = '';
-	if (path === cfg && sys > 1) {
+	if (path === cfg && sys === 9) {
 		rd = '/';
 	} else if (stu && path === lg) {
 		rd = adm;
@@ -49,7 +49,7 @@ const ps = async (p: Page) => {
 const save = (a: saveData) => {
 	cacheData = { ...cacheData, ...a };
 	if (!loaded) return;
-	saveCache('statue', undefined, cacheData, cacheTime);
+	saveCache('statue', undefined, method.GET, cacheData, undefined, cacheTime);
 };
 
 const su = async (s: number) => {

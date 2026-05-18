@@ -9,6 +9,7 @@ import { permission } from '$lib/enum';
 import { geoClose, geoStatue, loadGeoDb } from '$lib/server/ipLite';
 import { genPubKey } from '../crypto';
 import { getRuv } from '$lib/server/puv';
+import { validateCfToken, getCfLists, addIpToList } from '$lib/server/cloudflare';
 
 const { Admin, Read } = permission;
 
@@ -32,22 +33,29 @@ const apis: APIRoutes = {
 	setGeo: {
 		post: auth(Admin, async (req) => {
 			const p = await req.text();
-			if (!p) { sys.ipLiteToken = ''; }
+			if (!p) { sys.ipLiteToken = ''; checkStatue(); }
 			else { const [tk, ph] = p.split(','); if (tk) sys.ipLiteToken = tk; if (ph) sys.ipLiteDir = ph; checkStatue(); loadGeoDb(); }
 			return '';
 		})
 	},
 	sys: {
 		get: auth(Read, (req) => {
-			const ks = sysKs;
-			if (getClient(req)?.ok(Admin)) ks.push('ipLiteToken');
+			const ks = [...sysKs] as (keyof System)[];
+			// Only expose sensitive fields to Admin
+			if (getClient(req)?.ok(Admin)) ks.push('ipLiteToken', 'tsSecret', 'cfApiToken');
 			return filter(sys, ks);
 		}),
 		post: auth(Admin, async (req) => {
-			const o = filter(await req.json(), sysKs) as System;
+			const o = filter(await req.json(), [...sysKs, 'tsSecret', 'cfApiToken']) as System;
 			let loadGeo;
 			for (const [k, v] of Object.entries(o)) {
 				const kk = k as keyof System;
+				if (kk === 'tsSecret' || kk === 'cfApiToken') {
+					// Sensitive: stored but never returned in public GET
+					const n = trim(v as string);
+					if (n !== sys[kk]) (sys as Record<string, unknown>)[kk] = n;
+					continue;
+				}
 				const n = trim(v as string);
 				if (n && n !== sys[kk]) {
 					const isGeo = 'ipLiteDir' === kk || 'ipLiteToken' === kk;
@@ -60,6 +68,17 @@ const apis: APIRoutes = {
 				}
 			}
 			if (loadGeo && sys.ipLiteDir && sys.ipLiteToken) { loadGeoDb(); }
+		})
+	},
+	cfValidate: {
+		get: auth(Admin, async () => {
+			const ok = await validateCfToken();
+			return { valid: ok };
+		})
+	},
+	cfLists: {
+		get: auth(Admin, async () => {
+			return await getCfLists();
 		})
 	},
 	home: { get() { return [sys.linkedin, sys.github, sys.blogBio]; } },

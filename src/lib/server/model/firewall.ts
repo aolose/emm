@@ -21,6 +21,13 @@ export class FWRule {
 	trigger = false;
 	status = TEXT;
 	respId = INT;
+	// Collection mode — UA-based distributed crawler detection
+	uaMode = false;
+	ua = TEXT;
+	uaCount = TEXT;
+	// Universal fields
+	schedule = TEXT;
+	cfUpload = false;
 
 	rateLimiter(): [number, (times: number, dur: number) => number] {
 		const rates: [number, number][] = [];
@@ -55,6 +62,27 @@ export class FWRule {
 				return n;
 			}
 		];
+	}
+
+	/** Parse uaCount as a threshold number (default 1). */
+	getUaCountThreshold(): number {
+		const n = parseInt(this.uaCount);
+		return n > 0 ? n : 1;
+	}
+
+	/** Check if current UTC hour is within the schedule ranges.
+	 *  Empty schedule = always active.
+	 *  Format: "0-6,18-23,23-2" (comma-separated hour ranges, 0-23 inclusive).
+	 *  When a > b the range crosses midnight (e.g. 23-2 = 23:00–02:00). */
+	isInSchedule(): boolean {
+		if (!this.schedule || this.schedule === '-') return true;
+		const hour = new Date().getUTCHours();
+		return this.schedule.split(',').some((range) => {
+			const [a, b] = range.split('-').map(Number);
+			if (isNaN(a) || isNaN(b)) return false;
+			if (a > b) return hour >= a || hour <= b; // crossing midnight
+			return hour >= a && hour <= b;
+		});
 	}
 
 	onSave() {}

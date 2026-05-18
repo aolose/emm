@@ -9,6 +9,7 @@ import { ipInfo, ipInfoStr } from '$lib/server/ipLite';
 import { permission } from '$lib/enum';
 import { ruv } from '$lib/server/puv';
 import { error } from '@sveltejs/kit';
+import { isTsVerified, challengeResponse } from '$lib/server/turnstile';
 
 let triggers: FWRule[];
 let rules: FWRule[];
@@ -110,6 +111,7 @@ const hitRule = (
 ) => {
 	const { path = '', ip = '', method = '', headers, status } = log;
 	if (!rule.active) return false;
+	if (!rule.isInSchedule()) return false;
 	if (rule.path && !matchRuleValue(rule.path, path)) return false;
 	if (rule.status && !isInRange(rule.status, status)) return false;
 	if (rule.method) {
@@ -122,13 +124,15 @@ const hitRule = (
 	}
 	if (rule.headers && !matchHeader(rule.headers, headers || new Headers())) return false;
 	if (rule.country) {
-		if (!matchRuleValue(rule.country, ipInfoStr(ip))) return false;
+		const cfCountry = (headers || log.headers)?.get('cf-ipcountry')?.toUpperCase() || undefined;
+		if (!matchRuleValue(rule.country, ipInfoStr(ip, cfCountry))) return false;
 	}
 	if (rule.ip && !matches(ip, rule.ip)) return false;
 	return true;
 };
 export const getFwResp = (id?: number) =>
 	id ? fwResp.get(id)?.toResp() || new Response('', { status: 403 }) : undefined;
+
 export const hitRules = (
 	r: {
 		ip?: string;
@@ -229,6 +233,127 @@ const forEachLogReverse = (fn: (log: log) => boolean | void) => {
 	}
 };
 
+// === UA collection-mode ring buffer ===
+// Stores recent requests for batch analysis by UA-trigger rules.
+// TTL: 5 minutes, max 1000 entries.
+interface UaEntry {
+	ip: string;
+	ua: string;
+	path: string;
+	ts: number;
+}
+const UA_MAX = 1000;
+const UA_TTL = 5 * 60_000; // 5 min
+const uaEntries: UaEntry[] = [];
+
+function recordUaEntry(ip: string, ua: string, path: string): void {
+	const now = Date.now();
+	uaEntries.push({ ip, ua, path, ts: now });
+	// Trim expired
+	const cutoff = now - UA_TTL;
+	while (uaEntries.length && uaEntries[0].ts < cutoff) uaEntries.shift();
+	// Trim overflow
+	while (uaEntries.length > UA_MAX) uaEntries.shift();
+}
+
+/** Analyze one collection-mode trigger rule against the uaEntries window.
+ *  Returns IPs to block (already deduplicated against isIpBlocked). */
+function analyzeUaTrigger(rule: FWRule): string[] {
+	const now = Date.now();
+	const cutoff = now - UA_TTL;
+	// Parse rate as count threshold (collection mode: "10" or "10/300" — take count)
+	const rateCount = parseInt((rule.rate || '').replace(/[^0-9]/g, '')) || 0;
+	if (!rateCount) return [];
+
+	// 1. Filter by path regex (required) and optional UA regex
+	const pathPattern = rule.path;
+	const uaPattern = rule.ua;
+	const matching: UaEntry[] = [];
+	for (let i = uaEntries.length - 1; i >= 0; i--) {
+		const e = uaEntries[i];
+		if (e.ts < cutoff) break; // older entries are before this
+		if (!matchRuleValue(pathPattern, e.path)) continue;
+		if (uaPattern && !matchRuleValue(uaPattern, e.ua)) continue;
+		matching.push(e);
+	}
+
+	// 2. Group by exact UA
+	const groups = new Map<string, { ips: Set<string>; count: number }>();
+	for (const e of matching) {
+		let g = groups.get(e.ua);
+		if (!g) {
+			g = { ips: new Set(), count: 0 };
+			groups.set(e.ua, g);
+		}
+		g.ips.add(e.ip);
+		g.count++;
+	}
+
+	// 3. Check dual thresholds: distinct IPs >= uaCount AND total requests >= rate
+	const uaCountThreshold = rule.getUaCountThreshold();
+	const toBlock = new Set<string>();
+	for (const [, g] of groups) {
+		if (g.ips.size >= uaCountThreshold && g.count >= rateCount) {
+			for (const ip of g.ips) {
+				if (!isIpBlocked(ip)) toBlock.add(ip);
+			}
+		}
+	}
+	return [...toBlock];
+}
+
+// === Lazy scheduler ===
+// Analysis runs 5s after most recent request; stops when idle.
+let _uaTimer: ReturnType<typeof setTimeout> | undefined;
+let _uaPending = false;
+
+function runUaAnalysis(): void {
+	_uaPending = false;
+	if (!triggers) return;
+	const activeUa = triggers.filter(
+		(t) => t.uaMode && t.active && t.isInSchedule()
+	);
+	if (!activeUa.length) return;
+
+	for (const rule of activeUa) {
+		const ips = analyzeUaTrigger(rule);
+		for (const ip of ips) {
+			addBlackListRule({
+				ip,
+				respId: rule.respId,
+				mark: rule.mark,
+				log: rule.log,
+			});
+			// CF upload — async fire-and-forget
+			if (rule.cfUpload && sys.cfAccountId && sys.cfApiToken && sys.cfListId) {
+				pushIpToCf(ip, rule.mark || 'ua-collection').catch((e) =>
+					console.error('[cf] ua push failed:', ip, e)
+				);
+			}
+		}
+	}
+}
+
+function scheduleUaAnalysis(): void {
+	// Only schedule if there is at least one active uaMode trigger
+	if (!triggers || !triggers.some((t) => t.uaMode && t.active)) return;
+	if (_uaPending) return;
+	_uaPending = true;
+	clearTimeout(_uaTimer);
+	_uaTimer = setTimeout(runUaAnalysis, 5000);
+}
+
+let _pushIpToCf: ((ip: string, comment?: string) => Promise<void>) | undefined;
+
+/** Async push IP to Cloudflare list — lazy-loaded to avoid circular imports. */
+async function pushIpToCf(ip: string, comment?: string): Promise<void> {
+	if (!_pushIpToCf) {
+		const mod = await import('$lib/server/cloudflare');
+		_pushIpToCf = mod.addIpToList;
+	}
+	return _pushIpToCf(ip, comment);
+}
+
 const addBlackListRule = (r: { ip: string; respId: number; mark?: string; log?: boolean }) => {
 	if (blackList.find((a) => a.ip === r.ip)) return;
 	const b = model(BlackList, r) as BlackList;
@@ -300,7 +425,7 @@ const blackListCheck = (
 		let matched: FWRule | undefined;
 		forEachLogReverse((log) => {
 			const dur = now - log.createAt;
-			if (log.ip !== r.ip) return; // #1 continue equivalent
+			if (log.ip !== r.ip) return;
 			let over = 0;
 			for (let i = 0; i < ts.length; i++) {
 				if (dur > max[i]) {
@@ -318,12 +443,18 @@ const blackListCheck = (
 							mark: t.mark,
 							log: t.log
 						});
+						// CF upload — async fire-and-forget
+						if (t.cfUpload && sys.cfAccountId && sys.cfApiToken && sys.cfListId) {
+							pushIpToCf(r.ip, t.mark).catch((e) =>
+								console.error('[cf] push failed:', r.ip, e)
+							);
+						}
 						matched = t;
-						return false; // stop iteration
+						return false;
 					}
 				}
 			}
-			if (over === max.length) return false; // all windows expired
+			if (over === max.length) return false;
 		});
 		if (matched) return matched;
 	}
@@ -361,7 +492,6 @@ export const saveToDb = (r: log) => {
 };
 
 const logReq = (event: RequestEvent) => {
-	// skip admin
 	const ip = getClientAddr(event);
 	const {
 		request: { method, headers },
@@ -377,12 +507,17 @@ const logReq = (event: RequestEvent) => {
 	} as log;
 	if (path !== '/api/log') {
 		addToLogCache(r);
+		// UA collection mode: record for batch analysis
+		const ua = headers.get('user-agent') || '';
+		recordUaEntry(ip, ua, path);
+		scheduleUaAnalysis();
 	}
 	return r;
 };
 
 export const patchDetailIpInfo = (d: log[]) => {
 	return d.map((a) => {
+		const cfCountry = a.headers?.get('cf-ipcountry')?.toUpperCase() || undefined;
 		return [
 			a.createAt,
 			a.ip,
@@ -391,7 +526,7 @@ export const patchDetailIpInfo = (d: log[]) => {
 			a.status,
 			a.method,
 			a.mark,
-			ipInfoStr(a.ip)
+			ipInfoStr(a.ip, cfCountry)
 		];
 	});
 };
@@ -457,16 +592,13 @@ const fwFilter = (event: RequestEvent, rs = rules): Obj<FWRule> | undefined => {
 	const method = event.request.method.toLowerCase();
 	const r = { ip, path, headers, method };
 
-	// #15 fast-path: O(1) exact IP check for blacklist
 	const exact = exactBlackIp.get(ip);
 	if (exact && hitRule(r, exact)) {
 		return { respId: exact.respId || -1, mark: exact.mark, log: exact.log } as Obj<FWRule>;
 	}
-	// CIDR blacklist check (typically very few entries)
 	const cidrHit = hitRules(r, cidrBlackRules);
 	if (cidrHit?.respId) return cidrHit;
 
-	// user rules (normal scan)
 	return hitRules(r);
 };
 
@@ -497,10 +629,22 @@ export const blockIp = (key: string, ip: string): [bkRec, () => void] => {
 export const firewallProcess = async (event: RequestEvent, handle: () => Promise<Response>) => {
 	let res: Response | undefined;
 	const pn = getPathName(event.url);
-	const skipLog =
-		sysStatue < 2 ||
-		getClient(event.request)?.ok(permission.Admin) ||
-		/^(::1|127\.0)/.test(getClientAddr(event));
+	const ip = getClientAddr(event);
+	const isApi = pn.startsWith('/api/');
+
+	// Turnstile anti-crawl: protect article paths from crawlers.
+	// Cloudflare Turnstile decides whether to challenge based on risk.
+	// Protected: /, /posts, /post/*, /tags, /tag/*
+	const isTsProtected = /^\/($|posts(\/|$)|post\/|tags(\/|$)|tag\/)/.test(pn);
+	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
+	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
+	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
+		return challengeResponse(event.url.href, isApi);
+	}
+
+	const isAdmin = getClient(event.request)?.ok(permission.Admin);
+	const isLocalhost = /^(::1|127\.0)/.test(ip);
+	const skipAll = sysStatue < 2 || isAdmin;
 
 	if (!/^\/(api|res|font|src|manifest\.json)/.test(pn)) {
 		const p = checkRedirect(sysStatue, pn, event.request);
@@ -514,11 +658,12 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		}
 	}
 
-	if (skipLog) {
+	if (skipAll) {
 		return res || (await handle());
 	}
 
-	const fr = fwFilter(event);
+	// For localhost dev: skip blacklist filter but still run triggers
+	const fr = isLocalhost ? undefined : fwFilter(event);
 	if (fr?.respId) {
 		res = getFwResp(fr.respId);
 	}
@@ -532,6 +677,7 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	const sTr: FWRule[] = [];
 	const nTr: FWRule[] = [];
 	triggers.forEach((a) => {
+		if (a.uaMode) return; // collection mode — handled by batch scheduler
 		if (a.status) sTr.push(a);
 		else nTr.push(a);
 	});
@@ -558,4 +704,15 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		return res;
 	}
 	error(400);
+};
+
+// === Test exports — accessible via import { __test } ===
+export const __test = {
+	hitRule,
+	recordUaEntry,
+	analyzeUaTrigger,
+	runUaAnalysis,
+	scheduleUaAnalysis,
+	getUaEntries: () => uaEntries.slice(),
+	clearUaEntries: () => { uaEntries.length = 0; },
 };

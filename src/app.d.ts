@@ -4,6 +4,8 @@
 declare namespace App {
 	interface Locals {
 		ip: string;
+		cfCountry: string;
+		tsSiteKey: string;
 	}
 	// interface PageData {}
 	// interface Error {}
