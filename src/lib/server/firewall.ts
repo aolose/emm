@@ -235,7 +235,7 @@ const forEachLogReverse = (fn: (log: log) => boolean | void) => {
 
 // === UA collection-mode ring buffer ===
 // Stores recent requests for batch analysis by UA-trigger rules.
-// TTL: 5 minutes, max 1000 entries.
+// TTL: 1 minute, max 1000 entries.
 interface UaEntry {
 	ip: string;
 	ua: string;
@@ -243,8 +243,11 @@ interface UaEntry {
 	ts: number;
 }
 const UA_MAX = 1000;
-const UA_TTL = 5 * 60_000; // 5 min
+const UA_TTL = 60_000; // 1 min
 const uaEntries: UaEntry[] = [];
+
+// Cloudflare Verified Bot categories — skip logging and UA collection
+const CF_TRUSTED_BOT_CATEGORIES = ['Search Engine Crawler', 'Page Preview', 'Feed Fetcher', 'Archiver'];
 
 function recordUaEntry(ip: string, ua: string, path: string): void {
 	const now = Date.now();
@@ -493,7 +496,7 @@ export const saveToDb = (r: log) => {
 
 const logReq = (event: RequestEvent) => {
 	const ip = getClientAddr(event);
-	const {
+ 	const {
 		request: { method, headers },
 		url
 	} = event;
@@ -505,12 +508,19 @@ const logReq = (event: RequestEvent) => {
 		headers,
 		method
 	} as log;
-	if (path !== '/api/log') {
+	// Skip cache for localhost and authenticated users
+	const skipCache = /^(::1|127\.)/.test(ip)
+		|| getClient(event.request)?.ok(permission.Read);
+	if (path !== '/api/log' && !skipCache) {
 		addToLogCache(r);
-		// UA collection mode: record for batch analysis
-		const ua = headers.get('user-agent') || '';
-		recordUaEntry(ip, ua, path);
-		scheduleUaAnalysis();
+		// UA collection mode: record for batch analysis (skip CF trusted bots)
+		const isCfTrustedBot = headers.get('X-Client-Bot') === 'true'
+			&& CF_TRUSTED_BOT_CATEGORIES.includes(headers.get('X-Verified-Bot-Category') || '');
+		if (!isCfTrustedBot) {
+			const ua = headers.get('user-agent') || '';
+			recordUaEntry(ip, ua, path);
+			scheduleUaAnalysis();
+		}
 	}
 	return r;
 };
@@ -643,7 +653,8 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	}
 
 	const isAdmin = getClient(event.request)?.ok(permission.Admin);
-	const isLocalhost = /^(::1|127\.0)/.test(ip);
+	const isAuthenticated = !isAdmin && getClient(event.request)?.ok(permission.Read);
+	const isLocalhost = /^(::1|127\.)/.test(ip);
 	const skipAll = sysStatue < 2 || isAdmin;
 
 	if (!/^\/(api|res|font|src|manifest\.json)/.test(pn)) {
@@ -691,7 +702,7 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		log.status = res.status;
 		res = triggersHit(sTr, log) || res;
 	}
-	if (fr?.log || log.log) {
+	if (!isLocalhost && !isAuthenticated && (fr?.log || log.log)) {
 		saveToDb(log);
 	}
 	if (res) {

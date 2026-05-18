@@ -151,6 +151,13 @@ export function isTsVerified(req: Request, ip: string): boolean {
 	const secret = sys.tsSecret;
 	// Treat unset or default '-' as not configured
 	if (!sys.tsEnabled || !siteKey || siteKey === '-' || !secret || secret === '-') return true;
+
+	// Trusted bots identified by Cloudflare transform rules — skip challenge for SEO
+	const isClientBot = req.headers.get('X-Client-Bot') === 'true';
+	const botCategory = req.headers.get('X-Verified-Bot-Category');
+	const trustedCategories = ['Search Engine Crawler', 'Page Preview', 'Feed Fetcher', 'Archiver'];
+	if (isClientBot && botCategory && trustedCategories.includes(botCategory)) return true;
+
 	const cookie = getTsCookie(req);
 	return !!(cookie && verifyTsCookie(cookie, ip));
 }
