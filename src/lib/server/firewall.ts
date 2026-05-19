@@ -672,8 +672,8 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 
 	// Turnstile anti-crawl: protect article paths from crawlers.
 	// Cloudflare Turnstile decides whether to challenge based on risk.
-	// Protected: /, /posts, /post/*, /tags, /tag/*
-	const isTsProtected = /^\/($|posts(\/|$)|post\/|tags(\/|$)|tag\/)/.test(pn);
+	// Protected: /, /posts, /post/*, /tags, /tag/*, /about
+	const isTsProtected = /^\/($|posts(\/|$)|post\/|tags(\/|$)|tag\/|about(\/|$))/.test(pn);
 	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
 	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
