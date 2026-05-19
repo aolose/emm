@@ -670,16 +670,6 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	const ip = getClientAddr(event);
 	const isApi = pn.startsWith('/api/');
 
-	// Turnstile anti-crawl: protect article paths from crawlers.
-	// Cloudflare Turnstile decides whether to challenge based on risk.
-	// Protected: /, /posts, /post/*, /tags, /tag/*, /about
-	const isTsProtected = /^\/($|posts(\/|$)|post\/|tags(\/|$)|tag\/|about(\/|$))/.test(pn);
-	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
-	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
-	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
-		return challengeResponse(event.url.href, isApi);
-	}
-
 	const isAdmin = getClient(event.request)?.ok(permission.Admin);
 	const isAuthenticated = !isAdmin && getClient(event.request)?.ok(permission.Read);
 	const isLocalhost = /^(::1|127\.)/.test(ip);
@@ -701,17 +691,41 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		return res || (await handle());
 	}
 
-	// For localhost dev: skip blacklist filter but still run triggers
-	const fr = isLocalhost ? undefined : fwFilter(event);
+	// Blacklist check FIRST — block before any other challenge
+	const fr = isLocalhost ? undefined : fwFilter(event, rules);
 	if (fr?.respId) {
 		res = getFwResp(fr.respId);
 	}
+	if (res) {
+		// Block immediately, log and return
+		const log = logReq(event);
+		log.mark = fr?.mark;
+		log.status = res.status;
+		if (!isLocalhost && !isAuthenticated && (fr?.log || log.log)) {
+			saveToDb(log);
+		}
+		ruv({
+			ip: log.ip,
+			path: log.path,
+			ua: log.headers.get('user-agent') || '',
+			status: res.status
+		});
+		return res;
+	}
+
+	// Turnstile anti-crawl: protect article paths from crawlers.
+	// Cloudflare Turnstile decides whether to challenge based on risk.
+	// Protected: /, /posts, /post/*, /tags, /tag/*, /about
+	const isTsProtected = /^\/($|posts(\/|$)|post\/|tags(\/|$)|tag\/|about(\/|$))/.test(pn);
+	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
+	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
+	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
+		return challengeResponse(event.url.href, isApi);
+	}
+
 	const log = logReq(event);
 	if (fr) {
 		log.mark = fr.mark;
-		if (fr.respId) {
-			res = getFwResp(fr.respId);
-		}
 	}
 	const sTr: FWRule[] = [];
 	const nTr: FWRule[] = [];
