@@ -542,7 +542,7 @@ export const patchDetailIpInfo = (d: log[]) => {
 };
 export const fw2log = (l: FwLog) => {
 	return {
-		createAt: l.save,
+		createAt: l.createAt,
 		ip: l.ip,
 		path: l.path,
 		headers: new Headers(str2Hds(l.headers)),
