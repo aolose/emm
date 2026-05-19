@@ -1,9 +1,45 @@
-import { describe, it, expect, mock } from 'bun:test';
+import { describe, it, expect, mock, beforeEach } from 'bun:test';
 
 // Mock SvelteKit modules
 mock.module('$app/navigation', () => ({ goto: () => {} }));
 mock.module('$app/environment', () => ({ browser: false }));
 mock.module('$app/stores', () => ({ page: { subscribe: () => () => {} } }));
+
+// Mock database for addRule / addBlackListRule tests
+mock.module('$lib/server/index', () => ({
+	db: { save: () => {}, all: () => [], delByPk: () => {} },
+	sys: { maxFireLogs: 1000 },
+}));
+
+mock.module('$lib/server/utils', () => ({
+	checkRedirect: () => undefined,
+	getClient: () => undefined,
+	getClientAddr: () => '127.0.0.1',
+	model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
+	sysStatue: 2,
+}));
+
+mock.module('$lib/server/ipLite', () => ({
+	ipInfo: () => null,
+	ipInfoStr: () => '',
+}));
+
+mock.module('$lib/server/puv', () => ({
+	ruv: () => {},
+}));
+
+mock.module('$lib/enum', () => ({
+	permission: { Admin: 0, Read: 1, Post: 2 },
+	NULL: { INT: -1, TEXT: '-', DATE: new Date(0) },
+}));
+
+mock.module('$lib/utils', () => ({
+	arrFilter: (a: any) => a,
+	hasFwRuleFilter: () => false,
+	hds2Str: () => '',
+	str2Hds: () => [],
+	trim: (s?: string) => (s || '').trim(),
+}));
 
 import { FWRule } from '../../../src/lib/server/model';
 
@@ -226,6 +262,140 @@ describe('Firewall rule matching', () => {
 		it('schedule defaults to TEXT sentinel', () => {
 			const rule = new FWRule();
 			expect(rule.schedule).toBe('-');
+		});
+	});
+
+	describe('Rule persistence — addRule + lsRules round-trip', () => {
+		let addRule: (fr: FWRule) => void;
+		let lsRules: (page: number, size: number) => { items: FWRule[]; total: number };
+		let delRule: (ids: number[]) => void;
+
+		beforeEach(async () => {
+			const mod = await import('../../../src/lib/server/firewall');
+			addRule = mod.addRule;
+			lsRules = mod.lsRules;
+			delRule = mod.delRule;
+
+			// Initialize module-level arrays (normally done by loadRules).
+			mod.__test.setRules([]);
+			mod.__test.setTriggers([]);
+		});
+
+		it('persists uaMode and cfUpload through addRule → lsRules', () => {
+			const rule = new FWRule();
+			rule.id = 1;
+			rule.path = '/api/test';
+			rule.trigger = true;
+			rule.uaMode = true;
+			rule.cfUpload = true;
+			rule.ua = 'Bot/1.0';
+			rule.uaCount = '5';
+			rule.rate = '10';
+			rule.schedule = '0-6';
+			rule.mark = 'test-collection';
+			rule.active = true;
+			rule.ip = '';
+			rule.country = '';
+			rule.method = '';
+			rule.headers = '';
+			rule.status = '';
+
+			addRule(rule);
+
+			const result = lsRules(1, 20);
+			expect(result.items.length).toBe(1);
+
+			const saved = result.items[0];
+			expect(saved.id).toBe(1);
+			expect(saved.mark).toBe('test-collection');
+			expect(saved.uaMode).toBe(true);
+			expect(saved.cfUpload).toBe(true);
+			expect(saved.ua).toBe('Bot/1.0');
+			expect(saved.uaCount).toBe('5');
+			expect(saved.rate).toBe('10');
+			expect(saved.schedule).toBe('0-6');
+			expect(saved.trigger).toBe(true);
+		});
+
+		it('non-trigger rule does NOT set uaMode', () => {
+			const rule = new FWRule();
+			rule.id = 2;
+			rule.ip = '192.168.1.1';
+			rule.mark = 'non-trigger';
+			rule.trigger = false;
+			rule.uaMode = false;
+			rule.cfUpload = false;
+			rule.country = '';
+			rule.method = '';
+			rule.headers = '';
+			rule.status = '';
+
+			addRule(rule);
+
+			const result = lsRules(1, 20);
+			expect(result.items.length).toBe(1);
+
+			const saved = result.items[0];
+			expect(saved.id).toBe(2);
+			expect(saved.trigger).toBe(false);
+			expect(saved.uaMode).toBe(false);
+			expect(saved.cfUpload).toBe(false);
+		});
+
+		it('lsRules excludes rules with id <= 0', () => {
+			const rule = new FWRule();
+			rule.id = -1;
+			rule.ip = '10.0.0.1';
+			rule.trigger = false;
+			rule.country = '';
+			rule.method = '';
+			rule.headers = '';
+			rule.status = '';
+
+			addRule(rule);
+
+			const result = lsRules(1, 20);
+			expect(result.items.length).toBe(0);
+		});
+	});
+
+	describe('Trigger → blacklist integration (addBlackListRule)', () => {
+		let addBlackListRule: (r: { ip: string; respId: number; mark?: string; log?: boolean }) => void;
+		let getBlackList: () => any[];
+		let clearBlackList: () => void;
+
+		beforeEach(async () => {
+			const mod = await import('../../../src/lib/server/firewall');
+			addBlackListRule = mod.__test.addBlackListRule;
+			getBlackList = mod.__test.getBlackList;
+			clearBlackList = mod.__test.clearBlackList;
+			clearBlackList();
+		});
+
+		it('adds a new IP to the blacklist', () => {
+			addBlackListRule({ ip: '10.0.0.99', respId: -1, mark: 'test-block' });
+
+			const bl = getBlackList();
+			expect(bl.length).toBe(1);
+			expect(bl[0].ip).toBe('10.0.0.99');
+			expect(bl[0].mark).toBe('test-block');
+		});
+
+		it('deduplicates same IP', () => {
+			addBlackListRule({ ip: '10.0.0.99', respId: -1, mark: 'first' });
+			addBlackListRule({ ip: '10.0.0.99', respId: -1, mark: 'second' });
+
+			const bl = getBlackList();
+			expect(bl.length).toBe(1);
+			expect(bl[0].mark).toBe('first');
+		});
+
+		it('adds multiple distinct IPs', () => {
+			addBlackListRule({ ip: '10.0.0.1', respId: -1 });
+			addBlackListRule({ ip: '10.0.0.2', respId: -1 });
+			addBlackListRule({ ip: '10.0.0.3', respId: -1 });
+
+			expect(getBlackList().length).toBe(3);
 		});
 	});
 });

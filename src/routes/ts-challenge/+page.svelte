@@ -87,7 +87,8 @@
 					status = 'error';
 					errorMsg = 'Verification expired. Please refresh the page.';
 				},
-				theme: 'auto',
+				theme: 'dark',
+				size: 'flexible'
 			});
 		} catch (e) {
 			status = 'error';
@@ -157,15 +158,24 @@
 		z-index: 10000;
 	}
 
+  #ts-widget {
+    margin-top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
 	.bx {
-		background: rgba(30, 30, 40, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 16px;
-		padding: 40px;
-		text-align: center;
-		max-width: 400px;
-		width: 90%;
-		color: #ccc;
+    background: rgba(30, 30, 40, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 40px 24px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    color: #ccc;
+    box-sizing: border-box;
 
 		h1 {
 			font-size: 20px;

@@ -724,6 +724,18 @@ export const __test = {
 	analyzeUaTrigger,
 	runUaAnalysis,
 	scheduleUaAnalysis,
+	addBlackListRule,
 	getUaEntries: () => uaEntries.slice(),
 	clearUaEntries: () => { uaEntries.length = 0; },
+	getBlackList: () => (blackList || []).slice(),
+	clearBlackList: () => {
+		if (blackList) blackList.length = 0;
+		else blackList = [];
+		exactBlackIp.clear();
+		cidrBlackRules.length = 0;
+	},
+	getTriggers: () => (triggers || []).slice(),
+	setTriggers: (t: FWRule[]) => { triggers = t; },
+	getRules: () => (rules || []).slice(),
+	setRules: (r: FWRule[]) => { rules = r; },
 };
