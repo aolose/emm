@@ -116,6 +116,7 @@ export class FwLog {
 	status = INT;
 	method = TEXT;
 	createAt = INT;
+	save = INT;
 	mark = TEXT;
 	geo = TEXT;
 }
