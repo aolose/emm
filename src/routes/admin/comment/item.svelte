@@ -16,7 +16,7 @@
 				return 'auto';
 		}
 	};
-	let { topic, ck, d = {}, detail = 0 } = $props();
+	let { topic, ck,act, d = {}, detail = 0 } = $props();
 </script>
 
 <div
@@ -24,6 +24,7 @@
 	onclick={() => ck && ck(d)}
 	class:dt={detail}
 	class:tp={topic}
+	class:act={act}
 	transition:slide|global
 >
 	<div class="v">
@@ -164,23 +165,17 @@
 	}
 
 	.a {
-		--bg: var(--bg5);
 		transition: 0.1s linear;
-		box-shadow: rgba(0, 0, 0, 0.1) 0 3px 20px -10px;
 		border-radius: 4px;
 		display: flex;
 		margin: 5px;
 		padding: 10px;
 		cursor: pointer;
-		border: 1px solid var(--bg5);
 
-		&.act {
-			--bg: var(--bg3);
+		&.act,&:hover  {
+			background: var(--bg2);
 		}
 
-		&:hover {
-			--bg: var(--bg2);
-		}
 	}
 
 	.b {
@@ -232,7 +227,6 @@
 
 	.dt {
 		margin: 0;
-		background: rgba(105, 125, 185, 0.05);
 		flex-direction: column;
 		cursor: auto;
 

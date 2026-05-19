@@ -183,7 +183,7 @@
 	}
 
 	.sd {
-		background: var(--bg6);
+		background: var(--bg1);
 		width: 600px;
 		display: flex;
 		flex-direction: column;
@@ -204,6 +204,7 @@
 	.tb {
 		display: flex;
 		height: 30px;
+		gap: 12px;
 		align-items: center;
 		background: var(--bg0);
 		@include s() {
@@ -265,7 +266,6 @@
 	.h {
 		height: 64px;
 		align-items: center;
-		background: var(--bg2);
 		display: flex;
 		width: 100%;
 		@include s() {
@@ -291,7 +291,6 @@
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
-		background: var(--bg2);
 		padding-bottom: 10px;
 	}
 

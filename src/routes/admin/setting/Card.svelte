@@ -21,9 +21,9 @@
 	@use '../../../lib/break' as *;
 	.a {
 		display: flex;
-		margin: 9px;
+		margin: 16px 0;
 		border-radius: 14px;
-		background: rgba(40, 44, 55, 0.1);
+		background: rgba(0, 0, 0, 0.8);
 		flex-direction: column;
 		padding-bottom: 20px;
 		:global {

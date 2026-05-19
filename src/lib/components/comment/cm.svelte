@@ -350,6 +350,8 @@
 
 	.am {
 		height: 300px;
+		margin: 0 10px;
+		background: var(--bg0);
 		@include s() {
 			height: 200px;
 			padding: 10px;

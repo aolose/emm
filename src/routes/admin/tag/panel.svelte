@@ -120,7 +120,7 @@
 		flex: 1;
 		max-width: 600px;
 		height: 100%;
-		background: var(--bg2);
+		background: var(--bg0);
 
 		:global {
 			.a {

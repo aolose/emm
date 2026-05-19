@@ -32,9 +32,8 @@
 		overflow: auto;
 		display: flex;
 		flex-wrap: wrap;
-		background: var(--bg2);
+		background: var(--bg0);
 		align-content: flex-start;
-		border-bottom: 1px solid #16212a;
 
 		&.i {
 			padding: 2px 3px;

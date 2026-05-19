@@ -74,11 +74,11 @@
 		transition: 0.3s ease-in-out;
 
 		&:not(.act):hover {
-			background: var(--bg0);
+			background: var(--bg2);
 		}
 
 		&.act {
-			background: var(--bg2);
+			background: var(--bg0);
 		}
 
 		h3 {

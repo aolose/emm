@@ -33,7 +33,7 @@
 
 	.a {
 		border-radius: 14px;
-		background: var(--bg2);
+		background: var(--bg1);
 		max-width: 800px;
 		padding: 1px;
 		@include s() {
@@ -49,7 +49,7 @@
 		left: 0;
 		right: 0;
 		overflow: auto;
-		padding: 20px;
+		padding: 0 10px;
 		flex-direction: column;
 		@include s() {
 			padding: 0;

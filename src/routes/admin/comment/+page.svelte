@@ -101,6 +101,7 @@
 							<div class="r">
 								<Item
 									d={c}
+									act={sel===c}
 									ck={() => {
 										sel = c;
 										view = 1;
@@ -147,7 +148,6 @@
 	.x {
 		width: 100%;
 		height: 100%;
-		background: var(--bg2);
 		display: flex;
 		transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		@include s() {

@@ -23,14 +23,14 @@ a {
 	--bg-separator: rgba(255, 255, 255, 0.06);
 
 	/* === 兼容旧变量 (重新映射) === */
-	--bg0: #080b12;
-	--bg1: #131822;
-	--bg2: #0d101a;
-	--bg3: #0c0f18;
-	--bg4: #1b2130;
-	--bg5: #181d2a;
-	--bg6: #080b12;
-	--bg7: #0b0f18;
+	--bg0: #0c0c0e;
+	--bg1: #09090a;
+	--bg2: #111217;
+	--bg3: #0d0f13;
+	--bg4: #1a1e25;
+	--bg5: #1a1c23;
+	--bg6: #090a0c;
+	--bg7: #000000;
 
 	/* === 旧功能色 (保留兼容) === */
 	--green: #22c55e;
@@ -79,7 +79,7 @@ html {
 }
 
 body {
-	background: var(--bg1);
+	background: var(--bg0);
 	margin: 0;
 	height: 100%;
 	overflow: hidden;

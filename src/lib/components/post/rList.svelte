@@ -145,7 +145,7 @@
 			width: 0;
 			flex: 1;
 			border: 0;
-			background: var(--bg2);
+			background: var(--bg1);
 
 			&::placeholder {
 				color: var(--darkgrey);
@@ -169,7 +169,7 @@
 
 	.m {
 		pointer-events: none;
-		background: var(--bg2);
+		background: var(--bg1);
 
 		.k {
 			opacity: 0;
@@ -214,7 +214,6 @@
 
 	.ls {
 		padding: 20px 0;
-		background: color.adjust(black, $alpha: -0.8);
 		overflow: auto;
 		flex: 1;
 		margin-bottom: 10px;
@@ -230,7 +229,7 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background: var(--bg1);
+		background: var(--bg0);
 		border-radius: inherit;
 	}
 

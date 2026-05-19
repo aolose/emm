@@ -101,7 +101,6 @@
 		width: 100%;
 		height: 100%;
 		display: flex;
-		background: var(--bg3);
 		@include s() {
 			transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 			width: 200%;

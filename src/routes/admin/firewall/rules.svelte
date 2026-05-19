@@ -131,7 +131,7 @@
 								{#if r.uaMode}
 									<div class="icon i-group"><span>collection</span></div>
 								{/if}
-								<div class="icon i-sort"><span>w:{r.weight ?? 100}</span></div>
+								<div class="icon i-sort"><span>{r.weight ?? 100}</span></div>
 								{#if r.schedule}
 									<div class="icon i-clock"><span>{r.schedule}</span></div>
 								{/if}
@@ -168,7 +168,7 @@
 								{#if r.uaMode}
 									<div class="icon i-group"><span>collection</span></div>
 								{/if}
-								<div class="icon i-sort"><span>w:{r.weight ?? 100}</span></div>
+								<div class="icon i-sort"><span>{r.weight ?? 100}</span></div>
 								{#if r.schedule}
 									<div class="icon i-clock"><span>{r.schedule}</span></div>
 								{/if}
@@ -346,6 +346,26 @@
 		padding: 0;
 	}
 
+ .i-sort{
+	 flex: 0;
+	 width: auto;
+	 margin: auto;
+	 display: flex;
+	 order: -1;
+	 span{
+		 padding: 0 3px!important;
+		 margin: 0;
+		 display: flex;
+		 align-items: center;
+		 justify-content: center;
+		 text-align: center;
+		 font-weight: 800;
+     color: #000!important;
+     font-size: 10px;
+     background: rgb(120 127 161 / 0.24);
+	 }
+ }
+
 	.i-log {
 		color: #00d2ff;
 	}
@@ -405,7 +425,7 @@
 	}
 
 	.a {
-		border-left: 1px solid #141e28;
+		border-left: 1px solid #000;
 		padding: 0 0 10px;
 		height: 100%;
 		display: flex;
