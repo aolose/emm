@@ -55,7 +55,7 @@ const apis: APIRoutes = {
 		post: auth(Read, async (req) => {
 			const r = new Uint16Array(await req.arrayBuffer());
 			const o = lsRules(r[0], r[1]);
-			o.items = arrFilter(o.items, ['id','path','headers','ip','mark','country','log','active','trigger','status','rate','respId','uaMode','cfUpload','ua','uaCount','schedule','createAt']) as FWRuleType[];
+			o.items = arrFilter(o.items, ['id','path','headers','ip','mark','country','log','active','trigger','status','rate','respId','uaMode','cfUpload','ua','uaCount','schedule','createAt','method','weight']) as FWRuleType[];
 			return o;
 		})
 	},

@@ -297,6 +297,7 @@ export const DBProxy = <T extends Model>(C: Class<T>, init: Obj<T> = {}, load = 
 	}
 	const px = new Proxy(o, {
 		get(target, p: string, receiver: T) {
+			if (p in changes) return Reflect.get(changes, p);
 			const v = Reflect.get(target, p, receiver);
 			return hasOwnProperty(target, p) ? val(v) : v;
 		},

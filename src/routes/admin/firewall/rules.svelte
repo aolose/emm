@@ -131,6 +131,7 @@
 								{#if r.uaMode}
 									<div class="icon i-group"><span>collection</span></div>
 								{/if}
+								<div class="icon i-sort"><span>w:{r.weight ?? 100}</span></div>
 								{#if r.schedule}
 									<div class="icon i-clock"><span>{r.schedule}</span></div>
 								{/if}
@@ -167,6 +168,7 @@
 								{#if r.uaMode}
 									<div class="icon i-group"><span>collection</span></div>
 								{/if}
+								<div class="icon i-sort"><span>w:{r.weight ?? 100}</span></div>
 								{#if r.schedule}
 									<div class="icon i-clock"><span>{r.schedule}</span></div>
 								{/if}

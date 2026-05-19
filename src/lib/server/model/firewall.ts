@@ -28,6 +28,7 @@ export class FWRule {
 	// Universal fields
 	schedule = TEXT;
 	cfUpload = false;
+	weight = 100;
 
 	rateLimiter(): [number, (times: number, dur: number) => number] {
 		const rates: [number, number][] = [];

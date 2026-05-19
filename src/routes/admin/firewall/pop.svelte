@@ -50,6 +50,8 @@
 				d.schedule = trim(d.schedule || '')
 					.replace(/[^0-9,\-]/g, '')
 					.replace(/\-{2,}/g, '-');
+				d.weight = +d.weight || 100;
+				if (d.weight < 1) d.weight = 1;
 			}
 			d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 			const isUa = d.uaMode && d.trigger;
@@ -187,6 +189,12 @@
 								<Ck bind:value={d.cfUpload}>CF upload</Ck>
 							</label>
 						{/if}
+					{/if}
+					{#if tp}
+						<label transition:slide|global>
+							<span>weight:</span>
+							<input type="number" bind:value={d.weight} placeholder="100" />
+						</label>
 					{/if}
 					<label>
 						<span>mark:</span>

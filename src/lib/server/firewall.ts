@@ -37,8 +37,12 @@ const getPathName = (u: URL | string) => {
 };
 
 function sort() {
-	triggers.sort((a, b) => b.createAt - a.createAt);
-	rules.sort((a, b) => b.createAt - a.createAt);
+	const byWeight = (a: FWRule, b: FWRule) => {
+		const wd = (b.weight ?? 100) - (a.weight ?? 100);
+		return wd || b.createAt - a.createAt;
+	};
+	triggers.sort(byWeight);
+	rules.sort(byWeight);
 }
 
 export const delFwResp = (id: number) => {
@@ -154,6 +158,12 @@ export const hitRules = (
 				.filter((a) => trim(a))
 				.join();
 		if (k.log) o.log = k.log;
+		// CF upload — push matching IP for any rule with cfUpload enabled
+		if (k.cfUpload && sys.cfAccountId && sys.cfApiToken && sys.cfListId && r.ip) {
+			pushIpToCf(r.ip, k.mark).catch((e) =>
+				console.error('[cf] rule push failed:', r.ip, e)
+			);
+		}
 		if (k.respId || k.id < 0) {
 			o.respId = k.respId || -1;
 			break;
@@ -163,7 +173,10 @@ export const hitRules = (
 };
 export const lsRules = (page: number, size: number) => {
 	const r = rules.concat(triggers).filter((a) => a.id > 0);
-	r.sort((a, b) => b.createAt - a.createAt);
+	r.sort((a, b) => {
+		const wd = (b.weight ?? 100) - (a.weight ?? 100);
+		return wd || b.createAt - a.createAt;
+	});
 	return {
 		items: r.slice(size * (page - 1), size * page),
 		total: Math.ceil(r.length / size)
@@ -346,15 +359,29 @@ function scheduleUaAnalysis(): void {
 	_uaTimer = setTimeout(runUaAnalysis, 5000);
 }
 
-let _pushIpToCf: ((ip: string, comment?: string) => Promise<void>) | undefined;
+let _pushIpToCf: ((ip: string, comment?: string) => Promise<string>) | undefined;
+
+// Throttle "CF not configured" warnings to once per 10 min
+let _cfUnconfiguredLogged = 0;
 
 /** Async push IP to Cloudflare list — lazy-loaded to avoid circular imports. */
 async function pushIpToCf(ip: string, comment?: string): Promise<void> {
+	if (!sys.cfAccountId || !sys.cfApiToken || !sys.cfListId) {
+		const now = Date.now();
+		if (now - _cfUnconfiguredLogged > 600_000) {
+			console.warn('[cf] push skipped — CF not fully configured (account/token/list missing)');
+			_cfUnconfiguredLogged = now;
+		}
+		return;
+	}
 	if (!_pushIpToCf) {
 		const mod = await import('$lib/server/cloudflare');
 		_pushIpToCf = mod.addIpToList;
 	}
-	return _pushIpToCf(ip, comment);
+	const opId = await _pushIpToCf(ip, comment);
+	if (!opId) {
+		console.warn('[cf] push returned empty for', ip, '(may be already in list or API error)');
+	}
 }
 
 const addBlackListRule = (r: { ip: string; respId: number; mark?: string; log?: boolean }) => {
@@ -559,6 +586,7 @@ export const filterLog = (logs: log[], t: FWRule) => {
 };
 
 function matchRuleValue(value: string, target: string) {
+	if (!value) return true; // null/empty pattern matches everything
 	const rv = value.startsWith('!');
 	if (rv) value = value.substring(1);
 	const reg = value.match(/^\/(.*?)\/([gimy]+)?$/);

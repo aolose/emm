@@ -2,7 +2,7 @@
 	import { req } from '$lib/req';
 	import { method } from '$lib/enum';
 	import { sys } from './sys';
-	import { get } from 'svelte/store';
+	import { onMount } from 'svelte';
 	import Card from './Card.svelte';
 	import Ipt from './Ipt.svelte';
 	import Tip from './Tip.svelte';
@@ -15,10 +15,23 @@
 	let err = $state(0);
 	let msg = $state('');
 
-	const _sys = get(sys);
-	let cfAccountId = $state(_sys.cfAccountId || '');
+	let _sys = $state({});
+	let cfAccountId = $state('');
 	let cfApiToken = $state('');
-	let cfListId = $state(_sys.cfListId || '');
+	let cfListId = $state('');
+
+	// Subscribe to store. The parent +page.svelte calls load() in
+	// onMount which is async — get(sys) during render returns {}.
+	// The subscription catches the first non-empty update.
+	onMount(() => {
+		return sys.subscribe(s => {
+			_sys = s;
+			if (s.cfAccountId || s.cfListId) {
+				cfAccountId = s.cfAccountId || '';
+				cfListId = s.cfListId || '';
+			}
+		});
+	});
 
 	async function validate() {
 		validating = true;

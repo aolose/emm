@@ -9,7 +9,7 @@ console.log('DB path:', dbPath);
 
 const db = new Database(dbPath);
 const row = db.query('SELECT pwdSalt FROM System WHERE id=1').get();
-const salt = row ? row[0] : null;
+const salt = row?.pwdSalt ?? null;
 console.log('pwdSalt:', salt || 'none (legacy)');
 if (salt && salt !== '-') setPwdSalt(String(salt));
 
