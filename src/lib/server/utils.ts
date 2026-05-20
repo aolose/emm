@@ -167,6 +167,14 @@ export const setNull = <T extends object>(o: T, key: string) => {
 };
 
 export const getReqJson = async (req: Request) => {
+	const key = getShareKey(req);
+	if (key) {
+		const decrypted = await decryptReq(req, key, true);
+		if (decrypted) {
+			return JSON.parse(new TextDecoder().decode(decrypted));
+		}
+	}
+
 	const ct = req.headers.get('content-type') || '';
 	if (ct.includes('application/json')) return await req.json();
 	return await req.json();
