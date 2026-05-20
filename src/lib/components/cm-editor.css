@@ -64,7 +64,12 @@
 .editor-wrapper :global(.cm-editor) {
 	flex: 1;
 	height: 100% !important;
+	overflow: hidden;
 	background: var(--bg6, #1e2233);
+}
+
+.editor-wrapper :global(.cm-editor .cm-scroller) {
+	overflow-y: auto;
 }
 
 .editor-wrapper :global(.cm-editor .cm-content) {
