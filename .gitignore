@@ -10,6 +10,7 @@ node_modules
 *.db
 /.dbCfg
 /dist/
+/dev-dist/
 bun.lock
 /tmp_db
 /up/
