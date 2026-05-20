@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import Editor from '$lib/components/editor.svelte';
 	import {
@@ -21,6 +21,19 @@
 	let title = $state('');
 	let draft = $state('');
 	let cid = 0;
+
+	// Character counter (excludes URLs)
+	function countChars(text: string): number {
+		let cleaned = text
+			.replace(/!\[[^\]]*\]\([^)]+\)/g, '![]()')
+			.replace(/\[([^\]]*)\]\([^)]+\)/g, '[$1]()')
+			.replace(/\s+src=["'][^"']*["']/g, ' src=""')
+			.replace(/https?:\/\/[^\s<>"'\])]+/g, '')
+			.replace(/blob:https?:\/\/[^\s<>"'\])]+/g, '');
+		return cleaned.length;
+	}
+	let charCount = $derived.by(() => countChars(draft));
+
 	let { close, preview, visitor } = $props();
 	const ctxWatch = watch(draft, title);
 	const tSet = {
@@ -247,7 +260,7 @@
 			{#key $editPost._ || $editPost.id}
 				<Editor bind:value={draft} toolbar={tools} />
 				{#if $editPost.save}
-					<span class="tm">save at {time($editPost.save).slice(9)}</span>
+					<span class="tm"><span>save at {time($editPost.save).slice(9)}</span> <span class="wc">{charCount} chars</span></span>
 				{/if}
 			{/key}
 		</div>
@@ -287,8 +300,15 @@
 		position: absolute;
 		font-size: 12px;
 		bottom: 0;
-		left: 30px;
+		left: 0;
+		right: 0;
+		display: flex;
+		justify-content: space-between;
 		padding: 0 10px 9px;
+	}
+
+	.wc {
+		color: var(--text, #666);
 	}
 
 	.a {
