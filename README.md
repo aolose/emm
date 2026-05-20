@@ -11,17 +11,42 @@
 
 A self-hosted markdown blog system built with SvelteKit and Bun. Designed for personal writing and content management, with a focus on simplicity and performance.
 
-![home](doc/home.webp)
-
 ## Contents
-
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [Turnstile Anti-Crawl Setup](#turnstile-anti-crawl-setup)
 - [Contributing](#contributing)
-- [Screenshots](#screenshots)
 - [License](#license)
+
+## Screenshots
+
+### Desktop
+
+<p>
+  <img src="doc/home.webp" width="750" alt="file list" /><br/><br/>
+  <img src="doc/list.webp" width="750" alt="file list" /><br/><br/>
+  <img src="doc/view.webp" width="750" alt="file view" /><br/><br/>
+  <img src="doc/login.webp" width="750" alt="login" /><br/><br/>
+  <img src="doc/write.webp" width="750" alt="writing" /><br/><br/>
+  <img src="doc/fw.webp" width="750" alt="file management" /><br/><br/>
+  <img src="doc/manage.webp" width="750" alt="admin settings" />
+</p>
+
+### Mobile
+
+<p>
+  <img src="doc/list_m.webp" width="220" alt="file list on mobile" />
+  <img src="doc/view_m.webp" width="220" alt="file view on mobile" />
+  <img src="doc/manage_m.webp" width="220" alt="admin on mobile" />
+  <img src="doc/write_m.webp" width="220" alt="writing on mobile" />
+  <img src="doc/fw_m.webp" width="220" alt="file management on mobile" />
+</p>
+
+
+
+
 
 ## Features
 
@@ -172,25 +197,6 @@ Issues and pull requests are welcome. Before submitting a PR:
 2. Create a feature branch (`git checkout -b feature/your-feature`)
 3. Commit your changes
 4. Push and open a pull request
-
-## Screenshots
-
-### Desktop
-
-![file list](doc/list.webp)
-![file view](doc/view.webp)
-![login](doc/login.webp)
-![writing](doc/write.webp)
-![file management](doc/fw.webp)
-![admin settings](doc/manage.webp)
-
-### Mobile
-
-![file list on mobile](doc/list_m.webp)
-![file view on mobile](doc/view_m.webp)
-![admin on mobile](doc/manage_m.webp)
-![writing on mobile](doc/write_m.webp)
-![file management on mobile](doc/fw_m.webp)
 
 ## License
 
