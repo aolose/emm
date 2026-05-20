@@ -174,6 +174,7 @@ const save = () => {
 
 // flush one slot (type=0 hour, type=1 day) to DB with the given t index
 const flushSlot = (type: number, t: number) => {
+	if (!db || sysStatue < 2 || server.maintain) return;
 	const isDay = type === 1;
 	const r = isDay ? rqD : rqH;
 	const p = isDay ? pvD : pvH;
@@ -193,6 +194,7 @@ const flushSlot = (type: number, t: number) => {
 };
 
 const checkTimeWindow = () => {
+	if (!db || sysStatue < 2 || server.maintain) return;
 	const now = Date.now();
 	const nh = Math.floor(now / hour);
 	const nd = Math.floor(now / day);
@@ -230,6 +232,7 @@ export const ruv = ({
 	path: string;
 	ua: string;
 }) => {
+	if (!db || sysStatue < 2 || server.maintain) return;
 	// inline cross-window check (#5)
 	checkTimeWindow();
 
