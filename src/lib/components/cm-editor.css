@@ -51,6 +51,10 @@
 	font-size: 0;
 }
 
+.toolbar button[class*="icon"]::before {
+	font-size: 18px;
+}
+
 /* ── Built-in toolbar button icons ──────────────────────────────── */
 .tb-bold::after   { content: 'B'; font-weight: bold; }
 .tb-italic::after { content: 'I'; font-style: italic; }
