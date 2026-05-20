@@ -174,7 +174,7 @@
 		const track = () => updateActiveState();
 		v.dom.addEventListener('click', track);
 		v.dom.addEventListener('keyup', track);
-		v.dom.addEventListener('focus', track);
+		v.dom.addEventListener('touchend', track);
 	}
 
 	// ── Built-in toolbar buttons ─────────────────────────────────────
