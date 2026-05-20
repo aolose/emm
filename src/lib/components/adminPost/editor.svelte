@@ -258,7 +258,7 @@
 	@use '../../break' as *;
 
 	:global {
-		.editor-toolbar .icon.i-full {
+		.toolbar .i-full {
 			display: none;
 			@include s() {
 				display: inline;
@@ -387,7 +387,7 @@
 	}
 
 	:global {
-		.editor-toolbar .i-view {
+		.toolbar .i-view {
 			display: none;
 			@include s() {
 				display: inline-block;
@@ -395,7 +395,7 @@
 		}
 
 		@include s() {
-			.EasyMDEContainer .CodeMirror {
+			.cm-editor {
 				background: var(--bg6);
 			}
 		}

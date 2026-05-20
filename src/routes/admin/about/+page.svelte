@@ -63,7 +63,7 @@
 		position: relative;
 		flex: 1;
 		:global {
-			.editor-toolbar {
+			.toolbar {
 				height: auto;
 			}
 		}
@@ -121,8 +121,8 @@
 		flex-direction: column;
 
 		:global {
-			.editor-toolbar,
-			.CodeMirror-scroll {
+			.toolbar,
+			.cm-content {
 				padding: 10px 20px;
 			}
 		}

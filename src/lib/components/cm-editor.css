@@ -1,0 +1,109 @@
+/* ── CM6 Editor wrapper ─────────────────────────────────────────── */
+.editor-wrapper {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────────── */
+.toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
+	padding: 4px 8px;
+	background: var(--bg5, #1a1d2b);
+	border-bottom: 1px solid var(--border, #333);
+	flex-shrink: 0;
+}
+
+.toolbar button {
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	background: transparent;
+	color: var(--text, #828fa4);
+	cursor: pointer;
+	border-radius: 4px;
+	font-size: 15px;
+	transition: background 0.15s, color 0.15s;
+}
+
+.toolbar button:hover {
+	background: rgba(255, 255, 255, 0.08);
+	color: #fff;
+}
+
+.toolbar button .icon {
+	font-size: 18px;
+}
+
+/* Bold / Italic / Strikethrough text styling */
+.toolbar button:first-child  { font-weight: bold; }
+.toolbar button:nth-child(2) { font-style: italic; }
+.toolbar button:nth-child(3) { text-decoration: line-through; }
+
+/* ── CodeMirror 6 dark theme ────────────────────────────────────── */
+.editor-wrapper :global(.cm-editor) {
+	flex: 1;
+	height: 100% !important;
+	background: var(--bg6, #1e2233);
+}
+
+.editor-wrapper :global(.cm-editor .cm-content) {
+	font-family: monospace;
+	font-size: 15px;
+	line-height: 2;
+	padding: 8px 0;
+}
+
+.editor-wrapper :global(.cm-editor .cm-gutters) {
+	background: var(--bg5, #1a1d2b);
+	border-right: 1px solid #333;
+	color: #666;
+}
+
+.editor-wrapper :global(.cm-editor .cm-activeLineGutter) {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+.editor-wrapper :global(.cm-editor .cm-activeLine) {
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.editor-wrapper :global(.cm-editor .cm-cursor) {
+	border-left-color: #fff;
+}
+
+.editor-wrapper :global(.cm-editor .cm-selectionBackground) {
+	background: rgba(100, 150, 255, 0.2) !important;
+}
+
+.editor-wrapper :global(.cm-editor .cm-selectionMatch) {
+	background: rgba(100, 150, 255, 0.12);
+}
+
+.editor-wrapper :global(.cm-editor .cm-placeholder) {
+	color: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Markdown syntax colors ─────────────────────────────────────── */
+.editor-wrapper :global(.cm-editor .cm-header)     { color: #61afef; }
+.editor-wrapper :global(.cm-editor .cm-strong)     { color: #e5c07b; font-weight: bold; }
+.editor-wrapper :global(.cm-editor .cm-em)         { color: #98c379; font-style: italic; }
+.editor-wrapper :global(.cm-editor .cm-quote)      { color: #5c6370; }
+.editor-wrapper :global(.cm-editor .cm-link)       { color: #56b6c2; text-decoration: underline; }
+.editor-wrapper :global(.cm-editor .cm-url)        { color: #56b6c2; }
+.editor-wrapper :global(.cm-editor .cm-code)       { color: #e06c75; background: rgba(0,0,0,0.15); padding: 0 3px; border-radius: 3px; }
+.editor-wrapper :global(.cm-editor .cm-codeBlock)  { color: #abb2bf; }
+.editor-wrapper :global(.cm-editor .cm-list)       { color: #61afef; }
+.editor-wrapper :global(.cm-editor .cm-hr)         { color: #5c6370; }
+.editor-wrapper :global(.cm-editor .cm-strikethrough) { text-decoration: line-through; color: rgba(130,143,164,0.5); }

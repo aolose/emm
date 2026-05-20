@@ -69,7 +69,7 @@
 			box-shadow: rgba(0, 0, 0, 0.5) 0 0 10px;
 		}
 		:global {
-			.editor-toolbar {
+			.toolbar {
 				transition: 0.3s linear;
 				height: 90px;
 				overflow: hidden;
@@ -81,7 +81,7 @@
 			}
 
 			:global {
-				.editor-toolbar {
+				.toolbar {
 					height: 0;
 					padding: 0;
 				}

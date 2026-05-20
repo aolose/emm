@@ -1,138 +1,147 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
-	import './easymde.scss';
+	import './cm-editor.css';
 	import { filesUpload, selectFile } from '$lib/store';
 	import { createFileMd, createUrl, file2Md, watch } from '$lib/utils';
 
-	let e = $state('');
-	let editor = $state();
+	import CodeMirror from 'svelte-codemirror-editor';
+	import { markdown } from '@codemirror/lang-markdown';
+	import { EditorView } from '@codemirror/view';
+	import { EditorSelection } from '@codemirror/state';
+
+	let cm: EditorView;
 	let { value = $bindable(''), toolbar = [] } = $props();
-	const wb = watch(toolbar);
-	const wv = watch(value);
-    /** Default EasyMDE toolbar buttons */
-	const TOOLBAR_DEFAULTS = [
-		'bold',
-		'italic',
-		'strikethrough',
-		'quote',
-		'unordered-list',
-		'ordered-list',
-		'table',
-		{
-			name: 'files',
-			action: async (ed) => {
-				const f = await selectFile();
-				if (f && f.length) {
-					ed.codemirror.replaceSelection(file2Md(f));
-				}
-			},
-			className: 'icon i-file',
-			title: 'Files'
+
+	// ── Markdown toggle helpers ──────────────────────────────────────
+
+	/**
+	 * Wrap each selected line in the given before/after strings.
+	 * If selection is empty, inserts the wrapper at cursor.
+	 */
+	function wrapLine(before: string, after?: string) {
+		if (!cm) return;
+		const { from, to } = cm.state.selection.main;
+		const doc = cm.state.doc;
+		const fromLine = doc.lineAt(from);
+		const toLine = doc.lineAt(to);
+		const lines: string[] = [];
+		for (let i = fromLine.number; i <= toLine.number; i++) {
+			const line = doc.line(i);
+			lines.push(before + line.text + (after ?? before));
 		}
-	];
-	let tools = $derived(TOOLBAR_DEFAULTS.concat(toolbar));
+		cm.dispatch({
+			changes: { from: fromLine.from, to: toLine.to, insert: lines.join('\n') },
+			selection: EditorSelection.range(
+				fromLine.from + before.length,
+				fromLine.from + before.length + lines[0].length - before.length - (after ?? before).length
+			)
+		});
+	}
 
-	/**
-	 * EasyMDE doesn't support dynamic toolbar updates, so we monkey-patch
-	 * codemirror.getWrapperElement to intercept the toolbar container creation
-	 * and replace the old toolbar with a fresh one.
-	 */
-	const changeTools = () => {
-		if (!editor) return;
-		const bar = editor.toolbar_div;
-		const cm = editor.codemirror;
-		cm.off('cursorActivity');
-		const fn = cm.getWrapperElement;
-		cm.getWrapperElement = () => {
-			cm.getWrapperElement = fn;
-			return {
-				parentNode: {
-					insertBefore(a) {
-						bar.replaceWith(a);
-						editor.toolbar_div = a;
-					}
-				}
-			};
-		};
-		editor.createToolbar(tools);
-	};
-	$effect(() => {
-		wv(() => {
-			if (editor && value !== editor.value()) {
-				editor.value(value);
-			}
-		}, value);
-		wb(changeTools, tools);
-	});
+	/** Wrap selection or insert wrapper at cursor (inline). */
+	function wrapSelection(before: string, after?: string) {
+		if (!cm) return;
+		const { from, to } = cm.state.selection.main;
+		const text = cm.state.sliceDoc(from, to) || 'text';
+		cm.dispatch({
+			changes: { from, to, insert: before + text + (after ?? before) },
+			selection: EditorSelection.range(
+				from + before.length,
+				from + before.length + text.length
+			)
+		});
+	}
 
-	onMount(async () => {
-		const eModule = await import('easymde');
-		const Easy = eModule.default;
-		editor = new Easy({
-			element: e,
-			autoDownloadFontAwesome: false,
-			spellChecker: false,
-			uploadImage: true,
-			previewRender: () => '',
-			syncSideBySidePreviewScroll: false,
-			toolbar: tools,
-			imageUploadFunction: handleImageUpload,
-			shortcuts: {
-				preview: null,
-				fullscreen: null,
-				guide: null,
-				'upload-image': null
+	// ── Toolbar actions ──────────────────────────────────────────────
+
+	function toggleBold()          { wrapSelection('**'); }
+	function toggleItalic()        { wrapSelection('*'); }
+	function toggleStrikethrough() { wrapSelection('~~'); }
+	function insertQuote()         { wrapLine('> '); }
+	function insertUnorderedList() { wrapLine('- '); }
+	function insertOrderedList()   { wrapLine('1. '); }
+	function insertTable() {
+		if (!cm) return;
+		cm.dispatch({
+			changes: {
+				from: cm.state.selection.main.from,
+				insert: '\n| header | header |\n| --- | --- |\n| cell | cell |\n'
 			}
 		});
-		editor?.codemirror?.on('change', () => {
-			value = editor.value();
-		});
-		editor.value(value);
-	});
+	}
 
-	/**
-	 * Insert a file placeholder into the editor, upload the file,
-	 * then replace the temporary blob URL with the final server URL.
-	 */
-	async function handleImageUpload(f) {
-		const cm = editor.codemirror;
+	// ── File upload ──────────────────────────────────────────────────
+
+	async function handleFileUpload() {
+		if (!cm) return;
+		const files = await selectFile();
+		if (!files?.length) return;
+		const md = file2Md(files);
+		cm.dispatch({
+			changes: { from: cm.state.selection.main.from, insert: md }
+		});
+	}
+
+	/** Insert file placeholder, upload, then replace blob URL. */
+	async function handleImageUpload(f: File) {
+		if (!cm) return;
 		const blobUrl = createUrl(f);
-		cm.replaceSelection(`${createFileMd(f, blobUrl)}`);
+		const md = createFileMd(f, blobUrl);
+		cm.dispatch({ changes: { from: cm.state.selection.main.from, insert: md } });
 		filesUpload([f], (uploaded) => {
 			const finalUrl = createUrl(uploaded);
-			// Scan bottom-up to avoid position shifts from replacements
-			let line = cm.lineCount();
-			while (line--) {
-				const text = cm.getLine(line);
-				const idx = text.indexOf(blobUrl);
-				if (idx !== -1) {
-					cm.replaceRange(finalUrl, { line, ch: idx }, { line, ch: idx + blobUrl.length });
-				}
+			const doc = cm.state.doc.toString();
+			const idx = doc.indexOf(blobUrl);
+			if (idx !== -1) {
+				cm.dispatch({
+					changes: { from: idx, to: idx + blobUrl.length, insert: finalUrl }
+				});
 			}
 		});
 	}
+
+	// ── Built-in toolbar buttons ─────────────────────────────────────
+
+	const defaultButtons = [
+		{ label: 'B', title: 'Bold', action: toggleBold, bold: true },
+		{ label: 'I', title: 'Italic', action: toggleItalic, italic: true },
+		{ label: 'S', title: 'Strikethrough', action: toggleStrikethrough, strike: true },
+		{ label: '"', title: 'Quote', action: insertQuote },
+		{ label: '•', title: 'Unordered list', action: insertUnorderedList },
+		{ label: '1.', title: 'Ordered list', action: insertOrderedList },
+		{ label: '⊞', title: 'Table', action: insertTable },
+		{ label: '', title: 'Files', action: handleFileUpload, icon: 'icon i-file' }
+	];
 </script>
 
-<div class="e">
-	<textarea class="d" bind:this={e}></textarea>
+<div class="editor-wrapper">
+	<div class="toolbar">
+		{#each defaultButtons as btn (btn.title)}
+			<button onclick={btn.action} title={btn.title}>
+				{#if btn.icon}
+					<span class={btn.icon}></span>
+				{:else}
+					{btn.label}
+				{/if}
+			</button>
+		{/each}
+		{#each toolbar as btn (btn.name)}
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<button
+				onclick={btn.action}
+				title={btn.title}
+				class={btn.className || ''}
+			>
+				{btn.name}
+			</button>
+		{/each}
+	</div>
+	<CodeMirror
+		bind:value
+		lang={markdown()}
+		onready={(v) => cm = v}
+		lineWrapping={true}
+		tabSize={2}
+		placeholder="Write something..."
+	/>
 </div>
-
-<style lang="scss">
-	@use '../../lib/break' as *;
-	@import url(./font/fas.css);
-
-	.d {
-		display: none;
-	}
-
-	.e {
-		height: 100%;
-		overflow: hidden;
-		line-height: 2;
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		bottom: 0;
-	}
-</style>
