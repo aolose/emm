@@ -677,6 +677,12 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	const isLocalhost = /^(::1|127\.)/.test(ip);
 	const skipAll = sysStatue < 2 || isAdmin;
 
+	// Setup not complete — redirect to /config before skipAll bypasses checkRedirect
+	if (sysStatue < 2 && !isAdmin && pn !== '/config' && !/^\/(api|res|font|src|manifest\.json|favicon)/.test(pn)) {
+		const cr = new Response('', { status: 307, headers: new Headers({ location: '/config' }) });
+		return cr;
+	}
+
 	if (skipAll) {
 		return await handle();
 	}

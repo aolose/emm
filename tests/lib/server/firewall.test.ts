@@ -13,13 +13,14 @@ mock.module('$lib/server/index', () => ({
 
 let testIp = '127.0.0.1';
 let checkRedirectReturn = '';
+let mockSysStatue = 2;
 
 mock.module('$lib/server/utils', () => ({
 	checkRedirect: () => checkRedirectReturn,
 	getClient: () => undefined,
 	getClientAddr: () => testIp,
 	model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
-	sysStatue: 2,
+	get sysStatue() { return mockSysStatue; },
 }));
 
 mock.module('$lib/server/ipLite', () => ({
@@ -739,6 +740,68 @@ describe('Firewall rule matching', () => {
 			expect(adminRe.test('/adminer.php')).toBe(false);
 			expect(adminRe.test('/administrator')).toBe(false);
 			expect(adminRe.test('/Adminer.PHP')).toBe(false);
+		});
+	});
+
+	describe('setup redirect to /config when sysStatue < 2', () => {
+
+		beforeEach(async () => {
+			testIp = '10.0.0.4';
+		});
+
+		afterEach(() => {
+			testIp = '127.0.0.1';
+		});
+
+		it('redirects to /config when sysStatue is 0', async () => {
+			mock.module('$lib/server/utils', () => ({
+				checkRedirect: () => checkRedirectReturn,
+				getClient: () => undefined,
+				getClientAddr: () => testIp,
+				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
+				sysStatue: 0,
+			}));
+			const mod = await import('../../../src/lib/server/firewall');
+			mod.__test.setRules([]);
+			mod.__test.setTriggers([]);
+
+			const event = {
+				request: new Request('http://localhost/test-page'),
+				url: new URL('http://localhost/test-page'),
+				locals: { ip: '10.0.0.4' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await mod.firewallProcess(event, handle);
+
+			expect(res.status).toBe(307);
+			expect(res.headers.get('location')).toBe('/config');
+		});
+
+		it('passes through when already on /config', async () => {
+			mock.module('$lib/server/utils', () => ({
+				checkRedirect: () => checkRedirectReturn,
+				getClient: () => undefined,
+				getClientAddr: () => testIp,
+				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
+				sysStatue: 0,
+			}));
+			const mod = await import('../../../src/lib/server/firewall');
+			mod.__test.setRules([]);
+			mod.__test.setTriggers([]);
+
+			const event = {
+				request: new Request('http://localhost/config'),
+				url: new URL('http://localhost/config'),
+				locals: { ip: '10.0.0.4' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await mod.firewallProcess(event, handle);
+
+			expect(res.status).toBe(200);
 		});
 	});
 });
