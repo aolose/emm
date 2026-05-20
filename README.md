@@ -13,7 +13,7 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 
 ![home](doc/home.webp)
 
-## 目录
+## Contents
 
 - [Features](#features)
 - [Tech Stack](#tech-stack)
