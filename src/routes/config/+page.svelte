@@ -135,7 +135,7 @@
 <Head title="Blog Config" />
 <div class="a">
 	<div class="b">
-		<div class="o">Configure</div>
+		<div class="o">Emm Initialization {$statueSys}</div>
 		<Step value={step} info={steps} />
 		{#if $statueSys > 1}
 			<button class="up">
@@ -246,15 +246,15 @@
 	.o {
 		background: url('$lib/components/img/fav.png') left center no-repeat;
 		background-size: contain;
-		height: 60px;
-		width: 300px;
-		margin-bottom: 30px;
-		padding-left: 70px;
-		font-family: 'Architects Daughter';
-		color: #fff;
-		font-size: 20px;
-		display: flex;
-		align-items: center;
+    height: 25px;
+    width: 100%;
+    margin-bottom: 30px;
+    padding-left: 40px;
+    color: #a7adc9;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    margin-right: auto;
 		@include s() {
 			flex: 1;
 			padding-left: 38px;
@@ -266,14 +266,15 @@
 
 	.b {
 		height: 100%;
-		flex-direction: column;
+    flex-direction: column;
 		align-items: center;
 		width: 50%;
 		display: flex;
 		justify-content: center;
 		background: var(--bg1);
 		z-index: 2;
-		@include s() {
+    padding: 32px 32px 80px;
+    @include s() {
 			justify-content: flex-start;
 			width: 100%;
 			height: auto;
@@ -294,13 +295,15 @@
 	}
 
 	.m {
-		opacity: 0.5;
 		width: 400px;
-		padding: 10px;
-		color: #d39090;
+		padding: 0 10px;
+		color: #cf8345;
 		border-radius: 3px;
-		background: #312828;
 		white-space: pre-wrap;
+		margin-top: -30px;
+		@include s(){
+			width: 100%;
+		}
 	}
 
 	h1 {
@@ -329,13 +332,9 @@
 	}
 
 	.r {
-		margin: 20px auto;
 		width: 400px;
-		border-bottom: 1px solid var(--darkgrey);
 		height: 50px;
 		@include s() {
-			height: 40px;
-			margin-bottom: 10px;
 			width: 100%;
 		}
 
@@ -354,6 +353,7 @@
 			height: 50px;
 			font-size: 20px;
 			outline: none;
+			background: rgba(0,0,0,.5);
 
 			&:focus + i {
 				width: 100%;
@@ -368,9 +368,9 @@
 			right: 50%;
 			transform: translateX(50%);
 			width: 0;
-			background: var(--blue);
+			background: linear-gradient(90deg,transparent,var(--blue),transparent);
 			transition: 0.5s ease-in-out;
-			opacity: 0.4;
+			opacity: 0;
 		}
 	}
 
@@ -383,12 +383,13 @@
 		font-size: 20px;
 		width: 100px;
 		height: 50px;
-		border: 1px solid currentColor;
-		color: var(--darkgrey);
+		color: #666;
 		transition: 0.3s ease-in-out;
-
+    background: rgb(48 70 113 / 0.2);
+    opacity: .7;
 		&:hover {
-			color: var(--darkgrey-h);
+      color: #999;
+      background: rgb(48 70 113 / 0.3);
 			opacity: 1 !important;
 		}
 	}
@@ -404,8 +405,8 @@
 		}
 
 		button {
-			opacity: 0.5;
-			color: var(--blue);
+			background: rgb(48 70 113 / 0.47);
+			color: #fff;
 		}
 	}
 
@@ -420,11 +421,21 @@
 	}
 
 	.f {
+		flex: 1;
 		display: flex;
 		position: static;
 		align-items: center;
 		flex-direction: column;
 		justify-content: center;
+		gap: 50px;
+		@include s(){
+			width: 80%;
+			padding: 40px 0;
+      justify-content: start;
+	    .h{
+				margin-top: auto;
+			}
+		}
 	}
 
 	.fm {
@@ -438,6 +449,7 @@
 		@include s() {
 			padding-top: 100px;
 			width: 100%;
+			display: flex;
 			justify-content: flex-start;
 			height: auto;
 		}
@@ -451,6 +463,9 @@
 	.e {
 		width: 510px;
 		padding: 30px 0;
+		@include s() {
+			width: 80%;
+		}
 	}
 
 	h3 {
@@ -471,9 +486,9 @@
 
 	.act span,
 	input:focus ~ span {
-		transform: translate3d(0, -70%, 0);
-		font-size: 20px;
-		color: var(--darkgrey);
+		transform: translate3d(0, -160%, 0);
+		font-size: 14px;
+		color: #aaa;
 	}
 
 	.k {
@@ -487,21 +502,35 @@
 			color: #fff;
 			background: var(--blue);
 		}
+		@include s(){
+			position: relative;
+			margin-top: 20px;
+			width: 80%;
+			right: 0;
+			background: var(--bg7);
+		}
 	}
 
 	.up {
-		border-color: rgba(100, 120, 150, 0.8);
+		margin-right: auto;
+		border: none;
+		background: #000000;
 		display: flex;
 		align-items: center;
 		height: auto;
-		padding: 5px 15px;
-		color: rgba(120, 150, 180, 1);
+		font-size: 10px;
+		padding: 4px 8px;
+		color: #fff;
 		width: auto;
-		border-radius: 100px;
-		font-size: 13px;
-
+		border-radius: 4px;
 		span {
 			padding-left: 5px;
+			font-size: 10px;
+			color: inherit;
+		}
+		&:hover {
+			background: #fff;
+			color: #000;
 		}
 
 		input {

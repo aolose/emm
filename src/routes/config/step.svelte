@@ -37,6 +37,9 @@
 	}
 
 	.k {
+		flex: 1;
+		display: flex;
+		align-items: center;
 		@include s() {
 			position: absolute;
 			left: 0;
@@ -52,7 +55,8 @@
 	.f {
 		z-index: 2;
 		left: 0;
-		top: 0;
+		top: 50%;
+		transform: translateY(-50%);
 		opacity: 0.5;
 		position: absolute;
 		color: #fff;
@@ -79,16 +83,14 @@
 		height: 50px;
 		display: flex;
 		width: 50px;
-		font-size: 30px;
+		font-size: 24px;
 		align-items: center;
 		justify-content: center;
-		font-family: 'Architects Daughter';
 	}
 
 	p {
-		font-size: 18px;
-		font-family: 'Architects Daughter';
-		top: 55%;
+		font-size: 16px;
+		top: 53%;
 		transform: translateY(-50%);
 		position: absolute;
 		left: 45px;
@@ -98,8 +100,9 @@
 	i {
 		display: block;
 		left: 20px;
-		top: 100px;
+		top: 70px;
 		height: 100%;
+		opacity: .2;
 		border-left: 1px dashed currentColor;
 		position: absolute;
 	}
@@ -125,7 +128,7 @@
 
 	.s {
 		padding: 20px 0;
-		margin-bottom: 100px;
+		margin-bottom: 20px;
 		display: flex;
 		@include s() {
 			width: 100%;
