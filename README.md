@@ -18,7 +18,7 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
-- [Turnstile 反爬配置](#turnstile-反爬配置)
+- [Turnstile Anti-Crawl Setup](#turnstile-anti-crawl-setup)
 - [Contributing](#contributing)
 - [Screenshots](#screenshots)
 - [License](#license)
@@ -154,7 +154,7 @@ Or with PM2:
 pm2 start dist/index.js --name emm --interpreter bun
 ```
 
-## Turnstile 反爬配置
+## Turnstile Anti-Crawl Setup
 
 EMM 集成了 Cloudflare Turnstile 人机验证，并内置了搜索引擎爬虫白名单绕过逻辑。
 
