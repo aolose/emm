@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach } from 'bun:test';
+import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test';
 
 // Mock SvelteKit modules
 mock.module('$app/navigation', () => ({ goto: () => {} }));
@@ -11,10 +11,12 @@ mock.module('$lib/server/index', () => ({
 	sys: { maxFireLogs: 1000 },
 }));
 
+let testIp = '127.0.0.1';
+
 mock.module('$lib/server/utils', () => ({
 	checkRedirect: () => undefined,
 	getClient: () => undefined,
-	getClientAddr: () => '127.0.0.1',
+	getClientAddr: () => testIp,
 	model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
 	sysStatue: 2,
 }));
@@ -39,6 +41,18 @@ mock.module('$lib/utils', () => ({
 	hds2Str: () => '',
 	str2Hds: () => [],
 	trim: (s?: string) => (s || '').trim(),
+}));
+
+mock.module('$lib/server/turnstile', () => ({
+	isTsVerified: () => false,
+	challengeResponse: () => new Response('turnstile', { status: 418 }),
+	challengeResponseRedirect: () => new Response('', { status: 307 }),
+	challengeResponseJson: () => new Response('{}', { status: 403 }),
+	signTsCookie: () => '',
+	verifyTsCookie: () => false,
+	getTsCookie: () => undefined,
+	setTsCookie: () => {},
+	verifyTurnstileToken: async () => false,
 }));
 
 import { FWRule } from '../../../src/lib/server/model';
@@ -396,6 +410,82 @@ describe('Firewall rule matching', () => {
 			addBlackListRule({ ip: '10.0.0.3', respId: -1 });
 
 			expect(getBlackList().length).toBe(3);
+		});
+	});
+
+	describe('firewallProcess \u2014 non-status triggers block before Turnstile', () => {
+		let firewallProcess: any;
+		let setTriggers: any;
+		let setRules: any;
+		let clearBlackList: any;
+
+		beforeEach(async () => {
+			testIp = '10.0.0.1';
+			const mod = await import('../../../src/lib/server/firewall');
+			firewallProcess = mod.firewallProcess;
+			setTriggers = mod.__test.setTriggers;
+			setRules = mod.__test.setRules;
+			clearBlackList = mod.__test.clearBlackList;
+			setRules([]);
+			setTriggers([]);
+			clearBlackList();
+		});
+
+		afterEach(() => {
+			// Restore default IP so other tests are unaffected
+			testIp = '127.0.0.1';
+			setRules([]);
+			setTriggers([]);
+		});
+
+		it('blocks via trigger and skips Turnstile when rate limit exceeded', async () => {
+			const trigger = new FWRule();
+			trigger.id = 1;
+			trigger.path = '/about';
+			trigger.trigger = true;
+			trigger.rate = '1/1';
+			trigger.active = true;
+			trigger.ip = '';
+			trigger.respId = -1;
+			trigger.country = '';
+			trigger.method = '';
+			trigger.headers = '';
+			trigger.status = '';
+			setTriggers([trigger]);
+
+			// Dummy rule to prevent fwFilter from calling loadRules()
+			// (which would reset triggers to empty)
+			const dummy = new FWRule();
+			dummy.id = 999;
+			dummy.active = false;
+			setRules([dummy as any]);
+
+			const event = {
+				request: new Request('http://localhost/about'),
+				url: new URL('http://localhost/about'),
+				locals: { ip: '10.0.0.1' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await firewallProcess(event, handle);
+
+			// Should be blocked by trigger (403), NOT Turnstile (418)
+			expect(res.status).toBe(403);
+		});
+
+		it('passes through to Turnstile when no trigger matches', async () => {
+			const event = {
+				request: new Request('http://localhost/about'),
+				url: new URL('http://localhost/about'),
+				locals: { ip: '10.0.0.1' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await firewallProcess(event, handle);
+
+			expect(res.status).toBe(418);
 		});
 	});
 });

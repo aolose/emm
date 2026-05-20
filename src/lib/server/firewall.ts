@@ -713,16 +713,7 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		return res;
 	}
 
-	// Turnstile anti-crawl: protect article paths from crawlers.
-	// Cloudflare Turnstile decides whether to challenge based on risk.
-	// Protected: /, /posts, /post/*, /tags, /tag/*, /about
-	const isTsProtected = /^\/($|posts(\/|$)|post\/|tags(\/|$)|tag\/|about(\/|$))/.test(pn);
-	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
-	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
-	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
-		return challengeResponse(event.url.href, isApi);
-	}
-
+	// Non-status trigger rules — run before Turnstile to block early
 	const log = logReq(event);
 	if (fr) {
 		log.mark = fr.mark;
@@ -734,16 +725,34 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		if (a.status) sTr.push(a);
 		else nTr.push(a);
 	});
+	res = triggersHit(nTr, log);
 	if (res) {
-		log.status = res?.status;
-	} else {
-		res = triggersHit(nTr, log);
-	}
-	if (!res) {
-		res = await handle();
 		log.status = res.status;
-		res = triggersHit(sTr, log) || res;
+		if (!isLocalhost && !isAuthenticated && (fr?.log || log.log)) {
+			saveToDb(log);
+		}
+		ruv({
+			ip: log.ip,
+			path: log.path,
+			ua: log.headers.get('user-agent') || '',
+			status: res.status
+		});
+		return res;
 	}
+
+	// Turnstile anti-crawl: protect article paths from crawlers.
+	// Cloudflare Turnstile decides whether to challenge based on risk.
+	// Protected: /, /posts, /post/*, /tags, /tag/*, /about
+	const isTsProtected = /^\/($|posts(\/|$)|post\/|tags(\/|$)|tag\/|about(\/|$))/.test(pn);
+	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
+	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
+	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
+		return challengeResponse(event.url.href, isApi);
+	}
+
+	res = await handle();
+	log.status = res.status;
+	res = triggersHit(sTr, log) || res;
 	if (!isLocalhost && !isAuthenticated && (fr?.log || log.log)) {
 		saveToDb(log);
 	}
