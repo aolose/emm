@@ -494,7 +494,6 @@ const triggersHit = (tr: FWRule[], r: log) => {
 	if (!tr.length) return;
 	const matched = tr.find((a) => hitRule(r, a));
 	if (matched) {
-		if (matched.log) r.log = true;
 		const o = blackListCheck(r, tr);
 		if (o) {
 			o.respId = o.respId || -1;

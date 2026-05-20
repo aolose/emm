@@ -563,7 +563,7 @@ describe('Firewall rule matching', () => {
 		});
 	});
 
-	describe('triggersHit propagates log flag without rate limiting', () => {
+	describe('triggersHit log flag — only on rate-limit action', () => {
 		let firewallProcess: any;
 		let getLogCacheEntries: any;
 		let setTriggers: any;
@@ -589,7 +589,7 @@ describe('Firewall rule matching', () => {
 			setTriggers([]);
 		});
 
-		it('sets log flag on trigger match even without rate limit', async () => {
+		it('does not set log flag on trigger match when rate limit is not exceeded', async () => {
 			const trigger = new FWRule();
 			trigger.id = 10;
 			trigger.path = '/tag/some-slug';
@@ -602,7 +602,7 @@ describe('Firewall rule matching', () => {
 			trigger.method = '';
 			trigger.headers = '';
 			trigger.status = '';
-			trigger.rate = '';
+			trigger.rate = '10/300';  // rate limit defined but only 1 request
 			setTriggers([trigger]);
 
 			const dummy = new FWRule();
@@ -620,13 +620,54 @@ describe('Firewall rule matching', () => {
 			const handle = async () => new Response('ok', { status: 200 });
 			const res = await firewallProcess(event, handle);
 
-			// No rate limit → falls through to Turnstile
+			// Rate not exceeded → falls through to Turnstile
 			expect(res.status).toBe(418);
 
-			// Log cache entry should have log flag set
+			// Log flag should NOT be set — trigger didn't take action
 			const entries = getLogCacheEntries();
 			const last = entries[entries.length - 1];
 			expect(last.path).toBe('/tag/some-slug');
+			expect(last.log).toBeUndefined();
+		});
+
+		it('sets log flag when trigger rate limit is exceeded', async () => {
+			const trigger = new FWRule();
+			trigger.id = 12;
+			trigger.path = '/tag/rate-hit';
+			trigger.trigger = true;
+			trigger.log = true;
+			trigger.active = true;
+			trigger.ip = '';
+			trigger.respId = -1;
+			trigger.country = '';
+			trigger.method = '';
+			trigger.headers = '';
+			trigger.status = '';
+			trigger.rate = '1/1';  // 1 request per 1s → first hit exceeds
+			setTriggers([trigger]);
+
+			const dummy = new FWRule();
+			dummy.id = 999;
+			dummy.active = false;
+			setRules([dummy as any]);
+
+			const event = {
+				request: new Request('http://localhost/tag/rate-hit'),
+				url: new URL('http://localhost/tag/rate-hit'),
+				locals: { ip: '10.0.0.2' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await firewallProcess(event, handle);
+
+			// Rate exceeded → blocked by trigger (403)
+			expect(res.status).toBe(403);
+
+			// Log flag should be set — trigger took action
+			const entries = getLogCacheEntries();
+			const last = entries[entries.length - 1];
+			expect(last.path).toBe('/tag/rate-hit');
 			expect(last.log).toBe(true);
 		});
 
