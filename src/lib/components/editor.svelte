@@ -27,7 +27,7 @@
 		const text = doc.toString();
 		const line = doc.lineAt(pos).text;
 
-		const findSurrounding = (marker: string): boolean => {
+		const findSurrounding = (marker: string) => {
 			const before = text.slice(0, pos);
 			const after = text.slice(pos);
 			const lastOpen = before.lastIndexOf(marker);
@@ -62,23 +62,57 @@
 	function toggleWrapper(w: string) {
 		if (!cm) return;
 		const { from, to } = cm.state.selection.main;
-		const text = cm.state.sliceDoc(from, to) || 'text';
 		const len = w.length;
+		const doc = cm.state.doc;
+		const fullText = doc.toString();
 
-		if (text.startsWith(w) && text.endsWith(w) && text.length >= 2 * len) {
-			const inner = text.slice(len, -len);
-			cm.dispatch({
-				changes: { from, to, insert: inner },
-				selection: EditorSelection.range(from, from + inner.length)
-			});
-		} else {
-			cm.dispatch({
-				changes: { from, to, insert: w + text + w },
-				selection: EditorSelection.range(from + len, from + len + text.length)
-			});
+		// Case 1: text selected
+		if (from !== to) {
+			const sel = fullText.slice(from, to);
+			if (sel.startsWith(w) && sel.endsWith(w) && sel.length >= 2 * len) {
+				const inner = sel.slice(len, -len);
+				cm.dispatch({
+					changes: { from, to, insert: inner },
+					selection: EditorSelection.range(from, from + inner.length)
+				});
+			} else {
+				cm.dispatch({
+					changes: { from, to, insert: w + sel + w },
+					selection: EditorSelection.range(from + len, from + len + sel.length)
+				});
+			}
+			updateActiveState();
+			return;
 		}
+
+		// Case 2: no selection, check surrounding pair
+		const pos = from;
+		const before = fullText.slice(0, pos);
+		const after = fullText.slice(pos);
+		const openAt = before.lastIndexOf(w);
+		if (openAt === -1) return insertPlaceholder(w, pos, len);
+		const closeAt = after.indexOf(w);
+		if (closeAt === -1) return insertPlaceholder(w, pos, len);
+		const between = before.slice(openAt + len);
+		if (between.lastIndexOf(w) !== -1) return insertPlaceholder(w, pos, len);
+
+		// Cursor inside pair, unwrap
+		const inner = fullText.slice(openAt + len, pos + closeAt);
+		cm.dispatch({
+			changes: { from: openAt, to: pos + closeAt + len, insert: inner }
+		});
 		updateActiveState();
 	}
+
+	function insertPlaceholder(w: string, pos: number, len: number) {
+		if (!cm) return;
+		cm.dispatch({
+			changes: { from: pos, insert: w + 'text' + w },
+			selection: EditorSelection.range(pos + len, pos + len + 4)
+		});
+		updateActiveState();
+	}
+
 
 	function toggleLinePrefix(prefix: string) {
 		if (!cm) return;
