@@ -156,13 +156,13 @@ pm2 start dist/index.js --name emm --interpreter bun
 
 ## Turnstile Anti-Crawl Setup
 
-EMM 集成了 Cloudflare Turnstile 人机验证，并内置了搜索引擎爬虫白名单绕过逻辑。
+EMM integrates Cloudflare Turnstile CAPTCHA and includes a built-in search engine crawler whitelist bypass logic.
 
-如果你使用 Cloudflare 代理且开启了 Turnstile，需要配置一条 Transform Rule 以确保 SEO 爬虫不被拦截。
+If you use Cloudflare proxy and have Turnstile enabled, you need to configure a Transform Rule to ensure SEO crawlers are not blocked.
 
-详细步骤参见：[doc/turnstile.md](doc/turnstile.md)
+For detailed steps, see: [doc/turnstile.md](doc/turnstile.md)
 
-> **安全提醒：** 务必保护源站，防止攻击者绕过 Cloudflare 直接访问源站 IP 伪造请求头。推荐使用 [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) 或限制源站防火墙仅接受 [Cloudflare IP 范围](https://www.cloudflare.com/ips/)。
+> **Security Reminder**: Make sure to protect your origin server to prevent attackers from bypassing Cloudflare and directly accessing the origin IP to forge request headers. It is recommended to use  [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) or restrict your origin firewall to only accept [Cloudflare IP ranges](https://www.cloudflare.com/ips/).
 
 ## Contributing
 
