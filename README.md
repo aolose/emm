@@ -67,7 +67,7 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 - **Turnstile Integration** — Cloudflare Turnstile CAPTCHA with verified bot bypass
 - **Firewall** — IP-based access control, bot detection, custom rules with time scheduling
 - **UA Collection Detection** — Detect distributed crawlers by grouping IPs sharing the same User-Agent
-- **Geo IP Blocking** — Country-level access control via ip2location lite
+- **Geo IP Location** — Display visitor geographic information based on IP2Location Lite
 - **Cloudflare Integration** — Auto-push blocked IPs to Cloudflare IP Lists for edge-level filtering
 - **Backup & Restore** — Export and import data for disaster recovery
 - **Self-Hosted** — Runs on your own server, all data stays with you
