@@ -300,7 +300,7 @@
 		position: absolute;
 		font-size: 12px;
 		bottom: 0;
-		left: 0;
+		left: 10px;
 		right: 0;
 		display: flex;
 		justify-content: space-between;
@@ -308,7 +308,8 @@
 	}
 
 	.wc {
-		color: var(--text, #666);
+		color: rgba(127, 146, 161, 0.75);
+		padding: 0 10px;
 	}
 
 	.a {

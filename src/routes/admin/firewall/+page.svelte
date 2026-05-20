@@ -204,7 +204,7 @@
 	.tb {
 		display: flex;
 		height: 30px;
-		gap: 12px;
+		margin-right: 16px;
 		align-items: center;
 		background: var(--bg0);
 		@include s() {

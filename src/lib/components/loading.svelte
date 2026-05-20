@@ -63,7 +63,7 @@
 		right: 0;
 		bottom: 0;
 		top: 0;
-		background: color.adjust(rgb(17, 21, 30), $alpha: -0.2);
+		background: color.adjust(rgb(15 16 19), $alpha: -0.2);
 		backdrop-filter: blur(1px);
 		border-radius: inherit;
 		z-index: 100;

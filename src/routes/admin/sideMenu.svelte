@@ -50,8 +50,8 @@
 				&.act,
 				&:hover {
 					color: #fff;
-					background: var(--c-primary);
-					border-radius: 50px;
+					background: rgb(83 133 211 / 0.3);
+					border-radius: 8px;
 				}
 			}
 		}

@@ -38,19 +38,19 @@
 	flex-wrap: wrap;
 	background: var(--bg0, #1a1d2b);
 	flex-shrink: 0;
-	padding: 0 10px;
+	padding:  10px;
 }
 
 .toolbar button {
-	width: 30px;
+	width: 32px;
 	padding: 0;
-	height: 30px;
+	height: 32px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	border: none;
 	background: transparent;
-	color: var(--text, #828fa4);
+	color:  #828fa4;
 	cursor: pointer;
 	border-radius: 4px;
 	font-size: 15px;
@@ -90,7 +90,6 @@
 	flex: 1;
 	height: 100% !important;
 	overflow: hidden;
-	background: var(--bg6, #1e2233);
 }
 
 .editor-wrapper .cm-editor .cm-scroller {
@@ -105,13 +104,12 @@
 }
 
 .editor-wrapper .cm-editor .cm-activeLine {
-	background-color: var(--bg7) !important;
+	background-color: var(--bg7) ;
 }
 
 .editor-wrapper .cm-editor .cm-cursor {
 	border-left-color: #fff;
 }
-
 
 .editor-wrapper .cm-selectionMatch {
 	background: #22334a;

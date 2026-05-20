@@ -83,7 +83,7 @@
 
     .act {
       color: antiquewhite;
-      background: var(--c-primary);
+      background: var(--bg-separator);
       &.loading { animation: pageloading 1.2s ease-in-out infinite; }
     }
 
