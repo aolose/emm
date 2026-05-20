@@ -11,49 +11,100 @@
 	let cm: EditorView;
 	let { value = $bindable(''), toolbar = [] } = $props();
 
-	// ── Markdown toggle helpers ──────────────────────────────────────
+	// ── Active formatting state ──────────────────────────────────────
 
-	function wrapLine(before: string, after?: string) {
+	let activeBold = $state(false);
+	let activeItalic = $state(false);
+	let activeStrike = $state(false);
+	let activeQuote = $state(false);
+	let activeUL = $state(false);
+	let activeOL = $state(false);
+
+	function updateActiveState() {
+		if (!cm) return;
+		const pos = cm.state.selection.main.head;
+		const doc = cm.state.doc;
+		const text = doc.toString();
+		const line = doc.lineAt(pos).text;
+
+		const findSurrounding = (marker: string): boolean => {
+			const before = text.slice(0, pos);
+			const after = text.slice(pos);
+			const lastOpen = before.lastIndexOf(marker);
+			if (lastOpen === -1) return false;
+			const nextClose = after.indexOf(marker);
+			if (nextClose === -1) return false;
+			const between = before.slice(lastOpen + marker.length);
+			const beforeNext = between.lastIndexOf(marker);
+			if (beforeNext !== -1) return false;
+			return true;
+		};
+
+		activeBold = findSurrounding('**');
+		activeItalic = findSurrounding('*');
+		activeStrike = findSurrounding('~~');
+		activeQuote = /^> /.test(line);
+		activeUL = /^- /.test(line);
+		activeOL = /^\d+\. /.test(line);
+	}
+
+	// ── Toggle helpers ───────────────────────────────────────────────
+
+	function toggleWrapper(w: string) {
+		if (!cm) return;
+		const { from, to } = cm.state.selection.main;
+		const text = cm.state.sliceDoc(from, to) || 'text';
+		const len = w.length;
+
+		if (text.startsWith(w) && text.endsWith(w) && text.length >= 2 * len) {
+			const inner = text.slice(len, -len);
+			cm.dispatch({
+				changes: { from, to, insert: inner },
+				selection: EditorSelection.range(from, from + inner.length)
+			});
+		} else {
+			cm.dispatch({
+				changes: { from, to, insert: w + text + w },
+				selection: EditorSelection.range(from + len, from + len + text.length)
+			});
+		}
+		updateActiveState();
+	}
+
+	function toggleLinePrefix(prefix: string) {
 		if (!cm) return;
 		const { from, to } = cm.state.selection.main;
 		const doc = cm.state.doc;
 		const fromLine = doc.lineAt(from);
 		const toLine = doc.lineAt(to);
+		const prefixLen = prefix.length;
+
+		let allPrefixed = true;
 		const lines: string[] = [];
 		for (let i = fromLine.number; i <= toLine.number; i++) {
-			const line = doc.line(i);
-			lines.push(before + line.text + (after ?? before));
+			const t = doc.line(i).text;
+			lines.push(t);
+			if (!t.startsWith(prefix)) allPrefixed = false;
 		}
-		cm.dispatch({
-			changes: { from: fromLine.from, to: toLine.to, insert: lines.join('\n') },
-			selection: EditorSelection.range(
-				fromLine.from + before.length,
-				fromLine.from + before.length + lines[0].length - before.length - (after ?? before).length
-			)
-		});
-	}
 
-	function wrapSelection(before: string, after?: string) {
-		if (!cm) return;
-		const { from, to } = cm.state.selection.main;
-		const text = cm.state.sliceDoc(from, to) || 'text';
+		const newLines = allPrefixed
+			? lines.map(l => l.slice(prefixLen))
+			: lines.map(l => prefix + l);
+
 		cm.dispatch({
-			changes: { from, to, insert: before + text + (after ?? before) },
-			selection: EditorSelection.range(
-				from + before.length,
-				from + before.length + text.length
-			)
+			changes: { from: fromLine.from, to: toLine.to, insert: newLines.join('\n') }
 		});
+		updateActiveState();
 	}
 
 	// ── Toolbar actions ──────────────────────────────────────────────
 
-	function toggleBold()          { wrapSelection('**'); }
-	function toggleItalic()        { wrapSelection('*'); }
-	function toggleStrikethrough() { wrapSelection('~~'); }
-	function insertQuote()         { wrapLine('> '); }
-	function insertUnorderedList() { wrapLine('- '); }
-	function insertOrderedList()   { wrapLine('1. '); }
+	function toggleBold()          { toggleWrapper('**'); }
+	function toggleItalic()        { toggleWrapper('*'); }
+	function toggleStrikethrough() { toggleWrapper('~~'); }
+	function toggleQuote()         { toggleLinePrefix('> '); }
+	function toggleUL()            { toggleLinePrefix('- '); }
+	function toggleOL()            { toggleLinePrefix('1. '); }
 	function insertTable() {
 		if (!cm) return;
 		cm.dispatch({
@@ -76,7 +127,6 @@
 		});
 	}
 
-	/** Insert file placeholder, upload, then replace blob URL. */
 	async function handleImageUpload(f: File) {
 		if (!cm) return;
 		const blobUrl = createUrl(f);
@@ -94,10 +144,11 @@
 		});
 	}
 
-	// ── Paste-to-upload (Ctrl+V image) ───────────────────────────────
+	// ── Paste-to-upload + active state tracking ──────────────────────
 
 	function onEditorReady(v: EditorView) {
 		cm = v;
+
 		v.dom.addEventListener('paste', (e: ClipboardEvent) => {
 			const items = e.clipboardData?.items;
 			if (!items) return;
@@ -110,26 +161,36 @@
 				}
 			}
 		});
+
+		const track = () => updateActiveState();
+		v.dom.addEventListener('click', track);
+		v.dom.addEventListener('keyup', track);
+		v.dom.addEventListener('focus', track);
 	}
 
 	// ── Built-in toolbar buttons ─────────────────────────────────────
 
 	const defaultButtons = [
-		{ title: 'Bold', action: toggleBold, cls: 'tb-bold' },
-		{ title: 'Italic', action: toggleItalic, cls: 'tb-italic' },
-		{ title: 'Strikethrough', action: toggleStrikethrough, cls: 'tb-strike' },
-		{ title: 'Quote', action: insertQuote, cls: 'tb-quote' },
-		{ title: 'Unordered list', action: insertUnorderedList, cls: 'tb-ul' },
-		{ title: 'Ordered list', action: insertOrderedList, cls: 'tb-ol' },
-		{ title: 'Table', action: insertTable, cls: 'tb-table' },
-		{ title: 'Files / Image', action: handleFileUpload, cls: 'icon i-pic' }
+		{ title: 'Bold', action: toggleBold, cls: 'tb-bold', active: () => activeBold },
+		{ title: 'Italic', action: toggleItalic, cls: 'tb-italic', active: () => activeItalic },
+		{ title: 'Strikethrough', action: toggleStrikethrough, cls: 'tb-strike', active: () => activeStrike },
+		{ title: 'Quote', action: toggleQuote, cls: 'tb-quote', active: () => activeQuote },
+		{ title: 'Unordered list', action: toggleUL, cls: 'tb-ul', active: () => activeUL },
+		{ title: 'Ordered list', action: toggleOL, cls: 'tb-ol', active: () => activeOL },
+		{ title: 'Table', action: insertTable, cls: 'tb-table', active: () => false },
+		{ title: 'Files / Image', action: handleFileUpload, cls: 'icon i-pic', active: () => false }
 	];
 </script>
 
 <div class="editor-wrapper">
 	<div class="toolbar">
 		{#each defaultButtons as btn (btn.title)}
-			<button onclick={btn.action} title={btn.title} class={btn.cls}></button>
+			<button
+				onclick={btn.action}
+				title={btn.title}
+				class={btn.cls}
+				aria-pressed={btn.active()}
+			></button>
 		{/each}
 		{#each toolbar as btn (btn.name)}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
