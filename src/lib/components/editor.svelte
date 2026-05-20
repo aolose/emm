@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import './cm-editor.css';
 	import { filesUpload, selectFile } from '$lib/store';
 	import { createFileMd, createUrl, file2Md, watch } from '$lib/utils';
@@ -14,10 +13,6 @@
 
 	// ── Markdown toggle helpers ──────────────────────────────────────
 
-	/**
-	 * Wrap each selected line in the given before/after strings.
-	 * If selection is empty, inserts the wrapper at cursor.
-	 */
 	function wrapLine(before: string, after?: string) {
 		if (!cm) return;
 		const { from, to } = cm.state.selection.main;
@@ -38,7 +33,6 @@
 		});
 	}
 
-	/** Wrap selection or insert wrapper at cursor (inline). */
 	function wrapSelection(before: string, after?: string) {
 		if (!cm) return;
 		const { from, to } = cm.state.selection.main;
@@ -100,30 +94,42 @@
 		});
 	}
 
+	// ── Paste-to-upload (Ctrl+V image) ───────────────────────────────
+
+	function onEditorReady(v: EditorView) {
+		cm = v;
+		v.dom.addEventListener('paste', (e: ClipboardEvent) => {
+			const items = e.clipboardData?.items;
+			if (!items) return;
+			for (const item of items) {
+				if (item.type.startsWith('image/')) {
+					e.preventDefault();
+					const file = item.getAsFile();
+					if (file) handleImageUpload(file);
+					return;
+				}
+			}
+		});
+	}
+
 	// ── Built-in toolbar buttons ─────────────────────────────────────
 
 	const defaultButtons = [
-		{ label: 'B', title: 'Bold', action: toggleBold, bold: true },
-		{ label: 'I', title: 'Italic', action: toggleItalic, italic: true },
-		{ label: 'S', title: 'Strikethrough', action: toggleStrikethrough, strike: true },
-		{ label: '"', title: 'Quote', action: insertQuote },
-		{ label: '•', title: 'Unordered list', action: insertUnorderedList },
-		{ label: '1.', title: 'Ordered list', action: insertOrderedList },
-		{ label: '⊞', title: 'Table', action: insertTable },
-		{ label: '', title: 'Files', action: handleFileUpload, icon: 'icon i-file' }
+		{ title: 'Bold', action: toggleBold, cls: 'tb-bold' },
+		{ title: 'Italic', action: toggleItalic, cls: 'tb-italic' },
+		{ title: 'Strikethrough', action: toggleStrikethrough, cls: 'tb-strike' },
+		{ title: 'Quote', action: insertQuote, cls: 'tb-quote' },
+		{ title: 'Unordered list', action: insertUnorderedList, cls: 'tb-ul' },
+		{ title: 'Ordered list', action: insertOrderedList, cls: 'tb-ol' },
+		{ title: 'Table', action: insertTable, cls: 'tb-table' },
+		{ title: 'Files / Image', action: handleFileUpload, cls: 'icon i-pic' }
 	];
 </script>
 
 <div class="editor-wrapper">
 	<div class="toolbar">
 		{#each defaultButtons as btn (btn.title)}
-			<button onclick={btn.action} title={btn.title}>
-				{#if btn.icon}
-					<span class={btn.icon}></span>
-				{:else}
-					{btn.label}
-				{/if}
-			</button>
+			<button onclick={btn.action} title={btn.title} class={btn.cls}></button>
 		{/each}
 		{#each toolbar as btn (btn.name)}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -131,16 +137,15 @@
 				onclick={btn.action}
 				title={btn.title}
 				class={btn.className || ''}
-			>
-				{btn.name}
-			</button>
+			></button>
 		{/each}
 	</div>
 	<CodeMirror
 		bind:value
 		lang={markdown()}
-		onready={(v) => cm = v}
+		onready={onEditorReady}
 		lineWrapping={true}
+		lineNumbers={false}
 		tabSize={2}
 		placeholder="Write something..."
 	/>

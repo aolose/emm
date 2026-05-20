@@ -46,10 +46,19 @@
 	font-size: 18px;
 }
 
-/* Bold / Italic / Strikethrough text styling */
-.toolbar button:first-child  { font-weight: bold; }
-.toolbar button:nth-child(2) { font-style: italic; }
-.toolbar button:nth-child(3) { text-decoration: line-through; }
+/* Toolbar icon buttons — hide inner text, show ::before icon only */
+.toolbar button[class*="icon"] {
+	font-size: 0;
+}
+
+/* ── Built-in toolbar button icons ──────────────────────────────── */
+.tb-bold::after   { content: 'B'; font-weight: bold; }
+.tb-italic::after { content: 'I'; font-style: italic; }
+.tb-strike::after { content: 'S'; text-decoration: line-through; }
+.tb-quote::after  { content: '"'; font-size: 18px; font-weight: bold; font-family: serif; }
+.tb-ul::after     { content: '•'; font-size: 20px; }
+.tb-ol::after     { content: '1.'; font-size: 13px; font-weight: bold; }
+.tb-table::after  { content: '⊞'; font-size: 16px; }
 
 /* ── CodeMirror 6 dark theme ────────────────────────────────────── */
 .editor-wrapper :global(.cm-editor) {
@@ -63,16 +72,6 @@
 	font-size: 15px;
 	line-height: 2;
 	padding: 8px 0;
-}
-
-.editor-wrapper :global(.cm-editor .cm-gutters) {
-	background: var(--bg5, #1a1d2b);
-	border-right: 1px solid #333;
-	color: #666;
-}
-
-.editor-wrapper :global(.cm-editor .cm-activeLineGutter) {
-	background: rgba(255, 255, 255, 0.04);
 }
 
 .editor-wrapper :global(.cm-editor .cm-activeLine) {
