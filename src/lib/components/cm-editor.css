@@ -42,10 +42,6 @@
 	color: #fff;
 }
 
-.toolbar button .icon {
-	font-size: 18px;
-}
-
 /* Toolbar icon buttons — hide inner text, show ::before icon only */
 .toolbar button[class*="icon"] {
 	font-size: 0;
@@ -64,54 +60,67 @@
 .tb-ol::after     { content: '1.'; font-size: 13px; font-weight: bold; }
 .tb-table::after  { content: '⊞'; font-size: 16px; }
 
-/* ── CodeMirror 6 dark theme ────────────────────────────────────── */
-.editor-wrapper :global(.cm-editor) {
+/* ── CodeMirror 6 theme ─────────────────────────────────────────── */
+.editor-wrapper .cm-editor {
 	flex: 1;
 	height: 100% !important;
 	overflow: hidden;
 	background: var(--bg6, #1e2233);
 }
 
-.editor-wrapper :global(.cm-editor .cm-scroller) {
+.editor-wrapper .cm-editor .cm-scroller {
 	overflow-y: auto;
 }
 
-.editor-wrapper :global(.cm-editor .cm-content) {
+.editor-wrapper .cm-editor .cm-content {
 	font-family: monospace;
 	font-size: 15px;
 	line-height: 2;
 	padding: 8px 0;
 }
 
-.editor-wrapper :global(.cm-editor .cm-activeLine) {
-	background: rgba(255, 255, 255, 0.03);
+.editor-wrapper .cm-editor .cm-activeLine {
+	background-color: var(--bg7) !important;
 }
 
-.editor-wrapper :global(.cm-editor .cm-cursor) {
+.editor-wrapper .cm-editor .cm-cursor {
 	border-left-color: #fff;
 }
 
-.editor-wrapper :global(.cm-editor .cm-selectionBackground) {
+.editor-wrapper .cm-editor .cm-selectionBackground {
 	background: rgba(100, 150, 255, 0.2) !important;
 }
 
-.editor-wrapper :global(.cm-editor .cm-selectionMatch) {
-	background: rgba(100, 150, 255, 0.12);
+.editor-wrapper .cm-selectionMatch {
+	background: none !important;
+	color: #5197dd;
 }
 
-.editor-wrapper :global(.cm-editor .cm-placeholder) {
+.editor-wrapper .cm-editor .cm-placeholder {
 	color: rgba(255, 255, 255, 0.2);
 }
 
+.editor-wrapper .cm-gutters {
+	display: none !important;
+}
+
+.editor-wrapper .cm-line {
+	line-height: 2 !important;
+}
+
+.editor-wrapper .ͼc {
+	color: rgb(83 182 225 / 0.67) !important;
+}
+
 /* ── Markdown syntax colors ─────────────────────────────────────── */
-.editor-wrapper :global(.cm-editor .cm-header)     { color: #61afef; }
-.editor-wrapper :global(.cm-editor .cm-strong)     { color: #e5c07b; font-weight: bold; }
-.editor-wrapper :global(.cm-editor .cm-em)         { color: #98c379; font-style: italic; }
-.editor-wrapper :global(.cm-editor .cm-quote)      { color: #5c6370; }
-.editor-wrapper :global(.cm-editor .cm-link)       { color: #56b6c2; text-decoration: underline; }
-.editor-wrapper :global(.cm-editor .cm-url)        { color: #56b6c2; }
-.editor-wrapper :global(.cm-editor .cm-code)       { color: #e06c75; background: rgba(0,0,0,0.15); padding: 0 3px; border-radius: 3px; }
-.editor-wrapper :global(.cm-editor .cm-codeBlock)  { color: #abb2bf; }
-.editor-wrapper :global(.cm-editor .cm-list)       { color: #61afef; }
-.editor-wrapper :global(.cm-editor .cm-hr)         { color: #5c6370; }
-.editor-wrapper :global(.cm-editor .cm-strikethrough) { text-decoration: line-through; color: rgba(130,143,164,0.5); }
+.editor-wrapper .cm-editor .cm-header     { color: #61afef; }
+.editor-wrapper .cm-editor .cm-strong     { color: #e5c07b; font-weight: bold; }
+.editor-wrapper .cm-editor .cm-em         { color: #98c379; font-style: italic; }
+.editor-wrapper .cm-editor .cm-quote      { color: #5c6370; }
+.editor-wrapper .cm-editor .cm-link       { color: #56b6c2; text-decoration: underline; }
+.editor-wrapper .cm-editor .cm-url        { color: #56b6c2; }
+.editor-wrapper .cm-editor .cm-code       { color: #e06c75; background: rgba(0,0,0,0.15); padding: 0 3px; border-radius: 3px; }
+.editor-wrapper .cm-editor .cm-codeBlock  { color: #abb2bf; }
+.editor-wrapper .cm-editor .cm-list       { color: #61afef; }
+.editor-wrapper .cm-editor .cm-hr         { color: #5c6370; }
+.editor-wrapper .cm-editor .cm-strikethrough { text-decoration: line-through; color: rgba(130,143,164,0.5); }
