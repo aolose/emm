@@ -82,8 +82,8 @@
     * { color: rgb(78, 96, 115); }
 
     .act {
-      color: antiquewhite;
-      background: var(--bg-separator);
+      color: #fff;
+      background: rgb(26 48 87 / 70%);
       &.loading { animation: pageloading 1.2s ease-in-out infinite; }
     }
 
