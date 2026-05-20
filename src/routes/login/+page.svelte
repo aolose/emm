@@ -220,7 +220,7 @@
 		align-items: center;
 		justify-content: center;
 		backdrop-filter: blur(5px);
-		background: rgba(20, 25, 35, 0.9);
+		background: rgb(10 15 25 / 0.76);
 	}
 
 	.bx {
