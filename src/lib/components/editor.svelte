@@ -37,8 +37,17 @@
 			const between = before.slice(lastOpen + marker.length);
 			const beforeNext = between.lastIndexOf(marker);
 			if (beforeNext !== -1) return false;
+
+			// For single-char markers (*), exclude adjacent markers (**)
+			if (marker.length === 1) {
+				const openPos = lastOpen;
+				const closePos = pos + nextClose;
+				if (text[openPos + 1] === marker || text[openPos - 1] === marker) return false;
+				if (text[closePos - 1] === marker || text[closePos + 1] === marker) return false;
+			}
 			return true;
 		};
+
 
 		activeBold = findSurrounding('**');
 		activeItalic = findSurrounding('*');
