@@ -65,8 +65,7 @@
 			width: 100%;
 			height: 64px;
 			overflow: hidden;
-			background: linear-gradient(180deg, rgb(20, 22, 28), rgb(14, 17, 21));
-			box-shadow: rgba(0, 0, 0, 0.5) 0 0 10px;
+			border-top: 1px solid rgb(255 255 255 / 0.05);
 		}
 		:global {
 			.toolbar {

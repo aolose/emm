@@ -190,6 +190,7 @@
 
 	.b {
 		max-width: 1000px;
+		width: 0;
 		flex: 1;
 		@include m() {
 			width: 50%;
@@ -236,6 +237,7 @@
 	.c {
 		flex: 1;
 		max-width: 800px;
+		width: 0;
 		@include m() {
 			width: 50%;
 			flex: none;

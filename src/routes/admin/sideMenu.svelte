@@ -112,12 +112,13 @@
 		.v {
 			display: flex;
 			align-items: center;
-			padding: 0 12px 0 0;
-			width: auto;
+			padding: 0 ;
+			width: 54px;
+			height: 100%;
 			button {
 				margin: 0;
-				height: 36px;
-				width: 36px;
+				height: 100%;
+				width: 100%;
 			}
 		}
 		.u {

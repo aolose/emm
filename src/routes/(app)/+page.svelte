@@ -35,7 +35,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding-bottom: 100px;
+		padding-bottom: 5vh;
 	}
 
 	.bb {
