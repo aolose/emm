@@ -456,6 +456,7 @@ export const clipWords = (str: string, len: number) => {
 
 export const getPain = async (src?: string) => {
 	const { marked } = await import('marked');
+	marked.use({ gfm: true });
 	const { convert } = await import('html-to-text');
 	return src
 		? convert(await marked.parse(src), {

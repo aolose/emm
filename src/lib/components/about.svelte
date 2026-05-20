@@ -5,7 +5,7 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 
-	marked.setOptions({ headerIds: true });
+	marked.setOptions({ headerIds: true, gfm: true });
 	let patchMod = $state(false);
 	let el = $state();
 	let mor = $state();

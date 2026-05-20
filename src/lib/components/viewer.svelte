@@ -8,7 +8,7 @@
 	import { regElement } from '$lib/components/customent/reg';
 	import File from '$lib/components/post/File.svelte';
 
-	marked.setOptions({ headerIds: true });
+	marked.setOptions({ headerIds: true, gfm: true });
 	regElement('x-file', File);
 	let el = $state();
 	let mor = $state();
