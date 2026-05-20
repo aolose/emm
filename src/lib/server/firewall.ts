@@ -675,20 +675,8 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	const isLocalhost = /^(::1|127\.)/.test(ip);
 	const skipAll = sysStatue < 2 || isAdmin;
 
-	if (!/^\/(api|res|font|src|manifest\.json)/.test(pn)) {
-		const p = checkRedirect(sysStatue, pn, event.request);
-		if (p) {
-			res = new Response('', {
-				status: 307,
-				headers: new Headers({
-					location: p
-				})
-			});
-		}
-	}
-
 	if (skipAll) {
-		return res || (await handle());
+		return await handle();
 	}
 
 	// Blacklist check FIRST — block before any other challenge
@@ -748,6 +736,24 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
 		return challengeResponse(event.url.href, isApi);
+	}
+
+	// checkRedirect after firewall/triggers/turnstile, before handler
+	if (!/^\/(api|res|font|src|manifest\.json)/.test(pn)) {
+		const p = checkRedirect(sysStatue, pn, event.request);
+		if (p) {
+			log.status = 307;
+			if (!isLocalhost && !isAuthenticated && (fr?.log || log.log)) {
+				saveToDb(log);
+			}
+			ruv({
+				ip: log.ip,
+				path: log.path,
+				ua: log.headers.get('user-agent') || '',
+				status: 307
+			});
+			return new Response('', { status: 307, headers: new Headers({ location: p }) });
+		}
 	}
 
 	res = await handle();

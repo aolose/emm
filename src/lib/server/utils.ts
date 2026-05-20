@@ -504,7 +504,7 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 		needLogin = !client?.ok(permission.Read);
 	}
 	if (needLogin && !debugMode) {
-		if (isCfg || /^\/(admin)/i.test(path)) return login;
+		if (isCfg || /^\/admin(\/|$)/i.test(path)) return login;
 		return '';
 	}
 	if (!done && !isCfg) {
