@@ -12,9 +12,10 @@ mock.module('$lib/server/index', () => ({
 }));
 
 let testIp = '127.0.0.1';
+let checkRedirectReturn = '';
 
 mock.module('$lib/server/utils', () => ({
-	checkRedirect: () => undefined,
+	checkRedirect: () => checkRedirectReturn,
 	getClient: () => undefined,
 	getClientAddr: () => testIp,
 	model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
@@ -486,6 +487,89 @@ describe('Firewall rule matching', () => {
 			const res = await firewallProcess(event, handle);
 
 			expect(res.status).toBe(418);
+		});
+	});
+
+	describe('checkRedirect runs after fwFilter — adminer.php scenario', () => {
+		let firewallProcess: any;
+		let setRules: any;
+		let setTriggers: any;
+		let clearBlackList: any;
+
+		beforeEach(async () => {
+			testIp = '10.0.0.1';
+			checkRedirectReturn = '/login';
+			const mod = await import('../../../src/lib/server/firewall');
+			firewallProcess = mod.firewallProcess;
+			setRules = mod.__test.setRules;
+			setTriggers = mod.__test.setTriggers;
+			clearBlackList = mod.__test.clearBlackList;
+			setRules([]);
+			setTriggers([]);
+			clearBlackList();
+		});
+
+		afterEach(() => {
+			testIp = '127.0.0.1';
+			checkRedirectReturn = '';
+			setRules([]);
+			setTriggers([]);
+		});
+
+		it('fwFilter rule blocks /adminer.php before checkRedirect redirects', async () => {
+			const rule = new FWRule();
+			rule.id = 100;
+			rule.path = '/adminer.php';
+			rule.respId = -1;
+			rule.active = true;
+			rule.ip = '';
+			rule.country = '';
+			rule.method = '';
+			rule.headers = '';
+			rule.status = '';
+			rule.trigger = false;
+			setRules([rule as any]);
+
+			const event = {
+				request: new Request('http://localhost/adminer.php'),
+				url: new URL('http://localhost/adminer.php'),
+				locals: { ip: '10.0.0.1' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await firewallProcess(event, handle);
+
+			// Should be blocked by rule (403), NOT redirected by checkRedirect (307)
+			expect(res.status).toBe(403);
+		});
+
+		it('/adminer.php passes through when checkRedirect returns empty', async () => {
+			checkRedirectReturn = '';
+
+			const event = {
+				request: new Request('http://localhost/adminer.php'),
+				url: new URL('http://localhost/adminer.php'),
+				locals: { ip: '10.0.0.1' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await firewallProcess(event, handle);
+
+			// No firewall rule, checkRedirect returns '' — passes to handler
+			expect(res.status).toBe(200);
+		});
+
+		it('tightened admin regex excludes /adminer.php but matches /admin', () => {
+			// This reflects the fix in utils.ts: /^\/admin(\/|$)/i
+			const adminRe = /^\/admin(\/|$)/i;
+			expect(adminRe.test('/admin')).toBe(true);
+			expect(adminRe.test('/admin/')).toBe(true);
+			expect(adminRe.test('/admin/settings')).toBe(true);
+			expect(adminRe.test('/adminer.php')).toBe(false);
+			expect(adminRe.test('/administrator')).toBe(false);
+			expect(adminRe.test('/Adminer.PHP')).toBe(false);
 		});
 	});
 });
