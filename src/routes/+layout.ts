@@ -76,6 +76,7 @@ export const load = apiLoad('statue', undefined, {
 			status.set(stu);
 			if (cacheData.pwdSalt) setPwdSalt(cacheData.pwdSalt);
 		} else {
+			statueSys.set(sys);
 			await su(stu);
 		}
 	}
