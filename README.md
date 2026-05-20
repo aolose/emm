@@ -6,7 +6,7 @@
 ![Static Badge](https://img.shields.io/badge/sqlite-f472b6?style=flat&logo=bun&link=https%3A%2F%2Fbun.sh%2Fdocs%2Fapi%2Fsqlite)
 ![Static Badge](https://img.shields.io/badge/sass-^1.99-cc6699?style=flat&logo=sass&link=https%3A%2F%2Fsass-lang.com)
 ![Static Badge](https://img.shields.io/badge/marked-^18.0-yellow?style=flat&logo=markdown&link=https%3A%2F%2Fmarked.js.org)
-![Static Badge](https://img.shields.io/badge/easymde-^2.21-green?style=flat&link=https%3A%2F%2Fgithub.com%2FIonaru%2Feasy-markdown-editor)
+![Static Badge](https://img.shields.io/badge/codemirror-^6.0-blue?style=flat&logo=codemirror&link=https%3A%2F%2Fcodemirror.net)
 
 A self-hosted markdown blog system built with SvelteKit and Bun. Designed for personal writing and content management, with a focus on simplicity and performance.
 
@@ -16,7 +16,7 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 
 - **SSR + PWA** — Server-side rendering with offline support via service workers
 - **Responsive Design** — Optimized for both desktop and mobile devices
-- **Markdown Editor** — Full-featured editor with live preview (EasyMDE)
+- **Markdown Editor** — Full-featured editor built on CodeMirror 6 with custom toolbar and paste-to-upload
 - **Syntax Highlighting** — Code blocks styled with highlight.js
 - **Comments** — Built-in comment management system
 - **Firewall** — IP-based access control, bot detection, custom rules with time scheduling
@@ -40,7 +40,7 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 | Database | SQLite via `bun:sqlite` |
 | Styling | [SCSS](https://sass-lang.com) + [clsx](https://github.com/lukeed/clsx) |
 | Fonts | [SUIT](https://sunn.us/SUIT/) · [Noto Sans SC](https://fonts.google.com/noto/specimen/Noto+Sans+SC) |
-| Markdown Editor | [EasyMDE](https://github.com/Ionaru/easy-markdown-editor) |
+| Markdown Editor | [CodeMirror 6](https://codemirror.net) + [svelte-codemirror-editor](https://github.com/touchifyapp/svelte-codemirror-editor) |
 | Markdown Renderer | [marked](https://marked.js.org) + [highlight.js](https://highlightjs.org) |
 | Type Checking | TypeScript |
 
