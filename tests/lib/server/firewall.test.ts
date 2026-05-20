@@ -7,7 +7,7 @@ mock.module('$app/stores', () => ({ page: { subscribe: () => () => {} } }));
 
 // Mock database for addRule / addBlackListRule tests
 mock.module('$lib/server/index', () => ({
-	db: { save: () => {}, all: () => [], delByPk: () => {} },
+	db: { save: () => {}, all: () => [], delByPk: () => {}, count: () => 0 },
 	sys: { maxFireLogs: 1000 },
 }));
 
@@ -560,7 +560,176 @@ describe('Firewall rule matching', () => {
 			// No firewall rule, checkRedirect returns '' — passes to handler
 			expect(res.status).toBe(200);
 		});
+	});
 
+	describe('triggersHit propagates log flag without rate limiting', () => {
+		let firewallProcess: any;
+		let getLogCacheEntries: any;
+		let setTriggers: any;
+		let setRules: any;
+		let clearBlackList: any;
+
+		beforeEach(async () => {
+			testIp = '10.0.0.2';
+			const mod = await import('../../../src/lib/server/firewall');
+			firewallProcess = mod.firewallProcess;
+			getLogCacheEntries = mod.getLogCacheEntries;
+			setTriggers = mod.__test.setTriggers;
+			setRules = mod.__test.setRules;
+			clearBlackList = mod.__test.clearBlackList;
+			setRules([]);
+			setTriggers([]);
+			clearBlackList();
+		});
+
+		afterEach(() => {
+			testIp = '127.0.0.1';
+			setRules([]);
+			setTriggers([]);
+		});
+
+		it('sets log flag on trigger match even without rate limit', async () => {
+			const trigger = new FWRule();
+			trigger.id = 10;
+			trigger.path = '/tag/some-slug';
+			trigger.trigger = true;
+			trigger.log = true;
+			trigger.active = true;
+			trigger.ip = '';
+			trigger.respId = 0;
+			trigger.country = '';
+			trigger.method = '';
+			trigger.headers = '';
+			trigger.status = '';
+			trigger.rate = '';
+			setTriggers([trigger]);
+
+			const dummy = new FWRule();
+			dummy.id = 999;
+			dummy.active = false;
+			setRules([dummy as any]);
+
+			const event = {
+				request: new Request('http://localhost/tag/some-slug'),
+				url: new URL('http://localhost/tag/some-slug'),
+				locals: { ip: '10.0.0.2' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await firewallProcess(event, handle);
+
+			// No rate limit → falls through to Turnstile
+			expect(res.status).toBe(418);
+
+			// Log cache entry should have log flag set
+			const entries = getLogCacheEntries();
+			const last = entries[entries.length - 1];
+			expect(last.path).toBe('/tag/some-slug');
+			expect(last.log).toBe(true);
+		});
+
+		it('does not set log flag when trigger has log disabled', async () => {
+			const trigger = new FWRule();
+			trigger.id = 11;
+			trigger.path = '/tag/no-log-slug';
+			trigger.trigger = true;
+			trigger.log = false;
+			trigger.active = true;
+			trigger.ip = '';
+			trigger.respId = 0;
+			trigger.country = '';
+			trigger.method = '';
+			trigger.headers = '';
+			trigger.status = '';
+			trigger.rate = '';
+			setTriggers([trigger]);
+
+			const dummy = new FWRule();
+			dummy.id = 999;
+			dummy.active = false;
+			setRules([dummy as any]);
+
+			const event = {
+				request: new Request('http://localhost/tag/no-log-slug'),
+				url: new URL('http://localhost/tag/no-log-slug'),
+				locals: { ip: '10.0.0.2' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			await firewallProcess(event, handle);
+
+			const entries = getLogCacheEntries();
+			const last = entries[entries.length - 1];
+			expect(last.path).toBe('/tag/no-log-slug');
+			expect(last.log).toBeUndefined();
+		});
+	});
+
+	describe('Turnstile challenge records status on log', () => {
+		let firewallProcess: any;
+		let getLogCacheEntries: any;
+		let setRules: any;
+		let setTriggers: any;
+
+		beforeEach(async () => {
+			testIp = '10.0.0.3';
+			const mod = await import('../../../src/lib/server/firewall');
+			firewallProcess = mod.firewallProcess;
+			getLogCacheEntries = mod.getLogCacheEntries;
+			setRules = mod.__test.setRules;
+			setTriggers = mod.__test.setTriggers;
+			setRules([]);
+			setTriggers([]);
+		});
+
+		afterEach(() => {
+			testIp = '127.0.0.1';
+			setRules([]);
+			setTriggers([]);
+		});
+
+		it('records 418 status on log when Turnstile challenges /tag/xxx', async () => {
+			const event = {
+				request: new Request('http://localhost/tag/ts-test'),
+				url: new URL('http://localhost/tag/ts-test'),
+				locals: { ip: '10.0.0.3' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await firewallProcess(event, handle);
+
+			expect(res.status).toBe(418);
+
+			const entries = getLogCacheEntries();
+			const last = entries[entries.length - 1];
+			expect(last.path).toBe('/tag/ts-test');
+			expect(last.status).toBe(418);
+		});
+
+		it('records 200 when Turnstile is bypassed (ts-challenge page itself)', async () => {
+			const event = {
+				request: new Request('http://localhost/ts-challenge?redirect=/tag/test'),
+				url: new URL('http://localhost/ts-challenge?redirect=/tag/test'),
+				locals: { ip: '10.0.0.3' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await firewallProcess(event, handle);
+
+			expect(res.status).toBe(200);
+
+			const entries = getLogCacheEntries();
+			const last = entries[entries.length - 1];
+			expect(last.path).toBe('/ts-challenge?redirect=/tag/test');
+			expect(last.status).toBe(200);
+		});
+	});
+
+	describe('checkRedirect regex', () => {
 		it('tightened admin regex excludes /adminer.php but matches /admin', () => {
 			// This reflects the fix in utils.ts: /^\/admin(\/|$)/i
 			const adminRe = /^\/admin(\/|$)/i;

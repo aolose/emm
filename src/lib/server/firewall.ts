@@ -492,7 +492,9 @@ const blackListCheck = (
 
 const triggersHit = (tr: FWRule[], r: log) => {
 	if (!tr.length) return;
-	if (tr.find((a) => hitRule(r, a))) {
+	const matched = tr.find((a) => hitRule(r, a));
+	if (matched) {
+		if (matched.log) r.log = true;
 		const o = blackListCheck(r, tr);
 		if (o) {
 			o.respId = o.respId || -1;
@@ -735,7 +737,18 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
 	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
-		return challengeResponse(event.url.href, isApi);
+		const cr = challengeResponse(event.url.href, isApi);
+		log.status = cr.status;
+		if (!isLocalhost && !isAuthenticated && (fr?.log || log.log)) {
+			saveToDb(log);
+		}
+		ruv({
+			ip: log.ip,
+			path: log.path,
+			ua: log.headers.get('user-agent') || '',
+			status: cr.status
+		});
+		return cr;
 	}
 
 	// checkRedirect after firewall/triggers/turnstile, before handler
