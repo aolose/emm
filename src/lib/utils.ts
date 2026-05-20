@@ -144,7 +144,7 @@ export const getHeaderDataType = (h: Headers) => {
 
 export const parseBody = (data: ApiData) => {
 	const t = typeof data;
-	let tp = dataType.text;
+	let tp: typeof dataType[keyof typeof dataType]= dataType.text;
 	switch (t) {
 		case 'boolean':
 		case 'number':
@@ -419,13 +419,13 @@ const colors = [
 	'#E0E1DD', '#F1F2F6', '#F8F9FA'
 ];
 
-export const bgColor = (t: number) => {
+export const bgColor = (t: number,opacity:number=0.5,dark=0) => {
 	const d = new Date(t);
 	const val = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-	return getColor(val, 0.5);
+	return getColor(val, opacity,dark);
 };
 
-export const getColor = (a: number | string, opacity = 1) => {
+export const getColor = (a: number | string, opacity = 1, dark = 0) => {
 	const d = colors.length;
 	if (typeof a === 'string') {
 		let e = 0;
@@ -435,12 +435,25 @@ export const getColor = (a: number | string, opacity = 1) => {
 	}
 	a = Math.floor(a);
 	const c = colors[a % d];
-	if (opacity < 1) {
-		const r = parseInt(c.slice(1, 3), 16);
-		const g = parseInt(c.slice(3, 5), 16);
-		const b = parseInt(c.slice(5, 7), 16);
+
+	// 解析原始 HEX 颜色的 RGB 值
+	let r = parseInt(c.slice(1, 3), 16);
+	let g = parseInt(c.slice(3, 5), 16);
+	let b = parseInt(c.slice(5, 7), 16);
+
+	// 如果设置了 dark 参数，按比例向黑色(0,0,0)靠拢
+	if (dark > 0) {
+		const factor = Math.min(100, Math.max(0, dark)) / 100;
+		r = Math.floor(r * (1 - factor));
+		g = Math.floor(g * (1 - factor));
+		b = Math.floor(b * (1 - factor));
+	}
+
+	// 如果有透明度或者加深需求，统一返回 rgba 格式
+	if (opacity < 1 || dark > 0) {
 		return `rgba(${r},${g},${b},${opacity})`;
 	}
+
 	return c;
 };
 

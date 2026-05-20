@@ -12,7 +12,7 @@
 	let ds = $derived(clipWords(desc, 60));
 </script>
 
-<div class="s p" style={`background-color:${bgColor(createAt)}`}>
+<div class="s p" style={`background-color:${bgColor(createAt,0.6,70)}`}>
 	<div class="x" style={sty}></div>
 	<div class="t">
 		{m}/{d}
@@ -32,23 +32,20 @@
 	@use '../../break' as *;
 
 	.x {
-		transition: 2s ease-in-out;
+		transition: 1.4s ease-in-out;
 		position: absolute;
-		left: -3px;
-		right: -3px;
-		top: -3px;
-		bottom: -3px;
-		border-radius: 3px;
-		background: url('../img/1.jpg') center no-repeat;
+		inset: -3px;
+		background:  url('../img/1.jpg') center no-repeat;
 		background-size: cover;
 		filter: grayscale(0.5) blur(3px);
-		opacity: 0.3;
+		opacity: 0.15;
 		@include s() {
 			filter: grayscale(0.5) blur(2px);
 		}
 	}
 
 	.p {
+		box-shadow: rgba(0,0,0,0.7) 0 4px 16px -4px;
 		overflow: hidden;
 		border-radius: 32px;
 		width: 300px;
@@ -56,7 +53,7 @@
 		transition: 0.3s ease-in-out;
 		z-index: 20;
 		position: relative;
-		padding: 20px;
+		padding: 24px;
 		margin: 12px;
 		@include s() {
 			width: 100%;
@@ -78,7 +75,8 @@
 
 			.x {
 				transform: scale(1.05);
-				filter: grayscale(0.1) blur(1px);
+				filter: grayscale(0.1) blur(0px);
+				opacity: 0.3;
 			}
 		}
 	}
@@ -96,9 +94,9 @@
 		color: #ddd;
 		font-weight: 100;
 		position: absolute;
-		left: 20px;
+		left: 24px;
 		right: 90px;
-		top: 20px;
+		top: 24px;
 
 		& + h1 {
 			opacity: 0;
@@ -134,8 +132,8 @@
 	}
 
 	.t {
-		top: 20px;
-		right: 10px;
+		top: 28px;
+		right: 20px;
 		color: #fff;
 		text-shadow: rgba(0, 0, 0, 0.39) 1px 1px 3px;
 		font-size: 12px;
@@ -147,6 +145,7 @@
 		font-weight: 100;
 		display: flex;
 		align-items: center;
+		opacity: .4;
 	}
 
 	.y {
@@ -167,6 +166,5 @@
 		bottom: 0;
 		border-radius: inherit;
 		padding: inherit;
-		background: linear-gradient(177deg, rgba(30, 48, 63, 0.6), rgba(6, 9, 25, 0.9));
 	}
 </style>

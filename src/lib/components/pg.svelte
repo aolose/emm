@@ -120,7 +120,7 @@
     }
     .act, .nv:hover {
       color: #fff;
-      background: var(--darkgrey);
+      background: rgb(76 127 185 / 60%);
     }
     .act.loading { animation: pageloading-lt 1.2s ease-in-out infinite; }
   }
