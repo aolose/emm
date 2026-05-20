@@ -171,7 +171,7 @@ export const getReqJson = async (req: Request) => {
 	if (key) {
 		const decrypted = await decryptReq(req, key, true);
 		if (decrypted) {
-			return JSON.parse(new TextDecoder().decode(new Uint8Array(decrypted)));
+			return decrypted.json();
 		}
 	}
 
