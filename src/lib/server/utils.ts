@@ -412,6 +412,8 @@ export const setKey = <T extends Model>(o: Obj<T>, key: string, value: unknown) 
 };
 
 export let sysStatue = 0;
+const isNotSet = (v: string | null | undefined) => !v || v === NULL.TEXT;
+
 const chk = () => {
 	const dbc = resolve('.dbCfg');
 	let dbOk = false;
@@ -429,9 +431,9 @@ const chk = () => {
 		} else dbOk = true;
 	}
 	if (!dbOk) return 0;
-	if (!sys?.admUsr || !sys?.admPwd) return 1;
-	if (!sys?.uploadDir || !sys?.thumbDir) return 2;
-	if (sys?.ipLiteToken === null) return 3;
+	if (isNotSet(sys?.admUsr) || isNotSet(sys?.admPwd)) return 1;
+	if (isNotSet(sys?.uploadDir) || isNotSet(sys?.thumbDir)) return 2;
+	if (sys?.ipLiteToken === null || isNotSet(sys?.ipLiteToken)) return 3;
 	// Generate per-instance password salt if not present
 	if (!sys.pwdSalt) {
 		sys.pwdSalt = crypto.randomUUID();
