@@ -141,7 +141,7 @@ export function slugGen(title: string) {
 }
 
 export const uniqSlug = (id: number, slug: string) => {
-	const params: SQLQueryBindings[] = [`slug%`];
+	const params: SQLQueryBindings[] = [`${slug}%`];
 	let sql = `select slug
 						 from post
 						 where slug like ?`;
@@ -153,12 +153,16 @@ export const uniqSlug = (id: number, slug: string) => {
 		.prepare(sql)
 		.all(...params)
 		.map((a) => (a as Post).slug);
-	if (slugs.length) {
-		const n = slugs
-			.map((a) => +a.replace(slug, ''))
-			.filter((a) => a)
-			.reduce((a, b) => (a > b ? a : b));
-		return `${slug}-${n}`;
+	if (slugs.length && slugs.includes(slug)) {
+		const maxN = slugs
+			.map((s) => {
+				const suffix = s.slice(slug.length);
+				if (!suffix) return 0;
+				const m = suffix.match(/^-(\d+)$/);
+				return m ? +m[1] : 0;
+			})
+			.reduce((a, b) => (a > b ? a : b), 0);
+		return `${slug}-${maxN + 1}`;
 	}
 };
 

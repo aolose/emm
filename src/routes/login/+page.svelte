@@ -42,7 +42,7 @@
 				status.set(1);
 			})
 			.catch(({ data }) => {
-				if (typeof data === 'number') setMsg(`Please try again in ${data / 1e3} seconds.`);
+				if (typeof data === 'number' && data > 0) setMsg(`Please try again in ${data / 1e3} seconds.`);
 				else setMsg('wrong user name or password');
 			})
 			.finally(() => {

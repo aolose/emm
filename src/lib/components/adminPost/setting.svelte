@@ -4,7 +4,8 @@
 	import { onMount } from 'svelte';
 	import { editPost, saveNow, selectFile, setting, patchedTag } from '$lib/store';
 	import { fade } from 'svelte/transition';
-	import { api } from '$lib/req';
+	import { api, req } from '$lib/req';
+	import { applyStrPatch } from '$lib/setStrPatchFn';
 	import { get } from 'svelte/store';
 	import List from '$lib/components/post/rList.svelte';
 	import Sel from '$lib/components/post/rSelect.svelte';
@@ -13,6 +14,16 @@
 	let setPms = $state();
 	let post = $state({});
 	let { autoSave } = $props();
+
+	// Load tags on demand when setting opens and tag list is empty
+	$effect(() => {
+		if ($setting && !$patchedTag.tags.length) {
+			req('tags', $patchedTag.ver).then((d) => {
+				const [v, da] = applyStrPatch(new Set($patchedTag.tags), `${d}`);
+				patchedTag.set({ ver: v, tags: da });
+			});
+		}
+	});
 	const getSlug = api('slug');
 	let slugInfo = $state('');
 	let t = -1;
