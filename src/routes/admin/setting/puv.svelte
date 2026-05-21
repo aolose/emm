@@ -233,7 +233,6 @@
 
 <style lang="scss">
 	.bn {
-		padding: 0 20px;
 		margin-bottom: 20px;
 		display: flex;
 		align-items: center;
@@ -320,7 +319,7 @@
 	.a {
 		flex-grow: 1;
 		display: flex;
-
+    margin-left:30px;
 		span {
 			display: block;
 		}
