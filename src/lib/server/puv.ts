@@ -237,7 +237,7 @@ export const ruv = ({
 	checkTimeWindow();
 
 	const valid =
-		status < 300 && (path === '/' || /^\/(post|tag|about)s?\/?/.test(path)) && !isbot(ua);
+		status < 300 && (path === '/' || /^\/(api\/)?(post|tag|about)s?\/?/.test(path)) && !isbot(ua);
 	const h = hashIP(ip); // #7 hash IP
 	rqD++;
 	rqH++;
