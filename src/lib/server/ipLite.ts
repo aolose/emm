@@ -28,6 +28,7 @@ const httpGet = async (url: string, signal?: AbortSignal) => {
 export const geoStatue = () => (downloading ? '-' : dbVersion || '');
 
 export const geoClose = () => {
+	ip2location.close();
 	dbVersion = '';
 	dbFile = undefined;
 };
@@ -36,6 +37,7 @@ export const geoClose = () => {
 const load = (file: string) => {
 	if (typeof file !== 'string') return;
 	try {
+		ip2location.close(); // reset library state so open() will re-initialize
 		ip2location.open(file);
 		dbVersion = new Date().toISOString().slice(0, 10);
 		dbFile = file;
@@ -159,7 +161,7 @@ export const loadGeoDb = async () => {
 		isInitialized = true;
 	}
 
-	const checkInterval = 1e3 * 3600 * 48; // 48 hours
+	const checkInterval = 1e3 * 3600 * 24 * 30; // 30 days
 
 	const scheduleCheck = async () => {
 		await checkUpdate();
