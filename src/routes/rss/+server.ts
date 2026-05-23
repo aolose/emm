@@ -17,7 +17,13 @@ export const GET: RequestHandler = async ({ request, url }) => {
 	const etag = rssCache.getEtag();
 	const ifNoneMatch = request.headers.get('if-none-match');
 	if (ifNoneMatch && etag && ifNoneMatch === etag) {
-		return new Response(null, { status: 304 });
+		return new Response(null, {
+			status: 304,
+			headers: {
+				'ETag': etag,
+				'Cache-Control': 'max-age=0, s-max-age=600'
+			}
+		});
 	}
 
 	const headers: Record<string, string> = {

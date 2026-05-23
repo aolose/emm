@@ -9,7 +9,13 @@ import { eTags } from '$lib/server/cache';
 export const GET: RequestHandler = async ({ params, request }) => {
 	const tag = request.headers.get('If-None-Match');
 	if (tag && eTags.has(tag)) {
-		return new Response(null, { status: 304 });
+		return new Response(null, {
+			status: 304,
+			headers: {
+				etag: tag,
+				'cache-control': 'max-age=31536000'
+			}
+		});
 	}
 	const res = new Res();
 	let p = params.res;

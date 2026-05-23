@@ -122,12 +122,20 @@ export const auth = (ps: permission | permission[], fn: RespHandle) => (req: Req
 		const requires = new Set(([] as permission[]).concat(ps));
 		const client = getClient(req);
 		if (requires.size) {
-			if (!client) return resp('invalid token:' + req.url, 401);
+			if (!client) {
+				const r = resp('invalid token:' + req.url, 401);
+				delCookie(r, 'token');
+				return r;
+			}
 			if (!client.ok(Admin)) {
 				for (const p of requires) {
 					const s = client.ok(p);
 					if (s) continue;
-					else return resp('no permission', 401);
+					else {
+						const r = resp('no permission', 401);
+						delCookie(r, 'token');
+						return r;
+					}
 				}
 			}
 		}
