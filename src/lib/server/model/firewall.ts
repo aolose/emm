@@ -25,6 +25,11 @@ export class FWRule {
 	uaMode = false;
 	ua = TEXT;
 	uaCount = TEXT;
+	// UA collection window in seconds (default 60, range 30-3600)
+	uaWindow = 60;
+	// Turnstile abandon mode — detect crawlers that don't follow 307 redirects
+	abandon = false;
+	timeout = 3;
 	// Universal fields
 	schedule = TEXT;
 	cfUpload = false;
@@ -69,6 +74,18 @@ export class FWRule {
 	getUaCountThreshold(): number {
 		const n = parseInt(this.uaCount);
 		return n > 0 ? n : 1;
+	}
+
+	/** Parse timeout for abandon mode in seconds (default 3, clamped 1-10). */
+	getTimeout(): number {
+		const n = this.timeout ?? 3;
+		return Math.max(1, Math.min(10, n));
+	}
+
+	/** Parse UA collection window in seconds (default 60, clamped 30-3600). */
+	getUaWindow(): number {
+		const n = this.uaWindow ?? 60;
+		return Math.max(30, Math.min(3600, n));
 	}
 
 	/** Check if current UTC hour is within the schedule ranges.
@@ -138,4 +155,13 @@ export class BlackList {
 		r.respId = this.respId || -1;
 		return r;
 	}
+}
+
+export class WhiteList {
+	@primary
+	id = INT;
+	ip = TEXT;
+	mark = TEXT;
+	createAt = INT;
+	_geo?: string;
 }

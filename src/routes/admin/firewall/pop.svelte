@@ -52,19 +52,31 @@
 					.replace(/\-{2,}/g, '-');
 				d.weight = +d.weight || 100;
 				if (d.weight < 1) d.weight = 1;
+				d.timeout = (+d.timeout || 3);
+				if (d.timeout < 1) d.timeout = 1;
+				if (d.timeout > 10) d.timeout = 10;
+				d.uaWindow = (+d.uaWindow || 60);
+				if (d.uaWindow < 30) d.uaWindow = 30;
+				if (d.uaWindow > 3600) d.uaWindow = 3600;
 			}
 			d.status = (d.status || '').replace(/[^0-9;, \-~]/g, '');
 			const isUa = d.uaMode && d.trigger;
+			const isAbandon = d.abandon && d.trigger;
 			hasV = trim(
 				tp === 3 ||
-					(isUa ? (d.path && d.rate) : (d.trigger ? '' : d.ip)) ||
-					(isUa ? '' : (d.trigger ? d.status : '')) ||
-					d.path ||
-					(isUa ? '' : d.headers) ||
-					d.mark ||
-					(isUa ? '' : (d.trigger ? '' : d.country)) ||
-					''
+				isAbandon ||
+				(isAbandon ? '' : (isUa ? (d.path && d.rate) : (d.trigger ? '' : d.ip))) ||
+				(isUa || isAbandon ? '' : (d.trigger ? d.status : '')) ||
+				(isUa || isAbandon ? '' : d.path) ||
+				(isUa || isAbandon ? '' : d.headers) ||
+				d.mark ||
+				(isUa || isAbandon ? '' : (d.trigger ? '' : d.country)) ||
+				''
 			);
+		} else if (tp >= 6) {
+			d.ip = trim(d.ip);
+			d.mark = trim(d.mark, true);
+			hasV = trim(d.ip);
 		} else {
 			d.name = trim(d.name, true);
 			d.status = +d.status || 403;
@@ -84,7 +96,9 @@
 					'Create Rule',
 					'Edit blacklist',
 					'Add Response',
-					'Edit Response'
+					'Edit Response',
+					'Add whitelist',
+					'Edit whitelist'
 				][tp]}
 			</h1>
 			<button class="clo" onclick={cancel}>
@@ -94,7 +108,13 @@
 			{#if tp < 4 && tp && tp !== 3}
 				<div class="f1">
 					<label>
-						<Ck bind:value={d.active}>activate</Ck>
+						<Ck bind:value={d.active}>Activate</Ck>
+					</label>
+					<label>
+						<Ck bind:value={d.cfUpload}>CF Upload</Ck>
+					</label>
+					<label>
+						<Ck bind:value={d.log}>Log</Ck>
 					</label>
 					{#if tp}
 						<label>
@@ -102,29 +122,40 @@
 						</label>
 					{/if}
 					{#if d.trigger && tp}
-						<label transition:slide|global>
-							<Ck bind:value={d.uaMode}>collection</Ck>
+						<label>
+							<Ck bind:value={d.uaMode}
+							    onchange={() => {
+									if (d.uaMode) d.abandon = false;
+								}}>Collection
+							</Ck>
+						</label>
+						<label>
+							<Ck bind:value={d.abandon}
+							    onchange={() => {
+									if (d.abandon) { d.uaMode = false; d.path = ''; }
+								}}>Abandon
+							</Ck>
 						</label>
 					{/if}
-					<label transition:slidLeft|global>
-						<Ck bind:value={d.log}>log</Ck>
-					</label>
 				</div>
 			{/if}
 			<div class="f0">
 				{#if tp < 4}
 					{#if tp !== 3}
-						{#if !d.trigger}
+						{#if !d.trigger && !d.abandon}
 							<label transition:slide|global>
 								<span>IP:</span>
 								<input bind:value={d.ip} />
 							</label>
 						{/if}
+					{#if !(d.trigger && d.abandon)}
 						<label>
-							<span>path{#if d.trigger && d.uaMode}*{/if}:</span>
+							<span>path
+								{#if d.trigger && d.uaMode}*{/if}:</span>
 							<input bind:value={d.path} />
 						</label>
-						{#if !(d.trigger && d.uaMode)}
+					{/if}
+						{#if !(d.trigger && d.uaMode) && !(d.trigger && d.abandon)}
 							<label>
 								<span>header:</span>
 								<HdsIpt bind:value={d.headers} />
@@ -143,7 +174,16 @@
 								<span>rate*:</span>
 								<input bind:value={d.rate} placeholder="min total requests" />
 							</label>
-						{:else if d.trigger}
+							<label transition:slide|global>
+								<span>uaWindow:</span>
+								<input bind:value={d.uaWindow} placeholder="seconds (30-3600)" />
+							</label>
+						{:else if d.trigger && d.abandon}
+							<label transition:slide|global>
+								<span>timeout:</span>
+								<input bind:value={d.timeout} placeholder="seconds (1-10)" />
+							</label>
+						{:else if d.trigger && !d.abandon}
 							<label transition:slide|global>
 								<span>status:</span>
 								<input bind:value={d.status} />
@@ -172,7 +212,7 @@
 							</label>
 						{/if}
 					{/if}
-					{#if tp}
+					{#if tp && tp < 6}
 						<label transition:slide|global>
 							<span>response:</span>
 							<Sel
@@ -184,13 +224,8 @@
 								bind:value={d.respId}
 							/>
 						</label>
-						{#if tp !== 3}
-							<label transition:slide|global>
-								<Ck bind:value={d.cfUpload}>CF upload</Ck>
-							</label>
-						{/if}
 					{/if}
-					{#if tp}
+					{#if tp && tp < 6}
 						<label transition:slide|global>
 							<span>weight:</span>
 							<input type="number" bind:value={d.weight} placeholder="100" />
@@ -207,7 +242,17 @@
 						<input bind:value={d.status} />
 					</label>
 				{/if}
-				{#if tp >= 4}
+				{#if tp >= 6}
+					<label>
+						<span>IP:</span>
+						<input bind:value={d.ip} />
+					</label>
+					<label>
+						<span>mark:</span>
+						<input bind:value={d.mark} />
+					</label>
+					{/if}
+					{#if tp >= 4 && tp < 6}
 					<label>
 						<span>name:</span>
 						<input bind:value={d.name} />
@@ -226,7 +271,7 @@
 				<button onclick={() => (d = {})}>clear</button>
 				{#if !tp || hasV}
 					<button transition:slidLeft|global onclick={ok}>
-						{['search', 'save', 'create', 'save', 'create', 'save'][tp]}
+						{['search', 'save', 'create', 'save', 'create', 'save', 'create', 'save'][tp]}
 					</button>
 				{/if}
 			</div>
@@ -235,192 +280,201 @@
 {/if}
 
 <style lang="scss">
-	@use '../../../lib/break' as *;
+  @use '../../../lib/break' as *;
 
-	s {
-		flex: 1;
-	}
+  s {
+    flex: 1;
+  }
 
-	h1 {
-		pointer-events: none;
-		top: 0;
-		padding: 0 20px;
-		border-radius: 10px 10px 0 0;
-		left: 6px;
-		color: transparent;
-		background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
-		background-clip: text;
-		font-size: 22px;
-		line-height: 60px;
-		font-weight: 200;
-		position: absolute;
-		@include s() {
-			font-size: 18px;
-			line-height: 50px;
-		}
-	}
+  h1 {
+    pointer-events: none;
+    top: 0;
+    padding: 0 20px;
+    border-radius: 10px 10px 0 0;
+    left: 6px;
+    color: transparent;
+    background: linear-gradient(142deg, rgb(0 150 250), rgb(222 234 255));
+    background-clip: text;
+    font-size: 22px;
+    line-height: 60px;
+    font-weight: 200;
+    position: absolute;
+    @include s() {
+      font-size: 18px;
+      line-height: 50px;
+    }
+  }
 
-	.clo {
-		padding: 0;
-		position: absolute;
-		transition: 0.2s ease-in-out;
-		right: 10px;
-		top: 5px;
-		background: none;
-		width: 50px;
-		overflow: hidden;
-		height: 50px;
-		color: #3a537c;
-		transform: scale(0.9);
-		&:hover {
-			color: #00d2ff;
+  .clo {
+    padding: 0;
+    position: absolute;
+    transition: 0.2s ease-in-out;
+    right: 10px;
+    top: 5px;
+    background: none;
+    width: 50px;
+    overflow: hidden;
+    height: 50px;
+    color: #3a537c;
+    transform: scale(0.9);
 
-			i {
-				transform: rotate(35deg);
-				transform-origin: right;
-				width: 20px;
-				margin-left: 20px;
+    &:hover {
+      color: #00d2ff;
 
-				& + i {
-					transform: rotate(-35deg);
-				}
-			}
-		}
+      i {
+        transform: rotate(35deg);
+        transform-origin: right;
+        width: 20px;
+        margin-left: 20px;
 
-		i {
-			transition: inherit;
-			transform: rotate(45deg);
-			position: absolute;
-			top: 0;
-			left: 0;
-			margin: 24px 10px;
-			background: currentColor;
-			width: 30px;
-			height: 1px;
+        & + i {
+          transform: rotate(-35deg);
+        }
+      }
+    }
 
-			& + i {
-				transform: rotate(-45deg);
-			}
-		}
+    i {
+      transition: inherit;
+      transform: rotate(45deg);
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 24px 10px;
+      background: currentColor;
+      width: 30px;
+      height: 1px;
 
-		@include s() {
-			top: 3px;
-			right: 10px;
-			width: 40px;
-			height: 40px;
-			transform: scale(0.7);
-			&:hover {
-				color: #3a537c;
+      & + i {
+        transform: rotate(-45deg);
+      }
+    }
 
-				i {
-					transform-origin: center;
-					transform: rotate(45deg);
+    @include s() {
+      top: 3px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      transform: scale(0.7);
+      &:hover {
+        color: #3a537c;
 
-					& + i {
-						transform: rotate(-45deg);
-					}
-				}
-			}
-		}
-	}
+        i {
+          transform-origin: center;
+          transform: rotate(45deg);
 
-	.fn {
-		height: 120px;
-		display: flex;
-		align-items: center;
-		gap: 16px;
-		justify-content: center;
-		button {
-			width: 100px;
-			border-radius: 111px;
-			filter: hue-rotate(60deg);
-			& + button {
-				filter: hue-rotate(-30deg);
-			}
-		}
-	}
+          & + i {
+            transform: rotate(-45deg);
+          }
+        }
+      }
+    }
+  }
 
-	label {
-		font-size: 15px;
-		align-items: flex-start;
+  .fn {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
 
-		display: flex;
-		padding: 10px;
+    button {
+      width: 100px;
+      border-radius: 111px;
+      filter: hue-rotate(60deg);
 
-		input {
-			width: 0;
-			resize: none;
-			background: var(--bg1);
-			flex: 1;
-		}
+      & + button {
+        filter: hue-rotate(-30deg);
+      }
+    }
+  }
 
-		span {
-			line-height: 48px;
-			color: #8092a9;
-			text-align: right;
-			padding-right: 10px;
-			width: 80px;
-			flex-shrink: 0;
-		}
-	}
+  label {
+    font-size: 15px;
+    align-items: flex-start;
+    display: flex;
 
-	.f {
-		transition: 0.3s ease-in-out;
-		height: 640px;
-		padding: 60px 0 0;
-		display: flex;
-		flex-direction: column;
-		width: 500px;
-		background: var(--bg0);
-		border-radius: 16px;
-		box-shadow: rgba(0, 0, 0, 0.3) 0 10px 30px;
-		@include s() {
-			height: 100%;
-		}
-	}
+    input {
+      width: 0;
+      resize: none;
+      background: var(--bg1);
+      flex: 1;
+    }
 
-	.f0 {
-		flex: 1;
-		padding: 20px;
-		overflow: auto;
-	}
+    span {
+      line-height: 48px;
+      color: #8092a9;
+      text-align: right;
+      padding-right: 10px;
+      width: 80px;
+      flex-shrink: 0;
+    }
+  }
 
-	.f1 {
-		background: rgba(0, 0, 0, 0.2);
-		display: flex;
-		padding: 0 20px;
+  .f {
+    transition: 0.3s ease-in-out;
+    height: 640px;
+    padding: 60px 0 0;
+    display: flex;
+    flex-direction: column;
+    width: 500px;
+    background: var(--bg0);
+    border-radius: 16px;
+    box-shadow: rgba(0, 0, 0, 0.3) 0 10px 30px;
+    @include s() {
+      height: 100%;
+    }
+  }
 
-		span {
-			width: auto;
-			text-align: left;
-			padding-left: 10px;
-		}
+  .f0 {
+    flex: 1;
+    padding: 20px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
-		@include s() {
-			flex-wrap: wrap;
-			label {
-				white-space: nowrap;
-				width: auto;
-				flex: 1;
-			}
-		}
-	}
+  .f1 {
+    gap: 14px;
+    background: rgb(0 0 0 / 33%);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    flex-wrap: wrap;
+    margin: 8px;
+    padding: 12px;
+    border-radius: 4px;
 
-	.m {
-		backdrop-filter: blur(1px);
-		z-index: 100;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: fixed;
-		left: 72px;
-		top: 0;
-		bottom: 0;
-		right: 0;
-		background: rgba(100, 100, 100, 0.1);
-		@include s() {
-			left: 0;
-			top: 48px;
-		}
-	}
+    span {
+      width: auto;
+      text-align: left;
+      padding-left: 10px;
+    }
+
+    @include s() {
+      flex-wrap: wrap;
+      label {
+        white-space: nowrap;
+        width: auto;
+        flex: 1;
+      }
+    }
+  }
+
+  .m {
+    backdrop-filter: blur(1px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 72px;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(100, 100, 100, 0.1);
+    @include s() {
+      left: 0;
+      top: 48px;
+    }
+  }
 </style>

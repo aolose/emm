@@ -1,7 +1,7 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { matches } from 'ip-matching';
 import { db, sys } from '$lib/server/index';
-import { BlackList, FwLog, FwResp, FWRule } from '$lib/server/model';
+import { BlackList, FwLog, FwResp, FWRule, WhiteList } from '$lib/server/model';
 import { arrFilter, hasFwRuleFilter, hds2Str, str2Hds, trim } from '$lib/utils';
 import type { Obj, Timer } from '$lib/types';
 import { checkRedirect, getClient, getClientAddr, model, sysStatue } from '$lib/server/utils';
@@ -14,9 +14,24 @@ import { isTsVerified, challengeResponse } from '$lib/server/turnstile';
 let triggers: FWRule[];
 let rules: FWRule[];
 let blackList: BlackList[];
+let whiteList: WhiteList[];
+const exactWhiteIp = new Map<string, true>();
+let cidrWhiteRules: WhiteList[] = [];
 const exactBlackIp = new Map<string, FWRule>();
 let cidrBlackRules: FWRule[] = [];
 const fwResp = new Map<number, FwResp>();
+
+const rebuildWhiteIndex = () => {
+	exactWhiteIp.clear();
+	cidrWhiteRules = [];
+	for (const w of whiteList) {
+		if (w.ip && /[\/-]/.test(w.ip)) {
+			cidrWhiteRules.push(w);
+		} else if (w.ip) {
+			exactWhiteIp.set(w.ip, true);
+		}
+	}
+};
 
 const rebuildBlackIndex = () => {
 	exactBlackIp.clear();
@@ -199,6 +214,8 @@ export function loadRules() {
 		else rules.push(ru);
 	});
 	blackList = db.all(model(BlackList)).map((a) => model(BlackList, a) as BlackList);
+	whiteList = db.all(model(WhiteList)).map((a) => model(WhiteList, a) as WhiteList);
+	rebuildWhiteIndex();
 	rebuildBlackIndex();
 	sort();
 	clearTimeout(t);
@@ -246,9 +263,57 @@ const forEachLogReverse = (fn: (log: log) => boolean | void) => {
 	}
 };
 
+// === Turnstile abandon detection ===
+// Track IPs that received a 307 redirect but haven't loaded /ts-challenge.
+// Each IP maps to an array of { timeout, timer } tuples — one per active abandon rule.
+type AbandonEntry = { timeout: number; timer: ReturnType<typeof setTimeout> };
+const pendingAbandons = new Map<string, AbandonEntry[]>();
+
+function markAbandon(ip: string, rule: FWRule): void {
+	const timeout = rule.getTimeout() * 1000;
+	const entry: AbandonEntry = {
+		timeout,
+		timer: setTimeout(() => {
+			addBlackListRule({
+				ip,
+				respId: rule.respId,
+				mark: rule.mark,
+				log: rule.log,
+			});
+			// CF upload — async fire-and-forget
+			if (rule.cfUpload && sys.cfAccountId && sys.cfApiToken && sys.cfListId) {
+				pushIpToCf(ip, rule.mark || 'turnstile-abandon').catch((e) =>
+					console.error('[cf] abandon push failed:', ip, e)
+				);
+			}
+			// Remove this entry from the array
+			const entries = pendingAbandons.get(ip);
+			if (entries) {
+				const idx = entries.indexOf(entry);
+				if (idx !== -1) entries.splice(idx, 1);
+				if (!entries.length) pendingAbandons.delete(ip);
+			}
+		}, timeout),
+	};
+	const entries = pendingAbandons.get(ip);
+	if (entries) {
+		entries.push(entry);
+	} else {
+		pendingAbandons.set(ip, [entry]);
+	}
+}
+
+function clearAbandon(ip: string): void {
+	const entries = pendingAbandons.get(ip);
+	if (entries) {
+		for (const e of entries) clearTimeout(e.timer);
+		pendingAbandons.delete(ip);
+	}
+}
+
 // === UA collection-mode ring buffer ===
 // Stores recent requests for batch analysis by UA-trigger rules.
-// TTL: 1 minute, max 1000 entries.
+// TTL: dynamic based on active uaMode trigger windows, max 1000 entries.
 interface UaEntry {
 	ip: string;
 	ua: string;
@@ -256,7 +321,7 @@ interface UaEntry {
 	ts: number;
 }
 const UA_MAX = 1000;
-const UA_TTL = 60_000; // 1 min
+let _uaMaxWindow = 60; // dynamic, updated by scheduleUaAnalysis
 const uaEntries: UaEntry[] = [];
 
 // Cloudflare Verified Bot categories — skip logging and UA collection
@@ -265,8 +330,8 @@ const CF_TRUSTED_BOT_CATEGORIES = ['Search Engine Crawler', 'Page Preview', 'Fee
 function recordUaEntry(ip: string, ua: string, path: string): void {
 	const now = Date.now();
 	uaEntries.push({ ip, ua, path, ts: now });
-	// Trim expired
-	const cutoff = now - UA_TTL;
+	// Trim expired — use dynamic max window across all active uaMode triggers
+	const cutoff = now - _uaMaxWindow * 1000;
 	while (uaEntries.length && uaEntries[0].ts < cutoff) uaEntries.shift();
 	// Trim overflow
 	while (uaEntries.length > UA_MAX) uaEntries.shift();
@@ -276,7 +341,7 @@ function recordUaEntry(ip: string, ua: string, path: string): void {
  *  Returns IPs to block (already deduplicated against isIpBlocked). */
 function analyzeUaTrigger(rule: FWRule): string[] {
 	const now = Date.now();
-	const cutoff = now - UA_TTL;
+	const cutoff = now - rule.getUaWindow() * 1000;
 	// Parse rate as count threshold (collection mode: "10" or "10/300" — take count)
 	const rateCount = parseInt((rule.rate || '').replace(/[^0-9]/g, '')) || 0;
 	if (!rateCount) return [];
@@ -329,6 +394,10 @@ function runUaAnalysis(): void {
 	const activeUa = triggers.filter(
 		(t) => t.uaMode && t.active && t.isInSchedule()
 	);
+	// Update dynamic max window
+	_uaMaxWindow = activeUa.length
+		? Math.max(...activeUa.map((t) => t.getUaWindow()))
+		: 60;
 	if (!activeUa.length) return;
 
 	for (const rule of activeUa) {
@@ -420,6 +489,14 @@ export const isIpBlocked = (ip: string): Obj<FWRule> | undefined => {
 	return hitRules({ ip }, cidrBlackRules);
 };
 
+export const isIpWhitelisted = (ip: string): boolean => {
+	if (exactWhiteIp.has(ip)) return true;
+	for (const w of cidrWhiteRules) {
+		if (matches(ip, w.ip)) return true;
+	}
+	return false;
+};
+
 export const blackLists = (page = 1, size = 20) => {
 	blackList.sort((a, b) => b.createAt - a.createAt);
 	const bs = blackList.slice(size * (page - 1), size * page).map((a) => {
@@ -431,6 +508,37 @@ export const blackLists = (page = 1, size = 20) => {
 		items: arrFilter(bs, ['id', 'ip', 'mark', 'respId', 'createAt', '_geo'], false)
 	};
 };
+
+export const saveWhiteList = (w: WhiteList) => {
+	db.save(w);
+	const i = whiteList.findIndex((a) => a.id === w.id);
+	if (i !== -1) {
+		w = Object.assign(whiteList[i], w);
+	} else {
+		whiteList.push(w);
+	}
+	rebuildWhiteIndex();
+};
+export const delWhiteList = (...id: number[]) => {
+	const ids = new Set(id);
+	if (!ids.size) return;
+	db.delByPk(WhiteList, id);
+	whiteList = whiteList.filter((a) => !ids.has(a.id));
+	rebuildWhiteIndex();
+};
+
+export const whiteLists = (page = 1, size = 20) => {
+	whiteList.sort((a, b) => b.createAt - a.createAt);
+	const ws = whiteList.slice(size * (page - 1), size * page).map((a) => {
+		a._geo = ipInfoStr(a.ip);
+		return a;
+	});
+	return {
+		total: Math.ceil(whiteList.length / size),
+		items: arrFilter(ws, ['id', 'ip', 'mark', 'createAt', '_geo'], false)
+	};
+};
+
 const blackListCheck = (
 	r: {
 		ip: string;
@@ -686,6 +794,28 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		return await handle();
 	}
 
+	// /ts-challenge page load — clear pending abandon timers (browser followed 307)
+	if (pn.startsWith('/ts-challenge') && !isLocalhost && !isAdmin) {
+		clearAbandon(ip);
+	}
+
+	// Whitelist check — whitelisted IPs bypass firewall but logging still happens
+	if (!isLocalhost && !isAdmin && isIpWhitelisted(ip)) {
+		const wlLog = logReq(event);
+		res = await handle();
+		wlLog.status = res.status;
+		if (!isAuthenticated && wlLog.log) {
+			saveToDb(wlLog);
+		}
+		ruv({
+			ip: wlLog.ip,
+			path: wlLog.path,
+			ua: wlLog.headers.get('user-agent') || '',
+			status: res.status
+		});
+		return res;
+	}
+
 	// Blacklist check FIRST — block before any other challenge
 	const fr = isLocalhost ? undefined : fwFilter(event, rules);
 	if (fr?.respId) {
@@ -717,6 +847,7 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	const nTr: FWRule[] = [];
 	triggers.forEach((a) => {
 		if (a.uaMode) return; // collection mode — handled by batch scheduler
+		if (a.abandon) return; // abandon mode — handled by turnstile section
 		if (a.status) sTr.push(a);
 		else nTr.push(a);
 	});
@@ -742,6 +873,18 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
 	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
+		// Mark abandon: start timers for matching abandon trigger rules
+		const abandonTriggers = triggers.filter((t) => t.abandon && t.active && t.isInSchedule());
+		if (abandonTriggers.length) {
+			const r = { ip, path: pn, method: event.request.method.toLowerCase(), headers: event.request.headers };
+			for (const rule of abandonTriggers) {
+				const hr = hitRule(r, rule);
+				if (hr) {
+					markAbandon(ip, rule);
+				}
+			}
+		}
+
 		const cr = challengeResponse(event.url.href, isApi);
 		log.status = cr.status;
 		if (!isLocalhost && !isAuthenticated && (fr?.log || log.log)) {
@@ -800,8 +943,26 @@ export const __test = {
 	runUaAnalysis,
 	scheduleUaAnalysis,
 	addBlackListRule,
+	markAbandon,
+	clearAbandon,
+	getPendingAbandons: () => new Map(pendingAbandons),
+	clearPendingAbandons: () => {
+		for (const [, entries] of pendingAbandons) {
+			for (const e of entries) clearTimeout(e.timer);
+		}
+		pendingAbandons.clear();
+	},
+	getUaMaxWindow: () => _uaMaxWindow,
+	setUaMaxWindow: (w: number) => { _uaMaxWindow = w; },
 	getUaEntries: () => uaEntries.slice(),
 	clearUaEntries: () => { uaEntries.length = 0; },
+	getWhiteList: () => (whiteList || []).slice(),
+	clearWhiteList: () => {
+		if (whiteList) whiteList.length = 0;
+		else whiteList = [];
+		exactWhiteIp.clear();
+		cidrWhiteRules.length = 0;
+	},
 	getBlackList: () => (blackList || []).slice(),
 	clearBlackList: () => {
 		if (blackList) blackList.length = 0;

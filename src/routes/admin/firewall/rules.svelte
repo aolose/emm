@@ -14,7 +14,7 @@
 	let ld = $state(0);
 	const wa = watch(ta);
 	const fix = (d) => {
-		if (ta !== 2) {
+		if (ta !== 2 && ta !== 3) {
 			if (d.trigger) {
 				if (d.country) d.country = '';
 				if (d.method) d.method = '';
@@ -28,7 +28,7 @@
 	};
 	let go = (n) => {
 		p = n;
-		const api = ['rules', 'bks', 'fwRsp'][ta];
+		const api = ['rules', 'bks', 'fwRsp', 'wls'][ta];
 		ld = 1;
 		const isRsp = ta === 2;
 		req(api, isRsp ? undefined : new Uint16Array([p, 20]), {
@@ -46,10 +46,10 @@
 			.finally(() => (ld = 0));
 	};
 	const add = () => {
-		pop(ta ? 4 : 2).then((d) => {
+		pop(ta === 3 ? 6 : (ta ? 4 : 2)).then((d) => {
 			if (!d) return;
 			fix(d);
-			const api = ta ? 'fwRsp' : 'rule';
+			const api = ta === 3 ? 'wlk' : (ta ? 'fwRsp' : 'rule');
 			req(api, d).then((id) => {
 				d.id = id;
 				ls = [{ ...d }, ...ls];
@@ -61,7 +61,7 @@
 	const del = (id) => {
 		confirm('sure to delete?').then((ok) => {
 			if (ok) {
-				const api = ['rules', 'blk', 'fwRsp'][ta];
+				const api = ['rules', 'blk', 'fwRsp', 'wlk'][ta];
 				req(api, id, { method: method.DELETE }).then(() => {
 					ls = ls.filter((a) => a.id !== id);
 					if (ta === 2) fwRespLs.set(ls);
@@ -71,13 +71,13 @@
 	};
 
 	const edit = (da) => {
-		pop(ta ? (ta === 2 ? 5 : 3) : 1, { ...da }).then((d) => {
+		pop(ta === 3 ? 7 : (ta ? (ta === 2 ? 5 : 3) : 1), { ...da }).then((d) => {
 			if (!d) return;
 			fix(d);
 			let df = diffObj(da, d);
 			df.id = da.id;
-			if (ta === 1) df = { id: da.id, respId: df.respId, mark: df.mark };
-			const api = ['rule', 'blk', 'fwRsp'][ta];
+			if (ta === 1 || ta === 3) df = { id: da.id, mark: df.mark };
+			const api = ['rule', 'blk', 'fwRsp', 'wlk'][ta];
 			req(api, df)
 				.then(() => {
 					const idx = ls.indexOf(da);
@@ -111,9 +111,10 @@
 				<button class:act={!ta} onclick={() => (ta = 0)}>rules</button>
 				<button class:act={ta === 1} onclick={() => (ta = 1)}>blackList</button>
 				<button class:act={ta === 2} onclick={() => (ta = 2)}>response</button>
+				<button class:act={ta === 3} onclick={() => (ta = 3)}>whiteList</button>
 			</div>
 			<s></s>
-			{#if !ta || ta === 2}
+			{#if !ta || ta === 2 || ta === 3}
 				<button onclick={add} class="icon i-add"></button>
 			{/if}
 			<button onclick={close} class="icon i-close"></button>
@@ -131,7 +132,10 @@
 								{#if r.uaMode}
 									<div class="icon i-group"><span>collection</span></div>
 								{/if}
-								<div class="icon i-sort"><span>{r.weight ?? 100}</span></div>
+								{#if r.abandon}
+									<div class="icon i-label" title="Turnstile Abandon"><span>A</span></div>
+								{/if}
+								<div class="icon i-label"><span>{r.weight ?? 100}</span></div>
 								{#if r.schedule}
 									<div class="icon i-clock"><span>{r.schedule}</span></div>
 								{/if}
@@ -149,7 +153,23 @@
 								<button class="icon i-ed" onclick={() => edit(r)}></button>
 							</div>
 						</div>
-					{:else if ta === 2}
+					{:else if ta === 3}
+					<div class="u act">
+						<div class="i">
+							<div class="icon i-ip"><span>{r.ip}</span></div>
+							<div class="icon i-geo"><span>{r._geo}</span></div>
+						</div>
+						<div class="r">
+							{#if r.mark}
+								<span class="m">{r.mark}</span>
+							{/if}
+							<p>{time(r.createAt)}</p>
+							<s></s>
+							<button class="icon i-del" onclick={() => del(r.id)}></button>
+							<button class="icon i-ed" onclick={() => edit(r)}></button>
+						</div>
+					</div>
+				{:else if ta === 2}
 						<div class="u">
 							<div class="i">
 								<div class="icon i-tag"><span>{r.name}</span></div>
@@ -168,7 +188,10 @@
 								{#if r.uaMode}
 									<div class="icon i-group"><span>collection</span></div>
 								{/if}
-								<div class="icon i-sort"><span>{r.weight ?? 100}</span></div>
+								{#if r.abandon}
+									<div class="icon i-label" title="Turnstile Abandon"><span>A</span></div>
+								{/if}
+								<div class="icon i-label"><span>{r.weight ?? 100}</span></div>
 								{#if r.schedule}
 									<div class="icon i-clock"><span>{r.schedule}</span></div>
 								{/if}
@@ -288,7 +311,7 @@
 	.act {
 		.m {
 			padding-right: 10px;
-			color: #94abc0;
+			color: #4b555c;
 		}
 
 		.i {
@@ -312,13 +335,11 @@
 	.i {
 		display: flex;
 		flex-wrap: wrap;
-
+    justify-content: start;
+		align-items: start;
 		div {
 			font-size: 14px;
 			padding: 5px 10px;
-			flex-grow: 1;
-			width: 50%;
-
 			span {
 				color: #959ca8;
 				padding-left: 10px;
@@ -327,10 +348,12 @@
 
 		.i-set,
 		.i-drop {
-			line-height: 2;
+			line-height: 1;
 			align-items: flex-start;
 			display: flex;
-			width: 100%;
+			width: 90%;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 
 		.i-drop {
@@ -346,23 +369,28 @@
 		padding: 0;
 	}
 
- .i-sort{
+ .i-label{
 	 flex: 0;
-	 width: auto;
-	 margin: auto;
+	 align-items: center;
+	 justify-content: center;
+	 height: 24px;
+	 margin: 0 3px!important;
+	 padding: 0!important;
 	 display: flex;
 	 order: -1;
 	 span{
-		 padding: 0 3px!important;
+		 border-radius: 4px;
+		 padding: 4px 6px!important;
 		 margin: 0;
+		 line-height: 1;
 		 display: flex;
 		 align-items: center;
 		 justify-content: center;
 		 text-align: center;
 		 font-weight: 800;
-     color: #000!important;
+     color: #757b95 !important;
      font-size: 10px;
-     background: rgb(120 127 161 / 0.24);
+     background: rgb(0 0 0 / 0.6);
 	 }
  }
 
@@ -375,8 +403,7 @@
 	}
 
 	.r {
-		border-top: 1px solid rgba(0, 0, 0, 0.2);
-		background: #1d2125;
+		background: rgb(29 33 37 / 0.3);
 		width: 100%;
 		align-items: center;
 		height: 30px;
@@ -401,7 +428,7 @@
 		display: flex;
 		align-items: center;
 		padding: 0 0 0 10px;
-		height: 88px;
+		height: 64px;
 		@include s() {
 			height: 60px;
 		}

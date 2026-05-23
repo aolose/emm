@@ -7,6 +7,6 @@ export { Tag } from './tag';
 export { Comment, CmUser } from './comment';
 export { Require, RequireMap } from './require';
 export { System, User } from './system';
-export { FWRule, FwResp, FwLog, BlackList } from './firewall';
+export { FWRule, FwResp, FwLog, BlackList, WhiteList } from './firewall';
 export { RPU, RPUCache, PostRead } from './stats';
 export { TokenInfo } from './token';

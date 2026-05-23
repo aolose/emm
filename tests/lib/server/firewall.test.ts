@@ -845,4 +845,419 @@ describe('Firewall rule matching', () => {
 			expect(res.status).toBe(200);
 		});
 	});
+
+	describe('Abandon mode — model helpers', () => {
+		it('getTimeout defaults to 3', () => {
+			const rule = new FWRule();
+			expect(rule.getTimeout()).toBe(3);
+		});
+
+		it('getTimeout clamps to 1-10', () => {
+			const rule = new FWRule();
+			rule.timeout = 0;
+			expect(rule.getTimeout()).toBe(1);
+			rule.timeout = 999;
+			expect(rule.getTimeout()).toBe(10);
+		});
+
+		it('getUaWindow defaults to 60', () => {
+			const rule = new FWRule();
+			expect(rule.getUaWindow()).toBe(60);
+		});
+
+		it('getUaWindow clamps to 30-3600', () => {
+			const rule = new FWRule();
+			rule.uaWindow = 0;
+			expect(rule.getUaWindow()).toBe(30);
+			rule.uaWindow = 9999;
+			expect(rule.getUaWindow()).toBe(3600);
+		});
+	});
+
+	describe('markAbandon / clearAbandon timer management', () => {
+		let markAbandon: any;
+		let clearAbandon: any;
+		let getPendingAbandons: any;
+		let clearPendingAbandons: any;
+		let getBlackList: any;
+		let clearBlackList: any;
+
+		beforeEach(async () => {
+			const mod = await import('../../../src/lib/server/firewall');
+			markAbandon = mod.__test.markAbandon;
+			clearAbandon = mod.__test.clearAbandon;
+			getPendingAbandons = mod.__test.getPendingAbandons;
+			clearPendingAbandons = mod.__test.clearPendingAbandons;
+			getBlackList = mod.__test.getBlackList;
+			clearBlackList = mod.__test.clearBlackList;
+			clearBlackList();
+			clearPendingAbandons();
+		});
+
+		afterEach(() => {
+			clearPendingAbandons();
+			clearBlackList();
+		});
+
+		it('markAbandon starts timer and adds IP to blacklist after timeout', async () => {
+			const rule = new FWRule();
+			rule.timeout = 1;
+			rule.mark = 'test-abandon';
+			rule.respId = -1;
+			rule.log = false;
+
+			markAbandon('10.0.5.1', rule);
+
+			const pending = getPendingAbandons();
+			expect(pending.has('10.0.5.1')).toBe(true);
+
+			await new Promise((r) => setTimeout(r, 1100));
+
+			const bl = getBlackList();
+			expect(bl.length).toBe(1);
+			expect(bl[0].ip).toBe('10.0.5.1');
+			expect(bl[0].mark).toBe('test-abandon');
+		});
+
+		it('clearAbandon cancels timer so IP is NOT blacklisted', async () => {
+			const rule = new FWRule();
+			rule.timeout = 1;
+			rule.mark = 'test-abandon-clear';
+			rule.respId = -1;
+
+			markAbandon('10.0.5.2', rule);
+			clearAbandon('10.0.5.2');
+
+			const pending = getPendingAbandons();
+			expect(pending.has('10.0.5.2')).toBe(false);
+
+			await new Promise((r) => setTimeout(r, 1100));
+
+			const bl = getBlackList();
+			expect(bl.length).toBe(0);
+		});
+
+		it('multiple abandon rules for same IP tracked independently', async () => {
+			const rule1 = new FWRule();
+			rule1.timeout = 1;
+			rule1.mark = 'rule-1';
+			rule1.respId = -1;
+
+			const rule2 = new FWRule();
+			rule2.timeout = 2;
+			rule2.mark = 'rule-2';
+			rule2.respId = -1;
+
+			markAbandon('10.0.5.3', rule1);
+			markAbandon('10.0.5.3', rule2);
+
+			const pending = getPendingAbandons();
+			expect(pending.get('10.0.5.3').length).toBe(2);
+
+			await new Promise((r) => setTimeout(r, 1100));
+			let bl = getBlackList();
+			expect(bl.length).toBe(1);
+			expect(bl[0].mark).toBe('rule-1');
+
+			const pending2 = getPendingAbandons();
+			expect(pending2.get('10.0.5.3')?.length).toBe(1);
+
+			await new Promise((r) => setTimeout(r, 1100));
+			bl = getBlackList();
+			expect(bl.length).toBe(1);
+
+			expect(getPendingAbandons().has('10.0.5.3')).toBe(false);
+		});
+	});
+
+
+	describe('Direct abandon filter test', () => {
+		it('triggers.filter with abandon finds the rule in firewallProcess context', async () => {
+			testIp = '10.0.8.1';
+			mockSysStatue = 2;
+			mock.module('$lib/server/utils', () => ({
+				checkRedirect: () => checkRedirectReturn,
+				getClient: () => undefined,
+				getClientAddr: () => testIp,
+				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
+				get sysStatue() { return mockSysStatue; },
+			}));
+			const mod = await import('../../../src/lib/server/firewall');
+			mod.__test.setRules([]);
+			mod.__test.setTriggers([]);
+			mod.__test.clearPendingAbandons();
+
+			const rule = new FWRule();
+			rule.trigger = true;
+			rule.abandon = true;
+			rule.active = true;
+			rule.ip = '';
+			rule.path = '';
+			rule.status = '';
+			rule.country = '';
+			rule.method = '';
+			rule.headers = '';
+			mod.__test.setTriggers([rule]);
+
+			const dummy = new FWRule();
+			dummy.id = 999;
+			dummy.active = false;
+			mod.__test.setRules([dummy as any]);
+
+			const event = {
+				request: new Request('http://localhost/post/direct'),
+				url: new URL('http://localhost/post/direct'),
+				locals: { ip: '10.0.8.1' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await mod.firewallProcess(event, handle);
+
+
+			expect(mod.__test.getPendingAbandons().size).toBe(1);
+
+			testIp = '127.0.0.1';
+		});
+
+		it('clears abandon when /ts-challenge page is loaded', async () => {
+			testIp = '10.0.8.2';
+			mockSysStatue = 2;
+			mock.module('$lib/server/utils', () => ({
+				checkRedirect: () => checkRedirectReturn,
+				getClient: () => undefined,
+				getClientAddr: () => testIp,
+				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
+				get sysStatue() { return mockSysStatue; },
+			}));
+			const mod = await import('../../../src/lib/server/firewall');
+			mod.__test.setRules([]);
+			mod.__test.setTriggers([]);
+			mod.__test.clearPendingAbandons();
+
+			const rule = new FWRule();
+			rule.id = 78;
+			rule.trigger = true;
+			rule.abandon = true;
+			rule.timeout = 5;
+			rule.active = true;
+			rule.ip = '';
+			rule.path = '';
+			rule.status = '';
+			rule.country = '';
+			rule.method = '';
+			rule.headers = '';
+			mod.__test.setTriggers([rule]);
+
+			const dummy = new FWRule();
+			dummy.id = 999;
+			dummy.active = false;
+			mod.__test.setRules([dummy as any]);
+
+			// Step 1: Request protected path
+			const event1 = {
+				request: new Request('http://localhost/about'),
+				url: new URL('http://localhost/about'),
+				locals: { ip: '10.0.8.2' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			await mod.firewallProcess(event1, handle);
+
+			expect(mod.__test.getPendingAbandons().has('10.0.8.2')).toBe(true);
+
+			// Step 2: Load /ts-challenge
+			const event2 = {
+				request: new Request('http://localhost/ts-challenge?redirect=/about'),
+				url: new URL('http://localhost/ts-challenge?redirect=/about'),
+				locals: { ip: '10.0.8.2' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			await mod.firewallProcess(event2, handle);
+
+			expect(mod.__test.getPendingAbandons().has('10.0.8.2')).toBe(false);
+
+			testIp = '127.0.0.1';
+		});
+
+		it('does NOT mark abandon for non-protected paths', async () => {
+			testIp = '10.0.8.3';
+			mockSysStatue = 2;
+			mock.module('$lib/server/utils', () => ({
+				checkRedirect: () => checkRedirectReturn,
+				getClient: () => undefined,
+				getClientAddr: () => testIp,
+				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
+				get sysStatue() { return mockSysStatue; },
+			}));
+			const mod = await import('../../../src/lib/server/firewall');
+			mod.__test.setRules([]);
+			mod.__test.setTriggers([]);
+			mod.__test.clearPendingAbandons();
+
+			const rule = new FWRule();
+			rule.id = 79;
+			rule.trigger = true;
+			rule.abandon = true;
+			rule.timeout = 5;
+			rule.active = true;
+			rule.ip = '';
+			rule.path = '';
+			rule.status = '';
+			rule.country = '';
+			rule.method = '';
+			rule.headers = '';
+			mod.__test.setTriggers([rule]);
+
+			const dummy = new FWRule();
+			dummy.id = 999;
+			dummy.active = false;
+			mod.__test.setRules([dummy as any]);
+
+			const event = {
+				request: new Request('http://localhost/api/test'),
+				url: new URL('http://localhost/api/test'),
+				locals: { ip: '10.0.8.3' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			await mod.firewallProcess(event, handle);
+
+			expect(mod.__test.getPendingAbandons().has('10.0.8.3')).toBe(false);
+
+			testIp = '127.0.0.1';
+		});
+	});
+
+
+	describe('Whitelist — isIpWhitelisted and firewall bypass', () => {
+
+		it('isIpWhitelisted returns true for exact IP match', async () => {
+			const mod = await import('../../../src/lib/server/firewall');
+			const { WhiteList } = await import('../../../src/lib/server/model');
+			mod.__test.clearWhiteList();
+
+			const w = new WhiteList();
+			w.id = 1;
+			w.ip = '10.0.9.1';
+			w.mark = 'test-whitelist';
+			(mod as any).saveWhiteList(w);
+
+			const result = (mod as any).isIpWhitelisted('10.0.9.1');
+			expect(result).toBe(true);
+
+			mod.__test.clearWhiteList();
+		});
+
+		it('isIpWhitelisted returns false for unknown IP', async () => {
+			const mod = await import('../../../src/lib/server/firewall');
+			mod.__test.clearWhiteList();
+			expect((mod as any).isIpWhitelisted('10.0.9.99')).toBe(false);
+		});
+
+		it('delWhiteList removes IP from whitelist', async () => {
+			const mod = await import('../../../src/lib/server/firewall');
+			const { WhiteList } = await import('../../../src/lib/server/model');
+			mod.__test.clearWhiteList();
+
+			const w = new WhiteList();
+			w.id = 2;
+			w.ip = '10.0.9.2';
+			w.mark = 'to-delete';
+			(mod as any).saveWhiteList(w);
+
+			expect((mod as any).isIpWhitelisted('10.0.9.2')).toBe(true);
+
+			(mod as any).delWhiteList(2);
+			expect((mod as any).isIpWhitelisted('10.0.9.2')).toBe(false);
+
+			mod.__test.clearWhiteList();
+		});
+
+		it('whitelisted IP bypasses firewall and Turnstile', async () => {
+			testIp = '10.0.9.3';
+			mockSysStatue = 2;
+			mock.module('$lib/server/utils', () => ({
+				checkRedirect: () => checkRedirectReturn,
+				getClient: () => undefined,
+				getClientAddr: () => testIp,
+				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
+				get sysStatue() { return mockSysStatue; },
+			}));
+
+			const mod = await import('../../../src/lib/server/firewall');
+			const { WhiteList } = await import('../../../src/lib/server/model');
+			mod.__test.clearWhiteList();
+			mod.__test.setRules([]);
+			mod.__test.setTriggers([]);
+
+			// Add whitelist
+			const w = new WhiteList();
+			w.id = 3;
+			w.ip = '10.0.9.3';
+			(mod as any).saveWhiteList(w);
+
+			// Dummy rule to prevent loadRules
+			const dummy = new FWRule();
+			dummy.id = 999;
+			dummy.active = false;
+			mod.__test.setRules([dummy as any]);
+
+			const event = {
+				request: new Request('http://localhost/about'),
+				url: new URL('http://localhost/about'),
+				locals: { ip: '10.0.9.3' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await mod.firewallProcess(event, handle);
+
+			// Should pass through to handler (200), NOT Turnstile (418) or blacklist (403)
+			expect(res.status).toBe(200);
+
+			mod.__test.clearWhiteList();
+			testIp = '127.0.0.1';
+		});
+
+		it('non-whitelisted IP on same path gets Turnstile challenge', async () => {
+			testIp = '10.0.9.4';
+			mockSysStatue = 2;
+			mock.module('$lib/server/utils', () => ({
+				checkRedirect: () => checkRedirectReturn,
+				getClient: () => undefined,
+				getClientAddr: () => testIp,
+				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
+				get sysStatue() { return mockSysStatue; },
+			}));
+
+			const mod = await import('../../../src/lib/server/firewall');
+			mod.__test.clearWhiteList();
+			mod.__test.setRules([]);
+			mod.__test.setTriggers([]);
+
+			const dummy = new FWRule();
+			dummy.id = 999;
+			dummy.active = false;
+			mod.__test.setRules([dummy as any]);
+
+			const event = {
+				request: new Request('http://localhost/about'),
+				url: new URL('http://localhost/about'),
+				locals: { ip: '10.0.9.4' },
+				fetch: () => Promise.resolve(new Response()),
+			} as any;
+
+			const handle = async () => new Response('ok', { status: 200 });
+			const res = await mod.firewallProcess(event, handle);
+
+			// Should be blocked by Turnstile (418)
+			expect(res.status).toBe(418);
+
+			testIp = '127.0.0.1';
+		});
+	});
 });

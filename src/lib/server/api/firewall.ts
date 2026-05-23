@@ -2,12 +2,13 @@ import type { APIRoutes } from '../../types';
 import { db } from '../index';
 import { getClient, getIp, getReqJson, model, pageBuilder, resp } from '../utils';
 import { arrFilter } from '$lib/utils';
-import { BlackList, FwLog, FwResp, FWRule } from '$lib/server/model';
+import { BlackList, FwLog, FwResp, FWRule, WhiteList } from '$lib/server/model';
 import { auth, parseIds } from './_common';
 import { permission } from '$lib/enum';
-import { addRule, blackLists, blockIp, delBlackList, delFwResp, delRule, filterLog,
+import { addRule, blackLists, blockIp, delBlackList, delFwResp, delRule, delWhiteList,
+	filterLog,
 	fw2log, fwRespLis, getFwResp, isIpBlocked, getLogCacheEntries, lsRules,
-	patchDetailIpInfo, saveBlackList, setFwResp } from '$lib/server/firewall';
+	patchDetailIpInfo, saveBlackList, saveWhiteList, setFwResp, whiteLists } from '$lib/server/firewall';
 import { ipInfoStr } from '$lib/server/ipLite';
 import type { FWRule as FWRuleType } from '$lib/server/model';
 
@@ -55,7 +56,7 @@ const apis: APIRoutes = {
 		post: auth(Read, async (req) => {
 			const r = new Uint16Array(await req.arrayBuffer());
 			const o = lsRules(r[0], r[1]);
-			o.items = arrFilter(o.items, ['id','path','headers','ip','mark','country','log','active','trigger','status','rate','respId','uaMode','cfUpload','ua','uaCount','schedule','createAt','method','weight']) as FWRuleType[];
+			o.items = arrFilter(o.items, ['id','path','headers','ip','mark','country','log','active','trigger','status','rate','respId','uaMode','uaWindow','abandon','timeout','cfUpload','ua','uaCount','schedule','createAt','method','weight']) as FWRuleType[];
 			return o;
 		})
 	},
@@ -63,6 +64,20 @@ const apis: APIRoutes = {
 		get: auth(Read, () => fwRespLis()),
 		post: auth(Admin, async (req) => { return setFwResp(model(FwResp, await req.json())); }),
 		delete: auth(Admin, async (req) => { const id = +(await req.text()); if (id) delFwResp(id); })
+	},
+	wls: {
+		post: auth(Read, async (req) => {
+			const r = new Uint16Array(await req.arrayBuffer());
+			return whiteLists(r[0], r[1]);
+		})
+	},
+	wlk: {
+		post: auth(Admin, async (req) => {
+			const w = model(WhiteList, await req.json()) as WhiteList;
+			saveWhiteList(w);
+			return w.id;
+		}),
+		delete: auth(Admin, async (req) => { const id = +(await req.text()); if (id) delWhiteList(id); })
 	},
 };
 
