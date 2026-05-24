@@ -17,7 +17,8 @@ const page = (base: string, total: number, size: number) => {
 		urls.push({ url: base + (1 + i), lastMod: lastMod });
 	}
 };
-const tm = (n: number) => new Date(n).toUTCString();
+// W3C Datetime format: YYYY-MM-DDThh:mm:ss+00:00 (ISO 8601)
+const tm = (n: number) => new Date(n).toISOString().replace(/\.\d{3}Z$/, '+00:00');
 const load = () => {
 	const noAccess = noAccessPosts();
 	const where = noAccess?.length ? `id not in (${sqlFields(noAccess.length)})` : undefined;
