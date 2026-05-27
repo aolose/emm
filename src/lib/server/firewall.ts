@@ -969,7 +969,7 @@ function toCidr16(octets: number[]): string {
 
 export async function runAggregate(): Promise<void> {
 	console.log('[aggregate] runAggregate called, blackList.length =', blackList.length, 'fwAggregate =', sys.fwAggregate);
-	if (!sys.fwAggregate || !blackList.length) return;
+	if (sys.fwAggregate === false || !blackList.length) return;
 
 	const now = Date.now();
 	const lastCount = sys.fwLastCount || 0;
@@ -1134,7 +1134,7 @@ export async function runAggregate(): Promise<void> {
 export function scheduleAggregate(): void {
 	if (_aggTimer) clearTimeout(_aggTimer);
 	console.log('[aggregate] scheduleAggregate called, fwAggregate =', sys.fwAggregate);
-	if (!sys.fwAggregate) return;
+	if (sys.fwAggregate === false) return;
 	// First run after 60s, then every 24h
 	_aggTimer = setTimeout(() => {
 		runAggregate().catch((e) => console.error('[aggregate] error:', e));
