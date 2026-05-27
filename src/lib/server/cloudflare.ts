@@ -152,6 +152,30 @@ export async function addIpToList(ip: string, comment?: string): Promise<string>
 	return addIpsToList(sys.cfListId, [ip], comment);
 }
 
+/** Remove IPs from a list by their IDs.
+ *  Cloudflare deletes items by item ID, not by IP value. */
+export async function removeIpsFromList(listId: string, itemIds: string[]): Promise<boolean> {
+	if (!sys.cfAccountId || !sys.cfApiToken || !itemIds.length) return false;
+
+	try {
+		const res = await fetch(accountUrl(`/rules/lists/${listId}/items`), {
+			method: 'DELETE',
+			headers: cfHeaders(),
+			body: JSON.stringify({ items: itemIds.map((id) => ({ id })) }),
+			signal: AbortSignal.timeout(10000),
+		});
+		const data = (await res.json()) as { success: boolean };
+		if (!data.success) {
+			console.error('[cf] removeIpsFromList failed:', data);
+			return false;
+		}
+		return true;
+	} catch (e) {
+		console.error('[cf] removeIpsFromList error:', e);
+		return false;
+	}
+}
+
 /** Get async bulk operation status. */
 export async function getOperationStatus(opId: string): Promise<CfOpStatus | null> {
 	if (!sys.cfAccountId || !sys.cfApiToken) return null;

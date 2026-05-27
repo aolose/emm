@@ -221,6 +221,7 @@ export function loadRules() {
 	clearTimeout(t);
 	t = setTimeout(loadRules, 1e3 * 3600 * 72);
 	db.all(model(FwResp)).forEach((a) => fwResp.set(a.id, model(FwResp, a) as FwResp));
+	scheduleAggregate();
 }
 
 type log = {
@@ -689,9 +690,9 @@ export const fw2log = (l: FwLog) => {
 };
 
 export const filterLog = (logs: log[], t: FWRule) => {
-	return hasFwRuleFilter(t)
-		? logs.filter((a) => hitRule(a, { ...t, active: true } as FWRule))
-		: logs;
+	if (!hasFwRuleFilter(t)) return logs;
+	const rule = model(FWRule, { ...t, active: true }) as FWRule;
+	return logs.filter((a) => hitRule(a, rule));
 };
 
 function matchRuleValue(value: string, target: string) {
@@ -934,6 +935,213 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	}
 	error(400);
 };
+
+// === IP Aggregation ===
+
+let _aggTimer: ReturnType<typeof setTimeout> | undefined;
+const AGG_INTERVAL = 1e3 * 3600 * 24; // 24 hours
+
+function getIpOctets(ip: string): number[] | null {
+	const m = ip.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+	if (!m) return null;
+	return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3]), parseInt(m[4])];
+}
+
+function isCidr(ip: string): boolean {
+	return /[\/-]/.test(ip);
+}
+
+function isCidr24(ip: string): boolean {
+	return /\.0\/24$/.test(ip);
+}
+
+function isCidr16(ip: string): boolean {
+	return /\.0\.0\/16$/.test(ip);
+}
+
+function toCidr24(octets: number[]): string {
+	return `${octets[0]}.${octets[1]}.${octets[2]}.0/24`;
+}
+
+function toCidr16(octets: number[]): string {
+	return `${octets[0]}.${octets[1]}.0.0/16`;
+}
+
+export async function runAggregate(): Promise<void> {
+	if (!sys.fwAggregate || !blackList.length) return;
+
+	const now = Date.now();
+	const lastCount = sys.fwLastCount || 0;
+	const currentCount = blackList.length;
+	const newCount = currentCount - lastCount;
+
+	// Skip if count unchanged or new IPs < 200
+	if (lastCount > 0 && (newCount <= 0 || newCount < 200)) {
+		sys.fwLastAggregateAt = now;
+		return;
+	}
+
+	// Separate individual IPs from CIDRs
+	const individualIps: BlackList[] = [];
+	const cidr24s: BlackList[] = [];
+	for (const b of blackList) {
+		if (isCidr(b.ip)) {
+			if (isCidr24(b.ip) && !isCidr16(b.ip)) cidr24s.push(b);
+		} else {
+			individualIps.push(b);
+		}
+	}
+
+	// IDs of entries to remove from DB and memory
+	const toRemoveIds = new Set<number>();
+	// IPs to remove from CF (individual IPs that get aggregated)
+	const ipsToRemoveFromCf: string[] = [];
+	// New CIDR entries to add to DB, memory, and CF
+	const cidrsToAdd: string[] = [];
+	const marksForCidr = new Map<string, string>(); // CIDR -> aggregated marks
+
+	// --- Phase 1: /24 aggregation ---
+	const by24 = new Map<string, BlackList[]>();
+	for (const b of individualIps) {
+		const octets = getIpOctets(b.ip);
+		if (!octets) continue;
+		const prefix24 = `${octets[0]}.${octets[1]}.${octets[2]}`;
+		let group = by24.get(prefix24);
+		if (!group) { group = []; by24.set(prefix24, group); }
+		group.push(b);
+	}
+
+	for (const [prefix24, group] of by24) {
+		if (group.length > 5) {
+			const octets = getIpOctets(group[0].ip);
+			if (!octets) continue;
+			const cidr = toCidr24(octets);
+			if (!blackList.find((b) => b.ip === cidr)) {
+				cidrsToAdd.push(cidr);
+				const marks = [...new Set(group.map((b) => b.mark).filter((m) => m && m !== '-'))];
+				if (marks.length) marksForCidr.set(cidr, marks.join(','));
+			}
+			for (const b of group) {
+				toRemoveIds.add(b.id);
+				ipsToRemoveFromCf.push(b.ip);
+			}
+		}
+	}
+
+	// --- Phase 2: /16 aggregation ---
+	// Refresh cidr24s after phase 1 additions — but additions haven't been committed yet.
+	// We work with the pre-existing cidr24s plus newly generated /24 CIDRs.
+	const all24 = [...cidr24s];
+	for (const cidr of cidrsToAdd) {
+		if (isCidr24(cidr)) {
+			// Create a synthetic BlackList-like entry for grouping
+			all24.push({ ip: cidr, id: -1, mark: '', createAt: 0, respId: 0 } as BlackList);
+		}
+	}
+
+	const by16 = new Map<string, (BlackList | { ip: string })[]>();
+	for (const b of all24) {
+		const octets = getIpOctets(b.ip.replace(/\.0\/24$/, '.1'));
+		if (!octets) continue;
+		const prefix16 = `${octets[0]}.${octets[1]}`;
+		let group = by16.get(prefix16);
+		if (!group) { group = []; by16.set(prefix16, group); }
+		group.push(b);
+	}
+
+	for (const [prefix16, group] of by16) {
+		if (group.length > 5) {
+			const octets = getIpOctets(group[0].ip.replace(/\.0\/24$/, '.1'));
+			if (!octets) continue;
+			const cidr16 = toCidr16(octets);
+			if (!blackList.find((b) => b.ip === cidr16) && !cidrsToAdd.includes(cidr16)) {
+				cidrsToAdd.push(cidr16);
+			}
+			for (const b of group) {
+				if ('id' in b && b.id > 0) {
+					toRemoveIds.add(b.id);
+				}
+				// Remove the /24 CIDR from cidrsToAdd if it was added in phase 1
+				const idx = cidrsToAdd.indexOf(b.ip);
+				if (idx !== -1) {
+					cidrsToAdd.splice(idx, 1);
+					marksForCidr.delete(b.ip);
+				}
+				if (isCidr(b.ip)) ipsToRemoveFromCf.push(b.ip);
+			}
+		}
+	}
+
+	if (!toRemoveIds.size && !cidrsToAdd.length) {
+		sys.fwLastCount = currentCount;
+		sys.fwLastAggregateAt = now;
+		return;
+	}
+
+	// --- Apply changes to DB and memory ---
+	// Remove aggregated entries
+	if (toRemoveIds.size) {
+		delBlackList(...toRemoveIds);
+	}
+
+	// Add new CIDRs
+	for (const cidr of cidrsToAdd) {
+		const mark = marksForCidr.get(cidr) || 'aggregated';
+		const b = model(BlackList, { ip: cidr, mark, respId: -1 }) as BlackList;
+		db.save(b);
+		blackList.push(b);
+		const rule = b.toRule();
+		cidrBlackRules.push(rule);
+	}
+
+	// --- CF sync ---
+	if (sys.cfAccountId && sys.cfApiToken && sys.cfListId) {
+		try {
+			const cfMod = await import('$lib/server/cloudflare');
+
+			// Remove aggregated IPs from CF
+			if (ipsToRemoveFromCf.length) {
+				const existing = await cfMod.getListItems(sys.cfListId);
+				const ipToId = new Map<string, string>();
+				for (const item of existing) {
+					ipToId.set(item.ip, item.id);
+				}
+				const idsToRemove: string[] = [];
+				for (const ip of ipsToRemoveFromCf) {
+					const id = ipToId.get(ip);
+					if (id) idsToRemove.push(id);
+				}
+				if (idsToRemove.length) {
+					await cfMod.removeIpsFromList(sys.cfListId, idsToRemove);
+				}
+			}
+
+			// Add new CIDRs to CF
+			if (cidrsToAdd.length) {
+				await cfMod.addIpsToList(sys.cfListId, cidrsToAdd, 'aggregated');
+			}
+		} catch (e) {
+			console.error('[aggregate] CF sync error:', e);
+		}
+	}
+
+	// Persist count
+	sys.fwLastCount = blackList.length;
+	sys.fwLastAggregateAt = now;
+}
+
+export function scheduleAggregate(): void {
+	if (_aggTimer) clearTimeout(_aggTimer);
+	if (!sys.fwAggregate) return;
+	// First run after 60s, then every 24h
+	_aggTimer = setTimeout(() => {
+		runAggregate().catch((e) => console.error('[aggregate] error:', e));
+		// Re-schedule for next day
+		_aggTimer = setInterval(() => {
+			runAggregate().catch((e) => console.error('[aggregate] error:', e));
+		}, AGG_INTERVAL);
+	}, 60_000);
+}
 
 // === Test exports — accessible via import { __test } ===
 export const __test = {

@@ -162,16 +162,22 @@ export const loadGeoDb = async () => {
 	}
 
 	const checkInterval = 1e3 * 3600 * 24 * 30; // 30 days
+	const MAX_SAFE_TIMEOUT = 2_147_483_647; // 2^31 - 1, max 32-bit signed int
+
+	const safeSetTimeout = (fn: () => void, ms: number): ReturnType<typeof setTimeout> => {
+		if (ms <= MAX_SAFE_TIMEOUT) return setTimeout(fn, ms);
+		return setTimeout(() => { safeSetTimeout(fn, ms - MAX_SAFE_TIMEOUT); }, MAX_SAFE_TIMEOUT);
+	};
 
 	const scheduleCheck = async () => {
 		await checkUpdate();
-		updateTimer = setTimeout(scheduleCheck, checkInterval);
+		updateTimer = safeSetTimeout(scheduleCheck, checkInterval);
 	};
 
 	if (!dbFile) {
 		scheduleCheck();
 	} else {
-		updateTimer = setTimeout(scheduleCheck, checkInterval);
+		updateTimer = safeSetTimeout(scheduleCheck, checkInterval);
 	}
 };
 

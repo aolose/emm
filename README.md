@@ -69,6 +69,7 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 - **UA Collection Detection** — Detect distributed crawlers by grouping IPs sharing the same User-Agent
 - **Geo IP Location** — Display visitor geographic information based on IP2Location Lite
 - **Cloudflare Integration** — Auto-push blocked IPs to Cloudflare IP Lists for edge-level filtering
+- **IP Aggregation** — Automatically merge blacklist IPs into /24 and /16 CIDR blocks to reduce list size
 - **Backup & Restore** — Export and import data for disaster recovery
 - **Self-Hosted** — Runs on your own server, all data stays with you
 

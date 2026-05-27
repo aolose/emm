@@ -160,4 +160,7 @@ export const sysKs: (keyof import('$lib/server/model').System)[] = [
 	'seoDesc',
 	'cfAccountId',
 	'cfListId',
+	'fwAggregate',
+	'fwLastCount',
+	'fwLastAggregateAt',
 ];

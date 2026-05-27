@@ -8,6 +8,7 @@
 	import P from './puv.svelte';
 	import Ts from './turnstile.svelte';
 	import Cf from './cloudflare.svelte';
+	import Fw from './firewall.svelte';
 	import { onMount } from 'svelte';
 	import { load } from './sys';
 
@@ -25,6 +26,7 @@
 		<A />
 		<R />
 		<G />
+		<Fw />
 	</div>
 </div>
 

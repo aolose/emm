@@ -57,7 +57,7 @@ const apis: APIRoutes = {
 					continue;
 				}
 				const n = trim(v as string);
-				if (n && n !== sys[kk]) {
+				if ((typeof n === 'boolean' || n) && n !== sys[kk]) {
 					const isGeo = 'ipLiteDir' === kk || 'ipLiteToken' === kk;
 					if (isGeo) { geoClose(); }
 					if (['uploadDir', 'thumbDir', 'ipLiteDir'].includes(kk)) {

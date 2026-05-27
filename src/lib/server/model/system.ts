@@ -39,6 +39,10 @@ export class System {
 	cfAccountId = TEXT;
 	cfApiToken = TEXT;
 	cfListId = TEXT;
+	// Firewall IP aggregation
+	fwAggregate = true;
+	fwLastCount = INT;
+	fwLastAggregateAt = INT;
 }
 
 export class User {
