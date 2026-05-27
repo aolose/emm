@@ -363,6 +363,7 @@ export const trim = (a?: string, double = false) =>
 			: a.replace(/^\s+|\s+$/g, '')
 		: a;
 export const str2Hds = (str: string) => {
+	if (!str) return [];
 	const v: [string, string][] = [];
 	str.split('\n').forEach((a) => {
 		const u = a.match(/^(.*?):(.*)$/);
