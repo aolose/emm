@@ -9,17 +9,17 @@ describe('Markdown image size via title attribute', () => {
 
 	it('parses "300" as width=300', () => {
 		const html = marked.parse('![cat](/cat.webp "300")') as string;
-		expect(html).toContain('style="width:300;"');
+		expect(html).toContain('width="300"');
 		expect(html).not.toContain('title="300"');
 	});
 
-	it('parses "300px" as width=300px', () => {
+	it('parses "300px" as width=300', () => {
 		const html = marked.parse('![cat](/cat.webp "300px")') as string;
-		expect(html).toContain('style="width:300px;"');
+		expect(html).toContain('width="300"');
 		expect(html).not.toContain('title="300px"');
 	});
 
-	it('parses "50%" as width=50%', () => {
+	it('parses "50%" as style width=50%', () => {
 		const html = marked.parse('![cat](/cat.webp "50%")') as string;
 		expect(html).toContain('style="width:50%;"');
 		expect(html).not.toContain('title="50%"');
@@ -29,11 +29,12 @@ describe('Markdown image size via title attribute', () => {
 
 	it('parses "300x200" as width=300 height=200', () => {
 		const html = marked.parse('![cat](/cat.webp "300x200")') as string;
-		expect(html).toContain('style="width:300; height:200;"');
+		expect(html).toContain('width="300"');
+		expect(html).toContain('height="200"');
 		expect(html).not.toContain('title="300x200"');
 	});
 
-	it('parses "50%x30%" as width=50% height=30%', () => {
+	it('parses "50%x30%" as style width=50% height=30%', () => {
 		const html = marked.parse('![cat](/cat.webp "50%x30%")') as string;
 		expect(html).toContain('style="width:50%; height:30%;"');
 	});
@@ -60,7 +61,7 @@ describe('Markdown image size via title attribute', () => {
 	it('number-only alt text is unaffected', () => {
 		const html = marked.parse('![300](/cat.webp "400")') as string;
 		expect(html).toContain('alt="300"');
-		expect(html).toContain('style="width:400;"');
+		expect(html).toContain('width="400"');
 		expect(html).not.toContain('title="400"');
 	});
 
