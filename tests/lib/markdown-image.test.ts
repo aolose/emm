@@ -1,27 +1,9 @@
 import { describe, it, expect } from 'bun:test';
 import { marked } from 'marked';
-
-function setupRenderer() {
-	const renderer = new marked.Renderer();
-	renderer.image = function ({ href, title, text }: { href: string; title: string | null; text: string }) {
-		let style = '';
-		let titleAttr = '';
-		if (title) {
-			const m = title.match(/^(\d+(?:%|px)?)(?:x(\d+(?:%|px)?))?$/);
-			if (m) {
-				const [_full, w, h] = m;
-				style = ` style="width:${w};${h ? ` height:${h};` : ''}"`;
-			} else {
-				titleAttr = ` title="${title}"`;
-			}
-		}
-		return `<img src="${href}" alt="${text}"${titleAttr}${style}>`;
-	};
-	marked.setOptions({ renderer, headerIds: true, gfm: true });
-}
+import { configureMarked } from '../../src/lib/marked-config';
 
 describe('Markdown image size via title attribute', () => {
-	setupRenderer();
+	configureMarked();
 
 	// ── Width only ───────────────────────────────────────────────────
 

@@ -7,8 +7,9 @@
 	import { delay, watch } from '$lib/utils';
 	import { regElement } from '$lib/components/customent/reg';
 	import File from '$lib/components/post/File.svelte';
+	import { configureMarked } from '$lib/marked-config';
 
-	marked.setOptions({ headerIds: true, gfm: true });
+	configureMarked();
 	regElement('x-file', File);
 	let el = $state();
 	let mor = $state();
