@@ -6,7 +6,7 @@
 	import { fade } from 'svelte/transition';
 
 	const renderer = new marked.Renderer();
-	renderer.image = function (href, title, text) {
+	renderer.image = function ({ href, title, text }) {
 		let style = '';
 		let titleAttr = '';
 		if (title) {
