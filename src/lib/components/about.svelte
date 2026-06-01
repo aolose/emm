@@ -8,7 +8,7 @@
 	marked.setOptions({ headerIds: true, gfm: true });
 	marked.use({
 		renderer: {
-			image({ href, title, text }: { href: string; title: string | null; text: string }) {
+			image({ href, title, text }) {
 				let style = '';
 				let titleAttr = '';
 				if (title) {
