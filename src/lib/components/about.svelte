@@ -6,6 +6,24 @@
 	import { fade } from 'svelte/transition';
 
 	marked.setOptions({ headerIds: true, gfm: true });
+	marked.use({
+		renderer: {
+			image({ href, title, text }: { href: string; title: string | null; text: string }) {
+				let style = '';
+				let titleAttr = '';
+				if (title) {
+					const m = title.match(/^(\d+(?:%|px)?)(?:x(\d+(?:%|px)?))?$/);
+					if (m) {
+						const [_full, w, h] = m;
+						style = ` style="width:${w};${h ? ` height:${h};` : ''}"`;
+					} else {
+						titleAttr = ` title="${title}"`;
+					}
+				}
+				return `<img src="${href}" alt="${text}"${titleAttr}${style}>`;
+			}
+		}
+	});
 	let patchMod = $state(false);
 	let el = $state();
 	let mor = $state();
