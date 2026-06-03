@@ -521,6 +521,8 @@ export function checkRedirect(statue: number, path: string, req: Request) {
 		if (isCfg || /^\/admin(\/|$)/i.test(path)) return login;
 		return '';
 	}
+	// /admin.php, /admin.aspx, etc. — bot probes, let SvelteKit 404 them
+	if (/^\/admin\./i.test(path)) return '';
 	if (!done && !isCfg) {
 		return config;
 	} else if (done && isCfg) {
