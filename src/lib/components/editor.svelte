@@ -2,6 +2,7 @@
 	import './cm-editor.css';
 	import { filesUpload, selectFile } from '$lib/store';
 	import { createFileMd, createUrl, file2Md, watch } from '$lib/utils';
+	import { htmlToMd } from '$lib/html-to-md';
 
 	import CodeMirror from 'svelte-codemirror-editor';
 	import { markdown } from '@codemirror/lang-markdown';
@@ -170,45 +171,54 @@
 		});
 	}
 
-	async function handleImageUpload(f: File) {
-		if (!cm) return;
+	async function handleImageUpload(f: File, view?: EditorView) {
+		const v = view || cm;
+		if (!v) return;
 		const blobUrl = createUrl(f);
 		const md = createFileMd(f, blobUrl);
-		cm.dispatch({ changes: { from: cm.state.selection.main.from, insert: md } });
+		v.dispatch(v.state.replaceSelection(md));
 		filesUpload([f], (uploaded) => {
 			const finalUrl = createUrl(uploaded);
-			const doc = cm.state.doc.toString();
+			const doc = v.state.doc.toString();
 			const idx = doc.indexOf(blobUrl);
 			if (idx !== -1) {
-				cm.dispatch({
-					changes: { from: idx, to: idx + blobUrl.length, insert: finalUrl }
-				});
+				v.dispatch({ changes: { from: idx, to: idx + blobUrl.length, insert: finalUrl } });
 			}
 		});
 	}
 
 	// ── Paste-to-upload + active state tracking ──────────────────────
 
-	function onEditorReady(v: EditorView) {
-		cm = v;
+	const pasteExtension = EditorView.domEventHandlers({
+		paste(event, view) {
+			const clipboardData = event.clipboardData;
+			if (!clipboardData) return;
 
-		v.dom.addEventListener('paste', (e: ClipboardEvent) => {
-			const items = e.clipboardData?.items;
-			if (!items) return;
-			for (const item of items) {
+			for (const item of clipboardData.items) {
 				if (item.type.startsWith('image/')) {
-					e.preventDefault();
+					event.preventDefault();
 					const file = item.getAsFile();
-					if (file) handleImageUpload(file);
-					return;
+					if (file) handleImageUpload(file, view);
+					return true;
 				}
 			}
-		});
 
-		const track = () => updateActiveState();
-		v.dom.addEventListener('click', track);
-		v.dom.addEventListener('keyup', track);
-		v.dom.addEventListener('touchend', track);
+			// HTML → Markdown conversion
+			if (clipboardData.types.includes('text/html')) {
+				event.preventDefault();
+				const html = clipboardData.getData('text/html');
+				const md = htmlToMd(html);
+				view.dispatch(view.state.replaceSelection(md));
+				return true;
+			}
+		},
+		click() { updateActiveState(); },
+		keyup() { updateActiveState(); },
+		touchend() { updateActiveState(); }
+	});
+
+	function onEditorReady(v: EditorView) {
+		cm = v;
 	}
 
 	// ── Built-in toolbar buttons ─────────────────────────────────────
@@ -247,6 +257,7 @@
 	<CodeMirror
 		bind:value
 		lang={markdown()}
+		extensions={[pasteExtension]}
 		onready={onEditorReady}
 		lineWrapping={true}
 		lineNumbers={false}

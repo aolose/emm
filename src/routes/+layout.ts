@@ -62,7 +62,7 @@ if (browser) {
 	status.subscribe(su);
 }
 export const load = apiLoad('statue', undefined, {
-	cache: cacheTime,
+	cache: 0,
 	method: method.GET,
 	done: async (d: unknown, ctx) => {
 		loaded = 1;
@@ -75,6 +75,11 @@ export const load = apiLoad('statue', undefined, {
 			statueSys.set(sys);
 			status.set(stu);
 			if (cacheData.pwdSalt) setPwdSalt(cacheData.pwdSalt);
+			// Block rendering on auth failure — throw redirect synchronously
+			// to avoid the async deadlock that goto+suInProgress creates
+			if (!stu && pathname.startsWith('/admin')) {
+				throw redirect(307, '/login');
+			}
 		} else {
 			statueSys.set(sys);
 			await su(stu);
