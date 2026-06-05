@@ -304,7 +304,7 @@
       }
 
       h1 { font-size: 30px; margin-top: 10px; }
-      h2 { font-size: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px; }
+      h2 { font-size: 24px; padding-bottom: 8px; }
       h3 { font-size: 20px; }
       h4 { font-size: 18px; }
       h5 { font-size: 16px; }
