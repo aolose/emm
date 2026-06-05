@@ -274,20 +274,10 @@ async function runAiLoop(
 			}>;
 		};
 
-		console.log('[AI] client ←', JSON.stringify(data).slice(0, 500));
-
 		const choice = data?.choices?.[0];
 		if (!choice) {
-			console.error('[AI] unexpected response shape', data);
 			throw new Error('No response from AI');
 		}
-
-		console.log('[AI] choice →', {
-			finish_reason: choice.finish_reason,
-			hasContent: !!choice.message?.content,
-			contentPreview: choice.message?.content?.slice(0, 100),
-			toolCallCount: choice.message?.tool_calls?.length
-		});
 
 		if (choice.finish_reason === 'tool_calls' && choice.message?.tool_calls) {
 			// Detect loops: same tool+args called 3 times in a row
@@ -332,7 +322,6 @@ async function runAiLoop(
 			}
 
 			// Execute each tool call
-			console.log('[AI] available fns:', Object.keys(fns));
 			for (const tc of choice.message.tool_calls) {
 				const fn = fns[tc.function.name];
 				if (fn) {
@@ -346,15 +335,6 @@ async function runAiLoop(
 						typeof args === 'object' && args !== null && !Array.isArray(args)
 							? fn(...Object.values(args as Record<string, unknown>))
 							: fn();
-					const resultStr = result !== undefined ? JSON.stringify(result).slice(0, 500) : '(void)';
-					console.log(
-						'[AI] tool →',
-						tc.function.name,
-						'args:',
-						tc.function.arguments,
-						'→',
-						resultStr
-					);
 					ms.push({
 						role: 'tool',
 						content: JSON.stringify(result),

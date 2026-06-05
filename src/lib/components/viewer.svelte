@@ -14,11 +14,7 @@
 	function initMermaid(root) {
 		if (!root) return;
 		const blocks = root.querySelectorAll('pre.mermaid');
-		console.log('[viewer] initMermaid:', { blockCount: blocks.length });
 		if (!blocks.length) return;
-		blocks.forEach((b, i) => {
-			console.log('[viewer] mermaid block', i, 'textContent:', (b.textContent || '').slice(0, 80));
-		});
 		import('mermaid').then((m) => {
 			m.default.initialize({ startOnLoad: false, theme: 'dark', suppressErrorRendering: true });
 			// Run per-block to avoid mermaid reading wrong textContent
@@ -40,26 +36,19 @@
 	let content = $state('');
 	const fx = (s) => {
 		if (!s) return s;
-		const hasMermaid = /language-mermaid/.test(s);
-		if (hasMermaid) console.log('[viewer] fx: found language-mermaid in source');
-		const result = s
+		return s
 			.replace(/<(\w+-\w+)([^>]*?)\/>/g, '<$1$2></$1>')
 			.replace(
 				/<(h\d) id="(.+?)">(.+?)<\/\1>/g,
 				'<a class=\'head\' href="#$2" id="$2"><$1>$3</$1></a>'
 			)
-			.replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g, (match, content) => {
-				console.log('[viewer] fx: mermaid block content:', content.slice(0, 80));
-				return '<pre class="mermaid">' + content + '</pre>';
-			});
-		return result;
+			.replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g, '<pre class="mermaid">$1</pre>');
 	};
 
 	$effect(() => {
 		if (!preview) {
 			title = ctx.title || '';
 			content = ctx.content || '';
-			console.log('[viewer] non-preview sync:', { title, contentLen: (content || '').length });
 		}
 	});
 
@@ -68,12 +57,10 @@
 
 	$effect(() => {
 		const html = highlightedHtml;
-		console.log('[viewer] render effect:', { preview, hasEl: !!el, htmlLen: html.length, htmlPreview: html.slice(0,120), patchMod, hasMor: !!mor });
 		if (preview && el) {
 			if (patchMod && mor) {
 				try {
 					mor(el, `<div class="${el.className}">${html}</div>`);
-					console.log('[viewer] morphdom done, innerHTML length:', el.innerHTML.length);
 					initMermaid(el);
 				} catch (e) {
 					console.error('[viewer] morphdom error:', e);
@@ -82,23 +69,19 @@
 				}
 			} else {
 				el.innerHTML = html;
-				console.log('[viewer] innerHTML set, length:', el.innerHTML.length);
 				initMermaid(el);
 			}
 		}
 	});
 
 	onMount(() => {
-		console.log('[viewer] onMount:', { preview });
 		if (preview) {
 			import('morphdom').then((d) => {
 				mor = d.default;
 				patchMod = true;
-				console.log('[viewer] morphdom loaded');
 			});
 			const unsubscribe = editPost.subscribe(async (p) => {
 				if (!p) return;
-				console.log('[viewer] editPost update:', { title_d: p.title_d, contentLen: (p.content_d || '').length });
 				title = p.title_d || '';
 				content = p.content_d || '';
 				await tick();
@@ -408,6 +391,13 @@
 			}
 
 			li { margin-top: 5px; }
+
+			img {
+				margin: 10px 0;
+				max-width: 100%;
+				border-radius: 12px;
+				border: 2px solid rgba(3, 169, 244, 0.08);
+			}
 
 			.mermaid-svg {
 				display: flex;
