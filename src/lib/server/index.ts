@@ -6,8 +6,7 @@ import { loadGeoDb } from '$lib/server/ipLite';
 import { reqPostCache, requireMap, tagPostCache } from '$lib/server/cache';
 import { loadRules } from '$lib/server/firewall';
 import { sitemap } from '$lib/sitemap';
-import { rssCache } from '$lib/rssCache';
-import { atomCache } from '$lib/atomCache';
+import { feedData } from '$lib/feedData';
 import { loadPuv } from '$lib/server/puv';
 import { cmManager } from '$lib/server/comment';
 import { resolve } from 'path';
@@ -60,8 +59,7 @@ export const server = {
 		loadRules();
 		checkStatue();
 		sitemap.refresh();
-		rssCache.invalidate();
-		atomCache.invalidate();
+		feedData.invalidate();
 		loadPuv();
 	},
 	stop() {

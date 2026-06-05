@@ -6,8 +6,7 @@ import type { DB } from '$lib/server/db/sqlite3';
 import { publishedPost } from '$lib/server/store';
 import { reqPostCache, tagPostCache } from '$lib/server/cache';
 import { sitemap } from '$lib/sitemap';
-import { rssCache } from '$lib/rssCache';
-import { atomCache } from '$lib/atomCache';
+import { feedData } from '$lib/feedData';
 
 const { INT, TEXT } = NULL;
 
@@ -108,8 +107,7 @@ export class Post {
 		}
 		if (this._p || this.published === 0 || (this.published && '_tag' in this)) {
 			sitemap.refresh();
-			rssCache.invalidate();
-			atomCache.invalidate();
+			feedData.invalidate();
 		}
 		return !df;
 	}
