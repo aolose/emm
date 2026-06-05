@@ -14,6 +14,7 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 ## Contents
 - [Screenshots](#screenshots)
 - [Features](#features)
+- [AI Assistant](#ai-assistant)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [Turnstile Anti-Crawl Setup](#turnstile-anti-crawl-setup)
@@ -32,6 +33,7 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
   <img src="doc/write.webp" width="750" alt="writing" /><br/><br/>
   <img src="doc/fw.webp" width="750" alt="file management" /><br/><br/>
   <img src="doc/manage.webp" width="750" alt="admin settings" />
+  <img src="doc/ai.webp" width="750" alt="ai assistant" />
 </p>
 
 ### Mobile
@@ -43,10 +45,6 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
   <img src="doc/write_m.webp" width="220" alt="writing on mobile" />
   <img src="doc/fw_m.webp" width="220" alt="file management on mobile" />
 </p>
-
-
-
-
 
 ## Features
 
@@ -71,7 +69,34 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 - **Cloudflare Integration** — Auto-push blocked IPs to Cloudflare IP Lists for edge-level filtering
 - **IP Aggregation** — Automatically merge blacklist IPs into /24 and /16 CIDR blocks to reduce list size
 - **Backup & Restore** — Export and import data for disaster recovery
+- **AI Assistant** — DeepSeek-powered writing assistant with editor-integrated tool-calling
 - **Self-Hosted** — Runs on your own server, all data stays with you
+
+## AI Assistant
+
+The editor includes a DeepSeek AI assistant that can read your document and apply edits directly. Available from the admin write page toolbar (✦ button).
+
+### Setup
+
+1. Go to **Admin → Settings → AI Integration**
+2. Enter your [DeepSeek API Key](https://platform.deepseek.com/api_keys)
+3. Choose a model (default: `deepseek-chat`)
+4. Click **Test Connection** to verify, then **Save**
+
+### Capabilities
+
+The AI uses **function calling** to interact with the editor:
+
+**Read tools** — inspect the document: `getSelection`, `getCurrentLine`, `getCurrentParagraph`, `getCurrentSection`, `getFullDocument`, `getTitle`
+
+**Write tools** — modify the document: `replaceText`, `replaceCurrentLine`, `replaceCurrentParagraph`, `insertAtCursor`, `setTitle`
+
+### Usage
+
+1. Open the admin write page and select a post
+2. Click the ✦ button in the editor toolbar
+3. Ask the AI — e.g. "fix this line", "suggest a title", "improve this paragraph"
+4. The AI reads context, applies edits, and discusses your content
 
 ## Tech Stack
 
@@ -84,6 +109,7 @@ A self-hosted markdown blog system built with SvelteKit and Bun. Designed for pe
 | Fonts | [SUIT](https://sunn.us/SUIT/) · [Noto Sans SC](https://fonts.google.com/noto/specimen/Noto+Sans+SC) |
 | Markdown Editor | [CodeMirror 6](https://codemirror.net) + [svelte-codemirror-editor](https://github.com/touchifyapp/svelte-codemirror-editor) |
 | Markdown Renderer | [marked](https://marked.js.org) + [highlight.js](https://highlightjs.org) |
+| AI | [DeepSeek API](https://platform.deepseek.com) (function calling) |
 | Type Checking | TypeScript |
 
 ## Getting Started
@@ -133,6 +159,7 @@ On first run, visit the `/config` page to set up your admin username and passwor
 All settings are managed through the Admin UI (`/admin/setting`), stored in the SQLite database:
 
 - **Blog Info**: blog name, bio, SEO keywords/description, social links
+- **AI Integration**: DeepSeek API key and model selection
 - **Upload/Thumbnail Directories**: configurable storage paths for uploaded files and generated thumbnails
 - **Geo Location**: ip2location lite token and database directory for IP-based country blocking
 - **Comments**: enable/disable comments, moderation toggle
@@ -201,4 +228,4 @@ Issues and pull requests are welcome. Before submitting a PR:
 
 ## License
 
-MIT © [Aolose](https://github.com/aolose)
+This project is open source and available under the MIT License. See the [LICENSE](LICENSE) file for details.

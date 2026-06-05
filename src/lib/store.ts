@@ -156,6 +156,8 @@ export const patchedTag = writable({
 export const posts = writable([] as curPost[]);
 export const setting = writable(0);
 export const saveNow = writable(0);
+export const aiPanelTab = writable<'preview' | 'ai'>('preview');
+export const editorTools = writable<Record<string, (...args: unknown[]) => unknown>>({});
 
 editPost.subscribe((p) => {
 	if (!p._ && !p.id) return;

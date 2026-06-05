@@ -225,3 +225,7 @@
 .i-save:before {
 	content: '\e610';
 }
+
+.i-ai:before {
+	content: '\2726';
+}

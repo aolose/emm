@@ -12,6 +12,7 @@ import commentApis from './api/comment';
 import fileApis from './api/file';
 import backupApis from './api/backup';
 import turnstileApis from './api/turnstile';
+import aiApis from './api/ai';
 
 const apis: APIRoutes = {
 	...authApis,
@@ -23,6 +24,7 @@ const apis: APIRoutes = {
 	...commentApis,
 	...fileApis,
 	...backupApis,
+	...aiApis,
 };
 
 export const apiPath = Object.keys(apis);

@@ -73,7 +73,7 @@
 {/snippet}
 
 {#if d}
-	<div class={'bk icon i-close'} onclick={() => goBack()}></div>
+	<div class="bk icon i-close" onclick={() => goBack()}></div>
 	<div class="pg" bind:this={o}>
 		{#if $small}
 			<Top />

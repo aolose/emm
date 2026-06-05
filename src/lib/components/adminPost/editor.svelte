@@ -9,11 +9,14 @@
 		patchedTag,
 		posts,
 		saveNow,
-		setting
+		setting,
+		aiPanelTab,
+		editorTools
 	} from '$lib/store';
+	import { aiStatus, validateAi, aiReset } from '$lib/components/ai/aiStore';
+	import { get } from 'svelte/store';
 	import { api, req } from '$lib/req';
 	import { diffObj, getErr, watch, time } from '$lib/utils';
-	import { get } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import { method } from '$lib/enum';
 	import { applyStrPatch } from '$lib/setStrPatchFn';
@@ -21,6 +24,7 @@
 	let title = $state('');
 	let draft = $state('');
 	let cid = 0;
+	let editorRef = $state<Record<string, () => unknown> | null>(null);
 
 	// Character counter (excludes URLs)
 	function countChars(text: string): number {
@@ -130,10 +134,30 @@
 	const tView = {
 		name: 'preview',
 		action() {
+			aiPanelTab.set('preview');
 			preview && preview();
 		},
 		className: 'icon i-view',
 		title: 'preview'
+	};
+	// ── AI button ─────────────────────────────────────────────────
+	const tAI = {
+		name: 'ai',
+		action() {
+			const st = get(aiStatus);
+			if (st === 'available') {
+				aiPanelTab.set(get(aiPanelTab) === 'ai' ? 'preview' : 'ai');
+			} else if (st === 'checking') {
+				confirm('Checking AI availability, please wait...', 'ok', '');
+			} else if (st === 'no_key') {
+				confirm('Please configure DeepSeek API key in Settings', 'ok', '');
+			} else {
+				confirm('AI service unavailable', 'ok', '');
+			}
+		},
+		active: () => get(aiPanelTab) === 'ai',
+		className: 'icon i-ai',
+		title: 'AI Assistant'
 	};
 	let tools = $state([]);
 	$effect(() => {
@@ -198,6 +222,7 @@
 				.finally(() => {
 					saving = 0;
 				})) || {};
+
 		// drop
 		if ('save' in r && r.save < saveAt) return;
 		if (v._tag) await loadTag();
@@ -222,10 +247,28 @@
 
 	onMount(async () => {
 		loadTag();
-		return editPost.subscribe((p) => {
+		// Validate AI availability on mount
+		validateAi();
+		// Inject title tools into AI toolset (one-shot after CM tools appear)
+		let titleInjected = false;
+		const unsubTools = editorTools.subscribe((tools) => {
+			if (!titleInjected && Object.keys(tools).length) {
+				titleInjected = true;
+				editorTools.update((t) => ({
+					...t,
+					getTitle: () => ({ title: title || '' }),
+					setTitle: (t: string) => { title = t; return { ok: true }; },
+				}));
+			}
+		});
+		const unsubPost = editPost.subscribe((p) => {
 			draft = p.content_d || '';
 			title = p.title_d || '';
 			const { id, save, published, modify, title: _title, content } = p;
+			// Reset AI conversation when switching posts
+			if (cid && cid !== id) {
+				aiReset();
+			}
 			cid = id;
 			const up = modify || 0;
 			const hasDraft = !published || save > up;
@@ -241,11 +284,13 @@
 			if (id) t.push(tDel);
 			t.push(tView);
 			t.push(tFull);
+			t.push(tAI);
 			if (tools.join() !== t.join()) {
 				tools = t;
 			}
 			autoSave(p);
 		});
+		return () => { unsubTools(); unsubPost(); };
 	});
 </script>
 
@@ -258,7 +303,7 @@
 		<div class="e">
 			<button onclick={() => full.set(0)} class="icon i-shrink"></button>
 			{#key $editPost._ || $editPost.id}
-				<Editor bind:value={draft} toolbar={tools} />
+				<Editor bind:value={draft} toolbar={tools} bind:editorRef />
 				{#if $editPost.save}
 					<span class="tm"><span>save at {time($editPost.save).slice(9)}</span> <span class="wc">{charCount} chars</span></span>
 				{/if}

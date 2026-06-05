@@ -9,6 +9,7 @@
 	import Ts from './turnstile.svelte';
 	import Cf from './cloudflare.svelte';
 	import Fw from './firewall.svelte';
+	import Ai from './ai.svelte';
 	import { onMount } from 'svelte';
 	import { load } from './sys';
 
@@ -18,6 +19,7 @@
 <div class="m">
 	<div class="a">
 		<P />
+		<Ai />
 		<Ts />
 		<Cf />
 		<C />

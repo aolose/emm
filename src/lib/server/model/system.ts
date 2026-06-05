@@ -43,6 +43,9 @@ export class System {
 	fwAggregate = true;
 	fwLastCount = INT;
 	fwLastAggregateAt = INT;
+	// AI integration
+	aiApiKey = TEXT;
+	aiModel = TEXT;
 }
 
 export class User {

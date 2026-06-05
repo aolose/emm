@@ -1,6 +1,5 @@
 <script>
-	import Search from '$lib/components/adminPost/search.svelte';
-	import AddPost from '$lib/components/adminPost/add.svelte';
+	import AddPost from '$lib/components/adminPost/ActionBar.svelte';
 	import Vistior from '$lib/components/adminPost/read.svelte';
 	import Pg from '$lib/components/pg.svelte';
 	import Editor from '$lib/components/adminPost/editor.svelte';
@@ -8,8 +7,10 @@
 	import Setting from '$lib/components/adminPost/setting.svelte';
 	import FileWin from '$lib/components/fileManager.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
+	import AiPanel from '$lib/components/ai/AiPanel.svelte';
 	import Ld from '$lib/components/loading.svelte';
-	import { editPost, originPost, posts, setting, small, medium } from '$lib/store';
+	import { aiPanelTab, editPost, originPost, posts, setting, small, medium } from '$lib/store';
+	import { aiStatus, aiReset } from '$lib/components/ai/aiStore';
 	import { api } from '$lib/req';
 	import { onMount } from 'svelte';
 	import { trim, watch } from '$lib/utils';
@@ -22,11 +23,13 @@
 	let view = $state(0);
 	let ld = $state(0);
 
+
 	function sel(p) {
 		if (!p) {
 			originPost.set({});
 			editPost.set({});
 			view = 0;
+			aiReset();
 			return;
 		}
 		view = 1;
@@ -112,8 +115,7 @@
 	<div class="m" style={sty}>
 		<div class="a">
 			<div class="h">
-				<AddPost done={() => (view = 1)} />
-				<Search change={ch} />
+				<AddPost done={() => (view = 1)} change={ch} />
 			</div>
 			<div class="l">
 				<div class="ls" bind:this={el}>
@@ -140,14 +142,19 @@
 					view = 2;
 				}}
 				preview={() => {
+					aiPanelTab.set('preview');
 					view = 2;
 					visitor = 0;
 				}}
 			/>
 		</div>
 		<div class="c">
-			<Viewer preview={true} close={() => (view = 1)} />
-			<Vistior close={() => (view = 1)} bind:act={visitor} id={$editPost.id} />
+			{#if ($editPost._ || $editPost.id) && $aiStatus === 'available' && $aiPanelTab === 'ai'}
+				<AiPanel close={() => aiPanelTab.set('preview')} />
+			{:else}
+				<Viewer preview={true} close={() => (view = 1)} />
+				<Vistior close={() => (view = 1)} bind:act={visitor} id={$editPost.id} />
+			{/if}
 		</div>
 		<FileWin w={33.33333} />
 		<Setting autoSave={editor?.autoSave} />
@@ -198,6 +205,30 @@
 		}
 	}
 
+	.c {
+		flex: 1;
+		max-width: 800px;
+		width: 0;
+		display: flex;
+		flex-direction: column;
+		@include m() {
+			width: 50%;
+			flex: none;
+		}
+	}
+
+	.h {
+		padding: 20px 20px 6px;
+		display: flex;
+		align-content: center;
+		border-bottom: 1px solid var(--bg0);
+		flex-shrink: 0;
+		@include s() {
+			padding-top: 0;
+			border: 0;
+		}
+	}
+
 	.l {
 		flex-grow: 1;
 		height: 0;
@@ -232,16 +263,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-	}
-
-	.c {
-		flex: 1;
-		max-width: 800px;
-		width: 0;
-		@include m() {
-			width: 50%;
-			flex: none;
-		}
 	}
 
 	@include s() {

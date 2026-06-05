@@ -27,7 +27,7 @@ beforeEach(() => {
 	Object.assign(mockSys, { tsEnabled: true, tsSiteKey: TS_SITE_PASS, tsSecret: TS_SECRET_PASS, tsVerifyTTL: 1800 });
 	mock.module('$lib/server/index', () => ({ sys: mockSys as never, db: {}, server: { maintain: false } }));
 	mock.module('$lib/server/utils', () => {
-		let cookieStore = new Map<string, string>();
+		const cookieStore = new Map<string, string>();
 		return {
 			getCookie: (req: { headers: Headers }) => {
 				const c = req.headers.get('cookie');

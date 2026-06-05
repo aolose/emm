@@ -53,7 +53,7 @@ async function postJson(url: string, data: any, init?: RequestInit): Promise<Fet
 }
 
 // ── Cookie jar ─────────────────────────────────────────────────────────
-let cookies: string[] = [];
+const cookies: string[] = [];
 
 function saveCookies(headers: Headers) {
   const setCookie = headers.get('set-cookie');

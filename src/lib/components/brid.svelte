@@ -36,7 +36,7 @@
 <div class="b" transition:fade|global={{ duration: 200 }}>
 	<div class="h">
 		<div class="mg">
-			<Msg defaultText={'welcome to my blog!'} />
+			<Msg defaultText="welcome to my blog!" />
 			<i></i>
 		</div>
 		<div class="m"></div>

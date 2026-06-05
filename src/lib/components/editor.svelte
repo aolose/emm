@@ -1,6 +1,6 @@
 <script lang="ts">
 	import './cm-editor.css';
-	import { filesUpload, selectFile } from '$lib/store';
+	import { filesUpload, selectFile, editorTools } from '$lib/store';
 	import { createFileMd, createUrl, file2Md, watch } from '$lib/utils';
 	import { htmlToMd } from '$lib/html-to-md';
 
@@ -10,7 +10,7 @@
 	import { EditorSelection } from '@codemirror/state';
 
 	let cm: EditorView;
-	let { value = $bindable(''), toolbar = [] } = $props();
+	let { value = $bindable(''), toolbar = [], editorRef = $bindable(null) } = $props();
 
 	// ── Active formatting state ──────────────────────────────────────
 
@@ -219,7 +219,156 @@
 
 	function onEditorReady(v: EditorView) {
 		cm = v;
+		if (editorRef) editorRef = contextTools;
+		editorTools.set(contextTools);
 	}
+
+	// ── Context tools for AI ────────────────────────────────────────
+	// Each tool is a standalone function returning structured data
+
+	function getSelection() {
+		if (!cm) return { hasSelection: false, text: '' };
+		const { from, to } = cm.state.selection.main;
+		const hasSelection = from !== to;
+		return {
+			hasSelection,
+			text: hasSelection ? cm.state.doc.sliceString(from, to) : '',
+		};
+	}
+
+	function getCurrentLine() {
+		if (!cm) return { lineNumber: 0, text: '' };
+		const pos = cm.state.selection.main.head;
+		const line = cm.state.doc.lineAt(pos);
+		return {
+			lineNumber: line.number,
+			text: line.text,
+		};
+	}
+
+	function getCurrentParagraph() {
+		if (!cm) return { text: '', startLine: 0, endLine: 0 };
+		const doc = cm.state.doc;
+		const pos = cm.state.selection.main.head;
+		const cursorLine = doc.lineAt(pos);
+		let startLine = cursorLine.number;
+		let endLine = cursorLine.number;
+		while (startLine > 1) {
+			if (doc.line(startLine - 1).text.trim() === '') break;
+			startLine--;
+		}
+		while (endLine < doc.lines) {
+			if (doc.line(endLine + 1).text.trim() === '') break;
+			endLine++;
+		}
+		const lines: string[] = [];
+		for (let l = startLine; l <= endLine; l++) lines.push(doc.line(l).text);
+		return { text: lines.join('\n'), startLine, endLine };
+	}
+
+	function getCurrentSection() {
+		if (!cm) return { text: '' };
+		const doc = cm.state.doc;
+		const pos = cm.state.selection.main.head;
+		const text = doc.toString();
+		const allLines = text.split('\n');
+		const cursorLine = doc.lineAt(pos).number - 1;
+		let secStart = 0;
+		for (let i = cursorLine; i >= 0; i--) {
+			if (/^#{1,6}\s/.test(allLines[i])) {
+				secStart = allLines.slice(0, i).join('\n').length + (i > 0 ? 1 : 0);
+				break;
+			}
+		}
+		let secEnd = text.length;
+		for (let i = cursorLine + 1; i < allLines.length; i++) {
+			if (/^#{1,6}\s/.test(allLines[i])) {
+				secEnd = allLines.slice(0, i).join('\n').length;
+				break;
+			}
+		}
+		return { text: text.slice(secStart, secEnd).trim() };
+	}
+
+	function getFullDocument() {
+		if (!cm) return { text: '', totalLines: 0, totalLength: 0 };
+		const doc = cm.state.doc;
+		return { text: doc.toString(), totalLines: doc.lines, totalLength: doc.length };
+	}
+
+	function replaceSelection(text: string) {
+		if (!cm) return;
+		const sel = cm.state.selection.main;
+		// If nothing selected, replace the current paragraph
+		if (sel.empty) {
+			const para = getCurrentParagraph();
+			if (para.text) {
+				const paraStart = cm.state.doc.line(para.startLine).from;
+				const paraEnd = cm.state.doc.line(para.endLine).to;
+				cm.dispatch({
+					changes: { from: paraStart, to: paraEnd, insert: text },
+					selection: { anchor: paraStart + text.length },
+				});
+				return;
+			}
+		}
+		cm.dispatch({
+			changes: { from: sel.from, to: sel.to, insert: text },
+			selection: { anchor: sel.from + text.length },
+		});
+	}
+
+	function replaceCurrentLine(text: string) {
+		if (!cm) return { ok: false, error: 'editor not ready' };
+		const pos = cm.state.selection.main.head;
+		const line = cm.state.doc.lineAt(pos);
+		cm.dispatch({
+			changes: { from: line.from, to: line.to, insert: text },
+			selection: { anchor: line.from + text.length },
+		});
+		return { ok: true, lineNumber: line.number };
+	}
+
+	function replaceCurrentParagraph(text: string) {
+		if (!cm) return { ok: false, error: 'editor not ready' };
+		const para = getCurrentParagraph();
+		if (!para.text) return { ok: false, error: 'empty paragraph' };
+		const paraStart = cm.state.doc.line(para.startLine).from;
+		const paraEnd = cm.state.doc.line(para.endLine).to;
+		cm.dispatch({
+			changes: { from: paraStart, to: paraEnd, insert: text },
+			selection: { anchor: paraStart + text.length },
+		});
+		return { ok: true, startLine: para.startLine, endLine: para.endLine };
+	}
+
+	function replaceText(search: string, replace: string) {
+		if (!cm || !search) return { ok: false, error: 'editor not ready' };
+		const doc = cm.state.doc;
+		const text = doc.toString();
+		const idx = text.indexOf(search);
+		if (idx === -1) return { ok: false, error: 'search text not found' };
+		cm.dispatch({
+			changes: { from: idx, to: idx + search.length, insert: replace },
+			selection: { anchor: idx + replace.length },
+		});
+		return { ok: true };
+	}
+
+	function insertAtCursor(text: string) {
+		if (!cm) return { ok: false, error: 'editor not ready' };
+		const pos = cm.state.selection.main.head;
+		cm.dispatch({
+			changes: { from: pos, insert: text },
+			selection: { anchor: pos + text.length },
+		});
+		return { ok: true };
+	}
+
+	const contextTools = {
+		getSelection, getCurrentLine, getCurrentParagraph, getCurrentSection, getFullDocument,
+		insertAtCursor, replaceSelection, replaceCurrentLine, replaceCurrentParagraph, replaceText,
+	};
 
 	// ── Built-in toolbar buttons ─────────────────────────────────────
 
@@ -251,6 +400,7 @@
 				onclick={btn.action}
 				title={btn.title}
 				class={btn.className || ''}
+				aria-pressed={btn.active?.()}
 			></button>
 		{/each}
 	</div>
