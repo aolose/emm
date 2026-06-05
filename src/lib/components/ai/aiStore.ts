@@ -60,10 +60,10 @@ const SYSTEM_PROMPT = `You are an AI assistant integrated into a markdown editor
 - Write tools: replaceCurrentLine(text), replaceCurrentParagraph(text), replaceText(searchText, newText), insertAtCursor(text), setTitle(title).
 
 **Efficiency rules:**
-- Read the full document ONCE with getFullDocument at the start if you need broad context. Do not re-read individual sections after that.
-- Prefer replaceText for targeted fixes (typos, phrasing). Use replaceCurrentParagraph only when rewriting a paragraph wholesale.
-- Batch your edits: apply multiple replaceText calls in a single response where possible.
-- When the user asks you to fix or modify content/title, read once, then apply all edits. Do not just print suggestions — call the tools.
+- For polishing/rewriting the whole article: read with getFullDocument ONCE, then use replaceFullDocument to apply the polished version in a single call.
+- For targeted fixes (typos, phrasing): use replaceText, batching multiple calls in one response.
+- Do not make many small edits across the document — prefer one replaceFullDocument call.
+- Read once, apply once. Do not re-read between edits.
 - For greetings, general Q&A, advice, or brainstorming, just respond directly.`;
 
 const AI_TOOLS: ToolDef[] = [
