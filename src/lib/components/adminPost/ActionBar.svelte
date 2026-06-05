@@ -63,7 +63,7 @@
   .wrapper {
     position: relative;
     width: 100%;
-    margin: 0 20px;
+    margin: 4px 20px 16px;
     height: 40px; /* Keep container bound stable */
     @include s() {
       width: 80%;
