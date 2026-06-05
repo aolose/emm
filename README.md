@@ -9,7 +9,7 @@
 ![Static Badge](https://img.shields.io/badge/codemirror-^6.0-blue?style=flat&logo=codemirror&link=https://codemirror.net)
 ![Static Badge](https://img.shields.io/badge/license-MIT-green?style=flat)
 
-A self-hosted markdown blog system built with SvelteKit and Bun. Designed for personal writing and content management, with a focus on simplicity and performance.
+A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSeek AI. Features built-in security firewall and smart writing assistant.
 
 ## Contents
 - [Screenshots](#screenshots)
