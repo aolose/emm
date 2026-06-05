@@ -226,8 +226,8 @@ async function runAiLoop(
 	fns: Record<string, () => unknown>,
 	model?: string
 ): Promise<void> {
-	// Limit loop iterations to prevent infinite tool-call cycles
-	for (let i = 0; i < 5; i++) {
+	const lastCalls: string[] = [];
+	for (let i = 0; i < 10; i++) {
 		const body = {
 			messages: [
 				{ role: 'system', content: SYSTEM_PROMPT },
@@ -266,6 +266,17 @@ async function runAiLoop(
 		});
 
 		if (choice.finish_reason === 'tool_calls' && choice.message?.tool_calls) {
+			// Detect loops: same tool+args called 3 times in a row
+			const sig = choice.message.tool_calls.map(tc => `${tc.function.name}:${tc.function.arguments}`).join('|');
+			lastCalls.push(sig);
+			if (lastCalls.length > 3) lastCalls.shift();
+			if (lastCalls.length === 3 && lastCalls[0] === sig && lastCalls[1] === sig) {
+				console.warn('[AI] loop detected, breaking:', sig);
+				ms.push({ role: 'assistant', content: '(AI got stuck — please try rephrasing your request.)' });
+				aiMessages.set([...ms]);
+				return;
+			}
+
 			// Add assistant message with tool_calls (may also have partial content)
 			ms.push({
 				role: 'assistant',
@@ -332,7 +343,7 @@ async function runAiLoop(
 		...ms,
 		{
 			role: 'assistant',
-			content: '(AI exceeded maximum tool-call iterations)'
+			content: '(AI took too many steps — please try rephrasing or breaking into smaller tasks.)'
 		}
 	]);
 }
