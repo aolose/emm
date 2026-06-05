@@ -52,6 +52,7 @@ A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSee
 - **SSR + PWA** — Server-side rendering with offline support via service workers
 - **Responsive Design** — Optimized for both desktop and mobile devices
 - **Markdown Editor** — Full-featured editor built on CodeMirror 6 with custom toolbar and paste-to-upload
+- **Mermaid Diagrams** — Render flowcharts and diagrams in posts with SSR support
 - **Syntax Highlighting** — Code blocks styled with highlight.js
 - **Article Management** — Create, edit, and organize markdown posts with version diff history
 - **Tags** — Categorize content with a tag system; Chinese titles auto-generate pinyin slugs
@@ -88,16 +89,21 @@ The editor includes a DeepSeek AI assistant that can read your document and appl
 
 The AI uses **function calling** to interact with the editor:
 
-**Read tools** — inspect the document: `getSelection`, `getCurrentLine`, `getCurrentParagraph`, `getCurrentSection`, `getFullDocument`, `getTitle`
+**Read tools** — inspect the document:
+`getSelection`, `getCurrentLine`, `getCurrentParagraph`, `getCurrentSection`, `getFullDocument`, `getTitle`
 
-**Write tools** — modify the document: `replaceText`, `replaceCurrentLine`, `replaceCurrentParagraph`, `insertAtCursor`, `setTitle`
+**Write tools** — modify the document:
+`replaceText`, `replaceCurrentLine`, `replaceCurrentParagraph`, `replaceFullDocument`, `insertAtCursor`, `setTitle`
+
+All write operations show an **inline confirmation card** ([Apply] / [Dismiss]) in the chat before executing. No modal dialogs.
 
 ### Usage
 
 1. Open the admin write page and select a post
 2. Click the ✦ button in the editor toolbar
-3. Ask the AI — e.g. "fix this line", "suggest a title", "improve this paragraph"
-4. The AI reads context, applies edits, and discusses your content
+3. Ask the AI — e.g. "fix this line", "suggest a title", "polish this article"
+4. Review the proposed changes and click **Apply** or **Dismiss**
+5. AI handles configuration checks automatically. If the API key is missing or invalid, a prompt will guide you to Settings
 
 ## Tech Stack
 
@@ -111,6 +117,7 @@ The AI uses **function calling** to interact with the editor:
 | Markdown Editor   | [CodeMirror 6](https://codemirror.net) + [svelte-codemirror-editor](https://github.com/touchifyapp/svelte-codemirror-editor) |
 | Markdown Renderer | [marked](https://marked.js.org) + [highlight.js](https://highlightjs.org)                                                    |
 | AI                | [DeepSeek API](https://platform.deepseek.com) (function calling)                                                             |
+| Diagrams          | [Mermaid](https://mermaid.js.org) (SSR + client-side)                                                                        |
 | Type Checking     | TypeScript                                                                                                                   |
 
 ## Getting Started

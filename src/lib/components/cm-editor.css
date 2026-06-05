@@ -140,7 +140,9 @@
 	background: #22334a;
 	color: #909ba5;
 }
-
+.editor-wrapper .cm-selectionBackground {
+	background: rgb(21 40 60 / 0.38);
+}
 .editor-wrapper .cm-editor::selection {
 	color: #d5a862;
 	background: #b2b9bf;

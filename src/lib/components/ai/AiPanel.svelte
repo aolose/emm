@@ -2,8 +2,21 @@
 	import { aiMessages, aiLoading, aiStreaming, aiPending, sendAiMessage, type AiMessage, type PendingAction } from './aiStore';
 	import { editorTools } from '$lib/store';
 	import { marked } from 'marked';
-	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
+	import { configureMarked } from '$lib/marked-config';
+
+	configureMarked();
+
+	function initMermaid(root) {
+		const blocks = root.querySelectorAll('pre.mermaid');
+		if (!blocks.length) return;
+		import('mermaid').then((m) => {
+			m.default.initialize({ startOnLoad: false, theme: 'dark', suppressErrorRendering: true });
+			Array.from(blocks).forEach((b) => {
+				m.default.run({ nodes: [b] }).catch(() => {});
+			});
+		});
+	}
 
 	let {
 		model = '',
@@ -30,6 +43,7 @@
 		void get(aiMessages);
 		void get(aiStreaming);
 		scrollToBottom();
+		if (chatEl) initMermaid(chatEl);
 	});
 
 	async function handleSend() {
@@ -51,7 +65,8 @@
 
 	function renderMarkdown(text: string): string {
 		if (!text) return '';
-		return marked.parse(text) as string;
+		const html = marked.parse(text) as string;
+		return html.replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g, '<pre class="mermaid">$1</pre>');
 	}
 </script>
 

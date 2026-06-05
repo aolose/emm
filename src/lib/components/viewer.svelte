@@ -1,70 +1,113 @@
 <script>
 	import { marked } from 'marked';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { editPost } from '$lib/store';
 	import { fade } from 'svelte/transition';
 	import { highlight } from '../hjs';
-	import { delay, watch } from '$lib/utils';
 	import { regElement } from '$lib/components/customent/reg';
 	import File from '$lib/components/post/File.svelte';
 	import { configureMarked } from '$lib/marked-config';
 
 	configureMarked();
 	regElement('x-file', File);
+
+	function initMermaid(root) {
+		if (!root) return;
+		const blocks = root.querySelectorAll('pre.mermaid');
+		console.log('[viewer] initMermaid:', { blockCount: blocks.length });
+		if (!blocks.length) return;
+		blocks.forEach((b, i) => {
+			console.log('[viewer] mermaid block', i, 'textContent:', (b.textContent || '').slice(0, 80));
+		});
+		import('mermaid').then((m) => {
+			m.default.initialize({ startOnLoad: false, theme: 'dark', suppressErrorRendering: true });
+			// Run per-block to avoid mermaid reading wrong textContent
+			Array.from(blocks).forEach((b) => {
+				m.default.run({ nodes: [b] }).catch((err) => {
+					console.error('[viewer] mermaid block error:', (b.textContent || '').slice(0, 50), err);
+				});
+			});
+		}).catch((err) => {
+			console.error('[viewer] mermaid import error:', err);
+		});
+	}
+
 	let el = $state();
 	let mor = $state();
 	let patchMod = $state(false);
 	let { ctx = {}, close, preview = false } = $props();
 	let title = $state('');
 	let content = $state('');
-	const fx = (s) =>
-		s &&
-		s
-			.replace(/<(\w+-\w+)( ?(.|\n)*?)\/>/g, '<$1$2></$1>')
+	const fx = (s) => {
+		if (!s) return s;
+		const hasMermaid = /language-mermaid/.test(s);
+		if (hasMermaid) console.log('[viewer] fx: found language-mermaid in source');
+		const result = s
+			.replace(/<(\w+-\w+)([^>]*?)\/>/g, '<$1$2></$1>')
 			.replace(
 				/<(h\d) id="(.+?)">(.+?)<\/\1>/g,
 				'<a class=\'head\' href="#$2" id="$2"><$1>$3</$1></a>'
-			);
+			)
+			.replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g, (match, content) => {
+				console.log('[viewer] fx: mermaid block content:', content.slice(0, 80));
+				return '<pre class="mermaid">' + content + '</pre>';
+			});
+		return result;
+	};
+
 	$effect(() => {
 		if (!preview) {
-			title = ctx.title;
-			content = ctx.content;
+			title = ctx.title || '';
+			content = ctx.content || '';
+			console.log('[viewer] non-preview sync:', { title, contentLen: (content || '').length });
 		}
 	});
-	const md = () => fx(`${marked.parse(content || '')}`);
-	let v = $state(md());
-	const vw = watch(v);
-	const wc = watch('');
-	const rd = () => (v = highlight(md()));
-	const dRd = delay(rd, 100);
+
+	const rawHtml = $derived(fx(`${marked.parse(content || '')}`));
+	const highlightedHtml = $derived(highlight(rawHtml));
+
 	$effect(() => {
-		wc(() => {
-			if (preview) dRd();
-			else rd();
-		}, content);
-		vw(() => {
-			if (el && preview) {
-				if (patchMod && el && mor) {
-					try {
-						mor(el, `<div class="${el.className}">${v}</div>`);
-						return;
-					} catch (e) {
-						console.error(e);
-					}
+		const html = highlightedHtml;
+		console.log('[viewer] render effect:', { preview, hasEl: !!el, htmlLen: html.length, htmlPreview: html.slice(0,120), patchMod, hasMor: !!mor });
+		if (preview && el) {
+			if (patchMod && mor) {
+				try {
+					mor(el, `<div class="${el.className}">${html}</div>`);
+					console.log('[viewer] morphdom done, innerHTML length:', el.innerHTML.length);
+					initMermaid(el);
+				} catch (e) {
+					console.error('[viewer] morphdom error:', e);
+					el.innerHTML = html;
+					initMermaid(el);
 				}
-				el.innerHTML = v;
+			} else {
+				el.innerHTML = html;
+				console.log('[viewer] innerHTML set, length:', el.innerHTML.length);
+				initMermaid(el);
 			}
-		}, v);
+		}
 	});
-	onMount(async () => {
+
+	onMount(() => {
+		console.log('[viewer] onMount:', { preview });
 		if (preview) {
-			const d = await import('morphdom');
-			mor = d.default;
-			patchMod = true;
-			return editPost.subscribe((p) => {
-				title = p.title_d;
-				content = fx(p.content_d);
+			import('morphdom').then((d) => {
+				mor = d.default;
+				patchMod = true;
+				console.log('[viewer] morphdom loaded');
 			});
+			const unsubscribe = editPost.subscribe(async (p) => {
+				if (!p) return;
+				console.log('[viewer] editPost update:', { title_d: p.title_d, contentLen: (p.content_d || '').length });
+				title = p.title_d || '';
+				content = p.content_d || '';
+				await tick();
+				if (el) initMermaid(el);
+			});
+			return unsubscribe;
+		} else {
+			// Public page: mermaid blocks are already in SSR HTML
+			tick().then(() => { if (el) initMermaid(el); });
 		}
 	});
 </script>
@@ -81,7 +124,7 @@
 		{/if}
 		<div class="c" bind:this={el}>
 			{#if !preview}
-				{@html v}
+				{@html highlightedHtml}
 			{/if}
 		</div>
 	</div>
@@ -184,6 +227,10 @@
 							flex: 1;
 							position: relative;
 						}
+
+						i {
+							font-style: normal;
+						}
 					}
 
 					&:after {
@@ -199,52 +246,46 @@
 						position: absolute;
 						top: 0;
 						left: 0;
+						right: 0;
+						pointer-events: none;
 					}
 				}
-			}
-
-			p,
-			li {
-				word-break: break-word;
-				overflow-wrap: break-word;
-				line-height: 1.75;
-				margin-bottom: 26px;
-				font-size: 17px;
-				color: rgba(210, 222, 240, 0.88);
-			}
-
-			img {
-				margin: 10px 0;
-				max-width: 100%;
-				border-radius: 12px;
-				border: 2px solid rgba(3, 169, 244, 0.08);
-			}
-
-			.hljs-section {
-				color: #2196f3;
 			}
 		}
 	}
 
+	.c {
+		flex: 1;
+		flex-shrink: 0;
+		overflow: auto;
+
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: var(--bg0);
+		}
+	}
+
 	.t {
-		margin-bottom: 20px;
 		display: flex;
-		justify-content: space-between;
-		@include s() {
-			margin: 0;
+		align-items: center;
+		justify-content: center;
+		padding: 10px 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+		h1 {
+			font-size: 30px;
+			font-weight: 400;
+			color: transparent;
+			background: linear-gradient(132deg, rgb(127, 203, 255), rgb(138, 135, 228));
+			background-clip: text;
 		}
 
 		button {
-			display: none;
-			@include s() {
-				display: block;
-				padding: 5px;
-				opacity: 0.5;
-				color: #1c93ff;
-				font-size: 32px;
-				right: -8px;
-				align-self: flex-start;
-			}
+			position: absolute;
+			right: 20px;
+			font-size: 30px;
 		}
 	}
 
@@ -326,48 +367,22 @@
 				padding-left: 1.5em;
 			}
 
-			h1 {
-				font-size: 28px;
-			}
-
-			h2 {
-				font-size: 24px;
-				margin-top: 2.5em;
-				border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-				padding-bottom: 0.5em;
-			}
-
-			h3 {
-				font-size: 20px;
-				margin-top: 2em;
-			}
-
-			h4 {
-				font-size: 18px;
-				margin-top: 1.5em;
-			}
-
-			h5 {
-				font-size: 16px;
-				margin-top: 1.2em;
-			}
-
-			h6 {
-				font-size: 15px;
-				margin-top: 1em;
-			}
+			h1 { font-size: 28px; }
+			h2 { font-size: 24px; margin-top: 2.5em; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5em; }
+			h3 { font-size: 20px; margin-top: 2em; }
+			h4 { font-size: 18px; margin-top: 1.5em; }
+			h5 { font-size: 16px; margin-top: 1.2em; }
+			h6 { font-size: 15px; margin-top: 1em; }
 
 			thead {
 				background: rgba(80, 100, 150, 0.1);
-
 				th {
 					color: #acb7cb;
 					font-weight: 200;
 				}
 			}
 
-			td,
-			th {
+			td, th {
 				font-size: 14px;
 				padding: 3px 5px;
 				border: 1px solid rgba(80, 100, 150, 0.7);
@@ -381,14 +396,10 @@
 			a {
 				text-decoration: underline;
 				transition: opacity 0.15s ease;
-				&:hover {
-					opacity: 0.8;
-				}
+				&:hover { opacity: 0.8; }
 			}
 
-			pre {
-				margin: 10px 0;
-			}
+			pre { margin: 10px 0; }
 
 			hr {
 				margin: 10px 0;
@@ -396,8 +407,14 @@
 				color: rgba(255, 255, 255, 0.1);
 			}
 
-			li {
-				margin-top: 5px;
+			li { margin-top: 5px; }
+
+			.mermaid-svg {
+				display: flex;
+				justify-content: center;
+				margin: 16px 0;
+				overflow-x: auto;
+				svg { max-width: 100%; height: auto; }
 			}
 		}
 	}
