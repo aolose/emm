@@ -18,7 +18,7 @@ export const load = async (event) => {
 	// SSR HTML already gets this from SvelteKit; data responses need it explicitly.
 	if (d) {
 		const etag = `"${Bun.hash(JSON.stringify(d)).toString(36)}"`;
-		event.setHeaders({ etag });
+		event.setHeaders({ etag, 'cache-control': 'private, must-revalidate' });
 	}
 
 	return result;
