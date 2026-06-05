@@ -43,7 +43,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
 	if (event.request.method !== 'GET') return;
 	const pathname = URL.parse(event.request.url).pathname;
-	if (/^\/(api|admin|login|rss)/.test(pathname)) return;
+	if (/^\/(api|admin|login|rss|atom)/.test(pathname)) return;
 
 	async function respond() {
 		const url = new URL(event.request.url);

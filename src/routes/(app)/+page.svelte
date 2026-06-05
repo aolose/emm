@@ -15,7 +15,7 @@
 		<Bird d={bio} />
 	</div>
 	<div class="rm">
-		<a class="icon i-rss" href="/rss"></a>
+		<a class="icon i-rss" href="/atom"></a>
 		{#if linkedin}
 			<a href={linkedin} target="_blank" class="icon i-LinkedIn"></a>
 		{/if}

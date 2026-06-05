@@ -7,6 +7,7 @@ import { reqPostCache, requireMap, tagPostCache } from '$lib/server/cache';
 import { loadRules } from '$lib/server/firewall';
 import { sitemap } from '$lib/sitemap';
 import { rssCache } from '$lib/rssCache';
+import { atomCache } from '$lib/atomCache';
 import { loadPuv } from '$lib/server/puv';
 import { cmManager } from '$lib/server/comment';
 import { resolve } from 'path';
@@ -60,6 +61,7 @@ export const server = {
 		checkStatue();
 		sitemap.refresh();
 		rssCache.invalidate();
+		atomCache.invalidate();
 		loadPuv();
 	},
 	stop() {

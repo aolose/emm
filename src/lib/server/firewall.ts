@@ -872,7 +872,7 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	// Protected: /, /posts, /post/*, /tags, /tag/*, /about
 	const isTsProtected = /^\/($|posts(\/|$)|post\/|tags(\/|$)|tag\/|about(\/|$))/.test(pn);
 	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
-	const isTsExempt = /^\/(login|config|ts-challenge|rss|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
+	const isTsExempt = /^\/(login|config|ts-challenge|rss|atom|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
 		// Mark abandon: start timers for matching abandon trigger rules
 		const abandonTriggers = triggers.filter((t) => t.abandon && t.active && t.isInSchedule());
