@@ -206,10 +206,10 @@
 		border-radius: 32px;
 		overflow: hidden;
 		background: $bg;
-		padding: 60px 80px;
+		padding: 32px 48px;
 		box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
 		@include s() {
-			padding: 20px 32px;
+			padding: 20px 8px;
 			margin: 0;
 			min-height: 67vh;
 		}

@@ -106,12 +106,12 @@
 			</p>
 			<div class="n">
 				<div class="u">
-					<button class="icon i-reply" onclick={reply}></button>
+					<button class="icon i-reply" onclick={reply} aria-label="reply"></button>
 					{#if own === 1}
-						<button class="icon i-ed" onclick={() => (editMod = 1)}></button>
+						<button class="icon i-ed" onclick={() => (editMod = 1)} aria-label="edit"></button>
 					{/if}
 					{#if own}
-						<button class="icon i-del" onclick={del(d.id)}></button>
+						<button class="icon i-del" onclick={del(d.id)} aria-label="delete"></button>
 					{/if}
 				</div>
 				<div class="t">

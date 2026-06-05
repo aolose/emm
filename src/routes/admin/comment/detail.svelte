@@ -117,7 +117,7 @@
 				onclick={set(cmStatus.Approve)}
 			></button>
 		{/if}
-		<button class="icon i-del" onclick={del(d.id)}></button>
+		<button class="icon i-del" onclick={del(d.id)} aria-label="delete"></button>
 	</div>
 	<div class="l">
 		<div class="ls" bind:this={el}>
