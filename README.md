@@ -1,4 +1,4 @@
-# EMM - Easy Markdown Manager
+# EMM - Modern Self-Hosted Blog System
 
 ![Static Badge](https://img.shields.io/badge/sveltekit-^2.59.1-f96743?style=flat&logo=svelte&link=https://svelte.dev/docs/kit/introduction)
 ![Static Badge](https://img.shields.io/badge/typescript-^6.0.3-3178c6?style=flat&link=https://www.typescriptlang.org)
