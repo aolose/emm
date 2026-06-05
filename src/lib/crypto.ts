@@ -4,7 +4,9 @@ const { subtle } = crypto;
 
 // ---- Per-instance password salt ----
 let _pwdSalt = '';
-export const setPwdSalt = (salt: string) => { _pwdSalt = salt; };
+export const setPwdSalt = (salt: string) => {
+	_pwdSalt = salt;
+};
 
 // ---- Buffer encoding helpers ----
 
@@ -20,14 +22,21 @@ const buf2x = (buf: ArrayBuffer) => {
 	const bv = new Uint8Array(buf);
 	let n = bv.length;
 	let s = '';
-	const k = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+=!@#$%^&*<>?:_-|~(){}[],.';
+	const k =
+		'1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+=!@#$%^&*<>?:_-|~(){}[],.';
 	const t = k.length;
 	while (n) {
 		const v = [0, 0, 0, 0];
 		let x = 4;
-		while (x && n) { v[--x] = bv[--n]; }
+		while (x && n) {
+			v[--x] = bv[--n];
+		}
 		let m = v[3] + (v[2] << 8) + (v[1] << 16) + ((v[0] << 24) >>> 0);
-		while (m >= t) { const l = m % t; s += k[l]; m = (m - l) / t; }
+		while (m >= t) {
+			const l = m % t;
+			s += k[l];
+			m = (m - l) / t;
+		}
 		s += k[m];
 	}
 	return s;
@@ -53,7 +62,9 @@ export const data2Buf = (data: ApiBodyData): ArrayBuffer | undefined => {
 			let n = d.length;
 			const buf = new ArrayBuffer(n * 2);
 			const bfv = new Uint16Array(buf);
-			while (n--) { bfv[n] = d.charCodeAt(n); }
+			while (n--) {
+				bfv[n] = d.charCodeAt(n);
+			}
 			return buf;
 		}
 	}

@@ -222,7 +222,9 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 						// Never resolve — the page will reload after verification
 						return new Promise(() => {});
 					}
-				} catch { /* not JSON, ignore */ }
+				} catch {
+					/* not JSON, ignore */
+				}
 			}
 			fal = true;
 			cfg = cfg || {};
@@ -287,7 +289,15 @@ export const addGroupKey = (groupKey: string, key: string) => {
 	group.set(groupKey, s);
 };
 
-export const saveCache = (url: string, p: reqParams, method: number, d: reqData, customKey?: string, c?: reqCache, groupKey?: string) => {
+export const saveCache = (
+	url: string,
+	p: reqParams,
+	method: number,
+	d: reqData,
+	customKey?: string,
+	c?: reqCache,
+	groupKey?: string
+) => {
 	if (!browser || !reqCacheMap) return;
 	const key = reqKey(url, p, method, customKey);
 	if (groupKey) addGroupKey(groupKey, key);

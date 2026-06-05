@@ -10,7 +10,7 @@
 	top: 0;
 	bottom: 0;
 }
-.codemirror-wrapper{
+.codemirror-wrapper {
 	flex-grow: 1;
 	height: 0;
 	margin: 0 0 43px;
@@ -18,19 +18,18 @@
 	overflow: auto;
 }
 
-
-.ͼc{
+.ͼc {
 	color: rgb(83 182 225 / 0.67) !important;
 }
-.cm-line{
-	line-height: 2!important;
+.cm-line {
+	line-height: 2 !important;
 }
 .cm-gutters {
-	display: none!important;
+	display: none !important;
 }
 
-.cm-activeLine{
-  background-color: var(--bg7) !important;
+.cm-activeLine {
+	background-color: var(--bg7) !important;
 }
 /* ── Toolbar ────────────────────────────────────────────────────── */
 .toolbar {
@@ -38,7 +37,7 @@
 	flex-wrap: wrap;
 	background: var(--bg0, #1a1d2b);
 	flex-shrink: 0;
-	padding:  10px;
+	padding: 10px;
 }
 
 .toolbar button {
@@ -50,11 +49,13 @@
 	justify-content: center;
 	border: none;
 	background: transparent;
-	color:  #828fa4;
+	color: #828fa4;
 	cursor: pointer;
 	border-radius: 4px;
 	font-size: 15px;
-	transition: background 0.15s, color 0.15s;
+	transition:
+		background 0.15s,
+		color 0.15s;
 }
 
 .toolbar button:hover {
@@ -62,28 +63,52 @@
 	color: #fff;
 }
 
-.toolbar button[aria-pressed="true"] {
+.toolbar button[aria-pressed='true'] {
 	color: #fff;
 	background: rgb(31 48 67 / 0.51);
 }
 
 /* Toolbar icon buttons — hide inner text, show ::before icon only */
-.toolbar button[class*="icon"] {
+.toolbar button[class*='icon'] {
 	font-size: 0;
 }
 
-.toolbar button[class*="icon"]::before {
+.toolbar button[class*='icon']::before {
 	font-size: 18px;
 }
 
 /* ── Built-in toolbar button icons ──────────────────────────────── */
-.tb-bold::after   { content: 'B'; font-weight: bold; }
-.tb-italic::after { content: 'I'; font-style: italic; }
-.tb-strike::after { content: 'S'; text-decoration: line-through; }
-.tb-quote::after  { content: '"'; font-size: 18px; font-weight: bold; font-family: serif; }
-.tb-ul::after     { content: '•'; font-size: 20px; }
-.tb-ol::after     { content: '1.'; font-size: 13px; font-weight: bold; }
-.tb-table::after  { content: '⊞'; font-size: 16px; }
+.tb-bold::after {
+	content: 'B';
+	font-weight: bold;
+}
+.tb-italic::after {
+	content: 'I';
+	font-style: italic;
+}
+.tb-strike::after {
+	content: 'S';
+	text-decoration: line-through;
+}
+.tb-quote::after {
+	content: '"';
+	font-size: 18px;
+	font-weight: bold;
+	font-family: serif;
+}
+.tb-ul::after {
+	content: '•';
+	font-size: 20px;
+}
+.tb-ol::after {
+	content: '1.';
+	font-size: 13px;
+	font-weight: bold;
+}
+.tb-table::after {
+	content: '⊞';
+	font-size: 16px;
+}
 
 /* ── CodeMirror 6 theme ─────────────────────────────────────────── */
 .editor-wrapper .cm-editor {
@@ -104,7 +129,7 @@
 }
 
 .editor-wrapper .cm-editor .cm-activeLine {
-	background-color: var(--bg7) ;
+	background-color: var(--bg7);
 }
 
 .editor-wrapper .cm-editor .cm-cursor {
@@ -138,14 +163,43 @@
 }
 
 /* ── Markdown syntax colors ─────────────────────────────────────── */
-.editor-wrapper .cm-editor .cm-header     { color: #61afef; }
-.editor-wrapper .cm-editor .cm-strong     { color: #e5c07b; font-weight: bold; }
-.editor-wrapper .cm-editor .cm-em         { color: #98c379; font-style: italic; }
-.editor-wrapper .cm-editor .cm-quote      { color: #5c6370; }
-.editor-wrapper .cm-editor .cm-link       { color: #56b6c2; text-decoration: underline; }
-.editor-wrapper .cm-editor .cm-url        { color: #56b6c2; }
-.editor-wrapper .cm-editor .cm-code       { color: #e06c75; background: rgba(0,0,0,0.15); padding: 0 3px; border-radius: 3px; }
-.editor-wrapper .cm-editor .cm-codeBlock  { color: #abb2bf; }
-.editor-wrapper .cm-editor .cm-list       { color: #61afef; }
-.editor-wrapper .cm-editor .cm-hr         { color: #5c6370; }
-.editor-wrapper .cm-editor .cm-strikethrough { text-decoration: line-through; color: rgba(130,143,164,0.5); }
+.editor-wrapper .cm-editor .cm-header {
+	color: #61afef;
+}
+.editor-wrapper .cm-editor .cm-strong {
+	color: #e5c07b;
+	font-weight: bold;
+}
+.editor-wrapper .cm-editor .cm-em {
+	color: #98c379;
+	font-style: italic;
+}
+.editor-wrapper .cm-editor .cm-quote {
+	color: #5c6370;
+}
+.editor-wrapper .cm-editor .cm-link {
+	color: #56b6c2;
+	text-decoration: underline;
+}
+.editor-wrapper .cm-editor .cm-url {
+	color: #56b6c2;
+}
+.editor-wrapper .cm-editor .cm-code {
+	color: #e06c75;
+	background: rgba(0, 0, 0, 0.15);
+	padding: 0 3px;
+	border-radius: 3px;
+}
+.editor-wrapper .cm-editor .cm-codeBlock {
+	color: #abb2bf;
+}
+.editor-wrapper .cm-editor .cm-list {
+	color: #61afef;
+}
+.editor-wrapper .cm-editor .cm-hr {
+	color: #5c6370;
+}
+.editor-wrapper .cm-editor .cm-strikethrough {
+	text-decoration: line-through;
+	color: rgba(130, 143, 164, 0.5);
+}

@@ -30,7 +30,10 @@
 	<div class="r5">
 		<button
 			class="icon"
-			onclick={(e) => { e.stopPropagation(); exp = 1 - exp; }}
+			onclick={(e) => {
+				e.stopPropagation();
+				exp = 1 - exp;
+			}}
 			class:i-add={!exp}
 			class:i-no={exp}
 		></button>

@@ -52,7 +52,14 @@
 	</div>
 	<div class="n" class:v={ih > oh && !a}>
 		<div class="nn">
-			<Nav {total} page={+$page.params.page || 1} length="2" go={'/' + name} tm="1" loading={Boolean($navigating)} />
+			<Nav
+				{total}
+				page={+$page.params.page || 1}
+				length="2"
+				go={'/' + name}
+				tm="1"
+				loading={Boolean($navigating)}
+			/>
 		</div>
 	</div>
 </div>

@@ -4,15 +4,19 @@ const db = new Database('blog.db');
 
 // 1. Create FwResp with tsChallenge = true
 const respId = Date.now();
-db.run(`INSERT INTO FwResp (id, name, headers, status, createAt, tsChallenge) VALUES (?, 'Turnstile Challenge', '', 200, ?, 1)`, 
-  [respId, Date.now()]);
+db.run(
+	`INSERT INTO FwResp (id, name, headers, status, createAt, tsChallenge) VALUES (?, 'Turnstile Challenge', '', 200, ?, 1)`,
+	[respId, Date.now()]
+);
 console.log('FwResp created, id:', respId);
 
 // 2. Create trigger rule: 3 hits in 60 seconds on any path → trigger Turnstile challenge
 const ruleId = Date.now() + 1;
-db.run(`INSERT INTO FWRule (id, mark, ip, path, method, headers, createAt, save, log, country, active, rate, trigger, status, respId) 
+db.run(
+	`INSERT INTO FWRule (id, mark, ip, path, method, headers, createAt, save, log, country, active, rate, trigger, status, respId) 
   VALUES (?, '', '', '', '', '', ?, 0, 1, '', 1, '3/60', 1, '', ?)`,
-  [ruleId, Date.now(), respId]);
+	[ruleId, Date.now(), respId]
+);
 console.log('Trigger rule created, id:', ruleId, '→ respId:', respId);
 
 // 3. Verify

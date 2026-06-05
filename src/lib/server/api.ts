@@ -24,7 +24,7 @@ const apis: APIRoutes = {
 	...commentApis,
 	...fileApis,
 	...backupApis,
-	...aiApis,
+	...aiApis
 };
 
 export const apiPath = Object.keys(apis);

@@ -166,7 +166,9 @@ export const loadGeoDb = async () => {
 
 	const safeSetTimeout = (fn: () => void, ms: number): ReturnType<typeof setTimeout> => {
 		if (ms <= MAX_SAFE_TIMEOUT) return setTimeout(fn, ms);
-		return setTimeout(() => { safeSetTimeout(fn, ms - MAX_SAFE_TIMEOUT); }, MAX_SAFE_TIMEOUT);
+		return setTimeout(() => {
+			safeSetTimeout(fn, ms - MAX_SAFE_TIMEOUT);
+		}, MAX_SAFE_TIMEOUT);
 	};
 
 	const scheduleCheck = async () => {

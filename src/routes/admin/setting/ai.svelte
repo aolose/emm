@@ -27,7 +27,7 @@
 		ld = true;
 		const o = {
 			aiApiKey: trim(apiKey),
-			aiModel: trim(model) || 'deepseek-chat',
+			aiModel: trim(model) || 'deepseek-chat'
 		};
 		try {
 			await req('sys', o);
@@ -81,12 +81,18 @@
 
 	function statusLabel(st: string) {
 		switch (st) {
-			case 'checking': return 'Checking...';
-			case 'available': return 'Connected';
-			case 'no_key': return 'No API key';
-			case 'invalid': return 'Invalid key';
-			case 'error': return 'Error';
-			default: return 'Unknown';
+			case 'checking':
+				return 'Checking...';
+			case 'available':
+				return 'Connected';
+			case 'no_key':
+				return 'No API key';
+			case 'invalid':
+				return 'Invalid key';
+			case 'error':
+				return 'Error';
+			default:
+				return 'Unknown';
 		}
 	}
 </script>
@@ -96,7 +102,11 @@
 	<Ipt label="Model" bind:value={model} placeholder="deepseek-chat" />
 	<div class="status-row">
 		<span class="status-label">Status:</span>
-		<span class="status-value" class:available={$aiStatus === 'available'} class:error={$aiStatus !== 'available' && $aiStatus !== 'checking'}>
+		<span
+			class="status-value"
+			class:available={$aiStatus === 'available'}
+			class:error={$aiStatus !== 'available' && $aiStatus !== 'checking'}
+		>
 			{statusLabel($aiStatus)}
 		</span>
 		<button class="validate-btn" onclick={validate} disabled={validating || !apiKey.trim()}>

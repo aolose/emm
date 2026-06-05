@@ -41,14 +41,24 @@
 	});
 </script>
 
-<div class="a" class:c={e} onclick={(ev) => { ev.stopPropagation(); fn(); }}>
+<div
+	class="a"
+	class:c={e}
+	onclick={(ev) => {
+		ev.stopPropagation();
+		fn();
+	}}
+>
 	<span>{getText ? getText(items.find((a) => getValue(a) === value)) : value}</span>
 	{#if e}
 		<div transition:slide|global class="b">
 			{#each items as k}
 				<div
 					class:s={multiply ? s.has(k) : value === getValue ? getValue(k) : k}
-					onclick={(ev) => { ev.stopPropagation(); ck(k)(ev); }}
+					onclick={(ev) => {
+						ev.stopPropagation();
+						ck(k)(ev);
+					}}
 				>
 					{getText ? getText(k) : k}
 				</div>

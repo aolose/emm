@@ -10,10 +10,14 @@ const { Admin, Read } = permission;
 const apis: APIRoutes = {
 	alCm: {
 		get: auth(Read, () => `${+sys?.comment || 0}${+sys?.cmCheck}`),
-		post: auth(Admin, async (req) => { const a = await req.text(); sys.comment = +a[0]; sys.cmCheck = +a[1]; })
+		post: auth(Admin, async (req) => {
+			const a = await req.text();
+			sys.comment = +a[0];
+			sys.cmCheck = +a[1];
+		})
 	},
 	cmLs: { get: cmManager.list },
-	cm: { get: cmManager.get, post: cmManager.set, delete: cmManager.del },
+	cm: { get: cmManager.get, post: cmManager.set, delete: cmManager.del }
 };
 
 export default apis;

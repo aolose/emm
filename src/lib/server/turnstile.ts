@@ -61,7 +61,7 @@ export function verifyTsCookie(cookie: string, ip: string): boolean {
 
 export function setTsCookie(response: Response, ip: string): void {
 	const value = signTsCookie(ip);
-	const ttl = (sys.tsVerifyTTL || 1800);
+	const ttl = sys.tsVerifyTTL || 1800;
 	setCookie(response, TS_COOKIE, value, Date.now() + ttl * 1000);
 }
 
@@ -89,7 +89,7 @@ export async function verifyTurnstileToken(token: string, ip?: string): Promise<
 		const res = await fetch(TS_VERIFY_URL, {
 			method: 'POST',
 			body: form,
-			signal: controller.signal,
+			signal: controller.signal
 		});
 
 		const data = (await res.json()) as { success: boolean; 'error-codes'?: string[] };
@@ -111,12 +111,12 @@ export async function verifyTurnstileToken(token: string, ip?: string): Promise<
  */
 export function challengeResponseRedirect(redirectUrl: string): Response {
 	const params = new URLSearchParams({
-		redirect: redirectUrl,
+		redirect: redirectUrl
 	});
 	const url = `/ts-challenge?${params.toString()}`;
 	return new Response('', {
 		status: 307,
-		headers: new Headers({ location: url }),
+		headers: new Headers({ location: url })
 	});
 }
 
@@ -125,12 +125,9 @@ export function challengeResponseRedirect(redirectUrl: string): Response {
  */
 export function challengeResponseJson(originalUrl: string): Response {
 	const params = new URLSearchParams({
-		redirect: originalUrl,
+		redirect: originalUrl
 	});
-	return resp(
-		{ tsChallenge: true, challengeUrl: `/ts-challenge?${params.toString()}` },
-		403,
-	);
+	return resp({ tsChallenge: true, challengeUrl: `/ts-challenge?${params.toString()}` }, 403);
 }
 
 /**

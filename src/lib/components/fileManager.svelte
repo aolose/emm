@@ -128,10 +128,22 @@
 		transition:fade|global
 		class="a"
 		class:dr={dragStatus === 1}
-		ondragover={(e) => { e.preventDefault(); dragStatus = 1; }}
-		ondrop={(e) => { e.preventDefault(); upload(e); }}
-		ondragleave={(e) => { e.preventDefault(); dragStatus = 0; }}
-		ondragend={(e) => { e.preventDefault(); dragStatus = 0; }}
+		ondragover={(e) => {
+			e.preventDefault();
+			dragStatus = 1;
+		}}
+		ondrop={(e) => {
+			e.preventDefault();
+			upload(e);
+		}}
+		ondragleave={(e) => {
+			e.preventDefault();
+			dragStatus = 0;
+		}}
+		ondragend={(e) => {
+			e.preventDefault();
+			dragStatus = 0;
+		}}
 		onclick={cancel}
 	>
 		<div class="dp" onclick={(e) => e.stopPropagation()} />
@@ -165,11 +177,7 @@
 					{#key ls}
 						{#each ls as file, index (file.id)}
 							<div animate:flip={{ duration: 300 }} out:fade={{ duration: 150 }}>
-								<Item
-									bind:file={ls[index]}
-									act={selected.includes(file)}
-									onclick={sel(file)}
-								/>
+								<Item bind:file={ls[index]} act={selected.includes(file)} onclick={sel(file)} />
 							</div>
 						{/each}
 					{/key}

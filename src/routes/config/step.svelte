@@ -102,7 +102,7 @@
 		left: 20px;
 		top: 70px;
 		height: 100%;
-		opacity: .2;
+		opacity: 0.2;
 		border-left: 1px dashed currentColor;
 		position: absolute;
 	}

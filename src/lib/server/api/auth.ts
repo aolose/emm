@@ -1,8 +1,16 @@
 import type { APIRoutes } from '../../types';
 import { db, server, sys } from '../index';
 import {
-	checkStatue, debugMode, delCookie, getClient, getIp, getReqJson,
-	model, resp, setToken, sysStatue,
+	checkStatue,
+	debugMode,
+	delCookie,
+	getClient,
+	getIp,
+	getReqJson,
+	model,
+	resp,
+	setToken,
+	sysStatue
 } from '../utils';
 import { enc, legacyEnc, filter, setPwdSalt } from '$lib/utils';
 import { validate, formatErrors } from '$lib/server/validate';
@@ -72,7 +80,11 @@ const apis: APIRoutes = {
 			const body = await getReqJson(req);
 			if (!Array.isArray(body) || body.length !== 3) return resp('invalid request', 400);
 			const [u, p, v] = body;
-			if (typeof u !== 'string' || typeof p !== 'string' || (typeof v !== 'string' && typeof v !== 'number'))
+			if (
+				typeof u !== 'string' ||
+				typeof p !== 'string' ||
+				(typeof v !== 'string' && typeof v !== 'number')
+			)
 				return resp('invalid request', 400);
 			if (sys.pwdSalt && sys.pwdSalt !== '-') setPwdSalt(sys.pwdSalt);
 			let ok = (await enc(sys.admUsr + v)) === u && (await enc(sys.admPwd + v)) === p;
@@ -105,7 +117,10 @@ const apis: APIRoutes = {
 				const err = mkdir(dir);
 				if (!err) server.start(p);
 				if (err) return err;
-				else { await Bun.write(resolve('.dbCfg'), p); checkStatue(); }
+				else {
+					await Bun.write(resolve('.dbCfg'), p);
+					checkStatue();
+				}
 			} catch (e) {
 				return resp(e?.toString(), 500);
 			}
@@ -135,7 +150,7 @@ const apis: APIRoutes = {
 				return resp('username or password is empty', 400);
 			}
 		}
-	},
+	}
 };
 
 export default apis;

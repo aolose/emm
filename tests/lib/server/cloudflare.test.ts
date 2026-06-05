@@ -5,13 +5,13 @@ mock.module('$lib/server/index', () => ({
 	sys: {
 		cfAccountId: 'test-account-id',
 		cfApiToken: 'test-token',
-		cfListId: 'test-list-id',
+		cfListId: 'test-list-id'
 	},
-	db: null,
+	db: null
 }));
 
 import {
-	isCfConfigured,
+	isCfConfigured
 	// Functions below assume sys is mocked
 } from '../../../src/lib/server/cloudflare';
 

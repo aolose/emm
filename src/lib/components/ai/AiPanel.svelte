@@ -15,6 +15,7 @@
 
 	let inputValue = $state('');
 	let chatEl = $state<HTMLDivElement>();
+	let copiedIdx = $state<Set<number>>(new Set());
 
 	function scrollToBottom() {
 		if (chatEl) {
@@ -52,7 +53,6 @@
 		if (!text) return '';
 		return marked.parse(text) as string;
 	}
-
 </script>
 
 <div class="ai-panel">
@@ -83,11 +83,22 @@
 					<div class="bubble">
 						{@html renderMarkdown(msg.content)}
 						<button
-							class="insert-btn icon i-log"
-							onclick={() => navigator.clipboard.writeText(msg.content)}
+							class="insert-btn icon"
+							class:i-ok={copiedIdx.has(i)}
+							class:i-copy={!copiedIdx.has(i)}
+							onclick={() => {
+								navigator.clipboard.writeText(msg.content);
+								const next = new Set(copiedIdx);
+								next.add(i);
+								copiedIdx = next;
+								setTimeout(() => {
+									const clear = new Set(copiedIdx);
+									clear.delete(i);
+									copiedIdx = clear;
+								}, 3000);
+							}}
 							title="Copy to clipboard"
-						></button
-						>
+						></button>
 					</div>
 				</div>
 			{:else if msg.role === 'tool'}
@@ -108,224 +119,235 @@
 			rows="2"
 			disabled={$aiLoading}
 		></textarea>
-		<button title="send" class="icon i-pub" onclick={handleSend} disabled={$aiLoading || !inputValue.trim()}></button>
+		<button
+			title="send"
+			class="icon i-pub"
+			onclick={handleSend}
+			disabled={$aiLoading || !inputValue.trim()}
+		></button>
 	</div>
 </div>
 
 <style lang="scss">
-  @use '../../break' as *;
+	@use '../../break' as *;
 
-  .ai-panel {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-    background: var(--bg1);
-  }
+	.ai-panel {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		overflow: hidden;
+		background: var(--bg1);
+	}
 
-  .ai-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
-    flex-shrink: 0;
-    position: relative;
+	.ai-header {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 16px;
+		flex-shrink: 0;
+		position: relative;
 
-    span {
-      font-size: 16px;
-      color: #8a9bb5;
-    }
+		span {
+			font-size: 16px;
+			color: #8a9bb5;
+		}
 
-    button {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-      color: var(--darkgrey);
-      background: none;
-      border: none;
-      cursor: pointer;
+		button {
+			position: absolute;
+			right: 16px;
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 18px;
+			color: var(--darkgrey);
+			background: none;
+			border: none;
+			cursor: pointer;
 
-      &:hover {
-        color: #c8d3ee;
-      }
-    }
-  }
+			&:hover {
+				color: #c8d3ee;
+			}
+		}
+	}
 
-  .chat {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
+	.chat {
+		flex: 1;
+		overflow-y: auto;
+		padding: 16px;
 
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
 
-    &::-webkit-scrollbar-thumb {
-      background: rgba(80, 100, 140, 0.3);
-      border-radius: 3px;
-    }
-  }
+		&::-webkit-scrollbar-thumb {
+			background: rgba(80, 100, 140, 0.3);
+			border-radius: 3px;
+		}
+	}
 
-  .empty {
-    text-align: center;
-    color: var(--darkgrey);
-    padding: 40px 20px;
+	.empty {
+		text-align: center;
+		color: var(--darkgrey);
+		padding: 40px 20px;
 
-    p {
-      margin: 8px 0;
-      font-size: 15px;
-    }
+		p {
+			margin: 8px 0;
+			font-size: 15px;
+		}
 
-    .hint {
-      font-size: 13px;
-      opacity: 0.7;
-    }
-  }
+		.hint {
+			font-size: 13px;
+			opacity: 0.7;
+		}
+	}
 
-  .msg {
-    margin-bottom: 12px;
-    display: flex;
+	.msg {
+		margin-bottom: 12px;
+		display: flex;
 
-    &.user {
-      justify-content: flex-end;
+		&.user {
+			justify-content: flex-end;
 
-      .bubble {
-        background: rgba(64, 128, 255, 0.15);
-      }
-    }
+			.bubble {
+				background: rgba(64, 128, 255, 0.15);
+			}
+		}
 
-    &.assistant {
-      justify-content: flex-start;
+		&.assistant {
+			justify-content: flex-start;
 
-      .bubble {
-        background: rgba(255, 255, 255, 0.05);
-      }
-    }
+			.bubble {
+				background: rgba(255, 255, 255, 0.05);
+			}
+		}
 
-    &.loading .bubble {
-      padding: 8px 16px;
-    }
-  }
+		&.loading .bubble {
+			padding: 8px 16px;
+		}
+	}
 
-  .bubble {
-    max-width: 85%;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #c8d3ee;
-    word-break: break-word;
+	.bubble {
+		max-width: 85%;
+		padding: 10px 14px;
+		border-radius: 12px;
+		font-size: 14px;
+		line-height: 1.6;
+		color: #c8d3ee;
+		word-break: break-word;
 
-    :global {
-      p {
-        margin: 4px 0;
-      }
+		:global {
+			p {
+				margin: 4px 0;
+			}
 
-      ul, ol {
-        padding-left: 1.2em;
-        margin: 4px 0;
-      }
+			ul,
+			ol {
+				padding-left: 1.2em;
+				margin: 4px 0;
+			}
 
-      li {
-        list-style-position: inside;
-      }
+			li {
+				list-style-position: inside;
+			}
 
-      code {
-        font-size: 12px;
-        background: rgba(0, 0, 0, 0.3);
-        padding: 1px 4px;
-        border-radius: 3px;
-      }
+			code {
+				font-size: 12px;
+				background: rgba(0, 0, 0, 0.3);
+				padding: 1px 4px;
+				border-radius: 3px;
+			}
 
-      pre {
-        font-size: 12px;
-        background: rgba(0, 0, 0, 0.3);
-        padding: 8px;
-        border-radius: 6px;
-        overflow-x: auto;
-      }
-    }
-  }
+			pre {
+				font-size: 12px;
+				background: rgba(0, 0, 0, 0.3);
+				padding: 8px;
+				border-radius: 6px;
+				overflow-x: auto;
+			}
+		}
+	}
 
-  .insert-btn {
-    font-size: 14px;
-    padding:  8px;
-    border-radius: 4px;
-    color: #8a9bb5;
-    cursor: pointer;
-    position: absolute;
-    right: -30px;
-    top: 8px;
+	.insert-btn {
+		font-size: 14px;
+		padding: 8px;
+		border-radius: 4px;
+		color: #8a9bb5;
+		cursor: pointer;
+		transition: color 0.2s;
+		position: absolute;
+		right: -30px;
+		top: 8px;
 
-    &:hover {
-      color: #c8d3ee;
-    }
-  }
+		&:hover {
+			color: #c8d3ee;
+		}
 
-  .dot {
-    &::after {
-      content: '';
-      animation: dots 1.2s steps(4, end) infinite;
-    }
-  }
+		&:global(.i-ok) {
+			color: #5a9;
+		}
+	}
 
-  @keyframes dots {
-    0% {
-      content: '';
-    }
-    25% {
-      content: '.';
-    }
-    50% {
-      content: '..';
-    }
-    75% {
-      content: '...';
-    }
-  }
+	.dot {
+		&::after {
+			content: '';
+			animation: dots 1.2s steps(4, end) infinite;
+		}
+	}
 
-  .input-area {
-    padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
+	@keyframes dots {
+		0% {
+			content: '';
+		}
+		25% {
+			content: '.';
+		}
+		50% {
+			content: '..';
+		}
+		75% {
+			content: '...';
+		}
+	}
 
-    textarea {
-      background: none;
-      flex: 1;
-      border-radius: 8px;
-      color: #c8d3ee;
-      padding: 0;
-      font-size: 14px;
-      resize: none;
+	.input-area {
+		padding: 12px 16px;
+		background: rgba(0, 0, 0, 0.2);
+		border-top: 1px solid rgba(255, 255, 255, 0.06);
+		display: flex;
+		gap: 8px;
+		align-items: flex-start;
 
-      &::placeholder {
-        color: rgba(127, 146, 161, 0.5);
-      }
-    }
+		textarea {
+			background: none;
+			flex: 1;
+			border-radius: 8px;
+			color: #c8d3ee;
+			padding: 0;
+			font-size: 14px;
+			resize: none;
 
-    button {
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 8px;
-      border: none;
-      color: #c8d3ee;
-      font-size: 18px;
-      cursor: pointer;
-      white-space: nowrap;
+			&::placeholder {
+				color: rgba(127, 146, 161, 0.5);
+			}
+		}
 
-      &:hover:not(:disabled) {
-        background: rgba(64, 128, 255, 0.5);
-      }
+		button {
+			border-radius: 4px;
+			background: rgba(255, 255, 255, 0.05);
+			padding: 8px;
+			border: none;
+			color: #c8d3ee;
+			font-size: 18px;
+			cursor: pointer;
+			white-space: nowrap;
 
-      &:disabled {
-        opacity: 0.4;
-        cursor: default;
-      }
-    }
-  }
+			&:hover:not(:disabled) {
+				background: rgba(64, 128, 255, 0.5);
+			}
+
+			&:disabled {
+				opacity: 0.4;
+				cursor: default;
+			}
+		}
+	}
 </style>

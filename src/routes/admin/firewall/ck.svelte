@@ -13,33 +13,33 @@
 <span onclick={ck}>{@render children?.()}</span>
 
 <style>
-    span {
-        height: 20px;
-        padding-left: 10px;
-        user-select: none;
-        line-height: 20px;
-    }
+	span {
+		height: 20px;
+		padding-left: 10px;
+		user-select: none;
+		line-height: 20px;
+	}
 
-    .c + span {
-        color: #7c93a9;
-    }
+	.c + span {
+		color: #7c93a9;
+	}
 
-    .a {
-        line-height: 1;
-        width: 20px;
-        height: 20px;
-        border: 1px solid #304565;
-        background: var(--bg1);
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 3px;
-        transition: 0.1s ease-in-out;
-    }
+	.a {
+		line-height: 1;
+		width: 20px;
+		height: 20px;
+		border: 1px solid #304565;
+		background: var(--bg1);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 3px;
+		transition: 0.1s ease-in-out;
+	}
 
-    .c {
-        border-color: transparent;
-        background: #1c93ff;
-    }
+	.c {
+		border-color: transparent;
+		background: #1c93ff;
+	}
 </style>

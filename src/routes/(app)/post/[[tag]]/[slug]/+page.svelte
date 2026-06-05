@@ -292,10 +292,10 @@
 		margin: 30px auto 0;
 		text-align: center;
 		:global {
-      * {
-        color: rgba(244, 246, 248, 0.9);
-        text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
-      }
+			* {
+				color: rgba(244, 246, 248, 0.9);
+				text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
+			}
 		}
 
 		p {

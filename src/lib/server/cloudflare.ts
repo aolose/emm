@@ -42,7 +42,7 @@ interface CfOpStatus {
 function cfHeaders(): Headers {
 	return new Headers({
 		Authorization: `Bearer ${sys.cfApiToken}`,
-		'Content-Type': 'application/json',
+		'Content-Type': 'application/json'
 	});
 }
 
@@ -61,7 +61,7 @@ export async function validateCfToken(): Promise<boolean> {
 	try {
 		const res = await fetch(accountUrl('/rules/lists?per_page=1'), {
 			headers: cfHeaders(),
-			signal: AbortSignal.timeout(5000),
+			signal: AbortSignal.timeout(5000)
 		});
 		const data = (await res.json()) as { success: boolean };
 		return data.success === true;
@@ -76,7 +76,7 @@ export async function getCfLists(): Promise<CfList[]> {
 	try {
 		const res = await fetch(accountUrl('/rules/lists'), {
 			headers: cfHeaders(),
-			signal: AbortSignal.timeout(5000),
+			signal: AbortSignal.timeout(5000)
 		});
 		const data = (await res.json()) as { success: boolean; result: CfList[] };
 		if (!data.success) {
@@ -96,7 +96,7 @@ export async function getListItems(listId: string): Promise<CfListItem[]> {
 	try {
 		const res = await fetch(accountUrl(`/rules/lists/${listId}/items?per_page=100`), {
 			headers: cfHeaders(),
-			signal: AbortSignal.timeout(5000),
+			signal: AbortSignal.timeout(5000)
 		});
 		const data = (await res.json()) as { success: boolean; result: CfListItem[] };
 		if (!data.success) {
@@ -133,7 +133,7 @@ export async function addIpsToList(
 			method: 'POST',
 			headers: cfHeaders(),
 			body: JSON.stringify(newEntries),
-			signal: AbortSignal.timeout(10000),
+			signal: AbortSignal.timeout(10000)
 		});
 		const data = (await res.json()) as { success: boolean; result: { operation_id: string } };
 		if (!data.success) {
@@ -162,7 +162,7 @@ export async function removeIpsFromList(listId: string, itemIds: string[]): Prom
 			method: 'DELETE',
 			headers: cfHeaders(),
 			body: JSON.stringify({ items: itemIds.map((id) => ({ id })) }),
-			signal: AbortSignal.timeout(10000),
+			signal: AbortSignal.timeout(10000)
 		});
 		const data = (await res.json()) as { success: boolean };
 		if (!data.success) {
@@ -182,7 +182,7 @@ export async function getOperationStatus(opId: string): Promise<CfOpStatus | nul
 	try {
 		const res = await fetch(accountUrl(`/rules/lists/bulk_operations/${opId}`), {
 			headers: cfHeaders(),
-			signal: AbortSignal.timeout(5000),
+			signal: AbortSignal.timeout(5000)
 		});
 		const data = (await res.json()) as { success: boolean; result: CfOpStatus };
 		if (!data.success) return null;

@@ -3,13 +3,13 @@ import { describe, it, expect, mock } from 'bun:test';
 // Mocks for getReqJson's dependencies
 mock.module('$lib/server/crypto', () => ({
 	keyPool: new Map(),
-	genPubKey: async () => new ArrayBuffer(0),
+	genPubKey: async () => new ArrayBuffer(0)
 }));
 
 mock.module('$lib/server/index', () => ({
 	db: {} as any,
 	server: { maintain: false },
-	sys: null as any,
+	sys: null as any
 }));
 
 const { getReqJson } = await import('../../../src/lib/server/utils');
@@ -19,7 +19,7 @@ describe('getReqJson', () => {
 		const req = new Request('http://localhost/api/test', {
 			method: 'POST',
 			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ usr: 'admin', pwd: 'secret' }),
+			body: JSON.stringify({ usr: 'admin', pwd: 'secret' })
 		});
 
 		const result = await getReqJson(req);
@@ -29,7 +29,7 @@ describe('getReqJson', () => {
 	it('parses plain JSON without content-type header', async () => {
 		const req = new Request('http://localhost/api/test', {
 			method: 'POST',
-			body: JSON.stringify({ foo: 'bar' }),
+			body: JSON.stringify({ foo: 'bar' })
 		});
 
 		const result = await getReqJson(req);
@@ -40,7 +40,7 @@ describe('getReqJson', () => {
 		const req = new Request('http://localhost/api/test', {
 			method: 'POST',
 			headers: { 'content-type': 'application/octet-stream' },
-			body: JSON.stringify({ key: 'value' }),
+			body: JSON.stringify({ key: 'value' })
 		});
 
 		const result = await getReqJson(req);

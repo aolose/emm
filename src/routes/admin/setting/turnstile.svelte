@@ -31,7 +31,7 @@
 			tsEnabled: enabled,
 			tsSiteKey: trim(siteKey),
 			tsSecret: trim(secret),
-			tsVerifyTTL: Math.abs(+ttl) || 1800,
+			tsVerifyTTL: Math.abs(+ttl) || 1800
 		};
 		req('sys', o)
 			.then(() => {
@@ -56,7 +56,7 @@
 	});
 </script>
 
-<Card {act} {msg} {err} title="Turnstile" {save} ld={ld}>
+<Card {act} {msg} {err} title="Turnstile" {save} {ld}>
 	<div class="ch">
 		<label class="switch">
 			<input type="checkbox" bind:checked={enabled} />
@@ -65,12 +65,17 @@
 		<span class="lb">Enable Turnstile anti-crawl</span>
 	</div>
 	<Ipt label="Site Key" bind:value={siteKey} placeholder="Cloudflare Turnstile site key" />
-	<Ipt label="Secret Key" bind:value={secret} placeholder="Cloudflare Turnstile secret key" password={true} />
+	<Ipt
+		label="Secret Key"
+		bind:value={secret}
+		placeholder="Cloudflare Turnstile secret key"
+		password={true}
+	/>
 	<Ipt label="Cookie TTL (seconds)" bind:value={ttl} placeholder="1800" />
 	<div class="note">
 		<span class="icon i-info"></span>
-		After a user passes verification, they get a cookie valid for this duration.
-		Once expired, they will need to re-verify on their next request.
+		After a user passes verification, they get a cookie valid for this duration. Once expired, they will
+		need to re-verify on their next request.
 	</div>
 </Card>
 

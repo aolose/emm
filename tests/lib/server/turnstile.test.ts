@@ -24,8 +24,17 @@ function setCfg(enabled: boolean, siteKey: string, secret: string, ttl = 1800) {
 }
 
 beforeEach(() => {
-	Object.assign(mockSys, { tsEnabled: true, tsSiteKey: TS_SITE_PASS, tsSecret: TS_SECRET_PASS, tsVerifyTTL: 1800 });
-	mock.module('$lib/server/index', () => ({ sys: mockSys as never, db: {}, server: { maintain: false } }));
+	Object.assign(mockSys, {
+		tsEnabled: true,
+		tsSiteKey: TS_SITE_PASS,
+		tsSecret: TS_SECRET_PASS,
+		tsVerifyTTL: 1800
+	});
+	mock.module('$lib/server/index', () => ({
+		sys: mockSys as never,
+		db: {},
+		server: { maintain: false }
+	}));
 	mock.module('$lib/server/utils', () => {
 		const cookieStore = new Map<string, string>();
 		return {
@@ -41,12 +50,19 @@ beforeEach(() => {
 				cookieStore.set(key, value);
 				resp.headers.append('set-cookie', `${key}=${value}`);
 			},
-			resp: (body: unknown, code = 200) => ({ body: JSON.stringify(body), status: code, headers: new Headers() }) as unknown as Response,
+			resp: (body: unknown, code = 200) =>
+				({
+					body: JSON.stringify(body),
+					status: code,
+					headers: new Headers()
+				}) as unknown as Response
 		};
 	});
 });
 
-afterEach(() => { mock.restore(); });
+afterEach(() => {
+	mock.restore();
+});
 
 async function load() {
 	return await import('$lib/server/turnstile');
@@ -81,7 +97,9 @@ describe('isTsVerified', () => {
 		setCfg(true, TS_SITE_PASS, TS_SECRET_PASS, 1800);
 		const { signTsCookie, isTsVerified } = await load();
 		const c = signTsCookie('10.0.0.1');
-		expect(isTsVerified({ headers: new Headers({ cookie: `_tsv=${c}` }) } as never, '10.0.0.1')).toBe(true);
+		expect(
+			isTsVerified({ headers: new Headers({ cookie: `_tsv=${c}` }) } as never, '10.0.0.1')
+		).toBe(true);
 	});
 	it('fail without cookie', async () => {
 		setCfg(true, TS_SITE_PASS, TS_SECRET_PASS, 1800);
@@ -91,7 +109,9 @@ describe('isTsVerified', () => {
 	it('fail with invalid cookie', async () => {
 		setCfg(true, TS_SITE_PASS, TS_SECRET_PASS, 1800);
 		const { isTsVerified } = await load();
-		expect(isTsVerified({ headers: new Headers({ cookie: '_tsv=bad' }) } as never, '10.0.0.1')).toBe(false);
+		expect(
+			isTsVerified({ headers: new Headers({ cookie: '_tsv=bad' }) } as never, '10.0.0.1')
+		).toBe(false);
 	});
 	it('pass when disabled', async () => {
 		setCfg(false, '', '', 1800);

@@ -16,7 +16,7 @@
 				return 'auto';
 		}
 	};
-	let { topic, ck,act, d = {}, detail = 0 } = $props();
+	let { topic, ck, act, d = {}, detail = 0 } = $props();
 </script>
 
 <div
@@ -24,7 +24,7 @@
 	onclick={() => ck && ck(d)}
 	class:dt={detail}
 	class:tp={topic}
-	class:act={act}
+	class:act
 	transition:slide|global
 >
 	<div class="v">
@@ -172,10 +172,10 @@
 		padding: 10px;
 		cursor: pointer;
 
-		&.act,&:hover  {
+		&.act,
+		&:hover {
 			background: var(--bg2);
 		}
-
 	}
 
 	.b {

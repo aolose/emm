@@ -1,13 +1,7 @@
 <script>
 	import { flip } from 'svelte/animate';
 
-	let {
-		total = 1,
-		page = $bindable(1),
-		go,
-		tm,
-		loading = false
-	} = $props();
+	let { total = 1, page = $bindable(1), go, tm, loading = false } = $props();
 
 	// 1. 交互状态
 	let pending = $state(0);
@@ -75,58 +69,81 @@
 </nav>
 
 <style lang="scss">
-  nav {
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    * { color: rgb(78, 96, 115); }
+	nav {
+		align-items: center;
+		justify-content: center;
+		display: flex;
+		* {
+			color: rgb(78, 96, 115);
+		}
 
-    .act {
-      color: #fff;
-      background: rgb(26 48 87 / 70%);
-      &.loading { animation: pageloading 1.2s ease-in-out infinite; }
-    }
+		.act {
+			color: #fff;
+			background: rgb(26 48 87 / 70%);
+			&.loading {
+				animation: pageloading 1.2s ease-in-out infinite;
+			}
+		}
 
-    .nv {
-      font-size: 12px;
-      cursor: pointer;
-      height: 24px;
-      min-width: 24px;
-      padding: 0 5px;
-      display: flex;
-      margin: 0 5px;
-      justify-content: center;
-      align-items: center;
-      border-radius: 32px;
-      transition: background 0.3s, color 0.3s;
-      text-decoration: none;
-      &:hover { color: #65b9e7; }
-    }
-  }
+		.nv {
+			font-size: 12px;
+			cursor: pointer;
+			height: 24px;
+			min-width: 24px;
+			padding: 0 5px;
+			display: flex;
+			margin: 0 5px;
+			justify-content: center;
+			align-items: center;
+			border-radius: 32px;
+			transition:
+				background 0.3s,
+				color 0.3s;
+			text-decoration: none;
+			&:hover {
+				color: #65b9e7;
+			}
+		}
+	}
 
-  @keyframes pageloading {
-    0%, 100% { background-color: var(--c-primary); }
-    50% { background-color: rgba(100, 116, 156, 0.4); }
-  }
+	@keyframes pageloading {
+		0%,
+		100% {
+			background-color: var(--c-primary);
+		}
+		50% {
+			background-color: rgba(100, 116, 156, 0.4);
+		}
+	}
 
-  .lt {
-    * { color: rgba(100, 116, 156, 0.9); }
-    .nv {
-      background: none;
-      padding: 5px 8px;
-      height: 24px;
-      width: auto;
-      border-radius: 111px;
-    }
-    .act, .nv:hover {
-      color: #fff;
-      background: rgb(76 127 185 / 60%);
-    }
-    .act.loading { animation: pageloading-lt 1.2s ease-in-out infinite; }
-  }
+	.lt {
+		* {
+			color: rgba(100, 116, 156, 0.9);
+		}
+		.nv {
+			background: none;
+			padding: 5px 8px;
+			height: 24px;
+			width: auto;
+			border-radius: 111px;
+		}
+		.act,
+		.nv:hover {
+			color: #fff;
+			background: rgb(76 127 185 / 60%);
+		}
+		.act.loading {
+			animation: pageloading-lt 1.2s ease-in-out infinite;
+		}
+	}
 
-  @keyframes pageloading-lt {
-    0%, 100% { background-color: var(--darkgrey); }
-    50% { background-color: rgba(100, 116, 156, 0.3); }
-  }
+	@keyframes pageloading-lt {
+		0%,
+		100% {
+			background-color: var(--darkgrey);
+		}
+		50% {
+			background-color: rgba(100, 116, 156, 0.3);
+		}
+	}
 </style>

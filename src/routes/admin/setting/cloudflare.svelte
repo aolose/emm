@@ -24,7 +24,7 @@
 	// onMount which is async — get(sys) during render returns {}.
 	// The subscription catches the first non-empty update.
 	onMount(() => {
-		return sys.subscribe(s => {
+		return sys.subscribe((s) => {
 			_sys = s;
 			if (s.cfAccountId || s.cfListId) {
 				cfAccountId = s.cfAccountId || '';
@@ -66,7 +66,10 @@
 		if (cfAccountId !== (_sys.cfAccountId || '')) s.cfAccountId = cfAccountId;
 		if (cfApiToken) s.cfApiToken = cfApiToken;
 		if (cfListId !== (_sys.cfListId || '')) s.cfListId = cfListId;
-		if (!Object.keys(s).length) { ld = false; return; }
+		if (!Object.keys(s).length) {
+			ld = false;
+			return;
+		}
 		try {
 			await req('sys', { ..._sys, ...s });
 			sys.update((a) => ({ ...a, ...s }));
@@ -88,29 +91,16 @@
 
 <Card title="Cloudflare Integration" {save} {ld} {err} {msg}>
 	<Tip>
-		Push blocked IPs to Cloudflare IP Lists for edge-level filtering.
-		Requires a Cloudflare API token with Account:Rulesets:Edit permission.
+		Push blocked IPs to Cloudflare IP Lists for edge-level filtering. Requires a Cloudflare API
+		token with Account:Rulesets:Edit permission.
 	</Tip>
 
-	<Ipt
-		label="Account ID"
-		bind:value={cfAccountId}
-		placeholder="Cloudflare Account ID"
-	/>
+	<Ipt label="Account ID" bind:value={cfAccountId} placeholder="Cloudflare Account ID" />
 
-	<Ipt
-		label="API Token"
-		bind:value={cfApiToken}
-		placeholder="Cloudflare API Token"
-		password
-	/>
+	<Ipt label="API Token" bind:value={cfApiToken} placeholder="Cloudflare API Token" password />
 
 	<div class="cf-row">
-		<Ipt
-			label="List ID"
-			bind:value={cfListId}
-			placeholder="IP List ID"
-		/>
+		<Ipt label="List ID" bind:value={cfListId} placeholder="IP List ID" />
 		<div class="cf-actions">
 			<button class="btn" onclick={validate} disabled={validating}>
 				{validating ? 'Checking...' : 'Test Connection'}

@@ -175,9 +175,7 @@ export const hitRules = (
 		if (k.log) o.log = k.log;
 		// CF upload — push matching IP for any rule with cfUpload enabled
 		if (k.cfUpload && sys.cfAccountId && sys.cfApiToken && sys.cfListId && r.ip) {
-			pushIpToCf(r.ip, k.mark).catch((e) =>
-				console.error('[cf] rule push failed:', r.ip, e)
-			);
+			pushIpToCf(r.ip, k.mark).catch((e) => console.error('[cf] rule push failed:', r.ip, e));
 		}
 		if (k.respId || k.id < 0) {
 			o.respId = k.respId || -1;
@@ -279,7 +277,7 @@ function markAbandon(ip: string, rule: FWRule): void {
 				ip,
 				respId: rule.respId,
 				mark: rule.mark,
-				log: rule.log,
+				log: rule.log
 			});
 			// CF upload — async fire-and-forget
 			if (rule.cfUpload && sys.cfAccountId && sys.cfApiToken && sys.cfListId) {
@@ -294,7 +292,7 @@ function markAbandon(ip: string, rule: FWRule): void {
 				if (idx !== -1) entries.splice(idx, 1);
 				if (!entries.length) pendingAbandons.delete(ip);
 			}
-		}, timeout),
+		}, timeout)
 	};
 	const entries = pendingAbandons.get(ip);
 	if (entries) {
@@ -326,7 +324,12 @@ let _uaMaxWindow = 60; // dynamic, updated by scheduleUaAnalysis
 const uaEntries: UaEntry[] = [];
 
 // Cloudflare Verified Bot categories — skip logging and UA collection
-const CF_TRUSTED_BOT_CATEGORIES = ['Search Engine Crawler', 'Page Preview', 'Feed Fetcher', 'Archiver'];
+const CF_TRUSTED_BOT_CATEGORIES = [
+	'Search Engine Crawler',
+	'Page Preview',
+	'Feed Fetcher',
+	'Archiver'
+];
 
 function recordUaEntry(ip: string, ua: string, path: string): void {
 	const now = Date.now();
@@ -392,13 +395,9 @@ let _uaPending = false;
 function runUaAnalysis(): void {
 	_uaPending = false;
 	if (!triggers) return;
-	const activeUa = triggers.filter(
-		(t) => t.uaMode && t.active && t.isInSchedule()
-	);
+	const activeUa = triggers.filter((t) => t.uaMode && t.active && t.isInSchedule());
 	// Update dynamic max window
-	_uaMaxWindow = activeUa.length
-		? Math.max(...activeUa.map((t) => t.getUaWindow()))
-		: 60;
+	_uaMaxWindow = activeUa.length ? Math.max(...activeUa.map((t) => t.getUaWindow())) : 60;
 	if (!activeUa.length) return;
 
 	for (const rule of activeUa) {
@@ -408,7 +407,7 @@ function runUaAnalysis(): void {
 				ip,
 				respId: rule.respId,
 				mark: rule.mark,
-				log: rule.log,
+				log: rule.log
 			});
 			// CF upload — async fire-and-forget
 			if (rule.cfUpload && sys.cfAccountId && sys.cfApiToken && sys.cfListId) {
@@ -584,9 +583,7 @@ const blackListCheck = (
 						});
 						// CF upload — async fire-and-forget
 						if (t.cfUpload && sys.cfAccountId && sys.cfApiToken && sys.cfListId) {
-							pushIpToCf(r.ip, t.mark).catch((e) =>
-								console.error('[cf] push failed:', r.ip, e)
-							);
+							pushIpToCf(r.ip, t.mark).catch((e) => console.error('[cf] push failed:', r.ip, e));
 						}
 						matched = t;
 						return false;
@@ -633,7 +630,7 @@ export const saveToDb = (r: log) => {
 
 const logReq = (event: RequestEvent) => {
 	const ip = getClientAddr(event);
- 	const {
+	const {
 		request: { method, headers },
 		url
 	} = event;
@@ -646,13 +643,13 @@ const logReq = (event: RequestEvent) => {
 		method
 	} as log;
 	// Skip cache for localhost and authenticated users
-	const skipCache = /^(::1|127\.)/.test(ip)
-		|| getClient(event.request)?.ok(permission.Read);
+	const skipCache = /^(::1|127\.)/.test(ip) || getClient(event.request)?.ok(permission.Read);
 	if (path !== '/api/log' && !skipCache) {
 		addToLogCache(r);
 		// UA collection mode: record for batch analysis (skip CF trusted bots)
-		const isCfTrustedBot = headers.get('X-Client-Bot') === 'true'
-			&& CF_TRUSTED_BOT_CATEGORIES.includes(headers.get('X-Verified-Bot-Category') || '');
+		const isCfTrustedBot =
+			headers.get('X-Client-Bot') === 'true' &&
+			CF_TRUSTED_BOT_CATEGORIES.includes(headers.get('X-Verified-Bot-Category') || '');
 		if (!isCfTrustedBot) {
 			const ua = headers.get('user-agent') || '';
 			recordUaEntry(ip, ua, path);
@@ -786,7 +783,12 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	const skipAll = sysStatue < 2 || isAdmin;
 
 	// Setup not complete — redirect to /config before skipAll bypasses checkRedirect
-	if (sysStatue < 2 && !isAdmin && pn !== '/config' && !/^\/(api|res|font|src|manifest\.json|favicon)/.test(pn)) {
+	if (
+		sysStatue < 2 &&
+		!isAdmin &&
+		pn !== '/config' &&
+		!/^\/(api|res|font|src|manifest\.json|favicon)/.test(pn)
+	) {
 		const cr = new Response('', { status: 307, headers: new Headers({ location: '/config' }) });
 		return cr;
 	}
@@ -872,12 +874,20 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 	// Protected: /, /posts, /post/*, /tags, /tag/*, /about
 	const isTsProtected = /^\/($|posts(\/|$)|post\/|tags(\/|$)|tag\/|about(\/|$))/.test(pn);
 	// Exempt: login, rss, sitemap, robots, manifest, api, res, sw, favicon, config, ts-challenge
-	const isTsExempt = /^\/(login|config|ts-challenge|feed\/|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(pn);
+	const isTsExempt =
+		/^\/(login|config|ts-challenge|feed\/|api\/|sitemap\.xml|robots\.txt|manifest\.json|res\/|sw\.js|service-worker\.js|favicon)/.test(
+			pn
+		);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
 		// Mark abandon: start timers for matching abandon trigger rules
 		const abandonTriggers = triggers.filter((t) => t.abandon && t.active && t.isInSchedule());
 		if (abandonTriggers.length) {
-			const r = { ip, path: pn, method: event.request.method.toLowerCase(), headers: event.request.headers };
+			const r = {
+				ip,
+				path: pn,
+				method: event.request.method.toLowerCase(),
+				headers: event.request.headers
+			};
 			for (const rule of abandonTriggers) {
 				const hr = hitRule(r, rule);
 				if (hr) {
@@ -1007,7 +1017,10 @@ export async function runAggregate(): Promise<void> {
 		if (!octets) continue;
 		const prefix24 = `${octets[0]}.${octets[1]}.${octets[2]}`;
 		let group = by24.get(prefix24);
-		if (!group) { group = []; by24.set(prefix24, group); }
+		if (!group) {
+			group = [];
+			by24.set(prefix24, group);
+		}
 		group.push(b);
 	}
 
@@ -1045,7 +1058,10 @@ export async function runAggregate(): Promise<void> {
 		if (!octets) continue;
 		const prefix16 = `${octets[0]}.${octets[1]}`;
 		let group = by16.get(prefix16);
-		if (!group) { group = []; by16.set(prefix16, group); }
+		if (!group) {
+			group = [];
+			by16.set(prefix16, group);
+		}
 		group.push(b);
 	}
 
@@ -1161,9 +1177,13 @@ export const __test = {
 		pendingAbandons.clear();
 	},
 	getUaMaxWindow: () => _uaMaxWindow,
-	setUaMaxWindow: (w: number) => { _uaMaxWindow = w; },
+	setUaMaxWindow: (w: number) => {
+		_uaMaxWindow = w;
+	},
 	getUaEntries: () => uaEntries.slice(),
-	clearUaEntries: () => { uaEntries.length = 0; },
+	clearUaEntries: () => {
+		uaEntries.length = 0;
+	},
 	getWhiteList: () => (whiteList || []).slice(),
 	clearWhiteList: () => {
 		if (whiteList) whiteList.length = 0;
@@ -1179,7 +1199,11 @@ export const __test = {
 		cidrBlackRules.length = 0;
 	},
 	getTriggers: () => (triggers || []).slice(),
-	setTriggers: (t: FWRule[]) => { triggers = t; },
+	setTriggers: (t: FWRule[]) => {
+		triggers = t;
+	},
 	getRules: () => (rules || []).slice(),
-	setRules: (r: FWRule[]) => { rules = r; },
+	setRules: (r: FWRule[]) => {
+		rules = r;
+	}
 };

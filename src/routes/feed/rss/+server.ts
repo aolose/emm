@@ -18,7 +18,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		return new Response(null, {
 			status: 304,
 			headers: {
-				'ETag': etag,
+				ETag: etag,
 				'Cache-Control': 'max-age=0, s-max-age=600'
 			}
 		});

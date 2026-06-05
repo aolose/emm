@@ -23,7 +23,6 @@
 	let view = $state(0);
 	let ld = $state(0);
 
-
 	function sel(p) {
 		if (!p) {
 			originPost.set({});

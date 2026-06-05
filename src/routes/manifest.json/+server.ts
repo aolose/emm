@@ -37,7 +37,7 @@ export const GET: RequestHandler = ({ request }) => {
 		return new Response(null, {
 			status: 304,
 			headers: {
-				'ETag': etag,
+				ETag: etag,
 				'Cache-Control': CACHE_CONTROL
 			}
 		});
@@ -45,7 +45,7 @@ export const GET: RequestHandler = ({ request }) => {
 	return new Response(json, {
 		headers: {
 			'Content-Type': 'application/manifest+json',
-			'ETag': etag,
+			ETag: etag,
 			'Cache-Control': CACHE_CONTROL
 		}
 	});

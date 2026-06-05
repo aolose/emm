@@ -16,7 +16,7 @@
 	let act = $state(0);
 
 	onMount(() => {
-		return sys.subscribe(s => {
+		return sys.subscribe((s) => {
 			_sys = s;
 			fwAggregate = s.fwAggregate !== false;
 			fwLastCount = s.fwLastCount || 0;
@@ -55,9 +55,8 @@
 
 <Card {act} {msg} {err} title="Firewall" {save} {ld}>
 	<Tip>
-		Aggregate blacklist IPs to reduce list size.
-		When enabled, IPs in the same /24 subnet (>5) are merged into a CIDR block,
-		and /24 blocks in the same /16 (>5) are further merged.
+		Aggregate blacklist IPs to reduce list size. When enabled, IPs in the same /24 subnet (>5) are
+		merged into a CIDR block, and /24 blocks in the same /16 (>5) are further merged.
 	</Tip>
 
 	<div class="ch">

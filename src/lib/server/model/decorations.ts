@@ -3,7 +3,9 @@ import type { Model } from '$lib/types';
 const sqlInfo = new Map();
 export const primaryKey = 'PRIMARY KEY';
 type k = keyof Model;
-interface PKMap { [key: string]: k; }
+interface PKMap {
+	[key: string]: k;
+}
 export const pkMap: PKMap = {};
 
 function set(clsName: string, name: string, v: string) {
@@ -23,7 +25,11 @@ export function getConstraint(o: object, k: string) {
 }
 
 // Helper: detect Stage 3 (target === undefined) vs legacy decorator mode
-function resolve(target: object | undefined, nameOrCtx: string | any, fn: (className: string, fieldName: string) => void) {
+function resolve(
+	target: object | undefined,
+	nameOrCtx: string | any,
+	fn: (className: string, fieldName: string) => void
+) {
 	if (target === undefined) {
 		// Stage 3 decorator — defer via addInitializer
 		const ctx = nameOrCtx;

@@ -2,6 +2,6 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	return {
-		siteKey: (locals as Record<string, string>).tsSiteKey || '',
+		siteKey: (locals as Record<string, string>).tsSiteKey || ''
 	};
 };

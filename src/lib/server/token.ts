@@ -8,8 +8,8 @@ const ONE_HOUR_MS = 3_600_000;
 
 /** Default token expiration by permission type (in ms) */
 const DEFAULT_EXPIRES = new Map<permission, number>([
-	[permission.Admin, ONE_HOUR_MS * 24],      // 24 hours
-	[permission.Post, ONE_HOUR_MS * 24 * 30]   // 30 days
+	[permission.Admin, ONE_HOUR_MS * 24], // 24 hours
+	[permission.Post, ONE_HOUR_MS * 24 * 30] // 30 days
 ]);
 
 /** Sentinel value indicating no expiration / already expired */
@@ -26,7 +26,7 @@ export const genToken = (
 	const now = Date.now();
 	const token: Obj<TokenInfo> = model(TokenInfo, {
 		createAt: now,
-		expire: cfg.expire ?? (now + (DEFAULT_EXPIRES.get(type) ?? EXPIRE_NONE)),
+		expire: cfg.expire ?? now + (DEFAULT_EXPIRES.get(type) ?? EXPIRE_NONE),
 		times: cfg.times,
 		type,
 		_reqs: cfg._reqs

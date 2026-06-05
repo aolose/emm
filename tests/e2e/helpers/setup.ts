@@ -12,14 +12,25 @@ const DB_PATH = resolve(ROOT, `tests/e2e/e2e-${Date.now()}.db`);
 const DB_CFG = resolve(ROOT, '.dbCfg');
 
 const KEYS = {
-  alwaysPass:       { site: '1x00000000000000000000AA', secret: '1x0000000000000000000000000000000AA' },
-  alwaysFail:       { site: '2x00000000000000000000AB', secret: '2x0000000000000000000000000000000AA' },
-  invisiblePass:    { site: '1x00000000000000000000BB', secret: '1x0000000000000000000000000000000BB' },
-  invisibleFail:    { site: '2x00000000000000000000BB', secret: '2x0000000000000000000000000000000BB' },
-  forceInteractive: { site: '3x00000000000000000000FF', secret: '3x0000000000000000000000000000000FF' },
+	alwaysPass: { site: '1x00000000000000000000AA', secret: '1x0000000000000000000000000000000AA' },
+	alwaysFail: { site: '2x00000000000000000000AB', secret: '2x0000000000000000000000000000000AA' },
+	invisiblePass: {
+		site: '1x00000000000000000000BB',
+		secret: '1x0000000000000000000000000000000BB'
+	},
+	invisibleFail: {
+		site: '2x00000000000000000000BB',
+		secret: '2x0000000000000000000000000000000BB'
+	},
+	forceInteractive: {
+		site: '3x00000000000000000000FF',
+		secret: '3x0000000000000000000000000000000FF'
+	}
 };
 
-try { if (existsSync(DB_CFG)) unlinkSync(DB_CFG); } catch {}
+try {
+	if (existsSync(DB_CFG)) unlinkSync(DB_CFG);
+} catch {}
 
 const db = new Database(DB_PATH);
 
@@ -56,37 +67,42 @@ db.run('DELETE FROM FwResp');
 db.run('DELETE FROM FWRule');
 
 async function seed() {
-  const { enc } = await import('../../../src/lib/crypto');
-  const admUsr = await enc('tom');
-  const admPwd = await enc('123qwe');
-  const now = Date.now();
+	const { enc } = await import('../../../src/lib/crypto');
+	const admUsr = await enc('tom');
+	const admPwd = await enc('123qwe');
+	const now = Date.now();
 
-  db.run(`INSERT INTO System (id, admUsr, admPwd, tsEnabled, tsSiteKey, tsSecret, tsVerifyTTL,
+	db.run(
+		`INSERT INTO System (id, admUsr, admPwd, tsEnabled, tsSiteKey, tsSecret, tsVerifyTTL,
     blogName, uploadDir, thumbDir, maxFireLogs)
     VALUES (1, ?, ?, 1, ?, ?, 1800, 'EMM Test', 'upload', 'thumb', 100)`,
-    [admUsr, admPwd, KEYS.alwaysPass.site, KEYS.alwaysPass.secret]
-  );
-  console.log('✓ System seeded');
+		[admUsr, admPwd, KEYS.alwaysPass.site, KEYS.alwaysPass.secret]
+	);
+	console.log('✓ System seeded');
 
-  const respId = now;
-  db.run(`INSERT INTO FwResp (id, name, headers, status, createAt)
-    VALUES (?, 'Block', '', 403, ?)`, [respId, now]);
-  console.log(`✓ FwResp (id=${respId})`);
+	const respId = now;
+	db.run(
+		`INSERT INTO FwResp (id, name, headers, status, createAt)
+    VALUES (?, 'Block', '', 403, ?)`,
+		[respId, now]
+	);
+	console.log(`✓ FwResp (id=${respId})`);
 
-  const ruleId = now + 1;
-  db.run(`INSERT INTO FWRule (id, mark, ip, path, method, headers, createAt, save,
+	const ruleId = now + 1;
+	db.run(
+		`INSERT INTO FWRule (id, mark, ip, path, method, headers, createAt, save,
     log, country, active, rate, trigger, status, respId)
     VALUES (?, 'E2E-Test', '', '/ts-trigger', '', '', ?, 0, 1, '', 1, '1/3600', 1, '', ?)`,
-    [ruleId, now, respId]
-  );
-  console.log(`✓ Trigger rule (id=${ruleId})`);
+		[ruleId, now, respId]
+	);
+	console.log(`✓ Trigger rule (id=${ruleId})`);
 
-  db.close();
-  writeFileSync(DB_CFG, DB_PATH);
-  console.log(`✓ .dbCfg → ${DB_PATH}\n`);
+	db.close();
+	writeFileSync(DB_CFG, DB_PATH);
+	console.log(`✓ .dbCfg → ${DB_PATH}\n`);
 }
 
 seed().catch((e) => {
-  console.error('Setup failed:', e);
-  process.exit(1);
+	console.error('Setup failed:', e);
+	process.exit(1);
 });

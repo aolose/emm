@@ -257,7 +257,10 @@
 				editorTools.update((t) => ({
 					...t,
 					getTitle: () => ({ title: title || '' }),
-					setTitle: (t: string) => { title = t; return { ok: true }; },
+					setTitle: (t: string) => {
+						title = t;
+						return { ok: true };
+					}
 				}));
 			}
 		});
@@ -290,7 +293,10 @@
 			}
 			autoSave(p);
 		});
-		return () => { unsubTools(); unsubPost(); };
+		return () => {
+			unsubTools();
+			unsubPost();
+		};
 	});
 </script>
 
@@ -305,7 +311,10 @@
 			{#key $editPost._ || $editPost.id}
 				<Editor bind:value={draft} toolbar={tools} bind:editorRef />
 				{#if $editPost.save}
-					<span class="tm"><span>save at {time($editPost.save).slice(9)}</span> <span class="wc">{charCount} chars</span></span>
+					<span class="tm"
+						><span>save at {time($editPost.save).slice(9)}</span>
+						<span class="wc">{charCount} chars</span></span
+					>
 				{/if}
 			{/key}
 		</div>

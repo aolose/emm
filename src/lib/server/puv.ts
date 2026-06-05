@@ -49,9 +49,9 @@ const groupAdd = (g: UVGroup, h: string) => {
 	g.hashes.add(h);
 };
 
-const groupSize = (g: UVGroup) => g.overflow ? g.total : g.hashes.size;
+const groupSize = (g: UVGroup) => (g.overflow ? g.total : g.hashes.size);
 
-const groupToArr = (g: UVGroup): string[] => g.overflow ? [] : [...g.hashes];
+const groupToArr = (g: UVGroup): string[] => (g.overflow ? [] : [...g.hashes]);
 
 const groupFromArr = (arr: string[]): UVGroup => {
 	const g = makeGroup();
@@ -96,8 +96,14 @@ export const loadPuv = () => {
 	if (od) {
 		rqD = od.r;
 		pvD = od.p;
-		Object.assign(uvD, groupFromArr((db.get(model(RPUCache, { id: 1 }))?.value || '').split(',').filter(Boolean)));
-		Object.assign(_uvD, groupFromArr((db.get(model(RPUCache, { id: 2 }))?.value || '').split(',').filter(Boolean)));
+		Object.assign(
+			uvD,
+			groupFromArr((db.get(model(RPUCache, { id: 1 }))?.value || '').split(',').filter(Boolean))
+		);
+		Object.assign(
+			_uvD,
+			groupFromArr((db.get(model(RPUCache, { id: 2 }))?.value || '').split(',').filter(Boolean))
+		);
 		// #9 recover UV from today's remaining RPU records if cache empty
 		if (!groupSize(uvD) && !groupSize(_uvD)) {
 			recoverUVFromDB(1, nd, uvD, _uvD);
@@ -106,8 +112,14 @@ export const loadPuv = () => {
 	if (op) {
 		rqH = op.r;
 		pvH = op.p;
-		Object.assign(uvH, groupFromArr((db.get(model(RPUCache, { id: 3 }))?.value || '').split(',').filter(Boolean)));
-		Object.assign(_uvH, groupFromArr((db.get(model(RPUCache, { id: 4 }))?.value || '').split(',').filter(Boolean)));
+		Object.assign(
+			uvH,
+			groupFromArr((db.get(model(RPUCache, { id: 3 }))?.value || '').split(',').filter(Boolean))
+		);
+		Object.assign(
+			_uvH,
+			groupFromArr((db.get(model(RPUCache, { id: 4 }))?.value || '').split(',').filter(Boolean))
+		);
 	}
 };
 

@@ -12,7 +12,7 @@
 	let ds = $derived(clipWords(desc, 60));
 </script>
 
-<div class="s p" style={`background-color:${bgColor(createAt,0.6,70)}`}>
+<div class="s p" style={`background-color:${bgColor(createAt, 0.6, 70)}`}>
 	<div class="x" style={sty}></div>
 	<div class="t">
 		{m}/{d}
@@ -35,7 +35,7 @@
 		transition: 1.4s ease-in-out;
 		position: absolute;
 		inset: -3px;
-		background:  url('../img/1.jpg') center no-repeat;
+		background: url('../img/1.jpg') center no-repeat;
 		background-size: cover;
 		filter: grayscale(0.5) blur(3px);
 		opacity: 0.15;
@@ -45,7 +45,7 @@
 	}
 
 	.p {
-		box-shadow: rgba(0,0,0,0.7) 0 4px 16px -4px;
+		box-shadow: rgba(0, 0, 0, 0.7) 0 4px 16px -4px;
 		overflow: hidden;
 		border-radius: 32px;
 		width: 300px;
@@ -145,7 +145,7 @@
 		font-weight: 100;
 		display: flex;
 		align-items: center;
-		opacity: .4;
+		opacity: 0.4;
 	}
 
 	.y {

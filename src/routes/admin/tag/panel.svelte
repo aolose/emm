@@ -94,7 +94,12 @@
 					style:background-image={d.banner ? `url(/res/_${d.banner})` : ''}
 				>
 					{#if d.banner}
-						<button onclick={(e) => { e.stopPropagation(); d.banner = null; }} class="icon i-close"
+						<button
+							onclick={(e) => {
+								e.stopPropagation();
+								d.banner = null;
+							}}
+							class="icon i-close"
 						></button>
 					{/if}
 				</div>

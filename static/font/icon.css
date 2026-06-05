@@ -14,6 +14,14 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.i-ai:before {
+	content: '\e6ee';
+}
+
+.i-copy:before {
+	content: '\e9c7';
+}
+
 .i-rss:before {
 	content: '\ec83';
 }
@@ -228,4 +236,8 @@
 
 .i-ai:before {
 	content: '\2726';
+}
+
+.i-copy:before {
+	content: '\e60e';
 }

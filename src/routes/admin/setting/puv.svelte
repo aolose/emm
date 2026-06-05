@@ -24,11 +24,13 @@
 	let w = $state();
 	let data = $derived([pv, uv, ur, rv]);
 	const Y_AXIS_COLOR = 'rgba(127, 146, 161, 0.75)';
-	let avg = $derived(data.map(a => {
-		if (!a.length) return 0;
-		return Math.ceil(a.reduce((x, y) => x + y, 0) / a.length);
-	}));
-	let total = $derived(data.map(a => a.reduce((x, y) => x + y, 0)));
+	let avg = $derived(
+		data.map((a) => {
+			if (!a.length) return 0;
+			return Math.ceil(a.reduce((x, y) => x + y, 0) / a.length);
+		})
+	);
+	let total = $derived(data.map((a) => a.reduce((x, y) => x + y, 0)));
 	const genStep = (arr, n) => {
 		const l = arr.length;
 		if (l <= n) return arr;
@@ -141,7 +143,7 @@
 			if (!labels.includes(dmax)) labels.push(dmax);
 			for (const v of labels) {
 				const y = fy(v);
-		ctx.fillText(String(Math.round(v)), 50, y + 4);
+				ctx.fillText(String(Math.round(v)), 50, y + 4);
 			}
 		}
 	};
@@ -151,7 +153,8 @@
 		const [w, h] = [cvs.width, cvs.height];
 		ctx.clearRect(0, 0, w, h);
 		// compute global min/max across all checked datasets
-		let gmin = Infinity, gmax = -Infinity;
+		let gmin = Infinity,
+			gmax = -Infinity;
 		for (let i = 0; i < 4; i++) {
 			if (ck[i] && data[i].length) {
 				const mn = Math.min(...data[i]);
@@ -164,7 +167,10 @@
 		// find first checked line to show its Y labels
 		let firstIdx = -1;
 		for (let i = 0; i < 4; i++) {
-			if (ck[i] && data[i].length) { firstIdx = i; break; }
+			if (ck[i] && data[i].length) {
+				firstIdx = i;
+				break;
+			}
 		}
 		data.forEach((a, i) => {
 			if (ck[i] && a.length) {
@@ -185,7 +191,7 @@
 	});
 	$effect(() => {
 		// re-render when data or toggle changes
-		const _d = data.map(a => a.slice());
+		const _d = data.map((a) => a.slice());
 		const _c = { ...ck };
 		void _d;
 		void _c;
@@ -319,7 +325,7 @@
 	.a {
 		flex-grow: 1;
 		display: flex;
-    margin-left:30px;
+		margin-left: 30px;
 		span {
 			display: block;
 		}

@@ -28,7 +28,7 @@ const apis: APIRoutes = {
 
 			return resp({ success: false, error: 'verification failed' }, 403);
 		}
-	},
+	}
 };
 
 export default apis;

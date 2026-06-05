@@ -118,7 +118,13 @@
 						onclick={pickPic}
 					>
 						{#if post.banner}
-							<button onclick={(e) => { e.stopPropagation(); rmPic(); }} class="icon i-close" transition:fade|global
+							<button
+								onclick={(e) => {
+									e.stopPropagation();
+									rmPic();
+								}}
+								class="icon i-close"
+								transition:fade|global
 							></button>
 						{/if}
 					</div>

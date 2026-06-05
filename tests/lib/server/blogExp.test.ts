@@ -8,12 +8,15 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 	it('Bun.Archive generated format detection', async () => {
 		const entries: Record<string, string | Uint8Array> = {
 			'.dbCfg': 'hello',
-			'd.gz': Bun.gzipSync(new Uint8Array([1, 2, 3, 4, 5])),
+			'd.gz': Bun.gzipSync(new Uint8Array([1, 2, 3, 4, 5]))
 		};
 		const archive = new Bun.Archive(entries);
 		const bytes = await archive.bytes();
 
-		console.log('First 16 bytes:', [...bytes.slice(0, 16)].map(b => b.toString(16).padStart(2, '0')).join(' '));
+		console.log(
+			'First 16 bytes:',
+			[...bytes.slice(0, 16)].map((b) => b.toString(16).padStart(2, '0')).join(' ')
+		);
 		console.log('Total size:', bytes.length);
 
 		// Verify can be re-parsed
@@ -29,7 +32,7 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 			'.dbCfg': '/path/to/db.sqlite',
 			'd.gz': Bun.gzipSync(original),
 			'u/photo.jpg': new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]),
-			't/thumb.jpg': new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
+			't/thumb.jpg': new Uint8Array([0x89, 0x50, 0x4e, 0x47])
 		};
 		const archive = new Bun.Archive(entries);
 		const bytes = await archive.bytes();
@@ -54,7 +57,9 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 		const dbGz = filesMap.get('d.gz');
 		expect(dbGz).toBeDefined();
 		const compressed = new Uint8Array(await dbGz!.arrayBuffer());
-		const decompressed = Bun.gunzipSync(compressed as Uint8Array<ArrayBuffer>) as unknown as Uint8Array;
+		const decompressed = Bun.gunzipSync(
+			compressed as Uint8Array<ArrayBuffer>
+		) as unknown as Uint8Array;
 		expect(decompressed.length).toBe(6);
 		expect([...decompressed]).toEqual([...original]);
 
@@ -74,7 +79,7 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 	it('simulate unZip Entry read interface (d.gz)', async () => {
 		const entries: Record<string, string | Uint8Array> = {
 			'.dbCfg': 'hello',
-			'd.gz': Bun.gzipSync(new Uint8Array([1, 2, 3])),
+			'd.gz': Bun.gzipSync(new Uint8Array([1, 2, 3]))
 		};
 		const archive = new Bun.Archive(entries);
 		const bytes = await archive.bytes();
@@ -101,7 +106,9 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 		const dbGz = files.find((a) => a.filename === 'd.gz');
 		expect(dbGz).toBeDefined();
 		const dbCompressed = await dbGz!.read();
-		const dbBytes = Bun.gunzipSync(dbCompressed as Uint8Array<ArrayBuffer>) as unknown as Uint8Array;
+		const dbBytes = Bun.gunzipSync(
+			dbCompressed as Uint8Array<ArrayBuffer>
+		) as unknown as Uint8Array;
 		expect([...dbBytes]).toEqual([1, 2, 3]);
 	});
 
@@ -123,7 +130,7 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 
 		const entries: Record<string, string | Uint8Array> = {
 			'.dbCfg': 'db_path_' + 'x'.repeat(200),
-			'd.gz': Bun.gzipSync(largeData),
+			'd.gz': Bun.gzipSync(largeData)
 		};
 		const archive = new Bun.Archive(entries);
 		const bytes = await archive.bytes();
@@ -135,7 +142,9 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 		const dbGz = filesMap.get('d.gz');
 		expect(dbGz).toBeDefined();
 		const compressed = new Uint8Array(await dbGz!.arrayBuffer());
-		const dbRestored = Bun.gunzipSync(compressed as Uint8Array<ArrayBuffer>) as unknown as Uint8Array;
+		const dbRestored = Bun.gunzipSync(
+			compressed as Uint8Array<ArrayBuffer>
+		) as unknown as Uint8Array;
 		expect(dbRestored.length).toBe(4096);
 		expect(dbRestored[0]).toBe(0);
 		expect(dbRestored[4095]).toBe(0xff);
@@ -144,7 +153,7 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 	it('Chinese filename roundtrip', async () => {
 		const entries: Record<string, string | Uint8Array> = {
 			'file name with spaces.txt': 'hello',
-			'中文文件名.txt': '你好',
+			'中文文件名.txt': '你好'
 		};
 		const archive = new Bun.Archive(entries);
 		const bytes = await archive.bytes();
@@ -167,7 +176,7 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 
 		const entries: Record<string, string | Uint8Array> = {
 			'.dbCfg': '/tmp/test.db',
-			'd.gz': Bun.gzipSync(new Uint8Array(serialized)),
+			'd.gz': Bun.gzipSync(new Uint8Array(serialized))
 		};
 		const archive = new Bun.Archive(entries);
 		const bytes = await archive.bytes();
@@ -180,7 +189,9 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 		const dGz = filesMap.get('d.gz');
 		expect(dGz).toBeDefined();
 		const compressed = new Uint8Array(await dGz!.arrayBuffer());
-		const decompressed = Bun.gunzipSync(compressed as Uint8Array<ArrayBuffer>) as unknown as Uint8Array;
+		const decompressed = Bun.gunzipSync(
+			compressed as Uint8Array<ArrayBuffer>
+		) as unknown as Uint8Array;
 		expect(decompressed.length).toBe(serialized.length);
 		expect([...decompressed]).toEqual([...serialized]);
 	});
@@ -191,7 +202,7 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 
 		const entries: Record<string, string | Uint8Array> = {
 			'd.gz': Bun.gzipSync(new Uint8Array([1, 2, 3])),
-			'u/img.png': imageData,
+			'u/img.png': imageData
 		};
 		const archive = new Bun.Archive(entries);
 		const bytes = await archive.bytes();
@@ -209,7 +220,9 @@ describe('Blog backup — full roundtrip test (d.gz gzip)', () => {
 		const dbGz = filesMap.get('d.gz');
 		expect(dbGz).toBeDefined();
 		const dbCompressed = new Uint8Array(await dbGz!.arrayBuffer());
-		const dbDecompressed = Bun.gunzipSync(dbCompressed as Uint8Array<ArrayBuffer>) as unknown as Uint8Array;
+		const dbDecompressed = Bun.gunzipSync(
+			dbCompressed as Uint8Array<ArrayBuffer>
+		) as unknown as Uint8Array;
 		expect([...dbDecompressed]).toEqual([1, 2, 3]);
 	});
 });

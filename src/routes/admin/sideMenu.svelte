@@ -112,7 +112,7 @@
 		.v {
 			display: flex;
 			align-items: center;
-			padding: 0 ;
+			padding: 0;
 			width: 54px;
 			height: 100%;
 			button {

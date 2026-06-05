@@ -18,22 +18,27 @@ const apis: APIRoutes = {
 			const body: Record<string, unknown> = {
 				model: selectedModel,
 				messages,
-				stream,
+				stream
 			};
 			if (tools?.length) {
 				body.tools = tools;
 				body.tool_choice = 'auto';
 			}
 
-			console.log('[AI] request →', { model: selectedModel, stream, msgCount: messages.length, hasTools: !!tools?.length });
+			console.log('[AI] request →', {
+				model: selectedModel,
+				stream,
+				msgCount: messages.length,
+				hasTools: !!tools?.length
+			});
 
 			const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${apiKey}`,
+					Authorization: `Bearer ${apiKey}`
 				},
-				body: JSON.stringify(body),
+				body: JSON.stringify(body)
 			});
 
 			if (!response.ok) {
@@ -48,8 +53,8 @@ const apis: APIRoutes = {
 					headers: {
 						'Content-Type': 'text/event-stream',
 						'Cache-Control': 'no-cache',
-						Connection: 'keep-alive',
-					},
+						Connection: 'keep-alive'
+					}
 				});
 			}
 
@@ -60,10 +65,10 @@ const apis: APIRoutes = {
 				finish_reason: choice?.finish_reason,
 				hasContent: !!choice?.message?.content,
 				contentLen: choice?.message?.content?.length,
-				hasToolCalls: !!choice?.message?.tool_calls,
+				hasToolCalls: !!choice?.message?.tool_calls
 			});
 			return data;
-		}),
+		})
 	},
 	aiValidate: {
 		get: auth(Admin, async () => {
@@ -76,7 +81,7 @@ const apis: APIRoutes = {
 
 				const response = await fetch('https://api.deepseek.com/v1/models', {
 					headers: { Authorization: `Bearer ${apiKey}` },
-					signal: controller.signal,
+					signal: controller.signal
 				});
 				clearTimeout(timeout);
 
@@ -86,8 +91,8 @@ const apis: APIRoutes = {
 			} catch (e) {
 				return { valid: false, error: String(e) };
 			}
-		}),
-	},
+		})
+	}
 };
 
 export default apis;

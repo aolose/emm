@@ -8,7 +8,7 @@ mock.module('$app/stores', () => ({ page: { subscribe: () => () => {} } }));
 // Mock database for addRule / addBlackListRule tests
 mock.module('$lib/server/index', () => ({
 	db: { save: () => {}, all: () => [], delByPk: () => {}, count: () => 0 },
-	sys: { maxFireLogs: 1000 },
+	sys: { maxFireLogs: 1000 }
 }));
 
 let testIp = '127.0.0.1';
@@ -20,21 +20,23 @@ mock.module('$lib/server/utils', () => ({
 	getClient: () => undefined,
 	getClientAddr: () => testIp,
 	model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
-	get sysStatue() { return mockSysStatue; },
+	get sysStatue() {
+		return mockSysStatue;
+	}
 }));
 
 mock.module('$lib/server/ipLite', () => ({
 	ipInfo: () => null,
-	ipInfoStr: () => '',
+	ipInfoStr: () => ''
 }));
 
 mock.module('$lib/server/puv', () => ({
-	ruv: () => {},
+	ruv: () => {}
 }));
 
 mock.module('$lib/enum', () => ({
 	permission: { Admin: 0, Read: 1, Post: 2 },
-	NULL: { INT: -1, TEXT: '-', DATE: new Date(0) },
+	NULL: { INT: -1, TEXT: '-', DATE: new Date(0) }
 }));
 
 mock.module('$lib/utils', () => ({
@@ -42,7 +44,7 @@ mock.module('$lib/utils', () => ({
 	hasFwRuleFilter: () => false,
 	hds2Str: () => '',
 	str2Hds: () => [],
-	trim: (s?: string) => (s || '').trim(),
+	trim: (s?: string) => (s || '').trim()
 }));
 
 mock.module('$lib/server/turnstile', () => ({
@@ -54,7 +56,7 @@ mock.module('$lib/server/turnstile', () => ({
 	verifyTsCookie: () => false,
 	getTsCookie: () => undefined,
 	setTsCookie: () => {},
-	verifyTurnstileToken: async () => false,
+	verifyTurnstileToken: async () => false
 }));
 
 import { FWRule } from '../../../src/lib/server/model';
@@ -466,7 +468,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/about'),
 				url: new URL('http://localhost/about'),
 				locals: { ip: '10.0.0.1' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -481,7 +483,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/about'),
 				url: new URL('http://localhost/about'),
 				locals: { ip: '10.0.0.1' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -535,7 +537,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/adminer.php'),
 				url: new URL('http://localhost/adminer.php'),
 				locals: { ip: '10.0.0.1' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -552,7 +554,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/adminer.php'),
 				url: new URL('http://localhost/adminer.php'),
 				locals: { ip: '10.0.0.1' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -602,7 +604,7 @@ describe('Firewall rule matching', () => {
 			trigger.method = '';
 			trigger.headers = '';
 			trigger.status = '';
-			trigger.rate = '10/300';  // rate limit defined but only 1 request
+			trigger.rate = '10/300'; // rate limit defined but only 1 request
 			setTriggers([trigger]);
 
 			const dummy = new FWRule();
@@ -614,7 +616,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/tag/some-slug'),
 				url: new URL('http://localhost/tag/some-slug'),
 				locals: { ip: '10.0.0.2' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -643,7 +645,7 @@ describe('Firewall rule matching', () => {
 			trigger.method = '';
 			trigger.headers = '';
 			trigger.status = '';
-			trigger.rate = '1/1';  // 1 request per 1s → first hit exceeds
+			trigger.rate = '1/1'; // 1 request per 1s → first hit exceeds
 			setTriggers([trigger]);
 
 			const dummy = new FWRule();
@@ -655,7 +657,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/tag/rate-hit'),
 				url: new URL('http://localhost/tag/rate-hit'),
 				locals: { ip: '10.0.0.2' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -696,7 +698,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/tag/no-log-slug'),
 				url: new URL('http://localhost/tag/no-log-slug'),
 				locals: { ip: '10.0.0.2' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -737,7 +739,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/tag/ts-test'),
 				url: new URL('http://localhost/tag/ts-test'),
 				locals: { ip: '10.0.0.3' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -756,7 +758,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/ts-challenge?redirect=/tag/test'),
 				url: new URL('http://localhost/ts-challenge?redirect=/tag/test'),
 				locals: { ip: '10.0.0.3' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -785,7 +787,6 @@ describe('Firewall rule matching', () => {
 	});
 
 	describe('setup redirect to /config when sysStatue < 2', () => {
-
 		beforeEach(async () => {
 			testIp = '10.0.0.4';
 		});
@@ -800,7 +801,7 @@ describe('Firewall rule matching', () => {
 				getClient: () => undefined,
 				getClientAddr: () => testIp,
 				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
-				sysStatue: 0,
+				sysStatue: 0
 			}));
 			const mod = await import('../../../src/lib/server/firewall');
 			mod.__test.setRules([]);
@@ -810,7 +811,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/test-page'),
 				url: new URL('http://localhost/test-page'),
 				locals: { ip: '10.0.0.4' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -826,7 +827,7 @@ describe('Firewall rule matching', () => {
 				getClient: () => undefined,
 				getClientAddr: () => testIp,
 				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
-				sysStatue: 0,
+				sysStatue: 0
 			}));
 			const mod = await import('../../../src/lib/server/firewall');
 			mod.__test.setRules([]);
@@ -836,7 +837,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/config'),
 				url: new URL('http://localhost/config'),
 				locals: { ip: '10.0.0.4' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -970,7 +971,6 @@ describe('Firewall rule matching', () => {
 		});
 	});
 
-
 	describe('Direct abandon filter test', () => {
 		it('triggers.filter with abandon finds the rule in firewallProcess context', async () => {
 			testIp = '10.0.8.1';
@@ -980,7 +980,9 @@ describe('Firewall rule matching', () => {
 				getClient: () => undefined,
 				getClientAddr: () => testIp,
 				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
-				get sysStatue() { return mockSysStatue; },
+				get sysStatue() {
+					return mockSysStatue;
+				}
 			}));
 			const mod = await import('../../../src/lib/server/firewall');
 			mod.__test.setRules([]);
@@ -1008,12 +1010,11 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/post/direct'),
 				url: new URL('http://localhost/post/direct'),
 				locals: { ip: '10.0.8.1' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
 			const res = await mod.firewallProcess(event, handle);
-
 
 			expect(mod.__test.getPendingAbandons().size).toBe(1);
 
@@ -1028,7 +1029,9 @@ describe('Firewall rule matching', () => {
 				getClient: () => undefined,
 				getClientAddr: () => testIp,
 				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
-				get sysStatue() { return mockSysStatue; },
+				get sysStatue() {
+					return mockSysStatue;
+				}
 			}));
 			const mod = await import('../../../src/lib/server/firewall');
 			mod.__test.setRules([]);
@@ -1059,7 +1062,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/about'),
 				url: new URL('http://localhost/about'),
 				locals: { ip: '10.0.8.2' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -1072,7 +1075,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/ts-challenge?redirect=/about'),
 				url: new URL('http://localhost/ts-challenge?redirect=/about'),
 				locals: { ip: '10.0.8.2' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			await mod.firewallProcess(event2, handle);
@@ -1090,7 +1093,9 @@ describe('Firewall rule matching', () => {
 				getClient: () => undefined,
 				getClientAddr: () => testIp,
 				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
-				get sysStatue() { return mockSysStatue; },
+				get sysStatue() {
+					return mockSysStatue;
+				}
 			}));
 			const mod = await import('../../../src/lib/server/firewall');
 			mod.__test.setRules([]);
@@ -1120,7 +1125,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/api/test'),
 				url: new URL('http://localhost/api/test'),
 				locals: { ip: '10.0.8.3' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -1132,9 +1137,7 @@ describe('Firewall rule matching', () => {
 		});
 	});
 
-
 	describe('Whitelist — isIpWhitelisted and firewall bypass', () => {
-
 		it('isIpWhitelisted returns true for exact IP match', async () => {
 			const mod = await import('../../../src/lib/server/firewall');
 			const { WhiteList } = await import('../../../src/lib/server/model');
@@ -1185,7 +1188,9 @@ describe('Firewall rule matching', () => {
 				getClient: () => undefined,
 				getClientAddr: () => testIp,
 				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
-				get sysStatue() { return mockSysStatue; },
+				get sysStatue() {
+					return mockSysStatue;
+				}
 			}));
 
 			const mod = await import('../../../src/lib/server/firewall');
@@ -1210,7 +1215,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/about'),
 				url: new URL('http://localhost/about'),
 				locals: { ip: '10.0.9.3' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });
@@ -1231,7 +1236,9 @@ describe('Firewall rule matching', () => {
 				getClient: () => undefined,
 				getClientAddr: () => testIp,
 				model: (cls: any, data?: any) => Object.assign(new cls(), data || {}),
-				get sysStatue() { return mockSysStatue; },
+				get sysStatue() {
+					return mockSysStatue;
+				}
 			}));
 
 			const mod = await import('../../../src/lib/server/firewall');
@@ -1248,7 +1255,7 @@ describe('Firewall rule matching', () => {
 				request: new Request('http://localhost/about'),
 				url: new URL('http://localhost/about'),
 				locals: { ip: '10.0.9.4' },
-				fetch: () => Promise.resolve(new Response()),
+				fetch: () => Promise.resolve(new Response())
 			} as any;
 
 			const handle = async () => new Response('ok', { status: 200 });

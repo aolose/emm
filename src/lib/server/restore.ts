@@ -39,7 +39,7 @@ export const restore = async (data: ArrayBuffer) => {
 		console.warn(e);
 	}
 	if (!thumbDir || !uploadDir) return resp('some directories are missing', 500);
-		try {
+	try {
 		server.stop();
 		// Windows: file lock may not release immediately after DB close — retry
 		for (let retry = 0; retry < 3; retry++) {

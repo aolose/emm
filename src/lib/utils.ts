@@ -1,7 +1,17 @@
 import { req } from './req';
 import { contentType, dataType, encryptIv, encTypeIndex, getIndexType, method } from './enum';
 import type { ApiBodyData, ApiData, fView, Model, Obj, reqOption, reqParams, Timer } from './types';
-import { buf2Str, buf2Num, data2Buf, randNum, randStr, ivGen, enc, legacyEnc, setPwdSalt } from './crypto';
+import {
+	buf2Str,
+	buf2Num,
+	data2Buf,
+	randNum,
+	randStr,
+	ivGen,
+	enc,
+	legacyEnc,
+	setPwdSalt
+} from './crypto';
 export { buf2Str, buf2Num, data2Buf, randNum, randStr, ivGen, enc, legacyEnc, setPwdSalt };
 
 import { goto } from '$app/navigation';
@@ -144,7 +154,7 @@ export const getHeaderDataType = (h: Headers) => {
 
 export const parseBody = (data: ApiData) => {
 	const t = typeof data;
-	let tp: typeof dataType[keyof typeof dataType]= dataType.text;
+	let tp: (typeof dataType)[keyof typeof dataType] = dataType.text;
 	switch (t) {
 		case 'boolean':
 		case 'number':
@@ -217,10 +227,13 @@ export const delay = (fn: (...params: never[]) => void, ms = 0, maxMs = 0) => {
 		if (!firstCall) firstCall = now;
 		clearTimeout(timer);
 		const wait = maxMs ? Math.min(ms, firstCall + maxMs - now) : ms;
-		timer = setTimeout(() => {
-			firstCall = 0;
-			fn(...params as never[]);
-		}, Math.max(0, wait));
+		timer = setTimeout(
+			() => {
+				firstCall = 0;
+				fn(...(params as never[]));
+			},
+			Math.max(0, wait)
+		);
 	};
 };
 export const filter = <T extends object>(o: Obj<T>, keys: (keyof T)[], nullAble = true) => {
@@ -405,25 +418,39 @@ export const upDownScroller = (fn: (a: number) => void) => {
 
 const colors = [
 	// 1. 深邃基调层 (Deep Tones - 重点强调与背景色)
-	'#013A63', '#014F86', '#274C77', '#1B4965',
+	'#013A63',
+	'#014F86',
+	'#274C77',
+	'#1B4965',
 
 	// 2. 标准品牌层 (Core Brand - 你提供的原始色彩区间)
-	'#2C7DA0', '#4281A4', '#5C677D', '#6096BA',
+	'#2C7DA0',
+	'#4281A4',
+	'#5C677D',
+	'#6096BA',
 
 	// 3. 中性灰绿层 (Muted & Sage - 用于辅助或次要信息)
-	'#577573', '#667C85', '#8B8C89', '#9CAEA9',
+	'#577573',
+	'#667C85',
+	'#8B8C89',
+	'#9CAEA9',
 
 	// 4. 明亮阶梯层 (High-Light - 用于悬停态或浅色背景)
-	'#89C2D9', '#A9D6E5', '#B4C9D2', '#D1D9E0',
+	'#89C2D9',
+	'#A9D6E5',
+	'#B4C9D2',
+	'#D1D9E0',
 
 	// 5. 极简呼吸层 (Off-Whites - 页面底色或边框)
-	'#E0E1DD', '#F1F2F6', '#F8F9FA'
+	'#E0E1DD',
+	'#F1F2F6',
+	'#F8F9FA'
 ];
 
-export const bgColor = (t: number,opacity:number=0.5,dark=0) => {
+export const bgColor = (t: number, opacity: number = 0.5, dark = 0) => {
 	const d = new Date(t);
 	const val = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-	return getColor(val, opacity,dark);
+	return getColor(val, opacity, dark);
 };
 
 export const getColor = (a: number | string, opacity = 1, dark = 0) => {

@@ -12,6 +12,7 @@
 A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSeek AI. Features built-in security firewall and smart writing assistant.
 
 ## Contents
+
 - [Screenshots](#screenshots)
 - [Features](#features)
 - [AI Assistant](#ai-assistant)
@@ -100,17 +101,17 @@ The AI uses **function calling** to interact with the editor:
 
 ## Tech Stack
 
-| Category | Technology |
-|---|---|
-| Framework | [SvelteKit](https://svelte.dev/docs/kit/introduction) (SSR) |
-| Runtime | [Bun](https://bun.sh) |
-| Database | SQLite via `bun:sqlite` |
-| Styling | [SCSS](https://sass-lang.com) + [clsx](https://github.com/lukeed/clsx) |
-| Fonts | [SUIT](https://sunn.us/SUIT/) · [Noto Sans SC](https://fonts.google.com/noto/specimen/Noto+Sans+SC) |
-| Markdown Editor | [CodeMirror 6](https://codemirror.net) + [svelte-codemirror-editor](https://github.com/touchifyapp/svelte-codemirror-editor) |
-| Markdown Renderer | [marked](https://marked.js.org) + [highlight.js](https://highlightjs.org) |
-| AI | [DeepSeek API](https://platform.deepseek.com) (function calling) |
-| Type Checking | TypeScript |
+| Category          | Technology                                                                                                                   |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Framework         | [SvelteKit](https://svelte.dev/docs/kit/introduction) (SSR)                                                                  |
+| Runtime           | [Bun](https://bun.sh)                                                                                                        |
+| Database          | SQLite via `bun:sqlite`                                                                                                      |
+| Styling           | [SCSS](https://sass-lang.com) + [clsx](https://github.com/lukeed/clsx)                                                       |
+| Fonts             | [SUIT](https://sunn.us/SUIT/) · [Noto Sans SC](https://fonts.google.com/noto/specimen/Noto+Sans+SC)                          |
+| Markdown Editor   | [CodeMirror 6](https://codemirror.net) + [svelte-codemirror-editor](https://github.com/touchifyapp/svelte-codemirror-editor) |
+| Markdown Renderer | [marked](https://marked.js.org) + [highlight.js](https://highlightjs.org)                                                    |
+| AI                | [DeepSeek API](https://platform.deepseek.com) (function calling)                                                             |
+| Type Checking     | TypeScript                                                                                                                   |
 
 ## Getting Started
 
@@ -139,9 +140,9 @@ The application will be available at `http://localhost:4173`.
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `PORT` | `4173` | Server listen port |
+| Variable | Default                 | Description                                    |
+| -------- | ----------------------- | ---------------------------------------------- |
+| `PORT`   | `4173`                  | Server listen port                             |
 | `ORIGIN` | `http://localhost:4173` | Public origin URL (required for RSS / sitemap) |
 
 Set them before starting the server:
@@ -215,7 +216,7 @@ If you use Cloudflare proxy and have Turnstile enabled, you need to configure a 
 
 For detailed steps, see: [doc/turnstile.md](doc/turnstile.md)
 
-> **Security Reminder**: Make sure to protect your origin server to prevent attackers from bypassing Cloudflare and directly accessing the origin IP to forge request headers. It is recommended to use  [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) or restrict your origin firewall to only accept [Cloudflare IP ranges](https://www.cloudflare.com/ips/).
+> **Security Reminder**: Make sure to protect your origin server to prevent attackers from bypassing Cloudflare and directly accessing the origin IP to forge request headers. It is recommended to use [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) or restrict your origin firewall to only accept [Cloudflare IP ranges](https://www.cloudflare.com/ips/).
 
 ## Contributing
 

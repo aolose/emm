@@ -101,7 +101,7 @@
 							<div class="r">
 								<Item
 									d={c}
-									act={sel===c}
+									act={sel === c}
 									ck={() => {
 										sel = c;
 										view = 1;

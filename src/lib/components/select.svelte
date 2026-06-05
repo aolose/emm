@@ -30,7 +30,15 @@
 	{#if h}
 		<div class="b" transition:slide|global={{ duration: 100 }}>
 			{#each items as [k, v]}
-				<div class:e={k === value} onclick={(e) => { e.stopPropagation(); s(k)(); }}>{v}</div>
+				<div
+					class:e={k === value}
+					onclick={(e) => {
+						e.stopPropagation();
+						s(k)();
+					}}
+				>
+					{v}
+				</div>
 			{/each}
 		</div>
 	{/if}

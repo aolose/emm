@@ -30,7 +30,7 @@
 			const res = await fetch('/api/tsVerify', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ token }),
+				body: JSON.stringify({ token })
 			});
 			const body = await res.json();
 			if (body.success) {
@@ -158,24 +158,24 @@
 		z-index: 10000;
 	}
 
-  #ts-widget {
-    margin-top: 20px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
+	#ts-widget {
+		margin-top: 20px;
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		overflow: hidden;
+	}
 	.bx {
-    background: rgba(30, 30, 40, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 40px 24px;
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
-    color: #ccc;
-    box-sizing: border-box;
+		background: rgba(30, 30, 40, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 16px;
+		padding: 40px 24px;
+		text-align: center;
+		max-width: 400px;
+		width: 90%;
+		color: #ccc;
+		box-sizing: border-box;
 
 		h1 {
 			font-size: 20px;

@@ -16,7 +16,7 @@
 	let pic = $derived(file.type?.startsWith('image/') ? `/res/_${file.id}` : '');
 </script>
 
-<div class="file-card" class:act onclick={onclick}>
+<div class="file-card" class:act {onclick}>
 	<div class="p" style:background-image={pic ? `url(${pic})` : ''}>
 		{#if !pic}
 			<div class="f">

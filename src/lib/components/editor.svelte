@@ -49,7 +49,6 @@
 			return true;
 		};
 
-
 		activeBold = findSurrounding('**');
 		activeItalic = findSurrounding('*');
 		activeStrike = findSurrounding('~~');
@@ -114,7 +113,6 @@
 		updateActiveState();
 	}
 
-
 	function toggleLinePrefix(prefix: string) {
 		if (!cm) return;
 		const { from, to } = cm.state.selection.main;
@@ -132,8 +130,8 @@
 		}
 
 		const newLines = allPrefixed
-			? lines.map(l => l.slice(prefixLen))
-			: lines.map(l => prefix + l);
+			? lines.map((l) => l.slice(prefixLen))
+			: lines.map((l) => prefix + l);
 
 		cm.dispatch({
 			changes: { from: fromLine.from, to: toLine.to, insert: newLines.join('\n') }
@@ -143,12 +141,24 @@
 
 	// ── Toolbar actions ──────────────────────────────────────────────
 
-	function toggleBold()          { toggleWrapper('**'); }
-	function toggleItalic()        { toggleWrapper('*'); }
-	function toggleStrikethrough() { toggleWrapper('~~'); }
-	function toggleQuote()         { toggleLinePrefix('> '); }
-	function toggleUL()            { toggleLinePrefix('- '); }
-	function toggleOL()            { toggleLinePrefix('1. '); }
+	function toggleBold() {
+		toggleWrapper('**');
+	}
+	function toggleItalic() {
+		toggleWrapper('*');
+	}
+	function toggleStrikethrough() {
+		toggleWrapper('~~');
+	}
+	function toggleQuote() {
+		toggleLinePrefix('> ');
+	}
+	function toggleUL() {
+		toggleLinePrefix('- ');
+	}
+	function toggleOL() {
+		toggleLinePrefix('1. ');
+	}
 	function insertTable() {
 		if (!cm) return;
 		cm.dispatch({
@@ -212,9 +222,15 @@
 				return true;
 			}
 		},
-		click() { updateActiveState(); },
-		keyup() { updateActiveState(); },
-		touchend() { updateActiveState(); }
+		click() {
+			updateActiveState();
+		},
+		keyup() {
+			updateActiveState();
+		},
+		touchend() {
+			updateActiveState();
+		}
 	});
 
 	function onEditorReady(v: EditorView) {
@@ -232,7 +248,7 @@
 		const hasSelection = from !== to;
 		return {
 			hasSelection,
-			text: hasSelection ? cm.state.doc.sliceString(from, to) : '',
+			text: hasSelection ? cm.state.doc.sliceString(from, to) : ''
 		};
 	}
 
@@ -242,7 +258,7 @@
 		const line = cm.state.doc.lineAt(pos);
 		return {
 			lineNumber: line.number,
-			text: line.text,
+			text: line.text
 		};
 	}
 
@@ -307,14 +323,14 @@
 				const paraEnd = cm.state.doc.line(para.endLine).to;
 				cm.dispatch({
 					changes: { from: paraStart, to: paraEnd, insert: text },
-					selection: { anchor: paraStart + text.length },
+					selection: { anchor: paraStart + text.length }
 				});
 				return;
 			}
 		}
 		cm.dispatch({
 			changes: { from: sel.from, to: sel.to, insert: text },
-			selection: { anchor: sel.from + text.length },
+			selection: { anchor: sel.from + text.length }
 		});
 	}
 
@@ -324,7 +340,7 @@
 		const line = cm.state.doc.lineAt(pos);
 		cm.dispatch({
 			changes: { from: line.from, to: line.to, insert: text },
-			selection: { anchor: line.from + text.length },
+			selection: { anchor: line.from + text.length }
 		});
 		return { ok: true, lineNumber: line.number };
 	}
@@ -337,7 +353,7 @@
 		const paraEnd = cm.state.doc.line(para.endLine).to;
 		cm.dispatch({
 			changes: { from: paraStart, to: paraEnd, insert: text },
-			selection: { anchor: paraStart + text.length },
+			selection: { anchor: paraStart + text.length }
 		});
 		return { ok: true, startLine: para.startLine, endLine: para.endLine };
 	}
@@ -350,7 +366,7 @@
 		if (idx === -1) return { ok: false, error: 'search text not found' };
 		cm.dispatch({
 			changes: { from: idx, to: idx + search.length, insert: replace },
-			selection: { anchor: idx + replace.length },
+			selection: { anchor: idx + replace.length }
 		});
 		return { ok: true };
 	}
@@ -360,14 +376,22 @@
 		const pos = cm.state.selection.main.head;
 		cm.dispatch({
 			changes: { from: pos, insert: text },
-			selection: { anchor: pos + text.length },
+			selection: { anchor: pos + text.length }
 		});
 		return { ok: true };
 	}
 
 	const contextTools = {
-		getSelection, getCurrentLine, getCurrentParagraph, getCurrentSection, getFullDocument,
-		insertAtCursor, replaceSelection, replaceCurrentLine, replaceCurrentParagraph, replaceText,
+		getSelection,
+		getCurrentLine,
+		getCurrentParagraph,
+		getCurrentSection,
+		getFullDocument,
+		insertAtCursor,
+		replaceSelection,
+		replaceCurrentLine,
+		replaceCurrentParagraph,
+		replaceText
 	};
 
 	// ── Built-in toolbar buttons ─────────────────────────────────────
@@ -375,7 +399,12 @@
 	const defaultButtons = [
 		{ title: 'Bold', action: toggleBold, cls: 'tb-bold', active: () => activeBold },
 		{ title: 'Italic', action: toggleItalic, cls: 'tb-italic', active: () => activeItalic },
-		{ title: 'Strikethrough', action: toggleStrikethrough, cls: 'tb-strike', active: () => activeStrike },
+		{
+			title: 'Strikethrough',
+			action: toggleStrikethrough,
+			cls: 'tb-strike',
+			active: () => activeStrike
+		},
 		{ title: 'Quote', action: toggleQuote, cls: 'tb-quote', active: () => activeQuote },
 		{ title: 'Unordered list', action: toggleUL, cls: 'tb-ul', active: () => activeUL },
 		{ title: 'Ordered list', action: toggleOL, cls: 'tb-ol', active: () => activeOL },
@@ -387,11 +416,7 @@
 <div class="editor-wrapper">
 	<div class="toolbar">
 		{#each defaultButtons as btn (btn.title)}
-			<button
-				onclick={btn.action}
-				title={btn.title}
-				class={btn.cls}
-				aria-pressed={btn.active()}
+			<button onclick={btn.action} title={btn.title} class={btn.cls} aria-pressed={btn.active()}
 			></button>
 		{/each}
 		{#each toolbar as btn (btn.name)}

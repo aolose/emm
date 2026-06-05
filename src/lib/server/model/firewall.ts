@@ -105,7 +105,9 @@ export class FWRule {
 
 	onSave() {}
 	onDel() {}
-	toResp() { return; }
+	toResp() {
+		return;
+	}
 }
 
 export class FwResp {

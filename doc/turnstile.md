@@ -15,18 +15,18 @@ When using Cloudflare Turnstile to protect your site, legitimate automated visit
 4. Click **Create rule**
 5. Configure as follows:
 
-| Field | Value |
-|---|---|
-| Rule name | `Add Verified Bot Headers` |
-| When (Field) | Bot |
-| When (Operator) | equals |
-| When (Value) | Known Bots |
-| Then (Action) | Set static |
-| Header name | `X-Verified-Bot-Category` |
-| Header value | `cf.verified_bot_category` |
-| Then (Action) | Set static |
-| Header name | `X-Client-Bot` |
-| Header value | `true` |
+| Field           | Value                      |
+| --------------- | -------------------------- |
+| Rule name       | `Add Verified Bot Headers` |
+| When (Field)    | Bot                        |
+| When (Operator) | equals                     |
+| When (Value)    | Known Bots                 |
+| Then (Action)   | Set static                 |
+| Header name     | `X-Verified-Bot-Category`  |
+| Header value    | `cf.verified_bot_category` |
+| Then (Action)   | Set static                 |
+| Header name     | `X-Client-Bot`             |
+| Header value    | `true`                     |
 
 6. Click **Deploy**
 
@@ -39,10 +39,10 @@ EMM already includes the bot bypass logic in `src/lib/server/turnstile.ts`. The 
 ```ts
 // Trusted bot categories from Cloudflare Verified Bots
 const trustedCategories = [
-  'Search Engine Crawler',  // Googlebot, Bingbot, etc.
-  'Page Preview',           // Slack, Discord link previews
-  'Feed Fetcher',           // RSS/Atom feed readers
-  'Archiver',               // Internet Archive, etc.
+	'Search Engine Crawler', // Googlebot, Bingbot, etc.
+	'Page Preview', // Slack, Discord link previews
+	'Feed Fetcher', // RSS/Atom feed readers
+	'Archiver' // Internet Archive, etc.
 ];
 ```
 
@@ -63,12 +63,12 @@ User-Agent headers are trivial to spoof. Cloudflare's Verified Bot detection is 
 
 **Q: What are the possible values of `cf.verified_bot_category`?**
 
-| Category | Description |
-|---|---|
+| Category              | Description                                          |
+| --------------------- | ---------------------------------------------------- |
 | Search Engine Crawler | Googlebot, Bingbot, and other search engine crawlers |
-| Page Preview | Link preview services like Slack, Discord |
-| Feed Fetcher | RSS/Atom feed readers |
-| Archiver | Archival services like Internet Archive |
+| Page Preview          | Link preview services like Slack, Discord            |
+| Feed Fetcher          | RSS/Atom feed readers                                |
+| Archiver              | Archival services like Internet Archive              |
 
 **Q: What happens if I don't create this rule?**
 

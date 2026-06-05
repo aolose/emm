@@ -327,7 +327,8 @@ export const cmManager = (() => {
 				if (!c) return errMsg('comment not exist');
 				else {
 					if (!isAdm && cm.userId !== user.id) return errMsg('no permission', 1, 403);
-					if (!isAdm && c.state === cmStatus.Approve) return errMsg('approved comment cannot be modified', 0, 403);
+					if (!isAdm && c.state === cmStatus.Approve)
+						return errMsg('approved comment cannot be modified', 0, 403);
 					delete cm.isAdm;
 					db.save(cm, { skipSave: isAdm });
 					return {

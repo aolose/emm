@@ -331,7 +331,12 @@ export const readManager = (() => {
 				const all = db.all(model(PostRead), `pid = ? order by createAt desc`, postId);
 				if (all.length > 300) {
 					const keepIds = all.slice(0, 300).map((r) => r.id);
-					db.del(model(PostRead), `pid = ? and id not in (${sqlFields(keepIds.length)})`, postId, ...keepIds);
+					db.del(
+						model(PostRead),
+						`pid = ? and id not in (${sqlFields(keepIds.length)})`,
+						postId,
+						...keepIds
+					);
 				}
 			}
 		}

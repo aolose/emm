@@ -17,7 +17,9 @@ const apis: APIRoutes = {
 			const { changes } = db.delByPk(Res, [...r]);
 			r.forEach(delFile);
 			const ids = new Set([...r]);
-			for (const [k, v] of eTags) { if (ids.has(v)) eTags.delete(k); }
+			for (const [k, v] of eTags) {
+				if (ids.has(v)) eTags.delete(k);
+			}
 			return changes;
 		}),
 		post: auth(Read, async (req) => {
@@ -25,12 +27,27 @@ const apis: APIRoutes = {
 			const d = await req.json();
 			const { page, size } = d;
 			let { type, name = '' } = d;
-			const w = []; const v = [];
+			const w = [];
+			const v = [];
 			name = trim(name);
-			if (name) { w.push('name like ?'); v.push(`%${name}%`); }
-			if (type) { type = type.replace(/\*/g, '%'); w.push('type like ?'); v.push(type); }
+			if (name) {
+				w.push('name like ?');
+				v.push(`%${name}%`);
+			}
+			if (type) {
+				type = type.replace(/\*/g, '%');
+				w.push('type like ?');
+				v.push(type);
+			}
 			if (w.length) where = [w.join(' and '), ...v];
-			return pageBuilder(page, size, Res, ['save desc'], ['id','name','size','type','thumb'], where);
+			return pageBuilder(
+				page,
+				size,
+				Res,
+				['save desc'],
+				['id', 'name', 'size', 'type', 'thumb'],
+				where
+			);
 		})
 	},
 	up: {
@@ -45,7 +62,9 @@ const apis: APIRoutes = {
 			res.md5 = md5(buf);
 			const r = db.get(res);
 			if (r) return r.id;
-			res.size = buf.length; res.name = n; res.type = tp;
+			res.size = buf.length;
+			res.name = n;
+			res.type = tp;
 			db.save(res);
 			try {
 				saveFile(res.id, sys.uploadDir, buf);
@@ -53,13 +72,23 @@ const apis: APIRoutes = {
 					try {
 						const img = new Bun.Image(buf);
 						const w = img.width;
-						if (w > 300) { const thumb = await img.resize(300).toBuffer(); saveFile(res.id, sys.thumbDir, thumb); res.thumb = 1; db.save(res); }
-					} catch (e) { console.error(e); }
+						if (w > 300) {
+							const thumb = await img.resize(300).toBuffer();
+							saveFile(res.id, sys.thumbDir, thumb);
+							res.thumb = 1;
+							db.save(res);
+						}
+					} catch (e) {
+						console.error(e);
+					}
 				}
-			} catch (e) { console.error(e); db.del(res); }
+			} catch (e) {
+				console.error(e);
+				db.del(res);
+			}
 			return res.id;
 		})
-	},
+	}
 };
 
 export default apis;

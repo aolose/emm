@@ -46,10 +46,10 @@
 			.finally(() => (ld = 0));
 	};
 	const add = () => {
-		pop(ta === 3 ? 6 : (ta ? 4 : 2)).then((d) => {
+		pop(ta === 3 ? 6 : ta ? 4 : 2).then((d) => {
 			if (!d) return;
 			fix(d);
-			const api = ta === 3 ? 'wlk' : (ta ? 'fwRsp' : 'rule');
+			const api = ta === 3 ? 'wlk' : ta ? 'fwRsp' : 'rule';
 			req(api, d).then((id) => {
 				d.id = id;
 				ls = [{ ...d }, ...ls];
@@ -71,7 +71,7 @@
 	};
 
 	const edit = (da) => {
-		pop(ta === 3 ? 7 : (ta ? (ta === 2 ? 5 : 3) : 1), { ...da }).then((d) => {
+		pop(ta === 3 ? 7 : ta ? (ta === 2 ? 5 : 3) : 1, { ...da }).then((d) => {
 			if (!d) return;
 			fix(d);
 			let df = diffObj(da, d);
@@ -154,22 +154,22 @@
 							</div>
 						</div>
 					{:else if ta === 3}
-					<div class="u act">
-						<div class="i">
-							<div class="icon i-ip"><span>{r.ip}</span></div>
-							<div class="icon i-geo"><span>{r._geo}</span></div>
+						<div class="u act">
+							<div class="i">
+								<div class="icon i-ip"><span>{r.ip}</span></div>
+								<div class="icon i-geo"><span>{r._geo}</span></div>
+							</div>
+							<div class="r">
+								{#if r.mark}
+									<span class="m">{r.mark}</span>
+								{/if}
+								<p>{time(r.createAt)}</p>
+								<s></s>
+								<button class="icon i-del" onclick={() => del(r.id)}></button>
+								<button class="icon i-ed" onclick={() => edit(r)}></button>
+							</div>
 						</div>
-						<div class="r">
-							{#if r.mark}
-								<span class="m">{r.mark}</span>
-							{/if}
-							<p>{time(r.createAt)}</p>
-							<s></s>
-							<button class="icon i-del" onclick={() => del(r.id)}></button>
-							<button class="icon i-ed" onclick={() => edit(r)}></button>
-						</div>
-					</div>
-				{:else if ta === 2}
+					{:else if ta === 2}
 						<div class="u">
 							<div class="i">
 								<div class="icon i-tag"><span>{r.name}</span></div>
@@ -335,7 +335,7 @@
 	.i {
 		display: flex;
 		flex-wrap: wrap;
-    justify-content: start;
+		justify-content: start;
 		align-items: start;
 		div {
 			font-size: 14px;
@@ -369,30 +369,30 @@
 		padding: 0;
 	}
 
- .i-label{
-	 flex: 0;
-	 align-items: center;
-	 justify-content: center;
-	 height: 24px;
-	 margin: 0 3px!important;
-	 padding: 0!important;
-	 display: flex;
-	 order: -1;
-	 span{
-		 border-radius: 4px;
-		 padding: 4px 6px!important;
-		 margin: 0;
-		 line-height: 1;
-		 display: flex;
-		 align-items: center;
-		 justify-content: center;
-		 text-align: center;
-		 font-weight: 800;
-     color: #757b95 !important;
-     font-size: 10px;
-     background: rgb(0 0 0 / 0.6);
-	 }
- }
+	.i-label {
+		flex: 0;
+		align-items: center;
+		justify-content: center;
+		height: 24px;
+		margin: 0 3px !important;
+		padding: 0 !important;
+		display: flex;
+		order: -1;
+		span {
+			border-radius: 4px;
+			padding: 4px 6px !important;
+			margin: 0;
+			line-height: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			font-weight: 800;
+			color: #757b95 !important;
+			font-size: 10px;
+			background: rgb(0 0 0 / 0.6);
+		}
+	}
 
 	.i-log {
 		color: #00d2ff;

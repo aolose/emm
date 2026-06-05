@@ -59,90 +59,128 @@ const AI_TOOLS: ToolDef[] = [
 		type: 'function',
 		function: {
 			name: 'getSelection',
-			description: 'Get the text currently selected (highlighted) by the user in the editor. Returns whether there is a selection and the selected text. Use this when the user refers to "this" or "the selected text".',
-			parameters: { type: 'object', properties: {}, required: [] },
-		},
+			description:
+				'Get the text currently selected (highlighted) by the user in the editor. Returns whether there is a selection and the selected text. Use this when the user refers to "this" or "the selected text".',
+			parameters: { type: 'object', properties: {}, required: [] }
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'getCurrentLine',
-			description: 'Get the full text of the line where the cursor is currently placed. Returns the line number and text.',
-			parameters: { type: 'object', properties: {}, required: [] },
-		},
+			description:
+				'Get the full text of the line where the cursor is currently placed. Returns the line number and text.',
+			parameters: { type: 'object', properties: {}, required: [] }
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'getCurrentParagraph',
-			description: 'Get the paragraph (block of non-empty lines) around the cursor, delimited by blank lines. Returns the paragraph text and line range.',
-			parameters: { type: 'object', properties: {}, required: [] },
-		},
+			description:
+				'Get the paragraph (block of non-empty lines) around the cursor, delimited by blank lines. Returns the paragraph text and line range.',
+			parameters: { type: 'object', properties: {}, required: [] }
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'getCurrentSection',
-			description: 'Get the markdown section around the cursor, from its heading to the next heading or end of document.',
-			parameters: { type: 'object', properties: {}, required: [] },
-		},
+			description:
+				'Get the markdown section around the cursor, from its heading to the next heading or end of document.',
+			parameters: { type: 'object', properties: {}, required: [] }
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'getFullDocument',
-			description: 'Get the entire document content. Use only when the user asks for a full rewrite, global summary, or complete analysis. Returns text, line count, and total length.',
-			parameters: { type: 'object', properties: {}, required: [] },
-		},
+			description:
+				'Get the entire document content. Use only when the user asks for a full rewrite, global summary, or complete analysis. Returns text, line count, and total length.',
+			parameters: { type: 'object', properties: {}, required: [] }
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'replaceCurrentLine',
-			description: 'Replace the entire current line (where the cursor is) with new text. Use after reading and discussing the line to apply corrections.',
-			parameters: { type: 'object', properties: { text: { type: 'string', description: 'The new text to replace the current line with' } }, required: ['text'] },
-		},
+			description:
+				'Replace the entire current line (where the cursor is) with new text. Use after reading and discussing the line to apply corrections.',
+			parameters: {
+				type: 'object',
+				properties: {
+					text: { type: 'string', description: 'The new text to replace the current line with' }
+				},
+				required: ['text']
+			}
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'replaceCurrentParagraph',
-			description: 'Replace the entire current paragraph (where the cursor is) with new text. Use after reading and discussing the paragraph to apply corrections.',
-			parameters: { type: 'object', properties: { text: { type: 'string', description: 'The new text to replace the current paragraph with' } }, required: ['text'] },
-		},
+			description:
+				'Replace the entire current paragraph (where the cursor is) with new text. Use after reading and discussing the paragraph to apply corrections.',
+			parameters: {
+				type: 'object',
+				properties: {
+					text: {
+						type: 'string',
+						description: 'The new text to replace the current paragraph with'
+					}
+				},
+				required: ['text']
+			}
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'replaceText',
-			description: 'Precisely replace a specific substring in the document. Finds the first occurrence of searchText and replaces it with newText. Use for surgical fixes like correcting a typo or changing a specific phrase.',
-			parameters: { type: 'object', properties: { searchText: { type: 'string', description: 'The exact text to find and replace' }, newText: { type: 'string', description: 'The replacement text' } }, required: ['searchText', 'newText'] },
-		},
+			description:
+				'Precisely replace a specific substring in the document. Finds the first occurrence of searchText and replaces it with newText. Use for surgical fixes like correcting a typo or changing a specific phrase.',
+			parameters: {
+				type: 'object',
+				properties: {
+					searchText: { type: 'string', description: 'The exact text to find and replace' },
+					newText: { type: 'string', description: 'The replacement text' }
+				},
+				required: ['searchText', 'newText']
+			}
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'insertAtCursor',
 			description: 'Insert text at the current cursor position.',
-			parameters: { type: 'object', properties: { text: { type: 'string', description: 'Text to insert' } }, required: ['text'] },
-		},
+			parameters: {
+				type: 'object',
+				properties: { text: { type: 'string', description: 'Text to insert' } },
+				required: ['text']
+			}
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'getTitle',
 			description: 'Get the current article title.',
-			parameters: { type: 'object', properties: {}, required: [] },
-		},
+			parameters: { type: 'object', properties: {}, required: [] }
+		}
 	},
 	{
 		type: 'function',
 		function: {
 			name: 'setTitle',
 			description: 'Set the article title to a new value.',
-			parameters: { type: 'object', properties: { title: { type: 'string', description: 'New title text' } }, required: ['title'] },
-		},
-	},
+			parameters: {
+				type: 'object',
+				properties: { title: { type: 'string', description: 'New title text' } },
+				required: ['title']
+			}
+		}
+	}
 ];
 
 // ── Validation ──────────────────────────────────────────────────────
@@ -177,10 +215,7 @@ export async function sendAiMessage(
 		const ms = get(aiMessages);
 		await runAiLoop(ms, tools, model);
 	} catch (e) {
-		aiMessages.update((ms) => [
-			...ms,
-			{ role: 'assistant', content: `Error: ${e}` },
-		]);
+		aiMessages.update((ms) => [...ms, { role: 'assistant', content: `Error: ${e}` }]);
 	} finally {
 		aiLoading.set(false);
 	}
@@ -196,11 +231,11 @@ async function runAiLoop(
 		const body = {
 			messages: [
 				{ role: 'system', content: SYSTEM_PROMPT },
-				...ms.filter((m) => m.role !== 'tool' || m.tool_call_id),
+				...ms.filter((m) => m.role !== 'tool' || m.tool_call_id)
 			],
 			tools: AI_TOOLS,
 			model,
-			stream: false,
+			stream: false
 		};
 
 		const result = await req('ai', body, { method: 0 as never }); // POST
@@ -227,7 +262,7 @@ async function runAiLoop(
 			finish_reason: choice.finish_reason,
 			hasContent: !!choice.message?.content,
 			contentPreview: choice.message?.content?.slice(0, 100),
-			toolCallCount: choice.message?.tool_calls?.length,
+			toolCallCount: choice.message?.tool_calls?.length
 		});
 
 		if (choice.finish_reason === 'tool_calls' && choice.message?.tool_calls) {
@@ -235,7 +270,7 @@ async function runAiLoop(
 			ms.push({
 				role: 'assistant',
 				content: choice.message.content || '',
-				tool_calls: choice.message.tool_calls,
+				tool_calls: choice.message.tool_calls
 			});
 
 			// Execute each tool call
@@ -244,23 +279,35 @@ async function runAiLoop(
 				const fn = fns[tc.function.name];
 				if (fn) {
 					let args: unknown;
-					try { args = JSON.parse(tc.function.arguments); } catch { args = {}; }
-					const result = typeof args === 'object' && args !== null && !Array.isArray(args)
-						? fn(...Object.values(args as Record<string, unknown>))
-						: fn();
+					try {
+						args = JSON.parse(tc.function.arguments);
+					} catch {
+						args = {};
+					}
+					const result =
+						typeof args === 'object' && args !== null && !Array.isArray(args)
+							? fn(...Object.values(args as Record<string, unknown>))
+							: fn();
 					const resultStr = result !== undefined ? JSON.stringify(result).slice(0, 500) : '(void)';
-					console.log('[AI] tool →', tc.function.name, 'args:', tc.function.arguments, '→', resultStr);
+					console.log(
+						'[AI] tool →',
+						tc.function.name,
+						'args:',
+						tc.function.arguments,
+						'→',
+						resultStr
+					);
 					ms.push({
 						role: 'tool',
 						content: JSON.stringify(result),
-						tool_call_id: tc.id,
+						tool_call_id: tc.id
 					});
 				} else {
 					console.warn('[AI] unknown tool:', tc.function.name);
 					ms.push({
 						role: 'tool',
 						content: JSON.stringify({ error: `Unknown tool: ${tc.function.name}` }),
-						tool_call_id: tc.id,
+						tool_call_id: tc.id
 					});
 				}
 			}
@@ -274,7 +321,7 @@ async function runAiLoop(
 			}
 			ms.push({
 				role: 'assistant',
-				content,
+				content
 			});
 			aiMessages.set([...ms]);
 			return;
@@ -285,7 +332,7 @@ async function runAiLoop(
 		...ms,
 		{
 			role: 'assistant',
-			content: '(AI exceeded maximum tool-call iterations)',
-		},
+			content: '(AI exceeded maximum tool-call iterations)'
+		}
 	]);
 }

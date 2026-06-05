@@ -19,11 +19,15 @@ const apis: APIRoutes = {
 		},
 		get: auth(Admin, async () => {
 			const f = await blogExp();
-			return new Response(f, { status: 200, headers: new Headers({
-				'content-disposition': `attachment; filename=blog_${Date.now()}.tar`,
-				[contentType]: dataType.binary }) });
+			return new Response(f, {
+				status: 200,
+				headers: new Headers({
+					'content-disposition': `attachment; filename=blog_${Date.now()}.tar`,
+					[contentType]: dataType.binary
+				})
+			});
 		})
-	},
+	}
 };
 
 export default apis;

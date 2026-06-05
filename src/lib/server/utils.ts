@@ -568,7 +568,6 @@ export const blogExp = async () => {
 	const dbc = '.dbCfg';
 	const dbpath = await Bun.file(dbc).text();
 
-
 	const entries: Record<string, string | Uint8Array> = {};
 	entries[dbc] = dbpath;
 	entries['d.gz'] = Bun.gzipSync(new Uint8Array(db.db.serialize()));

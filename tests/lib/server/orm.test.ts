@@ -50,8 +50,8 @@ describe('ORM - DB class (in-memory SQLite)', () => {
 			const page2 = db.page(Res, 2, 2, ['id asc']);
 			expect(page2.length).toBe(2);
 
-			const ids1 = new Set(page1.map(r => r.id));
-			const ids2 = new Set(page2.map(r => r.id));
+			const ids1 = new Set(page1.map((r) => r.id));
+			const ids2 = new Set(page2.map((r) => r.id));
 			for (const id of ids1) {
 				expect(ids2.has(id)).toBe(false);
 			}

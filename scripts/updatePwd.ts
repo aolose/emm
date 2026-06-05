@@ -28,7 +28,10 @@ try {
 console.log('DB:', dbPath);
 
 const db = new Database(dbPath);
-const row = db.query('SELECT pwdSalt FROM System WHERE id=1').get() as Record<string, string> | null;
+const row = db.query('SELECT pwdSalt FROM System WHERE id=1').get() as Record<
+	string,
+	string
+> | null;
 const salt = row?.pwdSalt || '';
 console.log('pwdSalt:', salt || '(none)');
 

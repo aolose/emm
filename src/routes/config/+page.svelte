@@ -246,15 +246,15 @@
 	.o {
 		background: url('$lib/components/img/fav.png') left center no-repeat;
 		background-size: contain;
-    height: 25px;
-    width: 100%;
-    margin-bottom: 30px;
-    padding-left: 40px;
-    color: #a7adc9;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    margin-right: auto;
+		height: 25px;
+		width: 100%;
+		margin-bottom: 30px;
+		padding-left: 40px;
+		color: #a7adc9;
+		font-size: 18px;
+		display: flex;
+		align-items: center;
+		margin-right: auto;
 		@include s() {
 			flex: 1;
 			padding-left: 38px;
@@ -266,15 +266,15 @@
 
 	.b {
 		height: 100%;
-    flex-direction: column;
+		flex-direction: column;
 		align-items: center;
 		width: 50%;
 		display: flex;
 		justify-content: center;
 		background: var(--bg1);
 		z-index: 2;
-    padding: 32px 32px 80px;
-    @include s() {
+		padding: 32px 32px 80px;
+		@include s() {
 			justify-content: flex-start;
 			width: 100%;
 			height: auto;
@@ -301,7 +301,7 @@
 		border-radius: 3px;
 		white-space: pre-wrap;
 		margin-top: -30px;
-		@include s(){
+		@include s() {
 			width: 100%;
 		}
 	}
@@ -353,7 +353,7 @@
 			height: 50px;
 			font-size: 20px;
 			outline: none;
-			background: rgba(0,0,0,.5);
+			background: rgba(0, 0, 0, 0.5);
 
 			&:focus + i {
 				width: 100%;
@@ -368,7 +368,7 @@
 			right: 50%;
 			transform: translateX(50%);
 			width: 0;
-			background: linear-gradient(90deg,transparent,var(--blue),transparent);
+			background: linear-gradient(90deg, transparent, var(--blue), transparent);
 			transition: 0.5s ease-in-out;
 			opacity: 0;
 		}
@@ -385,11 +385,11 @@
 		height: 50px;
 		color: #666;
 		transition: 0.3s ease-in-out;
-    background: rgb(48 70 113 / 0.2);
-    opacity: .7;
+		background: rgb(48 70 113 / 0.2);
+		opacity: 0.7;
 		&:hover {
-      color: #999;
-      background: rgb(48 70 113 / 0.3);
+			color: #999;
+			background: rgb(48 70 113 / 0.3);
 			opacity: 1 !important;
 		}
 	}
@@ -428,11 +428,11 @@
 		flex-direction: column;
 		justify-content: center;
 		gap: 50px;
-		@include s(){
+		@include s() {
 			width: 80%;
 			padding: 40px 0;
-      justify-content: start;
-	    .h{
+			justify-content: start;
+			.h {
 				margin-top: auto;
 			}
 		}
@@ -502,7 +502,7 @@
 			color: #fff;
 			background: var(--blue);
 		}
-		@include s(){
+		@include s() {
 			position: relative;
 			margin-top: 20px;
 			width: 80%;

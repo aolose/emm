@@ -9,7 +9,12 @@ type FieldError = { field: string; expected: string; received: string };
 const typeOf = (v: unknown): string =>
 	v === null ? 'null' : v === undefined ? 'undefined' : Array.isArray(v) ? 'array' : typeof v;
 
-function checkField(obj: Record<string, unknown>, field: string, expected: string, errors: FieldError[]): void {
+function checkField(
+	obj: Record<string, unknown>,
+	field: string,
+	expected: string,
+	errors: FieldError[]
+): void {
 	const v = obj[field];
 	if (v === undefined || v === null) {
 		errors.push({ field, expected, received: typeOf(v) });
@@ -21,7 +26,7 @@ function checkField(obj: Record<string, unknown>, field: string, expected: strin
 /** Validate an object against a { field: type } schema */
 export function validate(
 	data: unknown,
-	schema: Record<string, string>,
+	schema: Record<string, string>
 ): { ok: true; data: Record<string, unknown> } | { ok: false; errors: FieldError[] } {
 	if (typeof data !== 'object' || data === null || Array.isArray(data)) {
 		return { ok: false, errors: [{ field: '(root)', expected: 'object', received: typeOf(data) }] };

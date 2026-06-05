@@ -13,9 +13,13 @@ const DB_PATH = resolve(import.meta.dir, 'test.db');
 const DB_CFG = resolve(import.meta.dir, '../../..', '.dbCfg');
 
 // Remove old config
-try { if (existsSync(DB_CFG)) unlinkSync(DB_CFG); } catch {}
+try {
+	if (existsSync(DB_CFG)) unlinkSync(DB_CFG);
+} catch {}
 // Remove old test db
-try { if (existsSync(DB_PATH)) unlinkSync(DB_PATH); } catch {}
+try {
+	if (existsSync(DB_PATH)) unlinkSync(DB_PATH);
+} catch {}
 
 const db = new Database(DB_PATH);
 
@@ -58,7 +62,8 @@ const { enc } = await import('../../../src/lib/crypto');
 const admUsr = await enc('tom');
 const admPwd = await enc('123qwe');
 
-db.run(`INSERT INTO System (id, admUsr, admPwd, blogName, uploadDir, thumbDir)
+db.run(
+	`INSERT INTO System (id, admUsr, admPwd, blogName, uploadDir, thumbDir)
 	VALUES (1, ?, ?, 'EMM Playwright Test', 'upload', 'thumb')`,
 	[admUsr, admPwd]
 );

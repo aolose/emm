@@ -17,7 +17,7 @@ mock.module('$app/stores', () => ({ page: { subscribe: () => () => {} } }));
 
 mock.module('$lib/server/index', () => ({
 	db: null,
-	sys: { cfAccountId: '', cfApiToken: '', cfListId: '' },
+	sys: { cfAccountId: '', cfApiToken: '', cfListId: '' }
 }));
 
 mock.module('$lib/server/utils', () => ({
@@ -40,7 +40,7 @@ mock.module('$lib/server/utils', () => ({
 	combineResult: () => '',
 	throwDbProxyError: () => {},
 	pageBuilder: () => ({}),
-	sqlFields: () => '',
+	sqlFields: () => ''
 }));
 
 mock.module('$lib/server/ipLite', () => ({
@@ -48,13 +48,13 @@ mock.module('$lib/server/ipLite', () => ({
 	ipInfoStr: () => '',
 	geoClose: () => {},
 	geoStatue: () => false,
-	loadGeoDb: () => {},
+	loadGeoDb: () => {}
 }));
 
 mock.module('$lib/server/puv', () => ({
 	ruv: () => {},
 	loadPuv: () => {},
-	getRuv: () => [],
+	getRuv: () => []
 }));
 
 mock.module('$lib/enum', () => ({
@@ -70,7 +70,7 @@ mock.module('$lib/enum', () => ({
 	pmsName: { Admin: 'fully control', Read: 'read data', Post: 'read posts' },
 	reqMethod: ['POST', 'GET', 'DELETE', 'PATCH'],
 	geTypeIndex: () => '0',
-	getIndexType: () => 'application/json',
+	getIndexType: () => 'application/json'
 }));
 
 mock.module('$lib/utils', () => ({
@@ -93,18 +93,18 @@ mock.module('$lib/utils', () => ({
 	buf2Str: (b: any) => String(b),
 	buf2Num: () => 0,
 	data2Buf: () => new ArrayBuffer(0),
-	genPubKey: async () => new ArrayBuffer(0),
+	genPubKey: async () => new ArrayBuffer(0)
 }));
 
 mock.module('$lib/types', () => ({}));
 
 mock.module('$lib/server/turnstile', () => ({
 	isTsVerified: () => true,
-	challengeResponse: () => new Response(),
+	challengeResponse: () => new Response()
 }));
 
 mock.module('ip-matching', () => ({
-	matches: () => false,
+	matches: () => false
 }));
 
 // ---------------------------------------------------------------------------
@@ -123,7 +123,10 @@ function simRequest(ip: string, ua: string, path = '/api/test') {
 }
 
 function makeCollectionRule(opts: {
-	path?: string; ua?: string; uaCount?: string; rate?: string;
+	path?: string;
+	ua?: string;
+	uaCount?: string;
+	rate?: string;
 }): FWRule {
 	const r = new FWRule();
 	r.trigger = true;
@@ -133,11 +136,11 @@ function makeCollectionRule(opts: {
 	r.ua = opts.ua || '';
 	r.uaCount = opts.uaCount || '3';
 	r.rate = opts.rate || '5';
-	r.status = '';    // clear TEXT sentinel '-' → no status filter
-	r.ip = '';        // clear TEXT sentinel
-	r.method = '';    // clear TEXT sentinel
-	r.country = '';   // clear TEXT sentinel
-	r.headers = '';   // clear TEXT sentinel
+	r.status = ''; // clear TEXT sentinel '-' → no status filter
+	r.ip = ''; // clear TEXT sentinel
+	r.method = ''; // clear TEXT sentinel
+	r.country = ''; // clear TEXT sentinel
+	r.headers = ''; // clear TEXT sentinel
 	return r;
 }
 
@@ -146,7 +149,9 @@ function makeCollectionRule(opts: {
 // ---------------------------------------------------------------------------
 
 describe('UA Collection — distributed crawler detection', () => {
-	beforeEach(() => { __test.clearUaEntries(); });
+	beforeEach(() => {
+		__test.clearUaEntries();
+	});
 
 	describe('recordUaEntry', () => {
 		it('records entries into the buffer', () => {
@@ -198,10 +203,12 @@ describe('UA Collection — distributed crawler detection', () => {
 	describe('analyzeUaTrigger — multiple UA groups', () => {
 		it('blocks all groups meeting threshold', () => {
 			for (const ip of ['10.0.1.1', '10.0.1.2', '10.0.1.3']) {
-				simRequest(ip, 'BotA/1.0'); simRequest(ip, 'BotA/1.0');
+				simRequest(ip, 'BotA/1.0');
+				simRequest(ip, 'BotA/1.0');
 			}
 			for (const ip of ['10.0.2.1', '10.0.2.2', '10.0.2.3']) {
-				simRequest(ip, 'BotB/2.0'); simRequest(ip, 'BotB/2.0');
+				simRequest(ip, 'BotB/2.0');
+				simRequest(ip, 'BotB/2.0');
 			}
 			const rule = makeCollectionRule({ uaCount: '3', rate: '5' });
 			expect(__test.analyzeUaTrigger(rule).length).toBe(6);
@@ -274,7 +281,7 @@ describe('UA Collection — distributed crawler detection', () => {
 
 			const log = { ip: '10.0.0.1', path: '/api/test' };
 
-			setUtcHour(3);  // 3 ∈ [0,6]
+			setUtcHour(3); // 3 ∈ [0,6]
 			expect(__test.hitRule(log, rule)).toBe(true);
 
 			setUtcHour(15); // 15 ∉ [0,6]

@@ -48,7 +48,9 @@ const load = () => {
 	});
 	tmp =
 		'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
-		urls.map((a) => `<url><loc>__ORIGIN__${a.url}</loc><lastmod>${tm(a.lastMod)}</lastmod></url>`).join('') +
+		urls
+			.map((a) => `<url><loc>__ORIGIN__${a.url}</loc><lastmod>${tm(a.lastMod)}</lastmod></url>`)
+			.join('') +
 		'</urlset>';
 };
 export const sitemap = {

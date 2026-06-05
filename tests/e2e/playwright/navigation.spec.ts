@@ -39,7 +39,13 @@ test.describe('Admin flow (authenticated)', () => {
 		await expect(page).not.toHaveURL(/\/login/, { timeout: 10000 });
 
 		// Navigate admin pages — all should be accessible
-		const adminPages = ['/admin', '/admin/comment', '/admin/tag', '/admin/firewall', '/admin/setting'];
+		const adminPages = [
+			'/admin',
+			'/admin/comment',
+			'/admin/tag',
+			'/admin/firewall',
+			'/admin/setting'
+		];
 		for (const path of adminPages) {
 			await page.goto(path);
 			expect(page.url()).not.toContain('/login');
