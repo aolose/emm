@@ -358,6 +358,16 @@
 		return { ok: true, startLine: para.startLine, endLine: para.endLine };
 	}
 
+	function replaceFullDocument(text: string) {
+		if (!cm) return { ok: false, error: 'editor not ready' };
+		const len = cm.state.doc.length;
+		cm.dispatch({
+			changes: { from: 0, to: len, insert: text },
+			selection: { anchor: text.length },
+		});
+		return { ok: true };
+	}
+
 	function replaceText(search: string, replace: string) {
 		if (!cm || !search) return { ok: false, error: 'editor not ready' };
 		const doc = cm.state.doc;
@@ -391,7 +401,8 @@
 		replaceSelection,
 		replaceCurrentLine,
 		replaceCurrentParagraph,
-		replaceText
+		replaceText,
+		replaceFullDocument
 	};
 
 	// ── Built-in toolbar buttons ─────────────────────────────────────

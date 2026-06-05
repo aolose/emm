@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { aiMessages, aiLoading, aiStreaming, sendAiMessage, type AiMessage } from './aiStore';
+	import { aiMessages, aiLoading, aiStreaming, aiPending, sendAiMessage, type AiMessage, type PendingAction } from './aiStore';
 	import { editorTools } from '$lib/store';
 	import { marked } from 'marked';
 	import { onMount } from 'svelte';
@@ -108,6 +108,20 @@
 		{#if $aiLoading}
 			<div class="msg assistant loading">
 				<div class="bubble"><span class="dot">...</span></div>
+			</div>
+		{/if}
+		{#if $aiPending}
+			<div class="msg assistant">
+				<div class="bubble pending">
+					<p class="pending-label">Apply changes?</p>
+					{#each $aiPending.toolLabels as label}
+						<code class="pending-tool">{label}</code>
+					{/each}
+					<div class="pending-actions">
+						<button class="apply-btn" onclick={() => $aiPending.resolve(true)}>Apply</button>
+						<button class="dismiss-btn" onclick={() => $aiPending.resolve(false)}>Dismiss</button>
+					</div>
+				</div>
 			</div>
 		{/if}
 	</div>
@@ -283,6 +297,50 @@
 
 		&:global(.i-ok) {
 			color: #5a9;
+		}
+	}
+
+	.pending {
+		padding: 12px 16px;
+
+		.pending-label {
+			font-size: 13px;
+			color: #8a9bb5;
+			margin: 0 0 8px;
+		}
+		.pending-tool {
+			display: block;
+			font-size: 12px;
+			color: #7a8ba5;
+			background: rgba(0, 0, 0, 0.25);
+			padding: 3px 8px;
+			border-radius: 4px;
+			margin: 2px 0;
+		}
+		.pending-actions {
+			display: flex;
+			gap: 8px;
+			margin-top: 10px;
+		}
+		.apply-btn {
+			padding: 4px 14px;
+			border: none;
+			border-radius: 4px;
+			background: rgba(64, 160, 100, 0.35);
+			color: #8fc9a0;
+			font-size: 13px;
+			cursor: pointer;
+			&:hover { background: rgba(64, 160, 100, 0.55); }
+		}
+		.dismiss-btn {
+			padding: 4px 14px;
+			border: none;
+			border-radius: 4px;
+			background: rgba(255, 255, 255, 0.06);
+			color: #8a9bb5;
+			font-size: 13px;
+			cursor: pointer;
+			&:hover { background: rgba(255, 255, 255, 0.12); }
 		}
 	}
 

@@ -37,10 +37,18 @@ export const aiMessages = writable<AiMessage[]>([]);
 export const aiLoading = writable(false);
 export const aiStreaming = writable('');
 
+export interface PendingAction {
+	tool_calls: ToolCall[];
+	toolLabels: string[];
+	resolve: (approved: boolean) => void;
+}
+export const aiPending = writable<PendingAction | null>(null);
+
 /** Reset state when switching articles */
 export function aiReset() {
 	aiMessages.set([]);
 	aiStreaming.set('');
+	aiPending.set(null);
 }
 
 // ── Tool definitions ────────────────────────────────────────────────
@@ -50,8 +58,12 @@ const SYSTEM_PROMPT = `You are an AI assistant integrated into a markdown editor
 - Always respond in the same language as the user.
 - Read tools: getSelection, getCurrentLine, getCurrentParagraph, getCurrentSection, getFullDocument, getTitle.
 - Write tools: replaceCurrentLine(text), replaceCurrentParagraph(text), replaceText(searchText, newText), insertAtCursor(text), setTitle(title).
-- When the user asks you to fix or modify content/title, read first, then apply using the write tools. Do not just print suggestions — call the tool.
-- When the user asks for a title suggestion, call setTitle with your suggestion.
+
+**Efficiency rules:**
+- Read the full document ONCE with getFullDocument at the start if you need broad context. Do not re-read individual sections after that.
+- Prefer replaceText for targeted fixes (typos, phrasing). Use replaceCurrentParagraph only when rewriting a paragraph wholesale.
+- Batch your edits: apply multiple replaceText calls in a single response where possible.
+- When the user asks you to fix or modify content/title, read once, then apply all edits. Do not just print suggestions — call the tools.
 - For greetings, general Q&A, advice, or brainstorming, just respond directly.`;
 
 const AI_TOOLS: ToolDef[] = [
@@ -180,6 +192,18 @@ const AI_TOOLS: ToolDef[] = [
 				required: ['title']
 			}
 		}
+	},
+	{
+		type: 'function',
+		function: {
+			name: 'replaceFullDocument',
+			description: 'Replace the entire document content. Use only for complete rewrites.',
+			parameters: {
+				type: 'object',
+				properties: { text: { type: 'string', description: 'New full document content' } },
+				required: ['text']
+			}
+		}
 	}
 ];
 
@@ -227,7 +251,7 @@ async function runAiLoop(
 	model?: string
 ): Promise<void> {
 	const lastCalls: string[] = [];
-	for (let i = 0; i < 10; i++) {
+	for (let i = 0; i < 15; i++) {
 		const body = {
 			messages: [
 				{ role: 'system', content: SYSTEM_PROMPT },
@@ -283,6 +307,29 @@ async function runAiLoop(
 				content: choice.message.content || '',
 				tool_calls: choice.message.tool_calls
 			});
+
+			// Check if any write tools are being called — ask user inline
+			const writeTools = new Set(['replaceCurrentLine','replaceCurrentParagraph','replaceText','replaceFullDocument','insertAtCursor','setTitle']);
+			const hasWrites = choice.message.tool_calls.some(tc => writeTools.has(tc.function.name));
+			if (hasWrites) {
+				const writeCalls = choice.message.tool_calls.filter(tc => writeTools.has(tc.function.name));
+				const approved = await new Promise<boolean>((resolve) => {
+					aiPending.set({
+						tool_calls: writeCalls,
+						toolLabels: writeCalls.map(tc => `${tc.function.name}(${tc.function.arguments})`),
+						resolve,
+					});
+				});
+				aiPending.set(null);
+				if (!approved) {
+					// User rejected — push error results for each write tool
+					for (const tc of writeCalls) {
+						ms.push({ role: 'tool', content: JSON.stringify({ ok: false, error: 'rejected by user' }), tool_call_id: tc.id });
+					}
+					aiMessages.set([...ms]);
+					continue;
+				}
+			}
 
 			// Execute each tool call
 			console.log('[AI] available fns:', Object.keys(fns));
