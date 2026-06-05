@@ -9,9 +9,9 @@
 	import Comment from '$lib/components/comment/index.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Top from '$lib/components/Top.svelte';
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { marked } from 'marked';
+	import defaultBg from '$lib/components/img/1.jpg';
 
 	let { data } = $props();
 	let d = $derived(data.d),
@@ -22,9 +22,31 @@
 		view = $derived(desc || d._d),
 		prev = $derived(d._u),
 		next = $derived(d._n);
-	let sly = $derived(
-		d.banner ? `background-image:url(/res/${$small ? '_' + d.banner : d.banner})` : ''
-	);
+	let targetSrc = $derived(d.banner ? `/res/${$small ? '_' + d.banner : d.banner}` : defaultBg);
+	let currentBg = $state(targetSrc);
+	let prevBg = $state('');
+
+	$effect(() => {
+		if (targetSrc !== currentBg && targetSrc) {
+			// 1. 备份旧图
+			prevBg = currentBg;
+
+			// 2. 内存预加载新图
+			const img = new Image();
+			img.src = targetSrc;
+			img.onload = () => {
+				// 3. 只有当新图完全准备好（或命中了缓存），才触发 `{#key}`
+				currentBg = targetSrc;
+			};
+
+			// 4. 0.5秒后动画结束，清理旧图槽位
+			const t = setTimeout(() => {
+				prevBg = '';
+			}, 500);
+
+			return () => clearTimeout(t);
+		}
+	});
 	let style = $derived(
 		d.createAt
 			? ` background: linear-gradient(rgba(0,0,0,.7),${bgColor(d.createAt)} 30%);`
@@ -63,8 +85,8 @@
 	<div class="h">
 		<h1>{d.title}</h1>
 		{#if d.desc}<p>
-				{@html marked(d.desc)}
-			</p>{/if}
+			{@html marked(d.desc)}
+		</p>{/if}
 		<div class="i">
 			<span><span class="icon i-view"></span>{d._r}</span>
 			<span>{time(d.createAt)}</span>
@@ -78,7 +100,19 @@
 		{#if $small}
 			<Top />
 		{/if}
-		<div class="bg" style={sly}>
+		<div class="bg">
+			{#if prevBg}
+				<img class="bg-old" src={prevBg} alt="" />
+			{/if}
+			{#key currentBg}
+				<img
+					class="bg-img"
+					src={currentBg}
+					alt=""
+					decoding="async"
+					fetchpriority="high"
+				/>
+			{/key}
 			<div class="ft" {style}></div>
 			<div class="fc"></div>
 			{@render h()}
@@ -91,7 +125,7 @@
 				<div class="v">
 					{@render h()}
 					<div class="art">
-						<div class="ct" use:imageViewer>
+						<div class="ct" use:imageViewer={slug}>
 							<Viewer ctx={d} />
 						</div>
 						<div class="ss"></div>
@@ -106,21 +140,13 @@
 							{#if prev}
 								<p>
 									<span>newer:</span>
-									<button
-										onclick={() =>
-											goto(`/post/${tag ? `${tag}/` : ''}${prev.slug}`, { replaceState: true })}
-										>{prev.title}</button
-									>
+									<a href={`/post/${tag ? `${tag}/` : ''}${prev.slug}`}>{prev.title}</a>
 								</p>
 							{:else}<p></p>{/if}
 							{#if next}
 								<p>
 									<span>older:</span>
-									<button
-										onclick={() =>
-											goto(`/post/${tag ? `${tag}/` : ''}${next.slug}`, { replaceState: true })}
-										>{next.title}</button
-									>
+									<a href={`/post/${tag ? `${tag}/` : ''}${next.slug}`}>{next.title}</a>
 								</p>
 							{/if}
 						</div>
@@ -137,305 +163,338 @@
 {/if}
 
 <style lang="scss">
-	@use 'sass:color';
+  @use 'sass:color';
 
-	@use '../../../../../lib/break' as *;
+  @use '../../../../../lib/break' as *;
 
-	$bg: var(--bg6);
-	$bg2: var(--bg7);
+  $bg: var(--bg6);
+  $bg2: var(--bg7);
 
-	.sl {
-		padding: 20px 0;
-		display: flex;
-		justify-content: space-between;
-		flex-wrap: wrap;
-		p {
-			display: flex;
-			align-items: center;
-			padding: 3px 10px;
-			color: var(--darkgrey);
-			@include s() {
-				width: 100%;
-				justify-content: space-between;
-			}
-		}
+  .sl {
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
 
-		span {
-			font-size: 14px;
-		}
+    p {
+      display: flex;
+      align-items: center;
+      padding: 3px 10px;
+      color: var(--darkgrey);
+      @include s() {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
 
-		button {
-			color: var(--darkgrey-h);
-			margin-left: 10px;
-			background: none;
-			padding: 0;
-			&:hover {
-				color: #b1bbc5;
-				text-decoration: underline;
-			}
+    span {
+      font-size: 14px;
+    }
 
-			@include s() {
-				color: #758caf !important;
-			}
-		}
-	}
+    button {
+      color: var(--darkgrey-h);
+      margin-left: 10px;
+      background: none;
+      padding: 0;
 
-	.i-tags {
-		color: #2b4d77;
-		font-size: 18px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-right: 5px;
-	}
+      &:hover {
+        color: #b1bbc5;
+        text-decoration: underline;
+      }
 
-	.tg {
-		padding: 0 20px;
-		display: flex;
-		flex-wrap: wrap;
-	}
+      @include s() {
+        color: #758caf !important;
+      }
+    }
+  }
 
-	.ss {
-		flex: 1;
-	}
+  .i-tags {
+    color: #2b4d77;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+  }
 
-	.art {
-		display: flex;
-		flex-direction: column;
-		min-height: 500px;
-		border-radius: 32px;
-		overflow: hidden;
-		background: $bg;
-		padding: 32px 48px;
-		box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
-		@include s() {
-			padding: 20px 8px;
-			margin: 0;
-			min-height: 67vh;
-		}
-	}
+  .tg {
+    padding: 0 20px;
+    display: flex;
+    flex-wrap: wrap;
+  }
 
-	.ct {
-		& > img {
-			margin: 0 auto 30px;
-			display: block;
-		}
+  .ss {
+    flex: 1;
+  }
 
-		:global {
-			a {
-				color: #1c93ff;
-			}
+  .art {
+    display: flex;
+    flex-direction: column;
+    min-height: 500px;
+    border-radius: 32px;
+    overflow: hidden;
+    background: $bg;
+    padding: 32px 48px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
+    @include s() {
+      padding: 20px 8px;
+      margin: 0;
+      min-height: 67vh;
+    }
+  }
 
-			.md {
-				color: #333;
-				font-size: 14px;
-				line-height: 2;
-				margin: 10px 0 20px;
+  .ct {
+    & > img {
+      margin: 0 auto 30px;
+      display: block;
+    }
 
-				pre,
-				code {
-					border-radius: 3px;
-					word-break: break-word;
-					background: color.adjust(rgb(37, 40, 55), $alpha: -0.95);
-					color: #1a2638;
-				}
+    :global {
+      a {
+        color: #1c93ff;
+      }
 
-				pre {
-					code {
-						background: none;
-					}
-				}
+      .md {
+        color: #333;
+        font-size: 14px;
+        line-height: 2;
+        margin: 10px 0 20px;
 
-				& > p {
-					margin-bottom: 10px;
+        pre,
+        code {
+          border-radius: 3px;
+          word-break: break-word;
+          background: color.adjust(rgb(37, 40, 55), $alpha: -0.95);
+          color: #1a2638;
+        }
 
-					&:first-child:first-letter {
-						font-size: 30px;
-						@include s() {
-							font-size: 20px;
-						}
-					}
-				}
-			}
-		}
-	}
+        pre {
+          code {
+            background: none;
+          }
+        }
 
-	.co {
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		position: absolute;
-		overflow: auto;
-		transition: 0.3s ease-in-out;
-		@include s() {
-			overflow: visible;
-			bottom: inherit;
-			position: relative;
-			&:global {
-				.ctx {
-					padding: 0 !important;
-				}
-			}
-		}
-	}
+        & > p {
+          margin-bottom: 10px;
 
-	.h {
-		padding: 30px;
-		color: #f4f6f8;
-		min-height: 300px;
-		opacity: 0.8;
-		display: none;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		margin: 30px auto 0;
-		text-align: center;
-		:global {
-			* {
-				color: rgba(244, 246, 248, 0.9);
-				text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
-			}
-		}
+          &:first-child:first-letter {
+            font-size: 30px;
+            @include s() {
+              font-size: 20px;
+            }
+          }
+        }
+      }
+    }
+  }
 
-		p {
-			text-align: center;
-			line-height: 2;
-			margin: 10px 0 30px;
-			font-size: 14px;
-			max-width: 90%;
-		}
-	}
+  .co {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    overflow: auto;
+    transition: 0.3s ease-in-out;
+    @include s() {
+      overflow: visible;
+      bottom: inherit;
+      position: relative;
+      &:global {
+        .ctx {
+          padding: 0 !important;
+        }
+      }
+    }
+  }
 
-	.i {
-		width: 100%;
-		display: flex;
-		justify-content: center;
+  .h {
+    padding: 30px;
+    color: #f4f6f8;
+    min-height: 300px;
+    opacity: 0.8;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 30px auto 0;
+    text-align: center;
+		z-index:11;
 
-		span {
-			padding: 0 3px;
-			width: auto;
-			font-size: 12px;
-			color: #ddd;
-		}
+    :global {
+      * {
+        color: rgba(244, 246, 248, 0.9);
+        text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
+      }
+    }
 
-		& > span {
-			margin: 0 10px;
-		}
-	}
+    p {
+      text-align: center;
+      line-height: 2;
+      margin: 10px 0 30px;
+      font-size: 14px;
+      max-width: 90%;
+    }
+  }
 
-	h1 {
-		color: inherit;
-		margin: 14px 0 20px;
-		font-weight: 100;
-		text-align: center;
-		font-size: 48px;
-		@include s() {
-			max-height: 90%;
-			font-size: 32px;
-		}
-	}
+  .i {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 
-	.bk {
-		position: fixed;
-		font-size: 20px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 36px;
-		width: 36px;
-		opacity: 0.8;
-		cursor: pointer;
-		color: #fff;
-		top: 12px;
-		right: 12px;
-		z-index: 100;
+    span {
+      padding: 0 3px;
+      width: auto;
+      font-size: 12px;
+      color: #ddd;
+    }
 
-		&:hover {
-			opacity: 1;
-		}
-	}
+    & > span {
+      margin: 0 10px;
+    }
+  }
 
-	.bg {
-		z-index: 0;
-		pointer-events: none;
-		display: block;
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		height: 90%;
-		max-height: 100%;
-		min-height: 400px;
-		background: url('$lib/components/img/1.jpg') center no-repeat;
-		background-size: cover;
-		@include s() {
-			pointer-events: auto;
-			padding: 20px 1px;
-			position: relative;
-			border-bottom: none;
-			height: auto;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			min-height: 300px;
-			.h {
-				display: flex;
-			}
-		}
-	}
+  h1 {
+    color: inherit;
+    margin: 14px 0 20px;
+    font-weight: 100;
+    text-align: center;
+    font-size: 48px;
+    @include s() {
+      max-height: 90%;
+      font-size: 32px;
+    }
+  }
 
-	.ft,
-	.fc {
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		bottom: 0;
-	}
+  .bk {
+    position: fixed;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    width: 36px;
+    opacity: 0.8;
+    cursor: pointer;
+    color: #fff;
+    top: 12px;
+    right: 12px;
+    z-index: 100;
 
-	.ft {
-		opacity: 0.5;
-	}
+    &:hover {
+      opacity: 1;
+    }
+  }
 
-	.pg {
-		background: $bg2;
-		height: 100%;
-		overflow: auto;
-		@include s() {
-			scrollbar-width: auto;
-			min-height: 100%;
-			background: var(--bg6);
-		}
-	}
+  .bg {
+    z-index: 0;
+    pointer-events: none;
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 90%;
+    max-height: 100%;
+    min-height: 400px;
+    overflow: hidden;
+    @include s() {
+      pointer-events: auto;
+      padding: 20px 1px;
+      position: relative;
+      border-bottom: none;
+      height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      .h {
+        display: flex;
+      }
+    }
+  }
 
-	.fc {
-		background: linear-gradient(0, $bg2, transparent);
-		@include s() {
-			background: linear-gradient(0, $bg, transparent);
-		}
-	}
+  .bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 2;
+    animation: bgFadeIn 0.45s ease-in-out forwards;
+  }
+  .bg-old {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 1;
+    opacity: 1;
+  }
 
-	@supports (mix-blend-mode: multiply) {
-		.ft {
-			mix-blend-mode: multiply;
-			backdrop-filter: grayscale(0.5);
-		}
-	}
+  @keyframes bgFadeIn {
+    0% { opacity: 0; }
+    10% { opacity: 0; }
+    100% { opacity: 1; }
+  }
 
-	.v {
-		max-width: 100%;
-		width: 800px;
-		margin: 0 auto;
-		padding-bottom: 50px;
-		.h {
-			display: flex;
-		}
-		@include s() {
-			.h {
-				display: none;
-			}
-			padding-bottom: 0;
-		}
-	}
+  .ft,
+  .fc {
+    position: absolute;
+    z-index: 10;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+
+  .ft {
+    opacity: 0.5;
+  }
+
+  .pg {
+    background: $bg2;
+    height: 100%;
+    overflow: auto;
+    @include s() {
+      scrollbar-width: auto;
+      min-height: 100%;
+      background: var(--bg6);
+    }
+  }
+
+  .fc {
+    background: linear-gradient(0, $bg2, transparent);
+    @include s() {
+      background: linear-gradient(0, $bg, transparent);
+    }
+  }
+
+  @supports (mix-blend-mode: multiply) {
+    .ft {
+      mix-blend-mode: multiply;
+      backdrop-filter: grayscale(0.5);
+    }
+  }
+
+  .v {
+    max-width: 100%;
+    width: 800px;
+    margin: 0 auto;
+    padding-bottom: 50px;
+
+    .h {
+      display: flex;
+    }
+
+    @include s() {
+      .h {
+        display: none;
+      }
+      padding-bottom: 0;
+    }
+  }
 </style>

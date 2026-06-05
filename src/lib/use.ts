@@ -17,7 +17,7 @@ export const act = (node: HTMLAnchorElement, exact = true) => {
 	};
 };
 
-export const imageViewer = async (node: HTMLElement) => {
+export const imageViewer = async (node: HTMLElement, slug: string) => {
 	const Viewer = (await import('viewerjs')).default;
 	Viewer.setDefaults({
 		button: true,
@@ -31,9 +31,35 @@ export const imageViewer = async (node: HTMLElement) => {
 		minZoomRatio: 0.1
 	});
 
-	const t = setTimeout(() => new Viewer(node), 1e3);
+	let viewer: any = null;
+	let timeoutId: ReturnType<typeof setTimeout>;
+
+	const init = () => {
+		if (viewer) {
+			viewer.destroy();
+			viewer = null;
+		}
+		viewer = new Viewer(node);
+	};
+
+	timeoutId = setTimeout(init, 800);
+
 	return {
-		destroy: () => clearTimeout(t)
+		update(newSlug: string) {
+			if (newSlug !== slug) {
+				slug = newSlug;
+				clearTimeout(timeoutId);
+				// Delay to let the Viewer component render new images into DOM
+				timeoutId = setTimeout(init, 600);
+			}
+		},
+		destroy: () => {
+			clearTimeout(timeoutId);
+			if (viewer) {
+				viewer.destroy();
+				viewer = null;
+			}
+		}
 	};
 };
 

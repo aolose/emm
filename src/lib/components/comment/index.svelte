@@ -6,7 +6,7 @@
 	import Pg from '$lib/components/pg.svelte';
 	import Ld from '$lib/components/loading.svelte';
 	import { method } from '$lib/enum';
-	import { randNm, rndAr, watch } from '$lib/utils';
+	import { randNm, rndAr } from '$lib/utils';
 	import { msg } from './msg';
 	import { fly } from 'svelte/transition';
 
@@ -14,7 +14,9 @@
 	let total = $state(1);
 	let ld = 0;
 	let { slug = '' } = $props();
-	const ws = watch(slug);
+	let el = $state();
+	let loaded = $state(false);
+
 	const cur = $state({
 		act: 0,
 		topic: 0,
@@ -47,13 +49,39 @@
 	onMount(() => {
 		cur.name = localStorage.nm || randNm();
 		cur.avatar = localStorage.av || rndAr(avLs);
-		go();
 		msg.subscribe((m) => {
 			if (m.length) {
 				setTimeout(() => msg.set([]), 2e3);
 			}
 		});
 	});
+
+	// Lazy-load comments when the section scrolls into view.
+	// Re-triggers on slug change (article switch).
+	$effect(() => {
+		const _ = slug;
+		loaded = false;
+		ls = [];
+		page = 1;
+
+		if (!el) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					loaded = true;
+					go();
+					observer.disconnect();
+				}
+			},
+			{ rootMargin: '200px' }
+		);
+
+		observer.observe(el);
+
+		return () => observer.disconnect();
+	});
+
 	let ls = $state([]);
 	const user = $state({
 		name: '',
@@ -74,7 +102,6 @@
 	$effect(() => {
 		if (cur.name) localStorage.nm = cur.name;
 		if (cur.avatar) localStorage.av = cur.avatar;
-		ws(() => go(), slug);
 	});
 	const rm = (i) => () => {
 		ls = ls.filter((a) => a !== i);
@@ -91,18 +118,20 @@
 		{$msg[1]}
 	</div>
 {/if}
-<div class="a">
-	{#each ls as i}
-		<Itm d={i} {cur} {user} remove={rm(i)} />
-	{/each}
-	{#if total > 1}
-		<div class="p">
-			<Pg {page} {total} {go} />
-		</div>
-	{/if}
-	<Ld act={ld} />
+<div bind:this={el}>
+	<div class="a">
+		{#each ls as i}
+			<Itm d={i} {cur} {user} remove={rm(i)} />
+		{/each}
+		{#if total > 1}
+			<div class="p">
+				<Pg {page} {total} {go} />
+			</div>
+		{/if}
+		<Ld act={ld} />
+	</div>
+	<Cm av={avLs} {slug} {cur} {user} {done} />
 </div>
-<Cm av={avLs} {slug} {cur} {user} {done} />
 
 <style lang="scss">
 	@use 'sass:color';

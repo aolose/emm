@@ -13,5 +13,13 @@ export const load = async (event) => {
 	if (d?.content?.includes('```mermaid')) {
 		d.content = await renderMermaidBlocks(d.content);
 	}
+
+	// Enable conditional requests (304 Not Modified) for __data.json.
+	// SSR HTML already gets this from SvelteKit; data responses need it explicitly.
+	if (d) {
+		const etag = `"${Bun.hash(JSON.stringify(d)).toString(36)}"`;
+		event.setHeaders({ etag });
+	}
+
 	return result;
 };

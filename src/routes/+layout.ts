@@ -1,14 +1,13 @@
-import { saveCache, apiLoad } from '$lib/req';
+import { saveCache, req } from '$lib/req';
 import { setPwdSalt } from '$lib/utils';
 import { method } from '$lib/enum';
 import { statueSys, status, h, navStore } from '$lib/store';
 import type { headInfo } from '$lib/types';
-import { redirect } from '@sveltejs/kit';
-import type { Page } from '@sveltejs/kit';
+import { redirect, error } from '@sveltejs/kit';
+import type { Page, LoadEvent, BeforeNavigate } from '@sveltejs/kit';
 import { page } from '$app/stores';
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
-import type { BeforeNavigate } from '@sveltejs/kit';
 const cacheTime = 1e3 * 3600 * 24;
 let pathname = '';
 const jump = async (nav?: BeforeNavigate) => {
@@ -61,28 +60,42 @@ if (browser) {
 	page.subscribe(ps);
 	status.subscribe(su);
 }
-export const load = apiLoad('statue', undefined, {
-	cache: 0,
-	method: method.GET,
-	done: async (d: unknown, ctx) => {
-		loaded = 1;
-		cacheData = d as headInfo & { statue: number; sys: number };
-		pathname = (ctx as { url: URL }).url.pathname;
-		sys = cacheData.sys;
-		stu = cacheData.statue;
-		h.update((a) => ({ ...a, ...cacheData }));
-		if (browser) {
-			statueSys.set(sys);
-			status.set(stu);
-			if (cacheData.pwdSalt) setPwdSalt(cacheData.pwdSalt);
-			// Block rendering on auth failure — throw redirect synchronously
-			// to avoid the async deadlock that goto+suInProgress creates
-			if (!stu && pathname.startsWith('/admin')) {
-				throw redirect(307, '/login');
-			}
-		} else {
-			statueSys.set(sys);
-			await su(stu);
-		}
+export const load = async (event: LoadEvent) => {
+	const { url, fetch, params } = event;
+	const path = url.pathname;
+	pathname = path;
+
+	// On client-side, skip API call for non-admin pages after initial load.
+	// Public browsing needs neither auth checks nor site-config updates.
+	if (browser && loaded && !path.startsWith('/admin')) {
+		return { p: params, d: cacheData };
 	}
-});
+
+	let d: unknown;
+	try {
+		d = await req('statue', undefined, { fetch, method: method.GET, ctx: { url } });
+	} catch (e: any) {
+		if (e?.status >= 400) throw error(e.status, e?.body || 'Failed to load statue');
+		throw e;
+	}
+
+	loaded = 1;
+	cacheData = d as saveData;
+	sys = cacheData.sys;
+	stu = cacheData.statue;
+	h.update((a) => ({ ...a, ...cacheData }));
+
+	if (browser) {
+		statueSys.set(sys);
+		status.set(stu);
+		if (cacheData.pwdSalt) setPwdSalt(cacheData.pwdSalt);
+		if (!stu && path.startsWith('/admin')) {
+			throw redirect(307, '/login');
+		}
+	} else {
+		statueSys.set(sys);
+		await su(stu);
+	}
+
+	return { p: params, d };
+};

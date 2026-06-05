@@ -4,6 +4,7 @@
 		url('icon.woff2') format('woff2'),
 		url('icon.woff') format('woff'),
 		url('icon.ttf') format('truetype');
+	font-display: swap;
 }
 
 .icon {
