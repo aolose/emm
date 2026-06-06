@@ -1,7 +1,7 @@
 <script>
 	import Pg from './pg.svelte';
 	import Item from './fItems.svelte';
-	import { confirm, fileManagerStore, filesUpload, getProgress, upFiles } from '$lib/store';
+	import { confirm, fileManagerStore, filesUpload, getProgress, upFiles, h } from '$lib/store';
 	import { api, req } from '$lib/req';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -25,6 +25,12 @@
 	const size = 15;
 
 	function ok() {
+		const domain = get(h).r2PublicDomain;
+		for (const f of selected) {
+			if (domain && f.r2Synced && f.r2Key) {
+				f.url = `${domain}/${f.r2Key}`;
+			}
+		}
 		cfg.resolve?.([...selected]);
 		fileManagerStore.set({});
 		selected = [];

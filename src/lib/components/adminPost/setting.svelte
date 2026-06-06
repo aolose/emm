@@ -2,9 +2,10 @@
 	import CheckBox from '$lib/components/check.svelte';
 	import Tags from '$lib/components/tags.svelte';
 	import { onMount } from 'svelte';
-	import { editPost, saveNow, selectFile, setting, patchedTag } from '$lib/store';
+	import { editPost, saveNow, selectFile, setting, patchedTag, h } from '$lib/store';
 	import { fade } from 'svelte/transition';
 	import { api, req } from '$lib/req';
+	import { resUrl } from '$lib/utils';
 	import { applyStrPatch } from '$lib/setStrPatchFn';
 	import { get } from 'svelte/store';
 	import List from '$lib/components/post/rList.svelte';
@@ -113,7 +114,7 @@
 					<h3>Banner</h3>
 					<div
 						class:act={post.banner}
-						style:background-image={post.banner ? `url(/res/_${post.banner})` : ''}
+						style:background-image={post.banner ? `url(${post.bannerR2Synced ? resUrl($h.r2PublicDomain, post.bannerR2Key || post.banner, true, true) : `/res/_${post.banner}`})` : ''}
 						class="p icon i-pic"
 						onclick={pickPic}
 					>

@@ -68,7 +68,7 @@ const apis: APIRoutes = {
 		get: auth(Read, (req) => {
 			const ks = [...sysKs] as (keyof System)[];
 			// Only expose sensitive fields to Admin
-			if (getClient(req)?.ok(Admin)) ks.push('ipLiteToken', 'tsSecret', 'cfApiToken', 'aiApiKey');
+			if (getClient(req)?.ok(Admin)) ks.push('ipLiteToken', 'tsSecret', 'cfApiToken', 'aiApiKey', 'r2AccessKeyId', 'r2SecretAccessKey');
 			return filter(sys, ks);
 		}),
 		post: auth(Admin, async (req) => {
@@ -76,12 +76,14 @@ const apis: APIRoutes = {
 				...sysKs,
 				'tsSecret',
 				'cfApiToken',
-				'aiApiKey'
+				'aiApiKey',
+				'r2AccessKeyId',
+				'r2SecretAccessKey'
 			]) as System;
 			let loadGeo;
 			for (const [k, v] of Object.entries(o)) {
 				const kk = k as keyof System;
-				if (kk === 'tsSecret' || kk === 'cfApiToken' || kk === 'aiApiKey') {
+				if (kk === 'tsSecret' || kk === 'cfApiToken' || kk === 'aiApiKey' || kk === 'r2AccessKeyId' || kk === 'r2SecretAccessKey') {
 					// Sensitive: stored but never returned in public GET
 					const n = trim(v as string);
 					if (n !== sys[kk]) (sys as Record<string, unknown>)[kk] = n;

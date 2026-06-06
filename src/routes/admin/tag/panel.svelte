@@ -1,7 +1,7 @@
 <script>
-	import { confirm, selectFile } from '$lib/store';
+	import { confirm, selectFile, h } from '$lib/store';
 	import { fade } from 'svelte/transition';
-	import { diffObj, getErr } from '$lib/utils';
+	import { diffObj, getErr, resUrl } from '$lib/utils';
 	import { req } from '$lib/req';
 	import Pls from '$lib/components/post/rSelect.svelte';
 	import List from '$lib/components/post/rList.svelte';
@@ -91,7 +91,7 @@
 					class="p icon"
 					onclick={sel}
 					class:i-pic={!d.banner}
-					style:background-image={d.banner ? `url(/res/_${d.banner})` : ''}
+					style:background-image={d.banner ? `url(${d.bannerR2Synced ? resUrl($h.r2PublicDomain, d.bannerR2Key || d.banner, true, true) : `/res/_${d.banner}`})` : ''}
 				>
 					{#if d.banner}
 						<button

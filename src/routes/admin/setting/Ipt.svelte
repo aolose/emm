@@ -1,5 +1,6 @@
 <script>
 	let { label, value = $bindable(), placeholder, box, password } = $props();
+	const pwdName = Math.random().toString(36).slice(2);
 </script>
 
 <form class="r" autocomplete="off">
@@ -7,9 +8,9 @@
 	{#if box}
 		<textarea bind:value {placeholder}></textarea>
 	{:else if password}
-		<input type="password" bind:value {placeholder} />
+		<input type="password" name={pwdName} autocomplete="new-password" bind:value {placeholder} />
 	{:else}
-		<input bind:value {placeholder} />
+		<input bind:value {placeholder} autocomplete="off" />
 	{/if}
 </form>
 

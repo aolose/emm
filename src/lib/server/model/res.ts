@@ -13,5 +13,7 @@ export class Res {
 	md5 = TEXT;
 	save = INT;
 	thumb = INT;
+	r2Synced = INT;
+	r2Key = TEXT;
 	userId = INT;
 }

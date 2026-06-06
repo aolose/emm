@@ -1,10 +1,10 @@
 <script>
-	import { bgColor, goBack, time, watch } from '$lib/utils';
+	import { bgColor, goBack, resUrl, time, watch } from '$lib/utils';
 	import Ctx from '$lib/components/post/ctx.svelte';
 	import Viewer from '$lib/components/viewer.svelte';
 	import PF from '$lib/components/post/pf.svelte';
 	import Tag from '$lib/components/post/tag.svelte';
-	import { expand, small } from '$lib/store';
+	import { expand, small, h } from '$lib/store';
 	import { imageViewer } from '$lib/use';
 	import Comment from '$lib/components/comment/index.svelte';
 	import Head from '$lib/components/Head.svelte';
@@ -22,7 +22,9 @@
 		view = $derived(desc || d._d),
 		prev = $derived(d._u),
 		next = $derived(d._n);
-	let targetSrc = $derived(d.banner ? `/res/${$small ? '_' + d.banner : d.banner}` : defaultBg);
+	let r2Domain = $derived(data.r2Domain);
+	let r2Enabled = $derived(data.r2Enabled);
+	let targetSrc = $derived(d.banner ? (d.bannerR2Synced && r2Enabled ? resUrl(r2Domain, d.bannerR2Key || d.banner, $small, true) : `/res/${$small ? '_' + d.banner : d.banner}`) : defaultBg);
 	let currentBg = $state(targetSrc);
 	let prevBg = $state('');
 
@@ -69,7 +71,7 @@
 	description={view}
 	ogType="article"
 	canonical={$page.url.href}
-	ogImage={d.banner ? `${$page.url.origin}/res/_${d.banner}` : ''}
+	ogImage={d.banner ? (d.bannerR2Synced && r2Enabled ? resUrl(r2Domain, d.bannerR2Key || d.banner, true, true) : `${$page.url.origin}/res/_${d.banner}`) : ''}
 >
 	<meta property="article:published_time" content={time(d.createAt)} />
 	<meta property="article:tag" content={d._tag} />
@@ -85,7 +87,7 @@
 			description: view,
 			datePublished: time(d.createAt),
 			url: $page.url.href,
-			...(d.banner ? { image: `${$page.url.origin}/res/_${d.banner}` } : {})
+			...(d.banner ? { image: (d.bannerR2Synced && r2Enabled ? resUrl(r2Domain, d.bannerR2Key || d.banner, true, true) : `${$page.url.origin}/res/_${d.banner}`) } : {})
 		})}
 	</script>
 </Head>

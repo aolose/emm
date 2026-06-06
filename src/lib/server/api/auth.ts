@@ -61,7 +61,9 @@ const apis: APIRoutes = {
 					key: sys?.seoKey,
 					desc: sys?.seoDesc,
 					title: sys?.blogName,
-					pwdSalt: sys?.pwdSalt !== '-' ? sys?.pwdSalt : ''
+					pwdSalt: sys?.pwdSalt !== '-' ? sys?.pwdSalt : '',
+					r2PublicDomain: sys?.r2PublicDomain || '',
+					r2Enabled: !!sys?.r2Enabled
 				},
 				[],
 				false

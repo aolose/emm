@@ -2,13 +2,13 @@
 	let { type = 'any', size = 50 } = $props();
 	const colors = [
 		'#264653',
-		'#2a9d8f',
-		'#f4a261',
-		'#e76f51',
+		'#228176',
+		'#a16a3e',
+		'#8f4634',
 		'#0077b6',
 		'#4a4e69',
 		'#386641',
-		'#ff90b3',
+		'#772f69',
 		'#1a659e'
 	];
 	const color = colors[type.split('').reduce((a, b) => a + b.charCodeAt(0), 0) % colors.length];

@@ -2,14 +2,25 @@ import { get } from 'svelte/store';
 import { tags } from '$lib/server/store';
 import { combine, patchPostReqs, patchPostTags, tagPostCache } from '$lib/server/cache';
 import { model, pageBuilder, resp, sqlFields } from '$lib/server/utils';
-import { Post } from '$lib/server/model';
+import { Post, Res } from '$lib/server/model';
 import { clipWords, getPain } from '$lib/utils';
-import { db } from '$lib/server/index';
+import { db, sys } from '$lib/server/index';
 import { DiffMatchPatch } from 'diff-match-patch-typescript';
 import type { PatchObject } from 'diff-match-patch-typescript';
 import type { SQLQueryBindings } from 'bun:sqlite';
 
 const dmp = new DiffMatchPatch();
+
+function attachBannerR2(items: { banner?: number; bannerR2Synced?: boolean; bannerR2Key?: string }[]) {
+	if (!sys?.r2Enabled) return;
+	for (const item of items) {
+		if (item.banner) {
+			const r = db.get(new Res(item.banner));
+			if (r) { item.bannerR2Synced = !!r.r2Synced; item.bannerR2Key = r.r2Key || ''; }
+		}
+	}
+}
+
 export const pubPostList = async (
 	page: number,
 	size: number,
@@ -49,6 +60,7 @@ export const pubPostList = async (
 		a.desc = a.desc || clipWords(await getPain(a.content), 140);
 		delete a.content;
 	}
+	attachBannerR2(o.items);
 	if (!tagInfo) return o;
 	const e = o as { total: number; items: Post[]; bn?: number; desc?: string };
 	if (bn) e.bn = bn;
@@ -68,6 +80,7 @@ export const postList = (page: number, size: number, where?: [string, ...SQLQuer
 		where,
 		combine(patchPostTags, patchPostReqs)
 	);
+	attachBannerR2(o.items);
 	return o;
 };
 
