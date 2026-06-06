@@ -267,7 +267,9 @@ async function main() {
 	// Handle thumbnails
 	const thumbRows = db.query('SELECT id, r2Key FROM Res WHERE thumb = 1').all() as { id: number; r2Key: string }[];
 	if (thumbRows.length) console.log(`\nProcessing ${thumbRows.length} thumbnails...`);
+	let tp = 0;
 	for (const row of thumbRows) {
+		tp++;
 		const tk = `_${row.r2Key || row.id}`;
 		const localPath = resolve(sysCfg.thumbDir, String(row.id));
 
@@ -280,15 +282,19 @@ async function main() {
 
 		if (!existsSync(localPath)) continue;
 
+		console.log(`  [${tp}/${thumbRows.length}] uploading thumb ${row.id}...`);
 		const buf = readFileSync(localPath);
 		const ok = await r2Put(cfg, tk, new Uint8Array(buf), 'image/webp');
 		if (!ok) {
-			console.log(`  [FAIL] thumb ${row.id}`);
+			console.log(`    [FAIL] upload failed`);
 			continue;
 		}
 
 		if (await r2Exists(cfg, tk)) {
 			try { unlinkSync(localPath); } catch {}
+			console.log(`    synced ✓`);
+		} else {
+			console.log(`    [FAIL] verify failed`);
 		}
 	}
 
