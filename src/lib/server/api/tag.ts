@@ -20,7 +20,7 @@ const apis: APIRoutes = {
 			return ts.map((t) => {
 				const o: any = t;
 				if (sys?.r2Enabled && o.banner) {
-					const r = db.get(new Res(o.banner));
+					const r = db.get(model(Res, { id: o.banner }));
 					if (r) { o.bannerR2Synced = !!r.r2Synced; o.bannerR2Key = r.r2Key || ''; }
 				}
 				const ps = tagPostCache.getPostIds(t.id);

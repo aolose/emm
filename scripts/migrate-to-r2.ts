@@ -238,20 +238,21 @@ async function main() {
 			if (synced) {
 				db.run('UPDATE Res SET r2Synced = 1, thumb = ? WHERE id = ?', [thumb, row.id]);
 				ok++;
-			} else {
-				// Try local disk
-				const localPath = resolve(sysCfg.uploadDir, numKey);
-				if (existsSync(localPath)) {
-					const buf = new Uint8Array(readFileSync(localPath));
-					if (await r2Put(cfg, numKey, buf, 'application/octet-stream')) {
-						if (await r2Exists(cfg, numKey)) {
-							try { unlinkSync(localPath); } catch {}
-							db.run('UPDATE Res SET r2Synced = 1, r2Key = ? WHERE id = ?', [numKey, row.id]);
-							ok++;
-							continue;
-						}
+		} else {
+			// Try local disk
+			const rk = (hashKey && hashKey !== '-') ? hashKey : numKey;
+			const localPath = resolve(sysCfg.uploadDir, numKey);
+			if (existsSync(localPath)) {
+				const buf = new Uint8Array(readFileSync(localPath));
+				if (await r2Put(cfg, rk, buf, 'application/octet-stream')) {
+					if (await r2Exists(cfg, rk)) {
+						try { unlinkSync(localPath); } catch {}
+						db.run('UPDATE Res SET r2Synced = 1, r2Key = ? WHERE id = ?', [rk, row.id]);
+						ok++;
+						continue;
 					}
 				}
+			}
 				db.run('UPDATE Res SET r2Synced = 0 WHERE id = ?', [row.id]);
 				missing++;
 			}
@@ -277,6 +278,7 @@ async function main() {
 		// Check if already on R2
 		if (await r2Exists(cfg, rk)) {
 			skipped++;
+			db.run('UPDATE Res SET r2Synced = 1 WHERE id = ?', [row.id]);
 			if (existsSync(localPath)) {
 				try { unlinkSync(localPath); } catch {}
 				console.log(`  [${processed}/${total}] skip ${id} (R2 exists, local deleted)`);
@@ -304,7 +306,7 @@ async function main() {
 		// Verify and delete local
 		if (await r2Exists(cfg, rk)) {
 			try { unlinkSync(localPath); } catch {}
-			db.run('UPDATE Res SET r2Synced = 1 WHERE id = ?', [row.id]);
+			db.run('UPDATE Res SET r2Synced = 1, r2Key = ? WHERE id = ?', [rk, row.id]);
 			synced++;
 			console.log(`    synced ✓`);
 		} else {

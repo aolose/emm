@@ -15,7 +15,7 @@ function attachBannerR2(items: { banner?: number; bannerR2Synced?: boolean; bann
 	if (!sys?.r2Enabled) return;
 	for (const item of items) {
 		if (item.banner) {
-			const r = db.get(new Res(item.banner));
+			const r = db.get(model(Res, { id: item.banner }));
 			if (r) { item.bannerR2Synced = !!r.r2Synced; item.bannerR2Key = r.r2Key || ''; }
 		}
 	}

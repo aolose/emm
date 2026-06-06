@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './cm-editor.css';
-	import { filesUpload, selectFile, editorTools } from '$lib/store';
+	import { filesUpload, selectFile, editorTools, h } from '$lib/store';
+	import { get } from 'svelte/store';
 	import { createFileMd, createUrl, file2Md, watch } from '$lib/utils';
 	import { htmlToMd } from '$lib/html-to-md';
 
@@ -175,7 +176,8 @@
 		if (!cm) return;
 		const files = await selectFile();
 		if (!files?.length) return;
-		const md = file2Md(files);
+		const domain = get(h).r2PublicDomain;
+		const md = file2Md(files, domain);
 		cm.dispatch({
 			changes: { from: cm.state.selection.main.from, insert: md }
 		});
@@ -188,7 +190,8 @@
 		const md = createFileMd(f, blobUrl);
 		v.dispatch(v.state.replaceSelection(md));
 		filesUpload([f], (uploaded) => {
-			const finalUrl = createUrl(uploaded);
+			const domain = get(h).r2PublicDomain;
+			const finalUrl = createUrl(uploaded, domain);
 			const doc = v.state.doc.toString();
 			const idx = doc.indexOf(blobUrl);
 			if (idx !== -1) {

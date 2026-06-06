@@ -137,10 +137,13 @@ const up = async (info: fInfo, cb?: (f: fView) => void) => {
 	});
 	up.upload().then(({ data }) => {
 		if (data && cb) {
-			const isUrl = typeof data === 'string' && data.startsWith('http');
+			const s = String(data);
+			const pipe = s.indexOf('|');
+			const id = pipe >= 0 ? +s.slice(0, pipe) : +s;
+			const url = pipe >= 0 ? s.slice(pipe + 1) : undefined;
 			cb({
-				id: isUrl ? 0 : +data,
-				url: isUrl ? data : undefined,
+				id,
+				url,
 				size: info.file.size,
 				name: info.name,
 				type: info.file.type

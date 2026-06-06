@@ -290,16 +290,20 @@ if (enabled && publicDomain) {
 return thumb ? `/res/_${id}` : `/res/${id}`;
 }
 
-export function createUrl(f: fView | File) {
+export function createUrl(f: fView | File, publicDomain?: string) {
 	if (f instanceof File) {
 		return URL.createObjectURL(f as File);
 	}
-	return f.url || `/res/${f.id}`;
+	if (f.url) return f.url;
+	if (f.r2Synced && f.r2Key && publicDomain) {
+		return `${publicDomain}/${f.r2Key}`;
+	}
+	return `/res/${f.id}`;
 }
 
-export function createFileMd(f: fView | File, u = '') {
+export function createFileMd(f: fView | File, u = '', publicDomain?: string) {
 	const { name, size, type } = f;
-	if (!u) u = createUrl(f);
+	if (!u) u = createUrl(f, publicDomain);
 	if (type.startsWith('image/')) {
 		return `![${name}](${u})`;
 	}
@@ -312,10 +316,10 @@ export function createFileMd(f: fView | File, u = '') {
 	return `<x-file name="${name}" type="${getExt(f)}" size="${size}" src="${u}"></x>`;
 }
 
-export function file2Md(f: fView[] | File[]) {
+export function file2Md(f: fView[] | File[], publicDomain?: string) {
 	const s = [] as string[];
 	f.forEach((o) => {
-		s.push(createFileMd(o));
+		s.push(createFileMd(o, '', publicDomain));
 	});
 	return s.join('\n');
 }

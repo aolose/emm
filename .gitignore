@@ -22,3 +22,11 @@ bun.lock
 /tests/e2e/playwright/test.db
 /tests/e2e/playwright/test.db-shm
 /tests/e2e/playwright/test.db-wal
+
+# Temporary diagnostic scripts and output
+scripts/_*.ts
+scripts/_*.js
+merge_log.txt
+merge_log2.txt
+db_state.txt
+diag_out.txt
