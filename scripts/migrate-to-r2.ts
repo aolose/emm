@@ -336,5 +336,6 @@ async function main() {
 	db.close();
 
 	console.log(`\nDone. Synced: ${synced}, Skipped: ${skipped}, Failed: ${failed}`);
+}
 
 main().catch(console.error);
