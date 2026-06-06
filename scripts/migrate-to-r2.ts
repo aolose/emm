@@ -215,51 +215,49 @@ async function main() {
 	const bk = db.run('UPDATE Res SET r2Key = substr(md5, 1, 6) WHERE r2Key IS NULL AND md5 IS NOT NULL');
 	console.log(`Backfilled r2Key for ${(bk as any).changes} records`);
 
-	// ── Repair mode: verify synced files, re-upload or revert ──
+	// ── Repair mode: HEAD-check R2, fix r2Synced + r2Key ──
 	if (isRepair) {
-		console.log('\nRepair mode: checking synced files on R2...');
-		const syncedRows = db.query('SELECT id, type, r2Key FROM Res WHERE r2Synced = 1').all() as { id: number; type: string; r2Key: string }[];
-		console.log(`  ${syncedRows.length} records marked as synced`);
-		let fixed = 0, reverted = 0;
-		for (const row of syncedRows) {
-			const rk = row.r2Key || String(row.id);
-			if (await r2Exists(cfg, rk)) continue; // OK on R2
-			// Missing on R2 — try re-upload
-			const localPath = resolve(sysCfg.uploadDir, String(row.id));
-			if (existsSync(localPath)) {
-				const buf = new Uint8Array(readFileSync(localPath));
-				if (await r2Put(cfg, rk, buf, row.type || 'application/octet-stream')) {
-					if (await r2Exists(cfg, rk)) {
-						try { unlinkSync(localPath); } catch {}
-						fixed++;
-						console.log(`  fixed ${row.id} → re-uploaded`);
-						continue;
+		console.log('\nRepair mode: HEAD-checking all Res records against R2...');
+		const allRows = db.query('SELECT id, r2Key FROM Res').all() as { id: number; r2Key: string }[];
+		console.log(`  ${allRows.length} total records`);
+		let ok = 0, missing = 0, checked = 0;
+
+		for (const row of allRows) {
+			checked++;
+			if (checked % 50 === 0) console.log(`  ...${checked}/${allRows.length}`);
+			const numKey = String(row.id);
+			const hashKey = row.r2Key;
+			const numExists = await r2Exists(cfg, numKey);
+			const hashExists = hashKey && hashKey !== numKey && await r2Exists(cfg, hashKey);
+			const thumbKey = `_${numExists ? numKey : hashKey}_`;  // placeholder — we check below
+			const thumbNumExists = numExists && await r2Exists(cfg, `_${numKey}`);
+			const thumbHashExists = hashExists && await r2Exists(cfg, `_${hashKey}`);
+			const synced = numExists || hashExists;
+			const thumb = (numExists && thumbNumExists) || (hashExists && thumbHashExists) ? 1 : 0;
+
+			if (synced) {
+				db.run('UPDATE Res SET r2Synced = 1, thumb = ? WHERE id = ?', [thumb, row.id]);
+				ok++;
+			} else {
+				// Try local disk
+				const localPath = resolve(sysCfg.uploadDir, numKey);
+				if (existsSync(localPath)) {
+					const buf = new Uint8Array(readFileSync(localPath));
+					if (await r2Put(cfg, numKey, buf, 'application/octet-stream')) {
+						if (await r2Exists(cfg, numKey)) {
+							try { unlinkSync(localPath); } catch {}
+							db.run('UPDATE Res SET r2Synced = 1, r2Key = ? WHERE id = ?', [numKey, row.id]);
+							ok++;
+							continue;
+						}
 					}
 				}
+				db.run('UPDATE Res SET r2Synced = 0 WHERE id = ?', [row.id]);
+				missing++;
 			}
-			// Can't re-upload — revert r2Synced and restore /res/ in articles
-			db.run('UPDATE Res SET r2Synced = 0 WHERE id = ?', [row.id]);
-			reverted++;
-			console.log(`  reverted ${row.id} → R2 missing, local gone, set r2Synced=0`);
 		}
-		console.log(`  Fixed: ${fixed}, Reverted: ${reverted}`);
-
-		// Revert article content: r2 URLs back to /res/
-		if (reverted > 0) {
-			console.log('\nReverting article references...');
-			const posts = db.query('SELECT id, content, desc FROM Post').all() as { id: number; content: string; desc: string }[];
-			let revertedArticles = 0, revertedRefs = 0;
-			for (const post of posts) {
-				let changed = false;
-				let body = post.content || '';
-				let desc = post.desc || '';
-				body = body.replace(/https?:\/\/[^\/]+\/_([0-9a-f]{6})/g, (_, k) => { changed = true; revertedRefs++; return `/res/_${k}`; });
-				body = body.replace(/https?:\/\/[^\/]+\/([0-9a-f]{6})/g, (_, k) => { changed = true; revertedRefs++; return `/res/${k}`; });
-				if (changed) { db.run('UPDATE Post SET content = ?, desc = ? WHERE id = ?', [body, desc, post.id]); revertedArticles++; }
-			}
-			console.log(`  Reverted ${revertedArticles} articles, ${revertedRefs} refs`);
-		}
-		console.log('\nRepair complete. Run without --repair for normal migration.\n');
+		console.log(`  OK: ${ok}, Missing: ${missing}`);
+		console.log('\nRepair complete.\n');
 		db.close();
 		return;
 	}
