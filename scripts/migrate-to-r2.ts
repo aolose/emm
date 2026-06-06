@@ -211,7 +211,7 @@ async function main() {
 
 	// Backfill r2Key from existing MD5 values
 	const bk = db.run('UPDATE Res SET r2Key = substr(md5, 1, 6) WHERE r2Key IS NULL AND md5 IS NOT NULL');
-	console.log(`Backfilled r2Key for ~${bk} records`);
+	console.log(`Backfilled r2Key for ${(bk as any).changes} records`);
 
 	let synced = 0;
 	let skipped = 0;
