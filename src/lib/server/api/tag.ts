@@ -1,8 +1,8 @@
 import type { APIRoutes } from '../../types';
-import { db } from '../index';
+import { db, sys } from '../index';
 import { getClient, getReqJson, model, resp, sqlFields, throwDbProxyError } from '../utils';
 import { filter } from '$lib/utils';
-import { Post, Tag } from '$lib/server/model';
+import { Post, Tag, Res } from '$lib/server/model';
 import { auth } from './_common';
 import { permission } from '$lib/enum';
 import { tagPatcher, tags } from '$lib/server/store';
@@ -18,16 +18,21 @@ const apis: APIRoutes = {
 		post: auth(Read, async () => {
 			const ts = get(tags);
 			return ts.map((t) => {
+				const o: any = t;
+				if (sys?.r2Enabled && o.banner) {
+					const r = db.get(new Res(o.banner));
+					if (r) { o.bannerR2Synced = !!r.r2Synced; o.bannerR2Key = r.r2Key || ''; }
+				}
 				const ps = tagPostCache.getPostIds(t.id);
 				if (ps.length) {
 					return {
-						...t,
+						...o,
 						_posts: db
 							.all(model(Post), `id in (${sqlFields(ps.length)})`, ...ps)
 							.map((a) => ({ id: a.id, title: a.title || a.title }))
 					};
 				}
-				return filter(t, [], false);
+				return filter(o, [], false);
 			});
 		})
 	},

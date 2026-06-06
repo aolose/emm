@@ -361,13 +361,25 @@ export const mkdir = (dir: string) => {
 	}
 };
 
-export const saveFile = (name: string | number, dir: string, buf: Uint8Array) => {
+export const saveFile = async (name: string | number, dir: string, buf: Uint8Array, key?: string, contentType = ''): Promise<boolean> => {
+	// R2 upload path
+	const { isR2Configured, r2Put } = await import('$lib/server/cloudflare');
+	if (isR2Configured()) {
+		const baseKey = key || String(name);
+		const r2Key = dir === sys.thumbDir ? `_${baseKey}` : baseKey;
+		const ct = contentType || (dir === sys.thumbDir ? 'image/webp' : '');
+		const ok = await r2Put(r2Key, buf, ct);
+		if (ok) return true; // uploaded to R2, skip local disk
+		// fall through to local disk on failure
+	}
+	// Local disk path
 	dir = dir && resolve(dir);
 	if (!fs.existsSync(dir)) {
 		fs.mkdirSync(dir, { recursive: true });
 	}
 	const p = resolve(dir, name + '');
 	fs.writeFileSync(p, buf, { flag: 'w' });
+	return false;
 };
 
 const _delFile = (id: string | number, dir: string) => {
@@ -381,7 +393,14 @@ const _delFile = (id: string | number, dir: string) => {
 		}
 	}
 };
-export const delFile = (id: string | number) => {
+export const delFile = async (id: string | number, key?: string) => {
+	const { isR2Configured, r2Delete } = await import('$lib/server/cloudflare');
+	if (isR2Configured()) {
+		const rk = key || String(id);
+		await r2Delete(rk);
+		await r2Delete(`_${rk}`);
+		return;
+	}
 	if (_delFile(id, sys.uploadDir)) {
 		_delFile(id, sys.thumbDir);
 	}

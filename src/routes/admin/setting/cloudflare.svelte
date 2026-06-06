@@ -26,8 +26,9 @@
 	onMount(() => {
 		return sys.subscribe((s) => {
 			_sys = s;
-			if (s.cfAccountId || s.cfListId) {
+			if (s.cfAccountId || s.cfListId || s.cfApiToken) {
 				cfAccountId = s.cfAccountId || '';
+				cfApiToken = s.cfApiToken || '';
 				cfListId = s.cfListId || '';
 			}
 		});
@@ -73,7 +74,6 @@
 		try {
 			await req('sys', { ..._sys, ...s });
 			sys.update((a) => ({ ...a, ...s }));
-			cfApiToken = '';
 			msg = 'Saved';
 		} catch (e) {
 			err = 1;

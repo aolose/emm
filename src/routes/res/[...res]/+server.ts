@@ -5,6 +5,7 @@ import { sys, db } from '$lib/server';
 import { Res } from '$lib/server/model';
 import { contentType } from '$lib/enum';
 import { eTags } from '$lib/server/cache';
+import { isR2Configured } from '$lib/server/cloudflare';
 
 export const GET: RequestHandler = async ({ params, request }) => {
 	const tag = request.headers.get('If-None-Match');
@@ -31,13 +32,22 @@ export const GET: RequestHandler = async ({ params, request }) => {
 			let f: Uint8Array | undefined;
 			const u = resolve(sys.uploadDir, p);
 			const t = resolve(sys.thumbDir, p);
-			if (isThumb && r.thumb) {
-				const tf = Bun.file(t);
-				if (await tf.exists) f = await tf.bytes();
-			}
-			if (!f) {
-				const uf = Bun.file(u);
-				if (await uf.exists) f = await uf.bytes();
+			const safeRead = async (path: string) => {
+				try { return await Bun.file(path).bytes(); } catch { return undefined; }
+			};
+			if (isThumb && r.thumb) f = await safeRead(t);
+			if (!f) f = await safeRead(u);
+			// Fallback: local file gone after R2 migration → redirect to R2
+			if (!f && isR2Configured() && sys.r2PublicDomain) {
+				const fk = (r as any).r2Key || p;
+				const r2Key = isThumb ? `_${fk}` : fk;
+				return new Response(null, {
+					status: 301,
+					headers: {
+						location: `${sys.r2PublicDomain}/${r2Key}`,
+						'cache-control': 'max-age=31536000'
+					}
+				});
 			}
 			const desc = 'content-disposition';
 			const h = new Headers({

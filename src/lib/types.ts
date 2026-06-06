@@ -98,9 +98,14 @@ export type reqCache = Map<string, cacheRecord>;
 
 export type fView = {
 	id: number;
+	/** Direct URL when using R2 storage, otherwise use /res/{id} */
+	url?: string;
 	size: number;
 	name: string;
 	type: string;
+	r2Synced?: number;
+	r2Key?: string;
+	thumb?: number;
 };
 
 export type fileInfo = {

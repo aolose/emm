@@ -39,6 +39,13 @@ export class System {
 	cfAccountId = TEXT;
 	cfApiToken = TEXT;
 	cfListId = TEXT;
+	// R2 storage
+	r2Enabled = false;
+	r2AccountId = TEXT;
+	r2AccessKeyId = TEXT;
+	r2SecretAccessKey = TEXT;
+	r2Bucket = TEXT;
+	r2PublicDomain = TEXT;
 	// Firewall IP aggregation
 	fwAggregate = true;
 	fwLastCount = INT;

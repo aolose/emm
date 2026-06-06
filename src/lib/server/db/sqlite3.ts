@@ -186,7 +186,6 @@ export class DB {
 			if (!override_create) setKey(a, 'createAt', now);
 			[sql, values] = insert(o);
 		} else [sql, values] = update(o);
-		Log.debug('save', printSql(sql, values));
 		if (!sql) {
 			Log.warn('save', table, 'empty sql');
 			return { changes: 0, lastInsertRowid: 0 };

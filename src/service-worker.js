@@ -5,6 +5,7 @@ const channel = new BroadcastChannel('sw-messages');
 const cachePrefix = 'sw-';
 const CACHE = `${cachePrefix}${version}`;
 const RES_CACHE = 'res';
+const R2_HOST = 'r2.err.name';
 const ASSETS = [
 	...build, // the app itself
 	...files // everything in `static`
@@ -47,7 +48,8 @@ self.addEventListener('fetch', (event) => {
 
 	async function respond() {
 		const url = new URL(event.request.url);
-		const cache = await caches.open(url.pathname.startsWith('/res/') ? RES_CACHE : CACHE);
+		const isRes = url.pathname.startsWith('/res/') || url.hostname === R2_HOST;
+		const cache = await caches.open(isRes ? RES_CACHE : CACHE);
 		if (ASSETS.includes(url.pathname)) {
 			const response = await cache.match(url.pathname);
 			if (response) {

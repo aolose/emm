@@ -17,7 +17,9 @@ const fileManagerCfg = {} as fileSelectCfg;
 export const h = writable({
 	title: '',
 	key: '',
-	desc: ''
+	desc: '',
+	r2PublicDomain: '',
+	r2Enabled: false
 });
 export const fwRespLs = writable<FwResp[]>([]);
 export const full = writable(0);
@@ -35,7 +37,7 @@ export const selectFile = (limit = 0, type = '') => {
 		});
 	}).catch((err) => {
 		// User cancelled or closed the file selector
-		if (err !== 'cancelled') console.error('selectFile error:', err);
+		if (err != null && err !== 'cancelled') console.error('selectFile error:', err);
 	});
 };
 
@@ -135,8 +137,10 @@ const up = async (info: fInfo, cb?: (f: fView) => void) => {
 	});
 	up.upload().then(({ data }) => {
 		if (data && cb) {
+			const isUrl = typeof data === 'string' && data.startsWith('http');
 			cb({
-				id: +data,
+				id: isUrl ? 0 : +data,
+				url: isUrl ? data : undefined,
 				size: info.file.size,
 				name: info.name,
 				type: info.file.type

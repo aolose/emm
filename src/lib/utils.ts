@@ -281,11 +281,20 @@ export function fileSize(size = 0) {
 	return size.toFixed(1) + m[n];
 }
 
+/** Build resource URL using R2 public domain when enabled and configured, falling back to /res/. */
+export function resUrl(publicDomain: string, id: string | number, thumb = false, enabled = false, key?: string): string {
+if (enabled && publicDomain) {
+	const k = key || String(id);
+	return thumb ? `${publicDomain}/_${k}` : `${publicDomain}/${k}`;
+}
+return thumb ? `/res/_${id}` : `/res/${id}`;
+}
+
 export function createUrl(f: fView | File) {
 	if (f instanceof File) {
 		return URL.createObjectURL(f as File);
 	}
-	return `/res/${f.id}`;
+	return f.url || `/res/${f.id}`;
 }
 
 export function createFileMd(f: fView | File, u = '') {

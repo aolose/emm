@@ -69,6 +69,7 @@ A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSee
 - **UA Collection Detection** — Detect distributed crawlers by grouping IPs sharing the same User-Agent
 - **Geo IP Location** — Display visitor geographic information based on IP2Location Lite
 - **Cloudflare Integration** — Auto-push blocked IPs to Cloudflare IP Lists for edge-level filtering
+- **R2 Storage** — Upload files to Cloudflare R2 (S3-compatible) with per-file sync tracking and hash-based URLs
 - **IP Aggregation** — Automatically merge blacklist IPs into /24 and /16 CIDR blocks to reduce list size
 - **Backup & Restore** — Export and import data for disaster recovery
 - **AI Assistant** — DeepSeek-powered writing assistant with editor-integrated tool-calling
@@ -224,6 +225,61 @@ If you use Cloudflare proxy and have Turnstile enabled, you need to configure a 
 For detailed steps, see: [doc/turnstile.md](doc/turnstile.md)
 
 > **Security Reminder**: Make sure to protect your origin server to prevent attackers from bypassing Cloudflare and directly accessing the origin IP to forge request headers. It is recommended to use [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) or restrict your origin firewall to only accept [Cloudflare IP ranges](https://www.cloudflare.com/ips/).
+
+## R2 Storage
+
+EMM supports uploading files directly to [Cloudflare R2](https://developers.cloudflare.com/r2/) instead of local disk. R2 offers zero egress fees and S3-compatible API, making it ideal for image-heavy blogs.
+
+### Setup
+
+1. Create an R2 bucket in the [Cloudflare Dashboard](https://dash.cloudflare.com)
+2. Create an R2 API Token with **Object Read & Write** permissions for your bucket
+3. Bind a custom domain to the bucket (e.g., `cdn.example.com`) and enable public access
+4. Go to **Admin → Settings → R2 Storage** and fill in:
+   - **Account ID** — your Cloudflare Account ID
+   - **Access Key ID** / **Secret Access Key** — from the R2 API token
+   - **Bucket** — bucket name
+   - **Public Domain** — custom domain bound to the bucket
+   - Toggle **Enable R2 storage** on
+5. Click **Save**
+
+Once enabled, new uploads go directly to R2 and the API returns `https://cdn.example.com/<hash>` URLs. Existing local files continue to serve from disk via `/res/<id>`.
+
+### Migration
+
+Run the migration script to move existing local files to R2 and replace all `/res/` references in articles:
+
+```bash
+bun run scripts/migrate-to-r2.ts
+```
+
+What it does:
+1. Uploads all local files to R2 (using hash-based keys derived from MD5)
+2. Verifies each upload with a HEAD request before deleting the local copy
+3. Replaces `/res/<id>` and `/res/_<id>` references in post content with R2 URLs
+4. Backfills `r2Key` and `r2Synced` columns on the `Res` table
+
+The script is idempotent — running it multiple times is safe; already-migrated files are skipped.
+
+### Key Design
+
+- **Hash-based URLs**: R2 keys use the first 6 characters of the file's MD5 hash (`a3f2b1`), so re-uploading the same file keeps the same URL, while different content automatically gets a new URL (no CDN cache issues)
+- **Per-file sync tracking**: `r2Synced` flag on each resource determines whether to use the R2 URL or fall back to local `/res/` — no global toggle affecting all files at once
+- **Thumbnails**: Auto-generated thumbnails (300px WebP) use `_` prefix keys (e.g., `_a3f2b1`)
+- **Graceful fallback**: `/res/<id>` endpoint redirects to R2 (301) when local file is missing and `r2Synced` is set
+
+### Testing
+
+```bash
+# Basic R2 connectivity (PUT / HEAD / DELETE / public URL)
+bun run scripts/test-r2.ts
+
+# Migration logic (upload, verify, delete local, idempotency)
+bun run scripts/test-r2-migrate.ts
+
+# Full migration E2E (DB setup, article replacement, verification, cleanup)
+bun run scripts/test-r2-full-migrate.ts
+```
 
 ## Contributing
 

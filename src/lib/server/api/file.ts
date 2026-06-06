@@ -1,6 +1,7 @@
 import type { APIRoutes } from '../../types';
 import { db, sys } from '../index';
-import { delFile, getReqJson, md5, model, pageBuilder, resp, saveFile } from '../utils';
+import { delFile, md5, model, pageBuilder, resp, saveFile } from '../utils';
+import { isR2Configured } from '../cloudflare';
 import { trim } from '$lib/utils';
 import { Res } from '$lib/server/model';
 import { auth, parseIds, mimeLookup } from './_common';
@@ -14,8 +15,9 @@ const apis: APIRoutes = {
 	res: {
 		delete: auth(Admin, async (req) => {
 			const r = await parseIds(req);
+			const recs = r.map((id) => db.get(new Res(id)));
 			const { changes } = db.delByPk(Res, [...r]);
-			r.forEach(delFile);
+			await Promise.all(recs.map((rec) => delFile(rec.id, rec.r2Key)));
 			const ids = new Set([...r]);
 			for (const [k, v] of eTags) {
 				if (ids.has(v)) eTags.delete(k);
@@ -45,7 +47,7 @@ const apis: APIRoutes = {
 				size,
 				Res,
 				['save desc'],
-				['id', 'name', 'size', 'type', 'thumb'],
+				['id', 'name', 'size', 'type', 'thumb', 'r2Synced', 'r2Key'],
 				where
 			);
 		})
@@ -61,32 +63,55 @@ const apis: APIRoutes = {
 			const res = new Res();
 			res.md5 = md5(buf);
 			const r = db.get(res);
-			if (r) return r.id;
+			const r2Key = res.md5.substring(0, 6);
+			if (r) {
+				// Missing thumbnail? Generate it now
+				if (!r.thumb && tp.startsWith('image/')) {
+					try {
+						const img = new Bun.Image(buf);
+						const { width } = await img.metadata();
+						if (width > 300) {
+							const thumb = await img.resize(300).webp().bytes();
+							const thumbOk = await saveFile(r.id, sys.thumbDir, thumb, r.r2Key || r2Key);
+							if (thumbOk) { const up = new Res(); up.id = r.id; up.thumb = 1; db.save(up); }
+						}
+					} catch (e) {
+						console.error('[upload] thumb gen(md5 dedup) failed for res', r.id, e);
+					}
+				}
+				return isR2Configured() ? `${sys.r2PublicDomain}/${r.r2Key || r.id}` : r.id;
+			}
+			res.r2Key = r2Key;
 			res.size = buf.length;
 			res.name = n;
 			res.type = tp;
 			db.save(res);
 			try {
-				saveFile(res.id, sys.uploadDir, buf);
+				const r2Ok = await saveFile(res.id, sys.uploadDir, buf, r2Key, res.type);
+				if (r2Ok) { res.r2Synced = 1; db.save(res); }
 				if (tp.startsWith('image/')) {
 					try {
 						const img = new Bun.Image(buf);
-						const w = img.width;
-						if (w > 300) {
-							const thumb = await img.resize(300).toBuffer();
-							saveFile(res.id, sys.thumbDir, thumb);
-							res.thumb = 1;
-							db.save(res);
+						const { width } = await img.metadata();
+						if (width > 300) {
+							const thumb = await img.resize(300).webp().bytes();
+							const thumbOk = await saveFile(res.id, sys.thumbDir, thumb, r2Key);
+							if (thumbOk) {
+								res.thumb = 1;
+								db.save(res);
+							} else {
+								console.error('[upload] thumb save failed for res', res.id);
+							}
 						}
 					} catch (e) {
-						console.error(e);
+						console.error('[upload] thumb generation failed for res', res.id, e);
 					}
 				}
 			} catch (e) {
 				console.error(e);
 				db.del(res);
 			}
-			return res.id;
+			return isR2Configured() ? `${sys.r2PublicDomain}/${res.r2Key || res.id}` : res.id;
 		})
 	}
 };

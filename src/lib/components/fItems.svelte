@@ -1,7 +1,8 @@
 <script>
 	import FileIcon from './fileIcon.svelte';
-	import { getExt } from '$lib/utils';
-
+	import { getExt, resUrl } from '$lib/utils';
+	import { h } from '$lib/store';
+	let loaded = $state(false);
 	let {
 		file = $bindable({
 			id: 0,
@@ -13,12 +14,20 @@
 		onclick = () => {}
 	} = $props();
 
-	let pic = $derived(file.type?.startsWith('image/') ? `/res/_${file.id}` : '');
 </script>
 
 <div class="file-card" class:act {onclick}>
-	<div class="p" style:background-image={pic ? `url(${pic})` : ''}>
-		{#if !pic}
+	<div class="p">
+		{#if file.type?.startsWith('image/')}
+			<img
+				src={file.url || resUrl($h.r2PublicDomain, file.id, !!file.thumb, !!file.r2Synced, file.r2Key)}
+				alt={file.name}
+				class:loaded
+				onload={() => loaded = true}
+			/>
+		{/if}
+
+		{#if !file.type?.startsWith('image/') || !loaded}
 			<div class="f">
 				<FileIcon size={60} type={getExt(file)} />
 			</div>
@@ -71,12 +80,26 @@
 		}
 	}
 
-	.p {
-		border-radius: inherit;
-		padding-top: 100%;
-		background: var(--bg2) center;
-		background-size: cover;
-	}
+  .p {
+    position: relative;
+    padding-top: 100%;
+    background: var(--bg2);
+
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* 效果等同于 background-size: cover */
+      opacity: 0;
+      transition: opacity 0.3s ease;
+
+      &.loaded {
+        opacity: 1; /* 加载完成后渐入 */
+      }
+    }
+  }
 
 	.n {
 		width: 90%;

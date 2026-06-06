@@ -10,6 +10,7 @@
 	import Cf from './cloudflare.svelte';
 	import Fw from './firewall.svelte';
 	import Ai from './ai.svelte';
+	import R2 from './r2.svelte';
 	import { onMount } from 'svelte';
 	import { load } from './sys';
 
@@ -20,6 +21,7 @@
 	<div class="a">
 		<P />
 		<Ai />
+		<R2 />
 		<Ts />
 		<Cf />
 		<C />

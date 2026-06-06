@@ -1,9 +1,9 @@
 <script>
-	import { bgColor, clipWords } from '$lib/utils';
+	import { bgColor, clipWords, resUrl } from '$lib/utils';
+	import { h } from '$lib/store';
 
 	let { p = {}, path } = $props();
 	const { banner, slug, title, desc, createAt } = p;
-	const sty = banner ? `background-image:url(/res/_${banner})` : '';
 	const tm = new Date(createAt);
 	const y = tm.getFullYear();
 	const m = tm.getMonth() + 1;
@@ -13,7 +13,7 @@
 </script>
 
 <div class="s p" style={`background-color:${bgColor(createAt, 0.6, 70)}`}>
-	<div class="x" style={sty}></div>
+	<div class="x" style={banner ? `background-image:url(${p.bannerR2Synced ? resUrl($h.r2PublicDomain, p.bannerR2Key || banner, true, true) : `/res/_${banner}`})` : undefined}></div>
 	<div class="t">
 		{m}/{d}
 		{#if showY}
