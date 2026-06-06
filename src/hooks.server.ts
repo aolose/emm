@@ -24,14 +24,21 @@ export const handle: Handle = async ({ event, resolve }) => {
 			cfg.headers.set('x-forwarded-for', event.locals.ip);
 			return fetch(url, cfg);
 		};
-	return await firewallProcess(
-		event,
-		async () =>
-			await resolve(event, {
-				filterSerializedResponseHeaders: (name) =>
-					[contentType, encryptIv, encTypeIndex, 'location'].indexOf(name.toLowerCase()) > -1
-			})
-	);
+	const opts: Parameters<typeof resolve>[1] = {
+		filterSerializedResponseHeaders: (name) =>
+			[contentType, encryptIv, encTypeIndex, 'location'].indexOf(name.toLowerCase()) > -1
+	};
+
+	// Inject R2 host into HTML <head> for Service Worker cache pre-warming
+	const r2Host = sys?.r2Enabled && sys?.r2PublicDomain ? new URL(sys.r2PublicDomain).host : '';
+	if (r2Host) {
+		opts.transformPageChunk = ({ html }) => {
+			const script = `<script>caches.open('sw-config').then(c=>c.put('/__config/r2-host',new Response('${r2Host}')));</script>`;
+			return html.replace('</head>', script + '</head>');
+		};
+	}
+
+	return await firewallProcess(event, async () => await resolve(event, opts));
 };
 
 export const handleError = (({ error }) => {
