@@ -27,8 +27,11 @@
 
 	function sel() {
 		selectFile(1, 'image/*').then((a) => {
-			const id = a?.[0]?.id;
-			if (id) d.banner = '' + id;
+			if (a) {
+				d.banner = '' + a[0].id;
+				d.bannerR2Synced = !!a[0].r2Synced;
+				d.bannerR2Key = a[0].r2Key || '';
+			}
 		});
 	}
 

@@ -22,8 +22,9 @@ export const load = async (event) => {
 	// Resolve banner R2 info for direct URL
 	const { sys, db } = await import('$lib/server');
 	const { Res } = await import('$lib/server/model');
+	const { model } = await import('$lib/server/utils');
 	if (d.banner) {
-		const bannerRes = db.get(new Res(d.banner));
+		const bannerRes = db.get(model(Res, { id: d.banner }));
 		if (bannerRes) {
 			d.bannerR2Synced = !!bannerRes.r2Synced;
 			d.bannerR2Key = bannerRes.r2Key || '';

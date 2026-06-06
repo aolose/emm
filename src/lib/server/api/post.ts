@@ -4,7 +4,7 @@ import { getClient, getReqJson, model, pageBuilder, resp, sqlFields } from '../u
 import { diffObj, filter, clipWords, getPain, trim } from '$lib/utils';
 import { contentType, dataType, permission } from '$lib/enum';
 import { NULL } from '$lib/server/enum';
-import { Post, PostRead } from '$lib/server/model';
+import { Post, PostRead, Res } from '$lib/server/model';
 import {
 	auth,
 	REQS_PAGE_SIZE,
@@ -120,25 +120,31 @@ const apis: APIRoutes = {
 					if (pre) p._u = pre;
 					if (next) p._n = next;
 					readManager.set(p.id, req);
-					p._r = readManager.get(p.id);
-					if (!p.desc) p._d = clipWords(await getPain(p.content), 140);
-					return filter(
-						patchPostTags([p])[0],
-						[
-							'banner',
-							'_cm',
-							'desc',
-							'content',
-							'_d',
-							'createAt',
-							'_tag',
-							'title',
-							'_u',
-							'_n',
-							'_r'
-						],
-						false
-					);
+				p._r = readManager.get(p.id);
+				if (!p.desc) p._d = clipWords(await getPain(p.content), 140);
+				if (sys?.r2Enabled && p.banner) {
+					const r = db.get(model(Res, { id: p.banner }));
+					if (r) { p.bannerR2Synced = !!r.r2Synced; p.bannerR2Key = r.r2Key || ''; }
+				}
+				return filter(
+					patchPostTags([p])[0],
+					[
+						'banner',
+						'bannerR2Synced',
+						'bannerR2Key',
+						'_cm',
+						'desc',
+						'content',
+						'_d',
+						'createAt',
+						'_tag',
+						'title',
+						'_u',
+						'_n',
+						'_r'
+					],
+					false
+				);
 				}
 			}
 			return resp('post not found', 404);

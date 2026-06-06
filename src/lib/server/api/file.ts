@@ -15,7 +15,7 @@ const apis: APIRoutes = {
 	res: {
 		delete: auth(Admin, async (req) => {
 			const r = await parseIds(req);
-			const recs = r.map((id) => db.get(new Res(id)));
+			const recs = r.map((id) => db.get(model(Res, { id })));
 			const { changes } = db.delByPk(Res, [...r]);
 			await Promise.all(recs.map((rec) => delFile(rec.id, rec.r2Key)));
 			const ids = new Set([...r]);
@@ -79,7 +79,7 @@ const apis: APIRoutes = {
 						console.error('[upload] thumb gen(md5 dedup) failed for res', r.id, e);
 					}
 				}
-				return isR2Configured() ? `${sys.r2PublicDomain}/${r.r2Key || r.id}` : r.id;
+				return isR2Configured() ? `${r.id}|${sys.r2PublicDomain}/${r.r2Key || r.id}` : String(r.id);
 			}
 			res.r2Key = r2Key;
 			res.size = buf.length;
@@ -111,7 +111,7 @@ const apis: APIRoutes = {
 				console.error(e);
 				db.del(res);
 			}
-			return isR2Configured() ? `${sys.r2PublicDomain}/${res.r2Key || res.id}` : res.id;
+			return isR2Configured() ? `${res.id}|${sys.r2PublicDomain}/${res.r2Key || res.id}` : String(res.id);
 		})
 	}
 };
