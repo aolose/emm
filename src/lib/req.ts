@@ -275,14 +275,14 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 	});
 };
 
-const delGroupKey = (key: string) => {
+function delGroupKey(key: string) {
 	for (const [k, s] of group) {
 		if (s.has(key)) {
 			s.delete(key);
 			if (!s.size) group.delete(k);
 		}
 	}
-};
+}
 export const addGroupKey = (groupKey: string, key: string) => {
 	const s = group.get(groupKey) || new Set<string>();
 	s.add(key);

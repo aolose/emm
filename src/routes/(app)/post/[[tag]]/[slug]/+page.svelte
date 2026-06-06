@@ -64,21 +64,30 @@
 	});
 </script>
 
-<Head title={d.title} description={view}>
-	<meta name="og:type" content="article" />
-	<meta name="og:title" content={d.title} />
-	<meta name="og:description" content={view} />
-	<meta name="og:url" content={$page.url.href} />
-	<meta name="article:published_time" content={time(d.createAt)} />
-	<meta name="article:tag" content={d._tag} />
+<Head
+	title={d.title}
+	description={view}
+	ogType="article"
+	canonical={$page.url.href}
+	ogImage={d.banner ? `${$page.url.origin}/res/_${d.banner}` : ''}
+>
+	<meta property="article:published_time" content={time(d.createAt)} />
+	<meta property="article:tag" content={d._tag} />
 	{#if d.banner}
-		<meta name="og:image" content={`${$page.url.origin}/res/_${d.banner}`} />
+		<meta property="og:image:width" content="600" />
+		<meta property="og:image:height" content="400" />
 	{/if}
-	{#if d.banner}
-		<meta name="image" content={`${$page.url.origin}/res/_${d.banner}`} />
-	{/if}
-	<meta name="og:image:width" content="600" />
-	<meta name="og:image:height" content="400" />
+	<script type="application/ld+json">
+		{JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'BlogPosting',
+			headline: d.title,
+			description: view,
+			datePublished: time(d.createAt),
+			url: $page.url.href,
+			...(d.banner ? { image: `${$page.url.origin}/res/_${d.banner}` } : {})
+		})}
+	</script>
 </Head>
 
 {#snippet h()}

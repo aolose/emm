@@ -132,7 +132,7 @@
 	}
 </script>
 
-<Head title="Blog Config" />
+<Head title="Blog Config" noindex />
 <div class="a">
 	<div class="b">
 		<div class="o">Emm Initialization {$statueSys}</div>

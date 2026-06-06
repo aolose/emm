@@ -5,7 +5,7 @@
 	let { data, children } = $props();
 </script>
 
-<Head title={`${$h.title} - Admin`} />
+<Head title={`${$h.title} - Admin`} noindex />
 <div class="a" class:full={$full}>
 	<div class="b">
 		<Menu />
