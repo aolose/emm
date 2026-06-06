@@ -49,7 +49,7 @@
 		setting.set(0);
 		selectFile(1, 'image/*')
 			.then((a) => {
-				if (a) post = { ...post, banner: a[0].id + '' };
+				if (a) post = { ...post, banner: a[0].id + '', bannerR2Synced: !!a[0].r2Synced, bannerR2Key: a[0].r2Key || '' };
 			})
 			.finally(() => setting.set(1));
 	};
