@@ -216,8 +216,11 @@ async function main() {
 	let synced = 0;
 	let skipped = 0;
 	let failed = 0;
+	let processed = 0;
+	const total = rows.length;
 
 	for (const row of rows) {
+		processed++;
 		const id = String(row.id);
 		const rk = row.r2Key || id;
 		const localPath = resolve(sysCfg.uploadDir, id);
@@ -225,9 +228,9 @@ async function main() {
 		// Check if already on R2
 		if (await r2Exists(cfg, rk)) {
 			skipped++;
-			// Still delete local if exists
 			if (existsSync(localPath)) {
 				try { unlinkSync(localPath); } catch {}
+				console.log(`  [${processed}/${total}] skip ${id} (R2 exists, local deleted)`);
 			}
 			continue;
 		}
@@ -235,15 +238,17 @@ async function main() {
 		// Check local file
 		if (!existsSync(localPath)) {
 			skipped++;
+			console.log(`  [${processed}/${total}] skip ${id} (local file missing)`);
 			continue;
 		}
 
 		// Upload to R2
+		console.log(`  [${processed}/${total}] uploading ${id} (${row.type || 'unknown'})...`);
 		const buf = readFileSync(localPath);
 		const ok = await r2Put(cfg, rk, new Uint8Array(buf), row.type || 'application/octet-stream');
 		if (!ok) {
 			failed++;
-			console.log(`  [FAIL] ${id}`);
+			console.log(`    [FAIL] upload failed`);
 			continue;
 		}
 
@@ -252,14 +257,16 @@ async function main() {
 			try { unlinkSync(localPath); } catch {}
 			db.run('UPDATE Res SET r2Synced = 1 WHERE id = ?', [row.id]);
 			synced++;
+			console.log(`    synced ✓`);
 		} else {
 			failed++;
-			console.log(`  [VERIFY FAIL] ${id}`);
+			console.log(`    [FAIL] verify failed after upload`);
 		}
 	}
 
 	// Handle thumbnails
 	const thumbRows = db.query('SELECT id, r2Key FROM Res WHERE thumb = 1').all() as { id: number; r2Key: string }[];
+	if (thumbRows.length) console.log(`\nProcessing ${thumbRows.length} thumbnails...`);
 	for (const row of thumbRows) {
 		const tk = `_${row.r2Key || row.id}`;
 		const localPath = resolve(sysCfg.thumbDir, String(row.id));
