@@ -13,6 +13,9 @@ const ASSETS = [
 	...build, // the app itself
 	...files // everything in `static`
 ];
+// Navigation routes to precache so the app shell is available offline immediately
+// after install, even for pages the user hasn't visited yet.
+const PRECACHE_ROUTES = ['/', '/about', '/posts', '/tags'];
 
 self.addEventListener('install', (event) => {
 	const {
@@ -22,6 +25,14 @@ self.addEventListener('install', (event) => {
 	async function addFilesToCache() {
 		const cache = await caches.open(CACHE);
 		await cache.addAll(ASSETS);
+		// Precache nav routes individually so one failure doesn't block the rest
+		for (const route of PRECACHE_ROUTES) {
+			try {
+				await cache.add(route);
+			} catch {
+				// Route may require server context not available at install time
+			}
+		}
 	}
 
 	const p = addFilesToCache();
