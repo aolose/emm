@@ -30,24 +30,84 @@ import { error, redirect } from '@sveltejs/kit';
 import { confirm, status } from '$lib/store';
 import { get } from 'svelte/store';
 
-const cacheData = '.d';
-const cacheKey = '.k';
-const cacheExpire = '.e';
-const cacheGroup = '.g';
-const cacheBegin = '.b';
+const CACHE_BUCKET = 'emm-data';
 
-let reqCacheMap: reqCache;
-const cacheNames = [cacheData, cacheKey, cacheExpire, cacheBegin];
+/** Write API response to Cache API. TTL stored as x-cache-ttl header (epoch ms). */
+async function cacheApiPut(fullUrl: string, data: unknown, ttlMs: number) {
+	const cache = await caches.open(CACHE_BUCKET);
+	const res = new Response(JSON.stringify(data), {
+		headers: { 'x-cache-ttl': String(Date.now() + ttlMs) }
+	});
+	await cache.put(fullUrl, res);
+}
+
+/** Read from Cache API by full URL. Returns {data,ttl} or null if absent/expired. */
+async function cacheApiGet(fullUrl: string): Promise<{ data: unknown; ttl: number } | null> {
+	const cache = await caches.open(CACHE_BUCKET);
+	const res = await cache.match(fullUrl);
+	if (!res) return null;
+	const ttl = Number(res.headers.get('x-cache-ttl'));
+	if (ttl && ttl < Date.now()) return null;
+	const data = await res.json();
+	return { data, ttl: ttl || Date.now() + 864e5 };
+}
+
+/** Delete all Cache API entries whose URL path starts with /api/{prefix}. */
+async function cacheApiDeletePrefix(apiPrefix: string) {
+	const cache = await caches.open(CACHE_BUCKET);
+	const keys = await cache.keys();
+	for (const req of keys) {
+		if (new URL(req.url).pathname.startsWith(`/api/${apiPrefix}`)) {
+			await cache.delete(req);
+		}
+	}
+}
+
+/** Warm the in-memory cache from Cache API (async, fire-and-forget at module load). */
+async function loadFromCacheAPI() {
+	if (!browser) return;
+	const cache = await caches.open(CACHE_BUCKET);
+	const keys = await cache.keys();
+	for (const req of keys) {
+		try {
+			const res = await cache.match(req);
+			if (!res) continue;
+			const ttl = Number(res.headers.get('x-cache-ttl'));
+			if (ttl && ttl < Date.now()) continue;
+			const data = await res.json();
+			const url = new URL(req.url);
+			const path = url.pathname.replace(/^\/api\//, '');
+			const params: Record<string, string> = {};
+			url.searchParams.forEach((v, k) => { params[k] = v; });
+			const rk = reqKey(
+				path,
+				Object.keys(params).length ? params : undefined,
+				1 // method.GET
+			);
+			reqCacheMap.set(rk, [ttl || Date.now() + 864e5, data, undefined]);
+		} catch {
+			/* skip */
+		}
+	}
+}
+loadFromCacheAPI();
+
+const reqCacheMap: reqCache = new Map();
 const reqPromiseCache = new Map<string, Promise<reqData>>();
 const reqKey = (url: string, params: reqParams, method?: MethodNumber, key?: string | number) => {
 	let rk = `${url}${method || 0}`;
 	if (key) return `${rk}${key}`;
 	if (params !== undefined) {
-		const k = JSON.stringify(params).replace(/[,.^{}()\-_'"\\/?:]/gi, '');
-		rk = `${url}_${k.length}_${Array.from(k).reduce((a, b) => a + b.charCodeAt(0), 0)}`;
+		// Sort keys alphabetically so {a:1,b:2} and {b:2,a:1} produce the same key.
+		const sorted: Record<string, unknown> = {};
+		Object.keys(params as Record<string, unknown>)
+			.sort()
+			.forEach((k) => { sorted[k] = (params as Record<string, unknown>)[k]; });
+		rk = `${rk}_${JSON.stringify(sorted)}`;
 	}
 	return rk;
 };
+const group = new Map<string, Set<string>>();
 export const clearGroup = (groupKey: string) => {
 	const s = group.get(groupKey);
 	if (s && s.size) {
@@ -55,72 +115,9 @@ export const clearGroup = (groupKey: string) => {
 		for (const k of s) {
 			reqCacheMap.delete(k);
 		}
-		saveCacheToStorage();
+		cacheApiDeletePrefix(groupKey);
 	}
 };
-const group = new Map<string, Set<string>>();
-const saveCacheToStorage = () => {
-	if (!browser) return;
-	const d = [] as unknown[];
-	const k = [] as string[];
-	const e = [] as number[];
-	const now = Date.now();
-	const g = [];
-	for (const [k, v] of group) {
-		g.push(`${k}:${[...v].join()}`);
-	}
-	localStorage.setItem(cacheGroup, g.join(';'));
-	localStorage.setItem(cacheBegin, now + '');
-	for (const [a, [n, b, p]] of reqCacheMap) {
-		const dur = n - now;
-		if (!p && dur > 0) {
-			k.push(a);
-			d.push(b);
-			e.push(dur);
-		}
-	}
-	localStorage.setItem(cacheData, JSON.stringify(d));
-	localStorage.setItem(cacheKey, k.join());
-	localStorage.setItem(cacheExpire, e.join());
-	localStorage.setItem(cacheBegin, now + '');
-};
-
-const loadCacheFromStorage = () => {
-	if (!browser) return;
-	if (!reqCacheMap) reqCacheMap = new Map();
-	const g = localStorage.getItem(cacheGroup);
-	if (g) {
-		g.split(';').forEach((a) => {
-			const [k, v] = a.split(':');
-			group.set(k, new Set(v.split(',')));
-		});
-	}
-	let ch;
-	const [d, k, e, b] = cacheNames.map((a) => localStorage.getItem(a));
-	if (d && k && e && b) {
-		try {
-			const da = JSON.parse(d);
-			const ke = k.split(',');
-			const ex = e.split(',').map((a) => +a);
-			const bg = +b;
-			const n = Date.now();
-			ex.forEach((a: number, i: number) => {
-				const exp = a + bg;
-				// Keep expired entries in-memory so reqCache() can serve them when offline.
-				// saveCacheToStorage() will filter them out of persistence on next write.
-				reqCacheMap.set(ke[i], [exp, da[i], undefined]);
-				if (exp <= n) {
-					ch = 1;
-				}
-			});
-		} catch (e) {
-			console.error(e);
-			// ignore
-		}
-	}
-	if (ch) saveCacheToStorage();
-};
-loadCacheFromStorage();
 
 let isLoadFn = false;
 let hydrationDone = false;
@@ -133,30 +130,49 @@ const allowReadCache = () => {
 	if (isLoadFn && !hydrationDone) return false; // hydration: always fetch fresh
 	return true;
 };
-const reqCache = (key: string, run: (re?: cacheRecord) => Promise<reqData>): Promise<reqData> => {
+const reqCache = (
+	key: string,
+	fullUrl: string | null,
+	run: (re?: cacheRecord) => Promise<reqData>
+): Promise<reqData> => {
 	if (!key || !browser) return run();
 	const rec = reqCacheMap.get(key);
 	const now = Date.now();
-	const offline = !navigator.onLine;
 
+	// L1: in-memory hit
 	if (allowReadCache() && rec) {
 		const [n, d, p] = rec;
 		if (p) return p;
-		// When offline, serve cache immediately regardless of expiry — skip the network entirely.
-		if (offline) {
-			console.info('[Offline Mode] Serving from cache (expired or not), skipping network.');
-			return Promise.resolve(d);
-		}
-		// Online: serve only if not yet expired.
 		if (n > now) return Promise.resolve(d);
+		// Expired — evict from memory, fall through to L2/network.
+		reqCacheMap.delete(key);
 	}
+
+	// L2: Cache API fallback (cold start, uses actual TTL from cached response).
+	// Respect allowReadCache — skip during hydration to let SvelteKit's embedded fetch handle it.
+	const tryCacheAPI = allowReadCache() && fullUrl
+		? cacheApiGet(fullUrl).then((entry) => {
+				if (entry !== null) {
+					reqCacheMap.set(key, <[number, object | string | number | boolean | void | null, Promise<reqData> | undefined]>[entry.ttl, entry.data, undefined]);
+					return entry.data;
+				}
+				return undefined;
+			})
+		: Promise.resolve(undefined);
 
 	const r = [-1, undefined, undefined] as cacheRecord;
 	reqCacheMap.set(key, r);
 
-	r[2] = run(r).catch((err) => {
+	r[2] = tryCacheAPI.then((cached) => {
+		if (cached !== undefined) return cached;
+		// L3: network
+		return run(r);
+	}).then(async (d) => {
+		if (fullUrl) cacheApiPut(fullUrl, d, 864e5);
+		return d;
+	}).catch((err) => {
 		if (rec && rec[1] !== undefined) {
-			console.warn(`[Offline Mode] Network failed. Using stale local history data.`, err);
+			console.warn(`Network failed. Using stale cache.`, err);
 			return rec[1];
 		}
 		throw err;
@@ -285,14 +301,6 @@ const query = async (url: ApiName, params?: reqParams, cfg?: reqOption): Promise
 	});
 };
 
-function delGroupKey(key: string) {
-	for (const [k, s] of group) {
-		if (s.has(key)) {
-			s.delete(key);
-			if (!s.size) group.delete(k);
-		}
-	}
-}
 export const addGroupKey = (groupKey: string, key: string) => {
 	const s = group.get(groupKey) || new Set<string>();
 	s.add(key);
@@ -314,7 +322,9 @@ export const saveCache = (
 	const now = Date.now();
 	const r = [now + c, d, undefined] as cacheRecord;
 	reqCacheMap.set(key, r);
-	saveCacheToStorage();
+	// Also write to Cache API (SW shares this bucket)
+	const fullUrl = `/api/${url}${p ? '?' + body2query(p as Record<string, unknown>) : ''}`;
+	cacheApiPut(fullUrl, d, c);
 };
 const delayMap = new Map<string, [connectFn, (params?: reqParams) => void, boolean]>();
 export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
@@ -362,13 +372,16 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 	let p = browser ? reqPromiseCache.get(key) : undefined;
 	if (!p) {
 		const cache = cfg?.cache;
-		p = reqCache(cache ? key : '', async (rec) => {
+		const fullUrl =
+			cache && cfg?.method === method.GET
+				? `/api/${url}${params ? '?' + body2query(params as Record<string, unknown>) : ''}`
+				: null;
+		p = reqCache(cache ? key : '', fullUrl, async (rec) => {
 			const d = await query(url, params, cfg);
 			if (cache && rec) {
 				rec[0] = Date.now() + cache;
 				rec[1] = d;
 				rec[2] = undefined;
-				saveCacheToStorage();
 			}
 			return d;
 		})

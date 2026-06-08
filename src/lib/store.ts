@@ -7,14 +7,6 @@ import type { BeforeNavigate } from '@sveltejs/kit';
 import type { FwResp } from '$lib/server/model';
 import { req } from '$lib/req';
 import { method } from '$lib/enum';
-import { browser } from '$app/environment';
-
-/** Global online/offline state. Subscribers can reactively show stale-data indicators. */
-export const isOnline = writable(browser ? navigator.onLine : true);
-if (browser) {
-	window.addEventListener('online', () => isOnline.set(true));
-	window.addEventListener('offline', () => isOnline.set(false));
-}
 
 const user = writable({
 	token: 'test'
