@@ -12,5 +12,7 @@ export class Tag {
 	createAt = INT;
 	userId = INT;
 	banner = INT;
+	bannerR2Synced?: boolean;
+	bannerR2Key?: string;
 	_posts?: string | { id: number; title: string }[];
 }

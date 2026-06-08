@@ -33,6 +33,8 @@ export class Post {
 	@primary
 	id = INT;
 	banner = INT;
+	bannerR2Synced?: boolean;
+	bannerR2Key?: string;
 	slug = TEXT;
 	desc = TEXT;
 	_d = TEXT;

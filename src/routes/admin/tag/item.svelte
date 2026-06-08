@@ -1,6 +1,6 @@
 <script>
 	import { confirm, h } from '$lib/store';
-	import { getErr, resUrl } from '$lib/utils';
+	import { resUrl } from '$lib/utils';
 	let { d = {}, sel = false, ck, del } = $props();
 
 	function de(id) {

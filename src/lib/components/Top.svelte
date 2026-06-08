@@ -7,7 +7,6 @@
 	let h = $state(99999);
 	let a = $state(0);
 	let btn = $state();
-	let t;
 	let p = $state();
 	const setA = delay((n) => {
 		a = n;

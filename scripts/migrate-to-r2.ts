@@ -229,7 +229,7 @@ async function main() {
 			const hashKey = row.r2Key;
 			const numExists = await r2Exists(cfg, numKey);
 			const hashExists = hashKey && hashKey !== numKey && await r2Exists(cfg, hashKey);
-			const thumbKey = `_${numExists ? numKey : hashKey}_`;  // placeholder — we check below
+			
 			const thumbNumExists = numExists && await r2Exists(cfg, `_${numKey}`);
 			const thumbHashExists = hashExists && await r2Exists(cfg, `_${hashKey}`);
 			const synced = numExists || hashExists;

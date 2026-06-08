@@ -18,7 +18,7 @@
 </script>
 
 <div class="m">
-	<div class="a">
+	<div class="w">
 		<P />
 		<Ai />
 		<R2 />
@@ -37,29 +37,30 @@
 <style lang="scss">
 	@use '../../../lib/break' as *;
 
-	.a {
-		border-radius: 14px;
-		background: var(--bg1);
-		max-width: 800px;
-		padding: 1px;
+	.w {
+		columns: 600px;
+		column-gap: 12px;
+		margin: 0;
+		:global(.a) {
+			break-inside: avoid;
+			margin: 0 0 12px;
+			width: 100%;
+		}
 		@include s() {
-			border-radius: 0;
+			columns: 1;
 		}
 	}
 
 	.m {
-		align-content: flex-start;
 		position: absolute;
 		top: 0;
 		bottom: 0;
 		left: 0;
 		right: 0;
 		overflow: auto;
-		padding: 0 10px;
-		flex-direction: column;
+		padding: 12px;
 		@include s() {
 			padding: 0;
-			flex-direction: row;
 		}
 	}
 </style>

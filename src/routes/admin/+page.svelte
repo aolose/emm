@@ -206,7 +206,7 @@
 
 	.c {
 		flex: 1;
-		max-width: 800px;
+		max-width: 1000px;
 		width: 0;
 		display: flex;
 		flex-direction: column;

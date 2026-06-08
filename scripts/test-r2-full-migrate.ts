@@ -26,7 +26,7 @@ const TEST_DIR = resolve('__r2_full_migrate_test__');
 const UPLOAD_DIR = join(TEST_DIR, 'upload');
 const THUMB_DIR = join(TEST_DIR, 'thumb');
 const DB_PATH = join(TEST_DIR, 'test.db');
-const R2_PREFIX = '__full_migrate_test__';
+
 
 // ---------------------------------------------------------------------------
 // Test helpers

@@ -16,9 +16,8 @@ import {
 	pageBuilder
 } from '../utils';
 import { permission } from '$lib/enum';
-import { enc, legacyEnc, filter, trim } from '$lib/utils';
+import { trim } from '$lib/utils';
 import { genToken } from '$lib/server/token';
-import { Post } from '$lib/server/model';
 
 const { Admin, Read } = permission;
 

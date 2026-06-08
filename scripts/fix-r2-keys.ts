@@ -15,7 +15,7 @@
 import { Database } from 'bun:sqlite';
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
-import { createHash } from 'crypto';
+
 
 // ---------------------------------------------------------------------------
 // DB access

@@ -7,8 +7,6 @@
  *   bun run scripts/recovery-thumbnails.ts 442-445   # specific IDs
  */
 import { Database } from 'bun:sqlite';
-import { readFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
 
 const db = new Database('blog.db');
 const sys = db.query('SELECT * FROM System WHERE id = 1').get() as Record<string, any>;

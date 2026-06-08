@@ -4,7 +4,7 @@
 	import Viewer from '$lib/components/viewer.svelte';
 	import PF from '$lib/components/post/pf.svelte';
 	import Tag from '$lib/components/post/tag.svelte';
-	import { expand, small, h } from '$lib/store';
+	import { expand, small } from '$lib/store';
 	import { imageViewer } from '$lib/use';
 	import Comment from '$lib/components/comment/index.svelte';
 	import Head from '$lib/components/Head.svelte';

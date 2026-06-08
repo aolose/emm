@@ -55,7 +55,7 @@ export const hooks: apiHooks = {
 								dmp.diff_cleanupSemantic(diff);
 							}
 							const patchList = dmp.patch_make(old, content, diff);
-							let patchText = '';
+							let patchText: string;
 							const inf = [];
 							const dif = [];
 							for (const { diffs, start1, start2, length1, length2 } of patchList) {

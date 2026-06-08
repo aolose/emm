@@ -4,7 +4,7 @@ import { Client } from '$lib/server/client';
 import { DBProxy, getClient, getIp, model, sqlFields } from '$lib/server/utils';
 import { db } from '$lib/server/index';
 import { requireType } from '$lib/server/enum';
-import type { DiffFn, Model, Obj, Timer } from '$lib/types';
+import type { DiffFn, Model } from '$lib/types';
 import { publishedPost, tags } from '$lib/server/store';
 import { diffStrSet } from '$lib/setStrPatchFn';
 import { get } from 'svelte/store';
