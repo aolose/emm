@@ -1,16 +1,20 @@
 /// <reference types="@sveltejs/kit" />
 import { build, files, version } from '$service-worker';
 
+const DEV = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
+
 const channel = new BroadcastChannel('sw-messages');
 const cachePrefix = 'sw-';
-const CACHE = `${cachePrefix}${version}`;
+// Dev mode uses a fixed cache name — `version` changes on every Vite rebuild,
+// which would otherwise trigger activate→delete and wipe the offline cache.
+const CACHE = DEV ? 'sw-dev' : `${cachePrefix}${version}`;
 const RES_CACHE = 'res';
 const ASSETS = [
 	...build, // the app itself
 	...files // everything in `static`
 ];
 
-self.addEventListener('install', async (event) => {
+self.addEventListener('install', (event) => {
 	const {
 		registration: { active }
 	} = self;
@@ -22,36 +26,55 @@ self.addEventListener('install', async (event) => {
 
 	const p = addFilesToCache();
 	event.waitUntil(p);
+
 	if (active) {
-		await p;
-		self.skipWaiting();
-		channel.postMessage({ type: 'CACHE_DONE' });
-	} else {
-		event.waitUntil(p);
+		event.waitUntil(
+			p.then(() => {
+				self.skipWaiting();
+				channel.postMessage({ type: 'CACHE_DONE' });
+			})
+		);
 	}
 });
+
 self.addEventListener('activate', (event) => {
 	async function deleteOldCaches() {
 		for (const key of await caches.keys()) {
 			if (key !== CACHE && key.startsWith('sw-')) await caches.delete(key);
 		}
 	}
-
 	event.waitUntil(deleteOldCaches());
 });
 
 self.addEventListener('fetch', (event) => {
+	// 保持原样：非 GET 请求不拦截
 	if (event.request.method !== 'GET') return;
+
 	const pathname = URL.parse(event.request.url).pathname;
 	if (/^\/(api|admin|login|feed)/.test(pathname)) return;
 
+	// Dev mode (Vite HMR): network-first, populate cache for offline.
+	// Always serves live Vite content; caches on the fly so offline has a full app shell.
+	if (DEV) {
+		async function networkFirst() {
+			try {
+				const response = await fetch(event.request);
+				const cache = await caches.open(CACHE);
+				cache.put(event.request, response.clone());
+				return response;
+			} catch {
+				const cache = await caches.open(CACHE);
+				return cache.match(event.request);
+			}
+		}
+		return event.respondWith(networkFirst());
+	}
+
 	async function respond() {
 		const url = new URL(event.request.url);
-
-		// 1. Sync path check (works instantly for /res/ requests)
 		let isRes = url.pathname.startsWith('/res/');
 
-		// 2. Cross-origin request: may be R2 — read shared Cache
+		// 跨域处理：判断是否为 R2 资源
 		if (!isRes && url.hostname !== self.location.hostname) {
 			const configCache = await caches.open('sw-config');
 			const configResponse = await configCache.match('/__config/r2-host');
@@ -59,28 +82,46 @@ self.addEventListener('fetch', (event) => {
 			if (r2Host && url.hostname === r2Host) isRes = true;
 		}
 
-		const cache = await caches.open(isRes ? RES_CACHE : CACHE);
-		if (ASSETS.includes(url.pathname)) {
-			const response = await cache.match(url.pathname);
-			if (response) {
-				return response;
-			}
-		}
+		const currentCacheName = isRes ? RES_CACHE : CACHE;
+		const cache = await caches.open(currentCacheName);
+
 		try {
-			const response = await fetch(event.request);
-			if (!(response instanceof Response)) {
-				throw new Error('invalid response from fetch');
+			const cachedResponse = await cache.match(event.request, { ignoreSearch: true });
+
+			let requestToSend = event.request;
+			if (isRes && url.hostname !== self.location.hostname && event.request.mode !== 'cors') {
+				requestToSend = new Request(event.request.url, {
+					method: event.request.method,
+					headers: event.request.headers,
+					mode: 'cors',
+					credentials: 'omit',
+					redirect: event.request.redirect
+				});
 			}
-			if (response.status === 200 || response.status === 0) {
-				cache.put(event.request, response.clone());
+
+			const networkFetch = fetch(requestToSend)
+				.then(async (networkResponse) => {
+					if (networkResponse && (networkResponse.status === 200 || networkResponse.status === 0)) {
+						await cache.put(event.request, networkResponse.clone());
+					}
+					return networkResponse;
+				})
+				.catch((fetchErr) => {
+					console.warn('SW 后台更新缓存失败（可能处于离线状态）:', fetchErr);
+				});
+
+			if (cachedResponse) {
+				event.waitUntil(networkFetch);
+				return cachedResponse;
 			}
-			return response;
+
+			const networkResponse = await networkFetch;
+			if (networkResponse) return networkResponse;
+
+			throw new Error('No cache and network failed');
 		} catch (err) {
-			const response = await cache.match(event.request);
-			if (response) {
-				return response;
-			}
-			throw err;
+			console.error('SW 处理请求崩溃，启动安全防御:', err);
+			return fetch(event.request);
 		}
 	}
 

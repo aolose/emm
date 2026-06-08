@@ -29,7 +29,6 @@ import { hooks } from '$lib/apiHooks';
 import { error, redirect } from '@sveltejs/kit';
 import { confirm, status } from '$lib/store';
 import { get } from 'svelte/store';
-import { goto } from '$app/navigation';
 
 const cacheData = '.d';
 const cacheKey = '.k';
@@ -107,11 +106,11 @@ const loadCacheFromStorage = () => {
 			const n = Date.now();
 			ex.forEach((a: number, i: number) => {
 				const exp = a + bg;
-				if (exp > n) {
-					reqCacheMap.set(ke[i], [exp, da[i], undefined]);
-				} else {
+				// Keep expired entries in-memory so reqCache() can serve them when offline.
+				// saveCacheToStorage() will filter them out of persistence on next write.
+				reqCacheMap.set(ke[i], [exp, da[i], undefined]);
+				if (exp <= n) {
 					ch = 1;
-					delGroupKey(ke[i]);
 				}
 			});
 		} catch (e) {
@@ -135,26 +134,37 @@ const allowReadCache = () => {
 	return true;
 };
 const reqCache = (key: string, run: (re?: cacheRecord) => Promise<reqData>): Promise<reqData> => {
-	if (!key) {
-		return run();
-	}
-	if (!browser) {
-		return run();
-	}
-	const rec = key && reqCacheMap.get(key);
+	if (!key || !browser) return run();
+	const rec = reqCacheMap.get(key);
 	const now = Date.now();
+	const offline = !navigator.onLine;
+
 	if (allowReadCache() && rec) {
 		const [n, d, p] = rec;
 		if (p) return p;
-		if (n > now) {
+		// When offline, serve cache immediately regardless of expiry — skip the network entirely.
+		if (offline) {
+			console.info('[Offline Mode] Serving from cache (expired or not), skipping network.');
 			return Promise.resolve(d);
 		}
+		// Online: serve only if not yet expired.
+		if (n > now) return Promise.resolve(d);
 	}
+
 	const r = [-1, undefined, undefined] as cacheRecord;
 	reqCacheMap.set(key, r);
-	r[2] = run(r);
+
+	r[2] = run(r).catch((err) => {
+		if (rec && rec[1] !== undefined) {
+			console.warn(`[Offline Mode] Network failed. Using stale local history data.`, err);
+			return rec[1];
+		}
+		throw err;
+	});
+
 	return r[2];
 };
+
 
 const getHooks = (url: string, method = 0) => {
 	const hks = hooks[url] || {};
@@ -292,10 +302,10 @@ export const addGroupKey = (groupKey: string, key: string) => {
 export const saveCache = (
 	url: string,
 	p: reqParams,
-	method: number,
+	method: MethodNumber,
 	d: reqData,
 	customKey?: string,
-	c?: reqCache,
+	c=0,
 	groupKey?: string
 ) => {
 	if (!browser || !reqCacheMap) return;
