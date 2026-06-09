@@ -282,14 +282,28 @@ async function signRequest(
 
 	const canonicalHeaders = signedHeaderNames
 		.map((h) => {
-			const v = h === 'host' ? host : h === 'x-amz-content-sha256' ? payloadSha256 : h === 'x-amz-date' ? amzDate : (extraHeaders?.[h] || '');
+			const v =
+				h === 'host'
+					? host
+					: h === 'x-amz-content-sha256'
+						? payloadSha256
+						: h === 'x-amz-date'
+							? amzDate
+							: extraHeaders?.[h] || '';
 			return `${h}:${v}`;
 		})
 		.join('\n');
 
 	const signedHeaders = signedHeaderNames.join(';');
 
-	const canonicalRequest = [method, canonicalUri, '', canonicalHeaders + '\n', signedHeaders, payloadSha256].join('\n');
+	const canonicalRequest = [
+		method,
+		canonicalUri,
+		'',
+		canonicalHeaders + '\n',
+		signedHeaders,
+		payloadSha256
+	].join('\n');
 
 	const credentialScope = `${dateStamp}/${R2_REGION}/${R2_SERVICE}/aws4_request`;
 	const stringToSign = [
@@ -300,9 +314,7 @@ async function signRequest(
 	].join('\n');
 
 	const signingKey = await getSignatureKey(sys.r2SecretAccessKey, dateStamp, R2_REGION, R2_SERVICE);
-	const signature = Array.from(
-		new Uint8Array(await hmacSha256(signingKey, stringToSign))
-	)
+	const signature = Array.from(new Uint8Array(await hmacSha256(signingKey, stringToSign)))
 		.map((b) => b.toString(16).padStart(2, '0'))
 		.join('');
 

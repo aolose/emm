@@ -53,6 +53,10 @@ export class System {
 	// AI integration
 	aiApiKey = TEXT;
 	aiModel = TEXT;
+	aiMemoryEnabled = false;
+	aiMemory = TEXT;
+	aiMemoryTags = TEXT;
+	aiMemoryLimit = INT;
 }
 
 export class User {

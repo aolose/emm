@@ -8,6 +8,8 @@ node_modules
 !.env.example
 /.idea
 *.db
+*.db-shm
+*.db-wal
 /.dbCfg
 /dist/
 /dev-dist/

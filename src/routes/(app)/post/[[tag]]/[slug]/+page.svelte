@@ -24,7 +24,13 @@
 		next = $derived(d._n);
 	let r2Domain = $derived(data.r2Domain);
 	let r2Enabled = $derived(data.r2Enabled);
-	let targetSrc = $derived(d.banner ? (d.bannerR2Synced && r2Enabled ? resUrl(r2Domain, d.bannerR2Key || d.banner, $small, true) : `/res/${$small ? '_' + d.banner : d.banner}`) : defaultBg);
+	let targetSrc = $derived(
+		d.banner
+			? d.bannerR2Synced && r2Enabled
+				? resUrl(r2Domain, d.bannerR2Key || d.banner, $small, true)
+				: `/res/${$small ? '_' + d.banner : d.banner}`
+			: defaultBg
+	);
 	let currentBg = $state(targetSrc);
 	let prevBg = $state('');
 
@@ -71,7 +77,11 @@
 	description={view}
 	ogType="article"
 	canonical={$page.url.href}
-	ogImage={d.banner ? (d.bannerR2Synced && r2Enabled ? resUrl(r2Domain, d.bannerR2Key || d.banner, true, true) : `${$page.url.origin}/res/_${d.banner}`) : ''}
+	ogImage={d.banner
+		? d.bannerR2Synced && r2Enabled
+			? resUrl(r2Domain, d.bannerR2Key || d.banner, true, true)
+			: `${$page.url.origin}/res/_${d.banner}`
+		: ''}
 >
 	<meta property="article:published_time" content={time(d.createAt)} />
 	<meta property="article:tag" content={d._tag} />
@@ -96,8 +106,8 @@
 	<div class="h">
 		<h1>{d.title}</h1>
 		{#if d.desc}<p>
-			{@html marked(d.desc)}
-		</p>{/if}
+				{@html marked(d.desc)}
+			</p>{/if}
 		<div class="i">
 			<span><span class="icon i-view"></span>{d._r}</span>
 			<span>{time(d.createAt)}</span>
@@ -116,13 +126,7 @@
 				<img class="bg-old" src={prevBg} alt="" />
 			{/if}
 			{#key currentBg}
-				<img
-					class="bg-img"
-					src={currentBg}
-					alt=""
-					decoding="async"
-					fetchpriority="high"
-				/>
+				<img class="bg-img" src={currentBg} alt="" decoding="async" fetchpriority="high" />
 			{/key}
 			<div class="ft" {style}></div>
 			<div class="fc"></div>
@@ -174,338 +178,344 @@
 {/if}
 
 <style lang="scss">
-  @use 'sass:color';
+	@use 'sass:color';
 
-  @use '../../../../../lib/break' as *;
+	@use '../../../../../lib/break' as *;
 
-  $bg: var(--bg6);
-  $bg2: var(--bg7);
+	$bg: var(--bg6);
+	$bg2: var(--bg7);
 
-  .sl {
-    padding: 20px 0;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
+	.sl {
+		padding: 20px 0;
+		display: flex;
+		justify-content: space-between;
+		flex-wrap: wrap;
 
-    p {
-      display: flex;
-      align-items: center;
-      padding: 3px 10px;
-      color: var(--darkgrey);
-      @include s() {
-        width: 100%;
-        justify-content: space-between;
-      }
-    }
+		p {
+			display: flex;
+			align-items: center;
+			padding: 3px 10px;
+			color: var(--darkgrey);
+			@include s() {
+				width: 100%;
+				justify-content: space-between;
+			}
+		}
 
-    span {
-      font-size: 14px;
-    }
+		span {
+			font-size: 14px;
+		}
 
-    button {
-      color: var(--darkgrey-h);
-      margin-left: 10px;
-      background: none;
-      padding: 0;
+		button {
+			color: var(--darkgrey-h);
+			margin-left: 10px;
+			background: none;
+			padding: 0;
 
-      &:hover {
-        color: #b1bbc5;
-        text-decoration: underline;
-      }
+			&:hover {
+				color: #b1bbc5;
+				text-decoration: underline;
+			}
 
-      @include s() {
-        color: #758caf !important;
-      }
-    }
-  }
+			@include s() {
+				color: #758caf !important;
+			}
+		}
+	}
 
-  .i-tags {
-    color: #2b4d77;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 5px;
-  }
+	.i-tags {
+		color: #2b4d77;
+		font-size: 18px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 5px;
+	}
 
-  .tg {
-    padding: 0 20px;
-    display: flex;
-    flex-wrap: wrap;
-  }
+	.tg {
+		padding: 0 20px;
+		display: flex;
+		flex-wrap: wrap;
+	}
 
-  .ss {
-    flex: 1;
-  }
+	.ss {
+		flex: 1;
+	}
 
-  .art {
-    display: flex;
-    flex-direction: column;
-    min-height: 500px;
-    border-radius: 32px;
-    overflow: hidden;
-    background: $bg;
-    padding: 32px 48px;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
-    @include s() {
-      padding: 20px 8px;
-      margin: 0;
-      min-height: 67vh;
-    }
-  }
+	.art {
+		display: flex;
+		flex-direction: column;
+		min-height: 500px;
+		border-radius: 32px;
+		overflow: hidden;
+		background: $bg;
+		padding: 32px 48px;
+		box-shadow: rgba(0, 0, 0, 0.2) 0 10px 30px -10px;
+		@include s() {
+			padding: 20px 8px;
+			margin: 0;
+			min-height: 67vh;
+		}
+	}
 
-  .ct {
-    & > img {
-      margin: 0 auto 30px;
-      display: block;
-    }
+	.ct {
+		& > img {
+			margin: 0 auto 30px;
+			display: block;
+		}
 
-    :global {
-      a {
-        color: #1c93ff;
-      }
+		:global {
+			a {
+				color: #1c93ff;
+			}
 
-      .md {
-        color: #333;
-        font-size: 14px;
-        line-height: 2;
-        margin: 10px 0 20px;
+			.md {
+				color: #333;
+				font-size: 14px;
+				line-height: 2;
+				margin: 10px 0 20px;
 
-        pre,
-        code {
-          border-radius: 3px;
-          word-break: break-word;
-          background: color.adjust(rgb(37, 40, 55), $alpha: -0.95);
-          color: #1a2638;
-        }
+				pre,
+				code {
+					border-radius: 3px;
+					word-break: break-word;
+					background: color.adjust(rgb(37, 40, 55), $alpha: -0.95);
+					color: #1a2638;
+				}
 
-        pre {
-          code {
-            background: none;
-          }
-        }
+				pre {
+					code {
+						background: none;
+					}
+				}
 
-        & > p {
-          margin-bottom: 10px;
+				& > p {
+					margin-bottom: 10px;
 
-          &:first-child:first-letter {
-            font-size: 30px;
-            @include s() {
-              font-size: 20px;
-            }
-          }
-        }
-      }
-    }
-  }
+					&:first-child:first-letter {
+						font-size: 30px;
+						@include s() {
+							font-size: 20px;
+						}
+					}
+				}
+			}
+		}
+	}
 
-  .co {
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    position: absolute;
-    overflow: auto;
-    transition: 0.3s ease-in-out;
-    @include s() {
-      overflow: visible;
-      bottom: inherit;
-      position: relative;
-      &:global {
-        .ctx {
-          padding: 0 !important;
-        }
-      }
-    }
-  }
+	.co {
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		position: absolute;
+		overflow: auto;
+		transition: 0.3s ease-in-out;
+		@include s() {
+			overflow: visible;
+			bottom: inherit;
+			position: relative;
+			&:global {
+				.ctx {
+					padding: 0 !important;
+				}
+			}
+		}
+	}
 
-  .h {
-    padding: 30px;
-    color: #f4f6f8;
-    min-height: 300px;
-    opacity: 0.8;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 30px auto 0;
-    text-align: center;
-		z-index:11;
+	.h {
+		padding: 30px;
+		color: #f4f6f8;
+		min-height: 300px;
+		opacity: 0.8;
+		display: none;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		margin: 30px auto 0;
+		text-align: center;
+		z-index: 11;
 
-    :global {
-      * {
-        color: rgba(244, 246, 248, 0.9);
-        text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
-      }
-    }
+		:global {
+			* {
+				color: rgba(244, 246, 248, 0.9);
+				text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px;
+			}
+		}
 
-    p {
-      text-align: center;
-      line-height: 2;
-      margin: 10px 0 30px;
-      font-size: 14px;
-      max-width: 90%;
-    }
-  }
+		p {
+			text-align: center;
+			line-height: 2;
+			margin: 10px 0 30px;
+			font-size: 14px;
+			max-width: 90%;
+		}
+	}
 
-  .i {
-    width: 100%;
-    display: flex;
-    justify-content: center;
+	.i {
+		width: 100%;
+		display: flex;
+		justify-content: center;
 
-    span {
-      padding: 0 3px;
-      width: auto;
-      font-size: 12px;
-      color: #ddd;
-    }
+		span {
+			padding: 0 3px;
+			width: auto;
+			font-size: 12px;
+			color: #ddd;
+		}
 
-    & > span {
-      margin: 0 10px;
-    }
-  }
+		& > span {
+			margin: 0 10px;
+		}
+	}
 
-  h1 {
-    color: inherit;
-    margin: 14px 0 20px;
-    font-weight: 100;
-    text-align: center;
-    font-size: 48px;
-    @include s() {
-      max-height: 90%;
-      font-size: 32px;
-    }
-  }
+	h1 {
+		color: inherit;
+		margin: 14px 0 20px;
+		font-weight: 100;
+		text-align: center;
+		font-size: 48px;
+		@include s() {
+			max-height: 90%;
+			font-size: 32px;
+		}
+	}
 
-  .bk {
-    position: fixed;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 36px;
-    width: 36px;
-    opacity: 0.8;
-    cursor: pointer;
-    color: #fff;
-    top: 12px;
-    right: 12px;
-    z-index: 100;
+	.bk {
+		position: fixed;
+		font-size: 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 36px;
+		width: 36px;
+		opacity: 0.8;
+		cursor: pointer;
+		color: #fff;
+		top: 12px;
+		right: 12px;
+		z-index: 100;
 
-    &:hover {
-      opacity: 1;
-    }
-  }
+		&:hover {
+			opacity: 1;
+		}
+	}
 
-  .bg {
-    z-index: 0;
-    pointer-events: none;
-    display: block;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 90%;
-    max-height: 100%;
-    min-height: 400px;
-    overflow: hidden;
-    @include s() {
-      pointer-events: auto;
-      padding: 20px 1px;
-      position: relative;
-      border-bottom: none;
-      height: auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 300px;
-      .h {
-        display: flex;
-      }
-    }
-  }
+	.bg {
+		z-index: 0;
+		pointer-events: none;
+		display: block;
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 90%;
+		max-height: 100%;
+		min-height: 400px;
+		overflow: hidden;
+		@include s() {
+			pointer-events: auto;
+			padding: 20px 1px;
+			position: relative;
+			border-bottom: none;
+			height: auto;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 300px;
+			.h {
+				display: flex;
+			}
+		}
+	}
 
-  .bg-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    z-index: 2;
-    animation: bgFadeIn 0.45s ease-in-out forwards;
-  }
-  .bg-old {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    z-index: 1;
-    opacity: 1;
-  }
+	.bg-img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		z-index: 2;
+		animation: bgFadeIn 0.45s ease-in-out forwards;
+	}
+	.bg-old {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		z-index: 1;
+		opacity: 1;
+	}
 
-  @keyframes bgFadeIn {
-    0% { opacity: 0; }
-    10% { opacity: 0; }
-    100% { opacity: 1; }
-  }
+	@keyframes bgFadeIn {
+		0% {
+			opacity: 0;
+		}
+		10% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
 
-  .ft,
-  .fc {
-    position: absolute;
-    z-index: 10;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-  }
+	.ft,
+	.fc {
+		position: absolute;
+		z-index: 10;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+	}
 
-  .ft {
-    opacity: 0.5;
-  }
+	.ft {
+		opacity: 0.5;
+	}
 
-  .pg {
-    background: $bg2;
-    height: 100%;
-    overflow: auto;
-    @include s() {
-      scrollbar-width: auto;
-      min-height: 100%;
-      background: var(--bg6);
-    }
-  }
+	.pg {
+		background: $bg2;
+		height: 100%;
+		overflow: auto;
+		@include s() {
+			scrollbar-width: auto;
+			min-height: 100%;
+			background: var(--bg6);
+		}
+	}
 
-  .fc {
-    background: linear-gradient(0, $bg2, transparent);
-    @include s() {
-      background: linear-gradient(0, $bg, transparent);
-    }
-  }
+	.fc {
+		background: linear-gradient(0, $bg2, transparent);
+		@include s() {
+			background: linear-gradient(0, $bg, transparent);
+		}
+	}
 
-  @supports (mix-blend-mode: multiply) {
-    .ft {
-      mix-blend-mode: multiply;
-      backdrop-filter: grayscale(0.5);
-    }
-  }
+	@supports (mix-blend-mode: multiply) {
+		.ft {
+			mix-blend-mode: multiply;
+			backdrop-filter: grayscale(0.5);
+		}
+	}
 
-  .v {
-    max-width: 100%;
-    width: 800px;
-    margin: 0 auto;
-    padding-bottom: 50px;
+	.v {
+		max-width: 100%;
+		width: 800px;
+		margin: 0 auto;
+		padding-bottom: 50px;
 
-    .h {
-      display: flex;
-    }
+		.h {
+			display: flex;
+		}
 
-    @include s() {
-      .h {
-        display: none;
-      }
-      padding-bottom: 0;
-    }
-  }
+		@include s() {
+			.h {
+				display: none;
+			}
+			padding-bottom: 0;
+		}
+	}
 </style>

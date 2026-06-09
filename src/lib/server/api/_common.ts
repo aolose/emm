@@ -215,5 +215,9 @@ export const sysKs: (keyof import('$lib/server/model').System)[] = [
 	'fwAggregate',
 	'fwLastCount',
 	'fwLastAggregateAt',
-	'aiModel'
+	'aiModel',
+	'aiMemoryEnabled',
+	'aiMemoryTags',
+	'aiMemoryLimit',
+	'aiMemory'
 ];

@@ -11,7 +11,15 @@
  */
 
 import { Database } from 'bun:sqlite';
-import { readFileSync, existsSync, mkdirSync, writeFileSync, unlinkSync, rmdirSync, readdirSync } from 'fs';
+import {
+	readFileSync,
+	existsSync,
+	mkdirSync,
+	writeFileSync,
+	unlinkSync,
+	rmdirSync,
+	readdirSync
+} from 'fs';
 import { resolve, join } from 'path';
 
 // ---------------------------------------------------------------------------
@@ -29,9 +37,13 @@ function ensureDir(dir: string) {
 function cleanDir(dir: string) {
 	if (existsSync(dir)) {
 		for (const f of readdirSync(dir)) {
-			try { unlinkSync(join(dir, f)); } catch {}
+			try {
+				unlinkSync(join(dir, f));
+			} catch {}
 		}
-		try { rmdirSync(dir); } catch {}
+		try {
+			rmdirSync(dir);
+		} catch {}
 	}
 }
 
@@ -69,11 +81,15 @@ function readR2Config() {
 async function sha256(data: string | Uint8Array): Promise<string> {
 	const buf = typeof data === 'string' ? new TextEncoder().encode(data) : data;
 	const hash = await crypto.subtle.digest('SHA-256', buf);
-	return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, '0')).join('');
+	return Array.from(new Uint8Array(hash))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
 }
 
 async function hmac256(key: Uint8Array, data: string): Promise<Uint8Array> {
-	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, [
+		'sign'
+	]);
 	const sig = await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(data));
 	return new Uint8Array(sig);
 }
@@ -91,10 +107,19 @@ async function r2Sign(method: string, keyPath: string, buf: Uint8Array, ct: stri
 	if (ct && method === 'PUT') names.push('content-type');
 	names.sort();
 
-	const ch = names.map((h) => {
-		const v = h === 'host' ? host : h === 'x-amz-content-sha256' ? payloadHash : h === 'x-amz-date' ? amzDate : ct;
-		return `${h}:${v}`;
-	}).join('\n');
+	const ch = names
+		.map((h) => {
+			const v =
+				h === 'host'
+					? host
+					: h === 'x-amz-content-sha256'
+						? payloadHash
+						: h === 'x-amz-date'
+							? amzDate
+							: ct;
+			return `${h}:${v}`;
+		})
+		.join('\n');
 
 	const sh = names.join(';');
 	const cr = [method, uri, '', ch + '\n', sh, payloadHash].join('\n');
@@ -125,19 +150,32 @@ function r2Url(keyPath: string): string {
 
 async function r2Put(key: string, buf: Uint8Array, ct: string): Promise<boolean> {
 	const h = await r2Sign('PUT', key, buf, ct);
-	const r = await fetch(r2Url(key), { method: 'PUT', headers: h, body: buf, signal: AbortSignal.timeout(15000) });
+	const r = await fetch(r2Url(key), {
+		method: 'PUT',
+		headers: h,
+		body: buf,
+		signal: AbortSignal.timeout(15000)
+	});
 	return r.ok;
 }
 
 async function r2Head(key: string): Promise<boolean> {
 	const h = await r2Sign('HEAD', key, new Uint8Array(0), '');
-	const r = await fetch(r2Url(key), { method: 'HEAD', headers: h, signal: AbortSignal.timeout(10000) });
+	const r = await fetch(r2Url(key), {
+		method: 'HEAD',
+		headers: h,
+		signal: AbortSignal.timeout(10000)
+	});
 	return r.ok;
 }
 
 async function r2Del(key: string): Promise<boolean> {
 	const h = await r2Sign('DELETE', key, new Uint8Array(0), '');
-	const r = await fetch(r2Url(key), { method: 'DELETE', headers: h, signal: AbortSignal.timeout(10000) });
+	const r = await fetch(r2Url(key), {
+		method: 'DELETE',
+		headers: h,
+		signal: AbortSignal.timeout(10000)
+	});
 	return r.ok || r.status === 404;
 }
 
@@ -147,8 +185,14 @@ async function r2Del(key: string): Promise<boolean> {
 
 let passed = 0;
 let failed = 0;
-function ok(msg: string) { passed++; console.log(`  ✓ ${msg}`); }
-function no(msg: string, d?: string) { failed++; console.log(`  ✗ ${msg}${d ? ` — ${d}` : ''}`); }
+function ok(msg: string) {
+	passed++;
+	console.log(`  ✓ ${msg}`);
+}
+function no(msg: string, d?: string) {
+	failed++;
+	console.log(`  ✗ ${msg}${d ? ` — ${d}` : ''}`);
+}
 
 async function main() {
 	const R2_PREFIX = '__migrate_test__';
@@ -168,7 +212,7 @@ async function main() {
 	const testFiles = [
 		{ id: 90001, body: 'Hello World', type: 'text/plain', thumb: false },
 		{ id: 90002, body: 'Image data ' + 'x'.repeat(500), type: 'image/png', thumb: true },
-		{ id: 90003, body: 'Another file', type: 'application/pdf', thumb: false },
+		{ id: 90003, body: 'Another file', type: 'application/pdf', thumb: false }
 	];
 	const r2Keys: string[] = [];
 
@@ -227,7 +271,10 @@ async function main() {
 			skipped++;
 			// If local exists, delete it (mimics migration)
 			const lp = join(UPLOAD_DIR, String(f.id));
-			if (existsSync(lp)) try { unlinkSync(lp); } catch {}
+			if (existsSync(lp))
+				try {
+					unlinkSync(lp);
+				} catch {}
 		}
 	}
 	if (skipped === testFiles.length) ok(`All ${testFiles.length} already-uploaded files skipped`);
@@ -236,7 +283,8 @@ async function main() {
 	// ── Test 5: Missing local file → skip ──
 	console.log('\n5. Missing local file → skip');
 	const nonExistent = 99999;
-	if (!existsSync(join(UPLOAD_DIR, String(nonExistent)))) ok('Missing file correctly detected as absent');
+	if (!existsSync(join(UPLOAD_DIR, String(nonExistent))))
+		ok('Missing file correctly detected as absent');
 
 	// ── Cleanup R2 ──
 	console.log('\n6. Cleanup R2 test keys');

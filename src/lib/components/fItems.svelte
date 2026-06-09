@@ -13,17 +13,17 @@
 		act = false,
 		onclick = () => {}
 	} = $props();
-
 </script>
 
 <div class="file-card" class:act {onclick}>
 	<div class="p">
 		{#if file.type?.startsWith('image/')}
 			<img
-				src={file.url || resUrl($h.r2PublicDomain, file.id, !!file.thumb, !!file.r2Synced, file.r2Key)}
+				src={file.url ||
+					resUrl($h.r2PublicDomain, file.id, !!file.thumb, !!file.r2Synced, file.r2Key)}
 				alt={file.name}
 				class:loaded
-				onload={() => loaded = true}
+				onload={() => (loaded = true)}
 			/>
 		{/if}
 
@@ -80,26 +80,26 @@
 		}
 	}
 
-  .p {
-    position: relative;
-    padding-top: 100%;
-    background: var(--bg2);
+	.p {
+		position: relative;
+		padding-top: 100%;
+		background: var(--bg2);
 
-    img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover; /* 效果等同于 background-size: cover */
-      opacity: 0;
-      transition: opacity 0.3s ease;
+		img {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: cover; /* 效果等同于 background-size: cover */
+			opacity: 0;
+			transition: opacity 0.3s ease;
 
-      &.loaded {
-        opacity: 1; /* 加载完成后渐入 */
-      }
-    }
-  }
+			&.loaded {
+				opacity: 1; /* 加载完成后渐入 */
+			}
+		}
+	}
 
 	.n {
 		width: 90%;

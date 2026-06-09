@@ -78,7 +78,9 @@ async function loadFromCacheAPI() {
 			const url = new URL(req.url);
 			const path = url.pathname.replace(/^\/api\//, '');
 			const params: Record<string, string> = {};
-			url.searchParams.forEach((v, k) => { params[k] = v; });
+			url.searchParams.forEach((v, k) => {
+				params[k] = v;
+			});
 			const rk = reqKey(
 				path,
 				Object.keys(params).length ? params : undefined,
@@ -102,7 +104,9 @@ const reqKey = (url: string, params: reqParams, method?: MethodNumber, key?: str
 		const sorted: Record<string, unknown> = {};
 		Object.keys(params as Record<string, unknown>)
 			.sort()
-			.forEach((k) => { sorted[k] = (params as Record<string, unknown>)[k]; });
+			.forEach((k) => {
+				sorted[k] = (params as Record<string, unknown>)[k];
+			});
 		rk = `${rk}_${JSON.stringify(sorted)}`;
 	}
 	return rk;
@@ -150,37 +154,46 @@ const reqCache = (
 
 	// L2: Cache API fallback (cold start, uses actual TTL from cached response).
 	// Respect allowReadCache — skip during hydration to let SvelteKit's embedded fetch handle it.
-	const tryCacheAPI = allowReadCache() && fullUrl
-		? cacheApiGet(fullUrl).then((entry) => {
-				if (entry !== null) {
-					reqCacheMap.set(key, <[number, object | string | number | boolean | void | null, Promise<reqData> | undefined]>[entry.ttl, entry.data, undefined]);
-					return entry.data;
-				}
-				return undefined;
-			})
-		: Promise.resolve(undefined);
+	const tryCacheAPI =
+		allowReadCache() && fullUrl
+			? cacheApiGet(fullUrl).then((entry) => {
+					if (entry !== null) {
+						reqCacheMap.set(key, <
+							[
+								number,
+								object | string | number | boolean | void | null,
+								Promise<reqData> | undefined
+							]
+						>[entry.ttl, entry.data, undefined]);
+						return entry.data;
+					}
+					return undefined;
+				})
+			: Promise.resolve(undefined);
 
 	const r = [-1, undefined, undefined] as cacheRecord;
 	reqCacheMap.set(key, r);
 
-	r[2] = tryCacheAPI.then((cached) => {
-		if (cached !== undefined) return cached;
-		// L3: network
-		return run(r);
-	}).then(async (d) => {
-		if (fullUrl) cacheApiPut(fullUrl, d, 864e5);
-		return d;
-	}).catch((err) => {
-		if (rec && rec[1] !== undefined) {
-			console.warn(`Network failed. Using stale cache.`, err);
-			return rec[1];
-		}
-		throw err;
-	});
+	r[2] = tryCacheAPI
+		.then((cached) => {
+			if (cached !== undefined) return cached;
+			// L3: network
+			return run(r);
+		})
+		.then(async (d) => {
+			if (fullUrl) cacheApiPut(fullUrl, d, 864e5);
+			return d;
+		})
+		.catch((err) => {
+			if (rec && rec[1] !== undefined) {
+				console.warn(`Network failed. Using stale cache.`, err);
+				return rec[1];
+			}
+			throw err;
+		});
 
 	return r[2];
 };
-
 
 const getHooks = (url: string, method = 0) => {
 	const hks = hooks[url] || {};
@@ -313,7 +326,7 @@ export const saveCache = (
 	method: MethodNumber,
 	d: reqData,
 	customKey?: string,
-	c=0,
+	c = 0,
 	groupKey?: string
 ) => {
 	if (!browser || !reqCacheMap) return;

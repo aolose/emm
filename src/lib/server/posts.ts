@@ -11,12 +11,17 @@ import type { SQLQueryBindings } from 'bun:sqlite';
 
 const dmp = new DiffMatchPatch();
 
-function attachBannerR2(items: { banner?: number; bannerR2Synced?: boolean; bannerR2Key?: string }[]) {
+function attachBannerR2(
+	items: { banner?: number; bannerR2Synced?: boolean; bannerR2Key?: string }[]
+) {
 	if (!sys?.r2Enabled) return;
 	for (const item of items) {
 		if (item.banner) {
 			const r = db.get(model(Res, { id: item.banner }));
-			if (r) { item.bannerR2Synced = !!r.r2Synced; item.bannerR2Key = r.r2Key || ''; }
+			if (r) {
+				item.bannerR2Synced = !!r.r2Synced;
+				item.bannerR2Key = r.r2Key || '';
+			}
 		}
 	}
 }

@@ -28,7 +28,9 @@ db.run(`
 	WHERE id = 1
 `);
 
-const row = db.query('SELECT r2Enabled, r2AccountId, r2Bucket, r2PublicDomain FROM System WHERE id = 1').get() as any;
+const row = db
+	.query('SELECT r2Enabled, r2AccountId, r2Bucket, r2PublicDomain FROM System WHERE id = 1')
+	.get() as any;
 console.log('R2 config written:');
 console.log(`  Enabled:    ${row.r2Enabled}`);
 console.log(`  Account ID: ${row.r2AccountId}`);

@@ -40,20 +40,38 @@ function readSystemConfig(): {
 
 	const r2AccountId = (process.env.R2_ACCOUNT_ID || (sys?.r2AccountId as string) || '').trim();
 	const r2AccessKeyId = (process.env.R2_ACCESS_KEY || (sys?.r2AccessKeyId as string) || '').trim();
-	const r2SecretAccessKey = (process.env.R2_SECRET_KEY || (sys?.r2SecretAccessKey as string) || '').trim();
+	const r2SecretAccessKey = (
+		process.env.R2_SECRET_KEY ||
+		(sys?.r2SecretAccessKey as string) ||
+		''
+	).trim();
 	const r2Bucket = (process.env.R2_BUCKET || (sys?.r2Bucket as string) || '').trim();
-	const r2PublicDomain = (process.env.R2_PUBLIC_DOMAIN || (sys?.r2PublicDomain as string) || '').trim();
+	const r2PublicDomain = (
+		process.env.R2_PUBLIC_DOMAIN ||
+		(sys?.r2PublicDomain as string) ||
+		''
+	).trim();
 	const uploadDir = (sys?.uploadDir as string) || 'upload';
 	const thumbDir = (sys?.thumbDir as string) || 'thumb';
 
 	if (!r2AccountId || !r2AccessKeyId || !r2SecretAccessKey || !r2Bucket) {
-		console.error('ERROR: R2 not configured. Set r2AccountId/r2AccessKeyId/r2SecretAccessKey/r2Bucket.');
+		console.error(
+			'ERROR: R2 not configured. Set r2AccountId/r2AccessKeyId/r2SecretAccessKey/r2Bucket.'
+		);
 		console.error('HINT: Run the app and configure R2 in Admin → Settings → R2 Storage,');
 		console.error('      or set R2_ACCOUNT_ID/R2_ACCESS_KEY/R2_SECRET_KEY/R2_BUCKET env vars.');
 		return null;
 	}
 
-	return { uploadDir, thumbDir, r2AccountId, r2AccessKeyId, r2SecretAccessKey, r2Bucket, r2PublicDomain };
+	return {
+		uploadDir,
+		thumbDir,
+		r2AccountId,
+		r2AccessKeyId,
+		r2SecretAccessKey,
+		r2Bucket,
+		r2PublicDomain
+	};
 }
 
 // ---------------------------------------------------------------------------
@@ -67,9 +85,7 @@ async function r2Put(
 	contentType: string
 ): Promise<boolean> {
 	try {
-		const { signedHeaders } = await signRequest(
-			cfg, 'PUT', key, buf, contentType
-		);
+		const { signedHeaders } = await signRequest(cfg, 'PUT', key, buf, contentType);
 		const endpoint = `https://${cfg.accountId}.r2.cloudflarestorage.com`;
 		const url = `${endpoint}/${cfg.bucket}/${encodeURIComponent(key).replace(/%2F/g, '/')}`;
 
@@ -118,7 +134,9 @@ async function sha256(data: string | Uint8Array): Promise<string> {
 }
 
 async function hmac256(key: Uint8Array, data: string): Promise<Uint8Array> {
-	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, [
+		'sign'
+	]);
 	const sig = await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(data));
 	return new Uint8Array(sig);
 }
@@ -151,16 +169,26 @@ async function signRequest(
 	const canonicalHeaders = signedNames
 		.map((h) => {
 			const v =
-				h === 'host' ? host :
-				h === 'x-amz-content-sha256' ? payloadSha256 :
-				h === 'x-amz-date' ? amzDate :
-				extra[h] || '';
+				h === 'host'
+					? host
+					: h === 'x-amz-content-sha256'
+						? payloadSha256
+						: h === 'x-amz-date'
+							? amzDate
+							: extra[h] || '';
 			return `${h}:${v}`;
 		})
 		.join('\n');
 
 	const signedHdr = signedNames.join(';');
-	const canonicalReq = [method, canonicalUri, '', canonicalHeaders + '\n', signedHdr, payloadSha256].join('\n');
+	const canonicalReq = [
+		method,
+		canonicalUri,
+		'',
+		canonicalHeaders + '\n',
+		signedHdr,
+		payloadSha256
+	].join('\n');
 	const scope = `${dateStamp}/${region}/${service}/aws4_request`;
 	const stringToSign = ['AWS4-HMAC-SHA256', amzDate, scope, await sha256(canonicalReq)].join('\n');
 
@@ -208,11 +236,17 @@ async function main() {
 	// Read DB
 	const dbCfg = readFileSync(resolve('.dbCfg'), 'utf-8').trim();
 	const db = new Database(dbCfg);
-	const rows = db.query('SELECT id, type, r2Key FROM Res').all() as { id: number; type: string; r2Key: string }[];
+	const rows = db.query('SELECT id, type, r2Key FROM Res').all() as {
+		id: number;
+		type: string;
+		r2Key: string;
+	}[];
 	console.log(`Found ${rows.length} resources to process.\n`);
 
 	// Backfill r2Key from existing MD5 values
-	const bk = db.run('UPDATE Res SET r2Key = substr(md5, 1, 6) WHERE r2Key IS NULL AND md5 IS NOT NULL');
+	const bk = db.run(
+		'UPDATE Res SET r2Key = substr(md5, 1, 6) WHERE r2Key IS NULL AND md5 IS NOT NULL'
+	);
 	console.log(`Backfilled r2Key for ${(bk as any).changes} records`);
 
 	// ── Repair mode: HEAD-check R2, fix r2Synced + r2Key ──
@@ -220,7 +254,9 @@ async function main() {
 		console.log('\nRepair mode: HEAD-checking all Res records against R2...');
 		const allRows = db.query('SELECT id, r2Key FROM Res').all() as { id: number; r2Key: string }[];
 		console.log(`  ${allRows.length} total records`);
-		let ok = 0, missing = 0, checked = 0;
+		let ok = 0,
+			missing = 0,
+			checked = 0;
 
 		for (const row of allRows) {
 			checked++;
@@ -228,31 +264,33 @@ async function main() {
 			const numKey = String(row.id);
 			const hashKey = row.r2Key;
 			const numExists = await r2Exists(cfg, numKey);
-			const hashExists = hashKey && hashKey !== numKey && await r2Exists(cfg, hashKey);
-			
-			const thumbNumExists = numExists && await r2Exists(cfg, `_${numKey}`);
-			const thumbHashExists = hashExists && await r2Exists(cfg, `_${hashKey}`);
+			const hashExists = hashKey && hashKey !== numKey && (await r2Exists(cfg, hashKey));
+
+			const thumbNumExists = numExists && (await r2Exists(cfg, `_${numKey}`));
+			const thumbHashExists = hashExists && (await r2Exists(cfg, `_${hashKey}`));
 			const synced = numExists || hashExists;
 			const thumb = (numExists && thumbNumExists) || (hashExists && thumbHashExists) ? 1 : 0;
 
 			if (synced) {
 				db.run('UPDATE Res SET r2Synced = 1, thumb = ? WHERE id = ?', [thumb, row.id]);
 				ok++;
-		} else {
-			// Try local disk
-			const rk = (hashKey && hashKey !== '-') ? hashKey : numKey;
-			const localPath = resolve(sysCfg.uploadDir, numKey);
-			if (existsSync(localPath)) {
-				const buf = new Uint8Array(readFileSync(localPath));
-				if (await r2Put(cfg, rk, buf, 'application/octet-stream')) {
-					if (await r2Exists(cfg, rk)) {
-						try { unlinkSync(localPath); } catch {}
-						db.run('UPDATE Res SET r2Synced = 1, r2Key = ? WHERE id = ?', [rk, row.id]);
-						ok++;
-						continue;
+			} else {
+				// Try local disk
+				const rk = hashKey && hashKey !== '-' ? hashKey : numKey;
+				const localPath = resolve(sysCfg.uploadDir, numKey);
+				if (existsSync(localPath)) {
+					const buf = new Uint8Array(readFileSync(localPath));
+					if (await r2Put(cfg, rk, buf, 'application/octet-stream')) {
+						if (await r2Exists(cfg, rk)) {
+							try {
+								unlinkSync(localPath);
+							} catch {}
+							db.run('UPDATE Res SET r2Synced = 1, r2Key = ? WHERE id = ?', [rk, row.id]);
+							ok++;
+							continue;
+						}
 					}
 				}
-			}
 				db.run('UPDATE Res SET r2Synced = 0 WHERE id = ?', [row.id]);
 				missing++;
 			}
@@ -280,7 +318,9 @@ async function main() {
 			skipped++;
 			db.run('UPDATE Res SET r2Synced = 1 WHERE id = ?', [row.id]);
 			if (existsSync(localPath)) {
-				try { unlinkSync(localPath); } catch {}
+				try {
+					unlinkSync(localPath);
+				} catch {}
 				console.log(`  [${processed}/${total}] skip ${id} (R2 exists, local deleted)`);
 			}
 			continue;
@@ -305,7 +345,9 @@ async function main() {
 
 		// Verify and delete local
 		if (await r2Exists(cfg, rk)) {
-			try { unlinkSync(localPath); } catch {}
+			try {
+				unlinkSync(localPath);
+			} catch {}
 			db.run('UPDATE Res SET r2Synced = 1, r2Key = ? WHERE id = ?', [rk, row.id]);
 			synced++;
 			console.log(`    synced ✓`);
@@ -316,7 +358,10 @@ async function main() {
 	}
 
 	// Handle thumbnails
-	const thumbRows = db.query('SELECT id, r2Key FROM Res WHERE thumb = 1').all() as { id: number; r2Key: string }[];
+	const thumbRows = db.query('SELECT id, r2Key FROM Res WHERE thumb = 1').all() as {
+		id: number;
+		r2Key: string;
+	}[];
 	if (thumbRows.length) console.log(`\nProcessing ${thumbRows.length} thumbnails...`);
 	let tp = 0;
 	for (const row of thumbRows) {
@@ -326,7 +371,9 @@ async function main() {
 
 		if (await r2Exists(cfg, tk)) {
 			if (existsSync(localPath)) {
-				try { unlinkSync(localPath); } catch {}
+				try {
+					unlinkSync(localPath);
+				} catch {}
 			}
 			continue;
 		}
@@ -342,7 +389,9 @@ async function main() {
 		}
 
 		if (await r2Exists(cfg, tk)) {
-			try { unlinkSync(localPath); } catch {}
+			try {
+				unlinkSync(localPath);
+			} catch {}
 			console.log(`    synced ✓`);
 		} else {
 			console.log(`    [FAIL] verify failed`);
@@ -361,7 +410,11 @@ async function main() {
 		for (const r of rows) keyMap.set(String(r.id), r.r2Key || String(r.id));
 
 		// Update article body
-		const posts = db.query('SELECT id, content, desc FROM Post').all() as { id: number; content: string; desc: string }[];
+		const posts = db.query('SELECT id, content, desc FROM Post').all() as {
+			id: number;
+			content: string;
+			desc: string;
+		}[];
 		for (const post of posts) {
 			let changed = false;
 			let body = post.content || '';

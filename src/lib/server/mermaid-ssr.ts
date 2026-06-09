@@ -12,10 +12,16 @@ export async function renderMermaidBlocks(markdown: string): Promise<string> {
 
 		let result = markdown;
 		for (const block of blocks) {
-			const code = block.replace(/```mermaid\s*\n/, '').replace(/```$/, '').trim();
+			const code = block
+				.replace(/```mermaid\s*\n/, '')
+				.replace(/```$/, '')
+				.trim();
 			if (!code) continue;
 			try {
-				const { svg } = await mermaid.default.render(`mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, code);
+				const { svg } = await mermaid.default.render(
+					`mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+					code
+				);
 				result = result.replace(block, `<div class="mermaid-svg">${svg}</div>`);
 			} catch {
 				// Leave block as-is if rendering fails

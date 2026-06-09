@@ -15,7 +15,15 @@
  */
 
 import { Database } from 'bun:sqlite';
-import { readFileSync, existsSync, mkdirSync, writeFileSync, unlinkSync, rmdirSync, readdirSync } from 'fs';
+import {
+	readFileSync,
+	existsSync,
+	mkdirSync,
+	writeFileSync,
+	unlinkSync,
+	rmdirSync,
+	readdirSync
+} from 'fs';
 import { resolve, join } from 'path';
 
 // ---------------------------------------------------------------------------
@@ -27,22 +35,36 @@ const UPLOAD_DIR = join(TEST_DIR, 'upload');
 const THUMB_DIR = join(TEST_DIR, 'thumb');
 const DB_PATH = join(TEST_DIR, 'test.db');
 
-
 // ---------------------------------------------------------------------------
 // Test helpers
 // ---------------------------------------------------------------------------
 
 let passed = 0;
 let failed = 0;
-function ok(msg: string) { passed++; console.log(`  ✓ ${msg}`); }
-function no(msg: string, d?: string) { failed++; console.log(`  ✗ ${msg}${d ? ` — ${d}` : ''}`); }
-function assert(cond: boolean, msg: string, detail?: string) { cond ? ok(msg) : no(msg, detail); }
+function ok(msg: string) {
+	passed++;
+	console.log(`  ✓ ${msg}`);
+}
+function no(msg: string, d?: string) {
+	failed++;
+	console.log(`  ✗ ${msg}${d ? ` — ${d}` : ''}`);
+}
+function assert(cond: boolean, msg: string, detail?: string) {
+	cond ? ok(msg) : no(msg, detail);
+}
 
-function ensureDir(dir: string) { if (!existsSync(dir)) mkdirSync(dir, { recursive: true }); }
+function ensureDir(dir: string) {
+	if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+}
 function cleanDir(dir: string) {
 	if (existsSync(dir)) {
-		for (const f of readdirSync(dir)) try { unlinkSync(join(dir, f)); } catch {}
-		try { rmdirSync(dir); } catch {}
+		for (const f of readdirSync(dir))
+			try {
+				unlinkSync(join(dir, f));
+			} catch {}
+		try {
+			rmdirSync(dir);
+		} catch {}
 	}
 }
 function cleanupAll() {
@@ -73,11 +95,15 @@ function readR2Config() {
 async function sha256(data: string | Uint8Array): Promise<string> {
 	const buf = typeof data === 'string' ? new TextEncoder().encode(data) : data;
 	const hash = await crypto.subtle.digest('SHA-256', buf);
-	return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, '0')).join('');
+	return Array.from(new Uint8Array(hash))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
 }
 
 async function hmac256(key: Uint8Array, data: string): Promise<Uint8Array> {
-	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, [
+		'sign'
+	]);
 	return new Uint8Array(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(data)));
 }
 
@@ -92,10 +118,19 @@ async function r2Sign(method: string, keyPath: string, buf: Uint8Array, ct: stri
 	const names = ['host', 'x-amz-content-sha256', 'x-amz-date'];
 	if (ct && method === 'PUT') names.push('content-type');
 	names.sort();
-	const ch = names.map((h) => {
-		const v = h === 'host' ? host : h === 'x-amz-content-sha256' ? payloadHash : h === 'x-amz-date' ? amzDate : ct;
-		return `${h}:${v}`;
-	}).join('\n');
+	const ch = names
+		.map((h) => {
+			const v =
+				h === 'host'
+					? host
+					: h === 'x-amz-content-sha256'
+						? payloadHash
+						: h === 'x-amz-date'
+							? amzDate
+							: ct;
+			return `${h}:${v}`;
+		})
+		.join('\n');
 	const sh = names.join(';');
 	const cr = [method, uri, '', ch + '\n', sh, payloadHash].join('\n');
 	const scope = `${dateStamp}/auto/s3/aws4_request`;
@@ -104,10 +139,13 @@ async function r2Sign(method: string, keyPath: string, buf: Uint8Array, ct: stri
 	const kRegion = await hmac256(kDate, 'auto');
 	const kService = await hmac256(kRegion, 's3');
 	const sk = await hmac256(kService, 'aws4_request');
-	const sig = Array.from(new Uint8Array(await hmac256(sk, sts))).map((b) => b.toString(16).padStart(2, '0')).join('');
+	const sig = Array.from(new Uint8Array(await hmac256(sk, sts)))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
 	const hdrs: Record<string, string> = {
 		Authorization: `AWS4-HMAC-SHA256 Credential=${cfg.accessKey}/${scope}, SignedHeaders=${sh}, Signature=${sig}`,
-		'x-amz-date': amzDate, 'x-amz-content-sha256': payloadHash
+		'x-amz-date': amzDate,
+		'x-amz-content-sha256': payloadHash
 	};
 	if (ct && method === 'PUT') hdrs['content-type'] = ct;
 	return hdrs;
@@ -120,19 +158,32 @@ function r2Url(keyPath: string): string {
 
 async function r2Put(key: string, buf: Uint8Array, ct: string): Promise<boolean> {
 	const h = await r2Sign('PUT', key, buf, ct);
-	const r = await fetch(r2Url(key), { method: 'PUT', headers: h, body: buf, signal: AbortSignal.timeout(15000) });
+	const r = await fetch(r2Url(key), {
+		method: 'PUT',
+		headers: h,
+		body: buf,
+		signal: AbortSignal.timeout(15000)
+	});
 	return r.ok;
 }
 
 async function r2Head(key: string): Promise<boolean> {
 	const h = await r2Sign('HEAD', key, new Uint8Array(0), '');
-	const r = await fetch(r2Url(key), { method: 'HEAD', headers: h, signal: AbortSignal.timeout(10000) });
+	const r = await fetch(r2Url(key), {
+		method: 'HEAD',
+		headers: h,
+		signal: AbortSignal.timeout(10000)
+	});
 	return r.ok;
 }
 
 async function r2Del(key: string): Promise<boolean> {
 	const h = await r2Sign('DELETE', key, new Uint8Array(0), '');
-	const r = await fetch(r2Url(key), { method: 'DELETE', headers: h, signal: AbortSignal.timeout(10000) });
+	const r = await fetch(r2Url(key), {
+		method: 'DELETE',
+		headers: h,
+		signal: AbortSignal.timeout(10000)
+	});
 	return r.ok || r.status === 404;
 }
 
@@ -140,23 +191,57 @@ async function r2Del(key: string): Promise<boolean> {
 // Migration logic (mirrors migrate-to-r2.ts core loop)
 // ---------------------------------------------------------------------------
 
-interface ResRow { id: number; type: string; thumb: number; r2Key: string; }
-interface PostRow { id: number; body: string; desc: string; }
-interface TagRow { id: number; banner: number; }
+interface ResRow {
+	id: number;
+	type: string;
+	thumb: number;
+	r2Key: string;
+}
+interface PostRow {
+	id: number;
+	body: string;
+	desc: string;
+}
+interface TagRow {
+	id: number;
+	banner: number;
+}
 
 async function runFullMigration(db: Database, publicDomain: string) {
-	let synced = 0, skipped = 0, failed = 0;
+	let synced = 0,
+		skipped = 0,
+		failed = 0;
 
 	// ── Phase 1: Upload resources ──
 	const rows = db.query('SELECT id, type, r2Key FROM Res').all() as ResRow[];
 	for (const row of rows) {
 		const rk = row.r2Key || String(row.id);
 		const localPath = join(UPLOAD_DIR, String(row.id));
-		if (await r2Head(rk)) { skipped++; if (existsSync(localPath)) try { unlinkSync(localPath); } catch {} continue; }
-		if (!existsSync(localPath)) { skipped++; continue; }
+		if (await r2Head(rk)) {
+			skipped++;
+			if (existsSync(localPath))
+				try {
+					unlinkSync(localPath);
+				} catch {}
+			continue;
+		}
+		if (!existsSync(localPath)) {
+			skipped++;
+			continue;
+		}
 		const buf = new Uint8Array(readFileSync(localPath));
-		if (!(await r2Put(rk, buf, row.type || 'application/octet-stream'))) { failed++; continue; }
-		if (await r2Head(rk)) { try { unlinkSync(localPath); } catch {} synced++; } else { failed++; }
+		if (!(await r2Put(rk, buf, row.type || 'application/octet-stream'))) {
+			failed++;
+			continue;
+		}
+		if (await r2Head(rk)) {
+			try {
+				unlinkSync(localPath);
+			} catch {}
+			synced++;
+		} else {
+			failed++;
+		}
 	}
 
 	// ── Phase 2: Upload thumbnails ──
@@ -164,26 +249,57 @@ async function runFullMigration(db: Database, publicDomain: string) {
 	for (const row of thumbRows) {
 		const tk = `_${row.r2Key || row.id}`;
 		const localPath = join(THUMB_DIR, String(row.id));
-		if (await r2Head(tk)) { if (existsSync(localPath)) try { unlinkSync(localPath); } catch {} continue; }
+		if (await r2Head(tk)) {
+			if (existsSync(localPath))
+				try {
+					unlinkSync(localPath);
+				} catch {}
+			continue;
+		}
 		if (!existsSync(localPath)) continue;
 		const buf = new Uint8Array(readFileSync(localPath));
 		if (!(await r2Put(tk, buf, 'image/webp'))) continue;
-		if (await r2Head(tk)) try { unlinkSync(localPath); } catch {} {}
+		if (await r2Head(tk))
+			try {
+				unlinkSync(localPath);
+			} catch {}
+		{
+		}
 	}
 
 	// ── Phase 3: Replace /res/ references in articles ──
-	let articlesUpdated = 0, refsReplaced = 0;
+	let articlesUpdated = 0,
+		refsReplaced = 0;
 	const keyMap = new Map(rows.map((r) => [String(r.id), r.r2Key || String(r.id)]));
 	const posts = db.query('SELECT id, content, desc FROM Post').all() as PostRow[];
 	for (const post of posts) {
 		let changed = false;
 		let body = post.content || '';
 		let desc = post.desc || '';
-		body = body.replace(/\/res\/_(\d+)/g, (_, rid) => { changed = true; refsReplaced++; return `${publicDomain}/_${keyMap.get(rid) || rid}`; });
-		body = body.replace(/\/res\/(\d+)/g, (_, rid) => { changed = true; refsReplaced++; return `${publicDomain}/${keyMap.get(rid) || rid}`; });
-		desc = desc.replace(/\/res\/_(\d+)/g, (_, rid) => { changed = true; refsReplaced++; return `${publicDomain}/_${keyMap.get(rid) || rid}`; });
-		desc = desc.replace(/\/res\/(\d+)/g, (_, rid) => { changed = true; refsReplaced++; return `${publicDomain}/${keyMap.get(rid) || rid}`; });
-		if (changed) { db.run('UPDATE Post SET content = ?, desc = ? WHERE id = ?', [body, desc, post.id]); articlesUpdated++; }
+		body = body.replace(/\/res\/_(\d+)/g, (_, rid) => {
+			changed = true;
+			refsReplaced++;
+			return `${publicDomain}/_${keyMap.get(rid) || rid}`;
+		});
+		body = body.replace(/\/res\/(\d+)/g, (_, rid) => {
+			changed = true;
+			refsReplaced++;
+			return `${publicDomain}/${keyMap.get(rid) || rid}`;
+		});
+		desc = desc.replace(/\/res\/_(\d+)/g, (_, rid) => {
+			changed = true;
+			refsReplaced++;
+			return `${publicDomain}/_${keyMap.get(rid) || rid}`;
+		});
+		desc = desc.replace(/\/res\/(\d+)/g, (_, rid) => {
+			changed = true;
+			refsReplaced++;
+			return `${publicDomain}/${keyMap.get(rid) || rid}`;
+		});
+		if (changed) {
+			db.run('UPDATE Post SET content = ?, desc = ? WHERE id = ?', [body, desc, post.id]);
+			articlesUpdated++;
+		}
 	}
 
 	return { synced, skipped, failed, articlesUpdated, refsReplaced };
@@ -195,7 +311,10 @@ async function runFullMigration(db: Database, publicDomain: string) {
 
 async function main() {
 	const cfg = readR2Config();
-	if (!cfg.accountId || !cfg.accessKey) { console.error('R2 not configured.'); process.exit(1); }
+	if (!cfg.accountId || !cfg.accessKey) {
+		console.error('R2 not configured.');
+		process.exit(1);
+	}
 
 	const DM = cfg.publicDomain;
 	const r2Keys: string[] = []; // track for cleanup
@@ -216,15 +335,25 @@ async function main() {
 		r2Enabled INTEGER, r2AccountId TEXT, r2AccessKeyId TEXT,
 		r2SecretAccessKey TEXT, r2Bucket TEXT, r2PublicDomain TEXT
 	)`);
-	db.run(`INSERT INTO System (id, uploadDir, thumbDir, r2Enabled, r2AccountId, r2AccessKeyId, r2SecretAccessKey, r2Bucket, r2PublicDomain)
+	db.run(
+		`INSERT INTO System (id, uploadDir, thumbDir, r2Enabled, r2AccountId, r2AccessKeyId, r2SecretAccessKey, r2Bucket, r2PublicDomain)
 		VALUES (1, '${UPLOAD_DIR.replace(/\\/g, '/')}', '${THUMB_DIR.replace(/\\/g, '/')}', 1, ?, ?, ?, ?, ?)`,
-		[cfg.accountId, cfg.accessKey, cfg.secretKey, cfg.bucket, cfg.publicDomain]);
+		[cfg.accountId, cfg.accessKey, cfg.secretKey, cfg.bucket, cfg.publicDomain]
+	);
 
 	// Res table
-	db.run(`CREATE TABLE IF NOT EXISTS Res (id INTEGER PRIMARY KEY, type TEXT, size INTEGER, name TEXT, md5 TEXT, thumb INTEGER, r2Key TEXT, r2Synced INTEGER, userId INTEGER)`);
-	db.run(`INSERT INTO Res (id, type, size, name, thumb, r2Key) VALUES (101, 'image/png', 500, 'photo.png', 1, 'aaa101')`);
-	db.run(`INSERT INTO Res (id, type, size, name, thumb, r2Key) VALUES (102, 'application/pdf', 300, 'doc.pdf', 0, 'bbb102')`);
-	db.run(`INSERT INTO Res (id, type, size, name, thumb, r2Key) VALUES (103, 'image/jpeg', 800, 'bg.jpg', 0, 'ccc103')`);
+	db.run(
+		`CREATE TABLE IF NOT EXISTS Res (id INTEGER PRIMARY KEY, type TEXT, size INTEGER, name TEXT, md5 TEXT, thumb INTEGER, r2Key TEXT, r2Synced INTEGER, userId INTEGER)`
+	);
+	db.run(
+		`INSERT INTO Res (id, type, size, name, thumb, r2Key) VALUES (101, 'image/png', 500, 'photo.png', 1, 'aaa101')`
+	);
+	db.run(
+		`INSERT INTO Res (id, type, size, name, thumb, r2Key) VALUES (102, 'application/pdf', 300, 'doc.pdf', 0, 'bbb102')`
+	);
+	db.run(
+		`INSERT INTO Res (id, type, size, name, thumb, r2Key) VALUES (103, 'image/jpeg', 800, 'bg.jpg', 0, 'ccc103')`
+	);
 
 	// Post table (body contains /res/ references)
 	db.run(`CREATE TABLE IF NOT EXISTS Post (
@@ -238,8 +367,12 @@ async function main() {
 		(2, 0, 'no-banner', 'No resources here.', 'Plain Post', 1)`);
 
 	// Tag table
-	db.run(`CREATE TABLE IF NOT EXISTS Tag (id INTEGER PRIMARY KEY, name TEXT, banner INTEGER, desc TEXT, createAt INTEGER, userId INTEGER)`);
-	db.run(`INSERT INTO Tag (id, name, banner, desc, createAt) VALUES (1, 'test-tag', 103, 'A tag with banner', ${Date.now()})`);
+	db.run(
+		`CREATE TABLE IF NOT EXISTS Tag (id INTEGER PRIMARY KEY, name TEXT, banner INTEGER, desc TEXT, createAt INTEGER, userId INTEGER)`
+	);
+	db.run(
+		`INSERT INTO Tag (id, name, banner, desc, createAt) VALUES (1, 'test-tag', 103, 'A tag with banner', ${Date.now()})`
+	);
 
 	ok('Test database created');
 	console.log(`  Res: 3 rows, Post: 2 rows, Tag: 1 row`);
@@ -323,6 +456,8 @@ async function main() {
 
 main().catch((e) => {
 	console.error('\nFATAL:', e);
-	try { cleanupAll(); } catch {}
+	try {
+		cleanupAll();
+	} catch {}
 	process.exit(1);
 });

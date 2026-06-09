@@ -9,8 +9,8 @@
 	import Viewer from '$lib/components/viewer.svelte';
 	import AiPanel from '$lib/components/ai/AiPanel.svelte';
 	import Ld from '$lib/components/loading.svelte';
-	import { aiPanelTab, editPost, originPost, posts, setting, small, medium } from '$lib/store';
-	import { aiStatus, aiReset } from '$lib/components/ai/aiStore';
+	import { aiPanelTab, editPost, originPost, posts, setting, xsmall, medium } from '$lib/store';
+	import { aiStatus, aiReset } from '$lib/components/ai';
 	import { api } from '$lib/req';
 	import { onMount } from 'svelte';
 	import { trim, watch } from '$lib/utils';
@@ -92,15 +92,28 @@
 	let sty = $state(''),
 		topSty = $state('');
 	let visitor = $state(0);
+	// Auto-switch to AI panel on small screens when activated
 	$effect(() => {
-		sty = $small
+		if (
+			$xsmall &&
+			$aiPanelTab === 'ai' &&
+			$aiStatus === 'available' &&
+			($editPost._ || $editPost.id)
+		) {
+			view = 2;
+			visitor = 0;
+		}
+	});
+
+	$effect(() => {
+		sty = $xsmall
 			? `transform:translate3d(${((-view * 100) / 3).toFixed(4)}%,0,0)`
 			: $medium
 				? view
 					? ''
 					: `transform:translate3d(400px,0,0)`
 				: '';
-		topSty = 'right: auto;left:' + ($small ? '29%' : $medium ? '-50px' : '410px');
+		topSty = 'right: auto;left:' + ($xsmall ? '29%' : $medium ? '-50px' : '410px');
 		wc(() => {
 			page(1);
 		}, sc);
@@ -182,7 +195,7 @@
 		background: var(--bg1);
 		display: flex;
 		flex-direction: column;
-		@include s() {
+		@media (max-width: 800px) {
 			background: var(--bg6);
 		}
 		@include m() {
@@ -222,7 +235,7 @@
 		align-content: center;
 		border-bottom: 1px solid var(--bg0);
 		flex-shrink: 0;
-		@include s() {
+		@media (max-width: 800px) {
 			padding-top: 0;
 			border: 0;
 		}
@@ -234,7 +247,7 @@
 		display: flex;
 		flex-direction: column;
 		padding-bottom: 10px;
-		@include s() {
+		@media (max-width: 800px) {
 			background: var(--bg3);
 		}
 	}
@@ -264,7 +277,7 @@
 		justify-content: center;
 	}
 
-	@include s() {
+	@media (max-width: 800px) {
 		.m {
 			transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 			width: 300%;

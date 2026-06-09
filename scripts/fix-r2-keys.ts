@@ -16,7 +16,6 @@ import { Database } from 'bun:sqlite';
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
-
 // ---------------------------------------------------------------------------
 // DB access
 // ---------------------------------------------------------------------------
@@ -37,12 +36,16 @@ function getDb(): Database {
 
 function fixR2Keys(db: Database, apply: boolean) {
 	// Find records where r2Key is wrong: NULL, '-', or looks like a pure numeric ID
-	const rows = db.query(`
+	const rows = db
+		.query(
+			`
 		SELECT id, md5, r2Key FROM Res
 		WHERE md5 IS NOT NULL AND md5 != '-'
 		  AND (r2Key IS NULL OR r2Key = '-' OR r2Key = CAST(id AS TEXT)
 		       OR (r2Key GLOB '[0-9]*' AND length(r2Key) < 6))
-	`).all() as { id: number; md5: string; r2Key: string }[];
+	`
+		)
+		.all() as { id: number; md5: string; r2Key: string }[];
 
 	console.log(`Found ${rows.length} records with potentially wrong r2Key`);
 
@@ -68,11 +71,15 @@ function fixR2Keys(db: Database, apply: boolean) {
 // ---------------------------------------------------------------------------
 
 function backfillMissing(db: Database, apply: boolean) {
-	const rows = db.query(`
+	const rows = db
+		.query(
+			`
 		SELECT id, md5 FROM Res
 		WHERE md5 IS NOT NULL AND md5 != '-'
 		  AND (r2Key IS NULL OR r2Key = '-')
-	`).all() as { id: number; md5: string }[];
+	`
+		)
+		.all() as { id: number; md5: string }[];
 
 	console.log(`\nFound ${rows.length} records with missing r2Key`);
 	for (const row of rows) {
@@ -93,9 +100,13 @@ function backfillMissing(db: Database, apply: boolean) {
 
 function fixR2Synced(db: Database, apply: boolean) {
 	// Mark as synced: records with a proper hash-based r2Key (6 hex chars)
-	const rows = db.query(`
+	const rows = db
+		.query(
+			`
 		SELECT id, r2Key FROM Res WHERE r2Synced = 0 AND r2Key IS NOT NULL AND r2Key != '-' AND r2Key != CAST(id AS TEXT)
-	`).all() as { id: number; r2Key: string }[];
+	`
+		)
+		.all() as { id: number; r2Key: string }[];
 
 	console.log(`\nFound ${rows.length} records with r2Synced=0 but non-trivial r2Key`);
 	for (const row of rows) {
@@ -123,7 +134,9 @@ function fixR2Synced(db: Database, apply: boolean) {
 
 const apply = process.argv.includes('--apply');
 
-console.log(apply ? '>>> APPLY MODE (writing changes) <<<\n' : '>>> DRY-RUN (no writes, use --apply) <<<\n');
+console.log(
+	apply ? '>>> APPLY MODE (writing changes) <<<\n' : '>>> DRY-RUN (no writes, use --apply) <<<\n'
+);
 
 const db = getDb();
 
@@ -134,7 +147,9 @@ fixR2Synced(db, apply);
 // Summary
 const total = db.query('SELECT COUNT(*) as c FROM Res').get() as { c: number };
 const synced = db.query('SELECT COUNT(*) as c FROM Res WHERE r2Synced = 1').get() as { c: number };
-const hasKey = db.query('SELECT COUNT(*) as c FROM Res WHERE r2Key IS NOT NULL AND r2Key != \'-\'').get() as { c: number };
+const hasKey = db
+	.query("SELECT COUNT(*) as c FROM Res WHERE r2Key IS NOT NULL AND r2Key != '-'")
+	.get() as { c: number };
 console.log(`\nSummary: ${total.c} total, ${hasKey.c} with r2Key, ${synced.c} synced`);
 
 db.close();

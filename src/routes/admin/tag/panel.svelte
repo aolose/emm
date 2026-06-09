@@ -94,7 +94,9 @@
 					class="p icon"
 					onclick={sel}
 					class:i-pic={!d.banner}
-					style:background-image={d.banner ? `url(${d.bannerR2Synced ? resUrl($h.r2PublicDomain, d.bannerR2Key || d.banner, true, true) : `/res/_${d.banner}`})` : ''}
+					style:background-image={d.banner
+						? `url(${d.bannerR2Synced ? resUrl($h.r2PublicDomain, d.bannerR2Key || d.banner, true, true) : `/res/_${d.banner}`})`
+						: ''}
 				>
 					{#if d.banner}
 						<button

@@ -361,7 +361,13 @@ export const mkdir = (dir: string) => {
 	}
 };
 
-export const saveFile = async (name: string | number, dir: string, buf: Uint8Array, key?: string, contentType = ''): Promise<boolean> => {
+export const saveFile = async (
+	name: string | number,
+	dir: string,
+	buf: Uint8Array,
+	key?: string,
+	contentType = ''
+): Promise<boolean> => {
 	// R2 upload path
 	const { isR2Configured, r2Put } = await import('$lib/server/cloudflare');
 	if (isR2Configured()) {

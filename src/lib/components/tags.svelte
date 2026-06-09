@@ -1,7 +1,8 @@
 <script>
 	import { tick } from 'svelte';
-	import { slide } from 'svelte/transition';
+	// 移除 slide 动画，下拉列表用 CSS 或者直接显示会流畅很多
 	import { idGen } from '$lib/utils';
+	import { SvelteSet } from 'svelte/reactivity';
 	let { tags = [], value = $bindable() } = $props();
 	let items = $state(new Set(value ? value?.split(',').filter((a) => !!a) : []));
 	let val = $state('');
@@ -12,13 +13,13 @@
 		v = v.trim();
 		if (v && !items.has(v)) {
 			items.add(v);
-			items = new Set(items);
+			items = new SvelteSet(items);
 		}
 	};
 
 	const rm = (v) => () => {
 		items.delete(v);
-		items = new Set(items);
+		items = new SvelteSet(items);
 	};
 
 	const keyPress = (e) => {
@@ -30,8 +31,10 @@
 					if (s === val.length) return (val = pre);
 					break;
 				case 'U':
+					e.preventDefault(); // 阻止光标移动
 					return idx--;
 				case 'D':
+					e.preventDefault(); // 阻止光标移动
 					return idx++;
 			}
 		}
@@ -46,7 +49,7 @@
 				const last = arr[arr.length - 1];
 				if (last) {
 					items.delete(last);
-					items = new Set(items);
+					items = new SvelteSet(items);
 				}
 			}
 		}
@@ -65,26 +68,29 @@
 	let dp = $state();
 	let idx = $state(0);
 
+	// 过滤并排序列表
 	let selects = $derived(
 		(Array.isArray(tags) ? tags : [])
 			.filter((a) => !items.has(a) && a !== val && a.toLowerCase().startsWith(val.toLowerCase()))
 			.sort((a, b) => (a < b ? -1 : 1))
 	);
 
-	// Clamp idx and scroll active item into view
+	// 当列表长度变化时，重置高亮索引，防止数组越界
 	$effect(() => {
-		const lh = selects.length;
-		if (idx >= lh) idx = 0;
+		if (idx >= selects.length) idx = 0;
+		if (idx < 0) idx = Math.max(0, selects.length - 1);
+	});
 
-		if (dp) {
+	$effect(() => {
+		if (dp && idx !== undefined) {
 			tick().then(() => {
-				const a = dp.querySelector('.act');
-				a?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				const activeEl = dp.querySelector('.act');
+				activeEl?.scrollIntoView({ behavior: 'auto', block: 'nearest' });
 			});
 		}
 	});
 
-	// Sync selected items back to parent via bindable value
+	// 同步数据回父组件
 	$effect(() => {
 		value = [...items].join() || null;
 	});
@@ -94,19 +100,22 @@
 	const selectTag = (sec) => {
 		add(sec);
 		val = '';
-		ipt?.focus();
+		// 延迟聚焦，防止和 blur 事件冲突
+		setTimeout(() => ipt?.focus(), 0);
 	};
 </script>
 
 <label class="a" for={id}>
 	{#if selects.length && (show || val)}
-		<div class="d" bind:this={dp} transition:slide|global>
-			{#each selects as sec, index}
+		<!-- 移除了这里的 transition:slide|global -->
+		<div class="d" bind:this={dp}>
+			<!-- 加上 (sec) 作为唯一标识 key，加快渲染速度 -->
+			{#each selects as sec, index (sec)}
 				<div class:act={idx === index} onclick={() => selectTag(sec)}>{sec}</div>
 			{/each}
 		</div>
 	{/if}
-	{#each [...items] as item}
+	{#each [...items] as item (item)}
 		<div class="b">
 			<span>{item}</span>
 			<button class="icon i-close" onclick={rm(item)}></button>
@@ -121,7 +130,7 @@
 			bind:value={val}
 			bind:this={ipt}
 			onfocus={() => (show = 1)}
-			onblur={() => (show = 0)}
+			onblur={() => setTimeout(() => (show = 0), 200)}
 			onkeydown={keyPress}
 			oninput={onInput}
 		/>
@@ -138,23 +147,26 @@
 		display: flex;
 		flex-wrap: wrap;
 		min-height: 30px;
+		position: relative; /* 确保定位正确 */
 	}
 
 	.d {
 		transform: translateY(-15px);
 		bottom: 100%;
 		padding: 10px 0;
-		background: rgba(21, 23, 26, 0.7);
+		background: rgba(21, 23, 26, 0.9); /* 稍微提高不透明度 */
 		position: absolute;
 		left: -10px;
 		right: -10px;
 		max-height: 100px;
-		overflow: auto;
+		overflow-y: auto; /* 明确只在 Y 轴滚动 */
+		z-index: 10; /* 防止被其他标签遮挡 */
 
 		div {
 			color: #60799f;
-			transition: 0.2s ease-in-out;
+			/* 移除了 transition: 0.2s 动画，列表大时文字变色动画会导致卡顿 */
 			padding: 3px 20px;
+			cursor: pointer;
 
 			&:hover {
 				background: rgba(0, 0, 0, 0.1);
@@ -180,6 +192,7 @@
 		padding: 5px;
 		border-left: 1px solid #171b2a;
 		color: #627184;
+		cursor: pointer;
 
 		&:hover {
 			color: #8aa3ab;
@@ -200,6 +213,7 @@
 		line-height: 18px;
 		white-space: nowrap;
 		margin-left: 10px;
+		position: relative; /* 确保子元素 input 定位准确 */
 
 		input,
 		span {
@@ -231,8 +245,5 @@
 		span + span {
 			opacity: 1;
 		}
-	}
-
-	.d {
 	}
 </style>
