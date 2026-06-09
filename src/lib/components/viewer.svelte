@@ -278,7 +278,7 @@
 			}
 
 			// 渐变链接样式
-			a {
+			a:not([data-custom-viewer]) {
 				color: #58a6ff !important;
 				text-decoration: none;
 				border-bottom: 1px dashed rgba(88, 166, 255, 0.4);
