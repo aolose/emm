@@ -282,12 +282,18 @@ export function fileSize(size = 0) {
 }
 
 /** Build resource URL using R2 public domain when enabled and configured, falling back to /res/. */
-export function resUrl(publicDomain: string, id: string | number, thumb = false, enabled = false, key?: string): string {
-if (enabled && publicDomain) {
-	const k = key || String(id);
-	return thumb ? `${publicDomain}/_${k}` : `${publicDomain}/${k}`;
-}
-return thumb ? `/res/_${id}` : `/res/${id}`;
+export function resUrl(
+	publicDomain: string,
+	id: string | number,
+	thumb = false,
+	enabled = false,
+	key?: string
+): string {
+	if (enabled && publicDomain) {
+		const k = key || String(id);
+		return thumb ? `${publicDomain}/_${k}` : `${publicDomain}/${k}`;
+	}
+	return thumb ? `/res/_${id}` : `/res/${id}`;
 }
 
 export function createUrl(f: fView | File, publicDomain?: string) {

@@ -61,8 +61,8 @@
 
 <Card title="R2 Storage" {save} {ld} {err} {msg}>
 	<Tip>
-		Upload files to Cloudflare R2 instead of local disk. Requires an R2 API token
-		with Object Read & Write permissions. Create one in
+		Upload files to Cloudflare R2 instead of local disk. Requires an R2 API token with Object Read &
+		Write permissions. Create one in
 		<a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Cloudflare Dashboard</a>
 		→ R2 → Manage R2 API Tokens.
 	</Tip>
@@ -88,11 +88,7 @@
 
 	<Ipt label="Bucket" bind:value={r2Bucket} placeholder="my-bucket" />
 
-	<Ipt
-		label="Public Domain"
-		bind:value={r2PublicDomain}
-		placeholder="https://cdn.example.com"
-	/>
+	<Ipt label="Public Domain" bind:value={r2PublicDomain} placeholder="https://cdn.example.com" />
 </Card>
 
 <style lang="scss">

@@ -30,7 +30,9 @@ async function sha256(data: string | Uint8Array): Promise<string> {
 }
 
 async function hmac256(key: Uint8Array, data: string): Promise<Uint8Array> {
-	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, [
+		'sign'
+	]);
 	const sig = await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(data));
 	return new Uint8Array(sig);
 }
@@ -52,16 +54,35 @@ async function signRequest(
 
 	const signedNames = ['host', 'x-amz-content-sha256', 'x-amz-date'];
 	const extra: Record<string, string> = {};
-	if (contentType) { signedNames.push('content-type'); extra['content-type'] = contentType; }
+	if (contentType) {
+		signedNames.push('content-type');
+		extra['content-type'] = contentType;
+	}
 	signedNames.sort();
 
-	const canonicalHeaders = signedNames.map(h => {
-		const v = h === 'host' ? host : h === 'x-amz-content-sha256' ? payloadSha256 : h === 'x-amz-date' ? amzDate : extra[h] || '';
-		return `${h}:${v}`;
-	}).join('\n');
+	const canonicalHeaders = signedNames
+		.map((h) => {
+			const v =
+				h === 'host'
+					? host
+					: h === 'x-amz-content-sha256'
+						? payloadSha256
+						: h === 'x-amz-date'
+							? amzDate
+							: extra[h] || '';
+			return `${h}:${v}`;
+		})
+		.join('\n');
 
 	const signedHdr = signedNames.join(';');
-	const canonicalReq = [method, canonicalUri, '', canonicalHeaders + '\n', signedHdr, payloadSha256].join('\n');
+	const canonicalReq = [
+		method,
+		canonicalUri,
+		'',
+		canonicalHeaders + '\n',
+		signedHdr,
+		payloadSha256
+	].join('\n');
 	const scope = `${dateStamp}/${region}/${service}/aws4_request`;
 	const stringToSign = ['AWS4-HMAC-SHA256', amzDate, scope, await sha256(canonicalReq)].join('\n');
 
@@ -100,21 +121,29 @@ async function r2Put(key: string, buf: Uint8Array, contentType: string): Promise
 
 // ── Main ────────────────────────────────────────────────────────────
 
-const targetIds = process.argv.slice(2).flatMap(a => a.split(',').map(Number)).filter(Boolean);
+const targetIds = process.argv
+	.slice(2)
+	.flatMap((a) => a.split(',').map(Number))
+	.filter(Boolean);
 const whereClause = targetIds.length
 	? `AND r.id IN (${targetIds.join(',')})`
 	: `AND (r.thumb = 0 OR r.thumb IS NULL)`;
 
-const toFix = db.query(`
+const toFix = db
+	.query(
+		`
 	SELECT r.id, r.r2Key, r.name, r.type
 	FROM Res r
 	WHERE r.r2Synced = 1 AND r.type LIKE 'image/%' ${whereClause}
 	ORDER BY r.id
-`).all() as { id: number; r2Key: string; name: string; type: string }[];
+`
+	)
+	.all() as { id: number; r2Key: string; name: string; type: string }[];
 
 console.log(`Found ${toFix.length} resources to fix thumbnails:\n`);
 
-let ok = 0, fail = 0;
+let ok = 0,
+	fail = 0;
 for (const r of toFix) {
 	const url = `${cfg.publicDomain}/${r.r2Key}`;
 	const thumbKey = `_${r.r2Key}`;

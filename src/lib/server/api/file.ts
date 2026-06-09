@@ -73,7 +73,12 @@ const apis: APIRoutes = {
 						if (width > 300) {
 							const thumb = await img.resize(300).webp().bytes();
 							const thumbOk = await saveFile(r.id, sys.thumbDir, thumb, r.r2Key || r2Key);
-							if (thumbOk) { const up = new Res(); up.id = r.id; up.thumb = 1; db.save(up); }
+							if (thumbOk) {
+								const up = new Res();
+								up.id = r.id;
+								up.thumb = 1;
+								db.save(up);
+							}
 						}
 					} catch (e) {
 						console.error('[upload] thumb gen(md5 dedup) failed for res', r.id, e);
@@ -88,7 +93,10 @@ const apis: APIRoutes = {
 			db.save(res);
 			try {
 				const r2Ok = await saveFile(res.id, sys.uploadDir, buf, r2Key, res.type);
-				if (r2Ok) { res.r2Synced = 1; db.save(res); }
+				if (r2Ok) {
+					res.r2Synced = 1;
+					db.save(res);
+				}
 				if (tp.startsWith('image/')) {
 					try {
 						const img = new Bun.Image(buf);
@@ -111,7 +119,9 @@ const apis: APIRoutes = {
 				console.error(e);
 				db.del(res);
 			}
-			return isR2Configured() ? `${res.id}|${sys.r2PublicDomain}/${res.r2Key || res.id}` : String(res.id);
+			return isR2Configured()
+				? `${res.id}|${sys.r2PublicDomain}/${res.r2Key || res.id}`
+				: String(res.id);
 		})
 	}
 };

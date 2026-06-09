@@ -15,7 +15,10 @@
 
 <div class="a" class:s={sel} onclick={ck}>
 	{#if d.banner}
-		<div class="b" style:background-image={`url(${d.bannerR2Synced ? resUrl($h.r2PublicDomain, d.bannerR2Key || d.banner, true, true) : `/res/_${d.banner}`})`}></div>
+		<div
+			class="b"
+			style:background-image={`url(${d.bannerR2Synced ? resUrl($h.r2PublicDomain, d.bannerR2Key || d.banner, true, true) : `/res/_${d.banner}`})`}
+		></div>
 	{/if}
 	<div class="t">
 		<h4>{d.name}</h4>

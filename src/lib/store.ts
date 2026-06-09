@@ -182,6 +182,7 @@ export const msg = writable('');
 
 export const expand = writable(0);
 export const small = writable(0);
+export const xsmall = writable(0); // 800px breakpoint for admin write layout
 export const medium = writable(0);
 export const statueSys = writable(0);
 export const elmCpm: { [key: string]: SvelteComponent } = {};

@@ -1,14 +1,17 @@
 <script>
 	import Q from './mediaQuery.svelte';
-	import { expand, medium, small } from '$lib/store';
+	import { expand, medium, small, xsmall } from '$lib/store';
 	let mobile = $state(0);
+	let tablet = $state(0);
 	let normal = $state(0);
 	$effect(() => {
 		small.set(mobile);
+		xsmall.set(tablet);
 		medium.set(normal);
 		expand.set(+!mobile);
 	});
 </script>
 
 <Q query="only screen and (max-width: 600px)" bind:matches={mobile} />
+<Q query="only screen and (max-width: 800px)" bind:matches={tablet} />
 <Q query="only screen and (max-width: 1280px)" bind:matches={normal} />

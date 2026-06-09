@@ -33,7 +33,11 @@ export const GET: RequestHandler = async ({ params, request }) => {
 			const u = resolve(sys.uploadDir, p);
 			const t = resolve(sys.thumbDir, p);
 			const safeRead = async (path: string) => {
-				try { return await Bun.file(path).bytes(); } catch { return undefined; }
+				try {
+					return await Bun.file(path).bytes();
+				} catch {
+					return undefined;
+				}
 			};
 			if (isThumb && r.thumb) f = await safeRead(t);
 			if (!f) f = await safeRead(u);

@@ -49,7 +49,13 @@
 		setting.set(0);
 		selectFile(1, 'image/*')
 			.then((a) => {
-				if (a) post = { ...post, banner: a[0].id + '', bannerR2Synced: !!a[0].r2Synced, bannerR2Key: a[0].r2Key || '' };
+				if (a)
+					post = {
+						...post,
+						banner: a[0].id + '',
+						bannerR2Synced: !!a[0].r2Synced,
+						bannerR2Key: a[0].r2Key || ''
+					};
 			})
 			.finally(() => setting.set(1));
 	};
@@ -114,7 +120,9 @@
 					<h3>Banner</h3>
 					<div
 						class:act={post.banner}
-						style:background-image={post.banner ? `url(${post.bannerR2Synced ? resUrl($h.r2PublicDomain, post.bannerR2Key || post.banner, true, true) : `/res/_${post.banner}`})` : ''}
+						style:background-image={post.banner
+							? `url(${post.bannerR2Synced ? resUrl($h.r2PublicDomain, post.bannerR2Key || post.banner, true, true) : `/res/_${post.banner}`})`
+							: ''}
 						class="p icon i-pic"
 						onclick={pickPic}
 					>

@@ -13,7 +13,12 @@
 </script>
 
 <div class="s p" style={`background-color:${bgColor(createAt, 0.6, 70)}`}>
-	<div class="x" style={banner ? `background-image:url(${p.bannerR2Synced ? resUrl($h.r2PublicDomain, p.bannerR2Key || banner, true, true) : `/res/_${banner}`})` : undefined}></div>
+	<div
+		class="x"
+		style={banner
+			? `background-image:url(${p.bannerR2Synced ? resUrl($h.r2PublicDomain, p.bannerR2Key || banner, true, true) : `/res/_${banner}`})`
+			: undefined}
+	></div>
 	<div class="t">
 		{m}/{d}
 		{#if showY}

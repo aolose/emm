@@ -13,7 +13,7 @@
 		aiPanelTab,
 		editorTools
 	} from '$lib/store';
-	import { aiStatus, validateAi, aiReset } from '$lib/components/ai/aiStore';
+	import { aiStatus, validateAi, aiReset } from '$lib/components/ai';
 	import { get } from 'svelte/store';
 	import { api, req } from '$lib/req';
 	import { diffObj, getErr, watch, time } from '$lib/utils';

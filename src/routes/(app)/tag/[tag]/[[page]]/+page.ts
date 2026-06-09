@@ -22,7 +22,10 @@ const hash = (s: string) => {
 export const load = async (event) => {
 	const result = await baseLoad(event);
 	if (result.d) {
-		event.setHeaders({ etag: `"${hash(JSON.stringify(result.d))}"`, 'cache-control': 'private, must-revalidate' });
+		event.setHeaders({
+			etag: `"${hash(JSON.stringify(result.d))}"`,
+			'cache-control': 'private, must-revalidate'
+		});
 	}
 	return result;
 };

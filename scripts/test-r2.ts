@@ -49,7 +49,9 @@ async function sha256(data: string | Uint8Array): Promise<string> {
 }
 
 async function hmac256(key: Uint8Array, data: string): Promise<Uint8Array> {
-	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+	const k = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, [
+		'sign'
+	]);
 	const sig = await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(data));
 	return new Uint8Array(sig);
 }
@@ -71,7 +73,14 @@ async function sign(method: string, keyPath: string, buf: Uint8Array, ct: string
 
 	const ch = names
 		.map((h) => {
-			const v = h === 'host' ? host : h === 'x-amz-content-sha256' ? payloadHash : h === 'x-amz-date' ? amzDate : ct;
+			const v =
+				h === 'host'
+					? host
+					: h === 'x-amz-content-sha256'
+						? payloadHash
+						: h === 'x-amz-date'
+							? amzDate
+							: ct;
 			return `${h}:${v}`;
 		})
 		.join('\n');
@@ -123,19 +132,32 @@ function fail(label: string, detail?: string) {
 async function put(key: string, body: string | Uint8Array, ct = ''): Promise<boolean> {
 	const buf = typeof body === 'string' ? new TextEncoder().encode(body) : body;
 	const hdrs = await sign('PUT', key, buf, ct);
-	const res = await fetch(r2Url(key), { method: 'PUT', headers: hdrs, body: buf, signal: AbortSignal.timeout(15000) });
+	const res = await fetch(r2Url(key), {
+		method: 'PUT',
+		headers: hdrs,
+		body: buf,
+		signal: AbortSignal.timeout(15000)
+	});
 	return res.ok;
 }
 
 async function head(key: string): Promise<boolean> {
 	const hdrs = await sign('HEAD', key, new Uint8Array(0), '');
-	const res = await fetch(r2Url(key), { method: 'HEAD', headers: hdrs, signal: AbortSignal.timeout(10000) });
+	const res = await fetch(r2Url(key), {
+		method: 'HEAD',
+		headers: hdrs,
+		signal: AbortSignal.timeout(10000)
+	});
 	return res.ok;
 }
 
 async function del(key: string): Promise<boolean> {
 	const hdrs = await sign('DELETE', key, new Uint8Array(0), '');
-	const res = await fetch(r2Url(key), { method: 'DELETE', headers: hdrs, signal: AbortSignal.timeout(10000) });
+	const res = await fetch(r2Url(key), {
+		method: 'DELETE',
+		headers: hdrs,
+		signal: AbortSignal.timeout(10000)
+	});
 	return res.ok || res.status === 404;
 }
 

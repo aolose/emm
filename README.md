@@ -68,6 +68,10 @@ A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSee
 - **Firewall** — IP-based access control, bot detection, custom rules with time scheduling
 - **UA Collection Detection** — Detect distributed crawlers by grouping IPs sharing the same User-Agent
 - **Geo IP Location** — Display visitor geographic information based on IP2Location Lite
+- **AI Writing Assistant** — DeepSeek-powered editor copilot with 19 tools (read/write document, memory, external APIs)
+- **Smart Model Routing** — Auto-selects flash/pro model based on prompt complexity
+- **Writing Style Memory** — AI learns your persona, style, and knowledge from published articles; persists across sessions
+- **HTTP Proxy Tool** — AI can fetch external APIs (weather, news, etc.) via backend proxy
 - **Cloudflare Integration** — Auto-push blocked IPs to Cloudflare IP Lists for edge-level filtering
 - **R2 Storage** — Upload files to Cloudflare R2 (S3-compatible) with per-file sync tracking and hash-based URLs
 - **IP Aggregation** — Automatically merge blacklist IPs into /24 and /16 CIDR blocks to reduce list size
@@ -77,34 +81,74 @@ A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSee
 
 ## AI Assistant
 
-The editor includes a DeepSeek AI assistant that can read your document and apply edits directly. Available from the admin write page toolbar (✦ button).
+DeepSeek-powered writing assistant integrated into the editor. Available from the admin write page toolbar.
 
 ### Setup
 
 1. Go to **Admin → Settings → AI Integration**
 2. Enter your [DeepSeek API Key](https://platform.deepseek.com/api_keys)
-3. Choose a model (default: `deepseek-chat`)
+3. Choose a model or leave as **Auto** for smart routing (see below)
 4. Click **Test Connection** to verify, then **Save**
 
-### Capabilities
+### Smart Model Routing
 
-The AI uses **function calling** to interact with the editor:
+When model is set to **Auto**, the AI analyzes each prompt and routes to the best model:
 
-**Read tools** — inspect the document:
-`getSelection`, `getCurrentLine`, `getCurrentParagraph`, `getCurrentSection`, `getFullDocument`, `getTitle`
+| Task type              | Model               | Examples                                                  |
+| ---------------------- | ------------------- | --------------------------------------------------------- |
+| Light (fast/cheap)     | `deepseek-v4-flash` | Typos, translations, titles, greetings                    |
+| Heavy (deep reasoning) | `deepseek-v4-pro`   | Full rewrites, code, analysis, long content (>1000 chars) |
+| Default                | `deepseek-v4-flash` | Ambiguous chat                                            |
 
-**Write tools** — modify the document:
-`replaceText`, `replaceCurrentLine`, `replaceCurrentParagraph`, `replaceFullDocument`, `insertAtCursor`, `setTitle`
+You can override by selecting a specific model or setting a default in Settings.
 
-All write operations show an **inline confirmation card** ([Apply] / [Dismiss]) in the chat before executing. No modal dialogs.
+### Deep Think Mode
+
+Toggle the **Think** switch in the AI panel to enable chain-of-thought reasoning. When enabled, the AI shows its thinking process before each response. Disabling it saves tokens for simple tasks.
+
+### Editor Tools
+
+The AI uses **function calling** to interact with the editor — 19 tools total:
+
+| Category       | Tools                                                                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Read document  | `getSelection`, `getCurrentLine`, `getCurrentParagraph`, `getCurrentSection`, `getFullDocument`, `getTitle`                             |
+| Write document | `replaceSelection`, `replaceCurrentLine`, `replaceCurrentParagraph`, `replaceText`, `replaceFullDocument`, `insertAtCursor`, `setTitle` |
+| Memory         | `getMemory`, `analyzeWritingStyle`, `saveMemory`                                                                                        |
+| External       | `getUserLocation` (browser GPS), `listModels`, `fetchUrl` (HTTP proxy)                                                                  |
+
+All write operations show an **inline confirmation card** ([Apply] / [Dismiss]) before executing.
+
+### Writing Style Memory
+
+The AI can learn your writing style from published articles and remember it across sessions.
+
+1. Go to **Admin → Settings → AI Integration** → enable **Memory**
+2. Select tags to focus learning (optional) and click **Learn Now**
+3. The AI reads up to 5 time-stratified articles, extracts your persona, style preferences, and knowledge
+4. Once learned, the profile is displayed in Settings and applied automatically in all future AI chats
+5. Click **Relearn** to update or **Clear** to reset
+
+**Profile fields saved:**
+
+- **Persona** — role, tone, target audience
+- **Style** — language, preferred patterns, words to avoid
+- **Knowledge** — recurring facts and themes from your articles
+
+### fetchUrl — External API Access
+
+The AI can make HTTP requests to external APIs (weather, news, exchange rates, etc.) via a backend proxy:
+
+- Supports **GET** and **POST** with custom headers and body
+- Text responses limited to 8KB; binary responses return a summary
+- Internal URLs (`localhost`, `127.0.0.1`) are blocked
 
 ### Usage
 
 1. Open the admin write page and select a post
-2. Click the ✦ button in the editor toolbar
-3. Ask the AI — e.g. "fix this line", "suggest a title", "polish this article"
-4. Review the proposed changes and click **Apply** or **Dismiss**
-5. AI handles configuration checks automatically. If the API key is missing or invalid, a prompt will guide you to Settings
+2. Click the AI button in the editor toolbar
+3. Ask the AI — e.g. "fix this line", "suggest a title", "polish this article", "what's the weather in Tokyo?"
+4. Review proposed changes and click **Apply** or **Dismiss**
 
 ## Tech Stack
 
@@ -254,6 +298,7 @@ bun run scripts/migrate-to-r2.ts
 ```
 
 What it does:
+
 1. Uploads all local files to R2 (using hash-based keys derived from MD5)
 2. Verifies each upload with a HEAD request before deleting the local copy
 3. Replaces `/res/<id>` and `/res/_<id>` references in post content with R2 URLs

@@ -1,4 +1,3 @@
-
 .editor-wrapper {
 	display: flex;
 	flex-direction: column;
@@ -68,7 +67,6 @@
 	background: rgb(31 48 67 / 0.51);
 }
 
-
 .toolbar button[class*='icon'] {
 	font-size: 0;
 }
@@ -76,7 +74,6 @@
 .toolbar button[class*='icon']::before {
 	font-size: 18px;
 }
-
 
 .tb-bold::after {
 	content: 'B';
@@ -109,7 +106,6 @@
 	content: '⊞';
 	font-size: 16px;
 }
-
 
 .editor-wrapper .cm-editor {
 	flex: 1;
@@ -144,7 +140,7 @@
 	background: rgb(10 32 51 / 0.71) !important;
 }
 .editor-wrapper .ͼ4 .cm-line ::selection,
-.editor-wrapper  .ͼ4 .cm-line::selection {
+.editor-wrapper .ͼ4 .cm-line::selection {
 	color: #8abefb;
 	background: rgb(41 54 74 / 0.61) !important;
 }
@@ -164,7 +160,6 @@
 .editor-wrapper .ͼc {
 	color: rgb(83 182 225 / 0.67) !important;
 }
-
 
 .editor-wrapper .cm-editor .cm-header {
 	color: #61afef;
@@ -207,18 +202,18 @@
 	color: rgba(130, 143, 164, 0.5);
 }
 
-.cm-panels{
-	background: none!important;
-	border-top:none!important;
+.cm-panels {
+	background: none !important;
+	border-top: none !important;
 }
 .cm-panel.cm-search {
 	border-radius: 16px;
 	background: rgb(0 0 0 / 0.6) !important;
 	color: #cccccc !important;
 	display: flex !important;
-	flex-wrap: wrap !important;     
-	align-items: center !important;  
-	gap: 8px !important;            
+	flex-wrap: wrap !important;
+	align-items: center !important;
+	gap: 8px !important;
 	padding: 32px 8px 10px !important;
 	box-sizing: border-box !important;
 }
@@ -237,7 +232,6 @@
 	box-sizing: border-box !important;
 }
 
-
 .cm-panel.cm-search .cm-button {
 	background: #2d2d2d !important;
 	color: #cccccc !important;
@@ -245,7 +239,7 @@
 	border-radius: 4px !important;
 	cursor: pointer !important;
 	height: 28px !important;
-	padding: 0 12px !important;     
+	padding: 0 12px !important;
 	font-size: 13px !important;
 	display: inline-flex !important;
 	align-items: center !important;
@@ -260,7 +254,7 @@
 
 .cm-panel.cm-search label {
 	display: inline-flex !important;
-	align-items: center !important;  
+	align-items: center !important;
 	height: 28px !important;
 	font-size: 13px !important;
 	cursor: pointer !important;
@@ -268,15 +262,15 @@
 	margin-right: 6px !important;
 }
 
-.cm-panel.cm-search label input[type="checkbox"] {
+.cm-panel.cm-search label input[type='checkbox'] {
 	width: 14px !important;
 	height: 14px !important;
-	margin: 0 6px 0 0 !important;   
+	margin: 0 6px 0 0 !important;
 	accent-color: #007acc !important;
 	cursor: pointer !important;
 }
 
-.cm-panel.cm-search button[name="close"] {
+.cm-panel.cm-search button[name='close'] {
 	background: none !important;
 	border: none !important;
 	color: #aaaaaa !important;
@@ -289,6 +283,6 @@
 	align-items: center !important;
 }
 
-.cm-panel.cm-search button[name="close"]:hover {
+.cm-panel.cm-search button[name='close']:hover {
 	color: #fff !important;
 }

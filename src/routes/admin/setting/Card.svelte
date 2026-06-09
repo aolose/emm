@@ -21,19 +21,12 @@
 	@use '../../../lib/break' as *;
 	.a {
 		display: flex;
-		margin: 16px 0;
 		border-radius: 14px;
 		background: rgba(0, 0, 0, 0.8);
 		flex-direction: column;
 		padding-bottom: 20px;
-		:global {
-			button {
-				min-width: 100px;
-			}
-		}
 		@include s() {
-			width: 96%;
-			margin: 5px auto;
+			margin: 0 12px;
 		}
 	}
 	.e {

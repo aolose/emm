@@ -21,7 +21,8 @@ const PRECACHE_ROUTES = ['/', '/about', '/posts', '/tags'];
  */
 function extractFetchedData(html) {
 	const results = [];
-	const regex = /<script type="application\/json" data-sveltekit-fetched data-url="([^"]*)"[^>]*>([\s\S]*?)<\/script>/g;
+	const regex =
+		/<script type="application\/json" data-sveltekit-fetched data-url="([^"]*)"[^>]*>([\s\S]*?)<\/script>/g;
 	let match;
 	while ((match = regex.exec(html)) !== null) {
 		const url = match[1].replace(/&amp;/g, '&');
@@ -55,13 +56,13 @@ self.addEventListener('install', (event) => {
 		await cache.addAll(ASSETS);
 
 		const dataCache = await caches.open(DATA_CACHE);
-		for (const route of PRECACHE_ROUTES) {
+		const tasks = PRECACHE_ROUTES.map(async (route) => {
 			try {
-				const response = await fetch(route);
-				if (!response.ok) continue;
+				const response = await fetch(route, { redirect: 'manual' });
+				if (response.status >= 300 && response.status < 400) return;
+				if (!response.ok) return;
 				const html = await response.text();
-
-				// Extract embedded API data
+				// 提取并缓存 API 数据
 				const entries = extractFetchedData(html);
 				for (const [url, data] of entries) {
 					await dataCache.put(
@@ -74,15 +75,17 @@ self.addEventListener('install', (event) => {
 						})
 					);
 				}
-
-				// Cache the HTML page
-				await cache.put(route, new Response(html, {
-					headers: { 'Content-Type': 'text/html; charset=utf-8' }
-				}));
+				await cache.put(
+					route,
+					new Response(html, {
+						headers: { 'Content-Type': 'text/html; charset=utf-8' }
+					})
+				);
 			} catch {
-				// Route may require server context not available at install time
+				// 忽略错误
 			}
-		}
+		});
+		await Promise.allSettled(tasks);
 	}
 
 	const p = addFilesToCache();
@@ -158,8 +161,15 @@ self.addEventListener('fetch', (event) => {
 
 			const networkFetch = fetch(requestToSend)
 				.then(async (networkResponse) => {
-					if (networkResponse && (networkResponse.status === 200 || networkResponse.status === 0)) {
-						await cache.put(event.request, networkResponse.clone());
+					if (networkResponse) {
+						// /res/: cache 200 and 301 (permanent R2 redirects)
+						// Other routes: only cache 200 (307 = Turnstile, skip)
+						const cacheable = isRes
+							? networkResponse.status === 200 || networkResponse.status === 301
+							: networkResponse.status === 200;
+						if (cacheable) {
+							await cache.put(event.request, networkResponse.clone());
+						}
 					}
 					return networkResponse;
 				})
