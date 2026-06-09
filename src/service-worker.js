@@ -58,7 +58,10 @@ self.addEventListener('install', (event) => {
 		const dataCache = await caches.open(DATA_CACHE);
 		const tasks = PRECACHE_ROUTES.map(async (route) => {
 			try {
-				const response = await fetch(route, { redirect: 'manual' });
+				const response = await fetch(route, {
+					redirect: 'manual',
+					headers: { 'X-SW-Precache': '1' }
+				});
 				if (response.status >= 300 && response.status < 400) return;
 				if (!response.ok) return;
 				const html = await response.text();

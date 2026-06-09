@@ -879,19 +879,28 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 			pn
 		);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
-		// Mark abandon: start timers for matching abandon trigger rules
-		const abandonTriggers = triggers.filter((t) => t.abandon && t.active && t.isInSchedule());
-		if (abandonTriggers.length) {
-			const r = {
-				ip,
-				path: pn,
-				method: event.request.method.toLowerCase(),
-				headers: event.request.headers
-			};
-			for (const rule of abandonTriggers) {
-				const hr = hitRule(r, rule);
-				if (hr) {
-					markAbandon(ip, rule);
+		// SW precache requests (X-SW-Precache header) still get a 307 but skip
+		// abandon timers — the SW won't follow redirects (redirect: 'manual') so the
+		// timer would always fire, causing false-positive blacklisting on deploy.
+		// Only the 4 routes the SW actually precaches (see service-worker.js PRECACHE_ROUTES)
+		const SW_PRECACHE = /^\/($|about|posts|tags)$/;
+		const isSwPrecache =
+			event.request.headers.get('X-SW-Precache') === '1' && SW_PRECACHE.test(pn);
+		if (!isSwPrecache) {
+			// Mark abandon: start timers for matching abandon trigger rules
+			const abandonTriggers = triggers.filter((t) => t.abandon && t.active && t.isInSchedule());
+			if (abandonTriggers.length) {
+				const r = {
+					ip,
+					path: pn,
+					method: event.request.method.toLowerCase(),
+					headers: event.request.headers
+				};
+				for (const rule of abandonTriggers) {
+					const hr = hitRule(r, rule);
+					if (hr) {
+						markAbandon(ip, rule);
+					}
 				}
 			}
 		}
