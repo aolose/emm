@@ -4,7 +4,7 @@ import { method } from '$lib/enum';
 const baseLoad = apiLoad('tags', undefined, {
 	method: method.GET,
 	group: 'posts',
-	cache: 1e3 * 3600 * 3
+	cache: 1e3 * 3600
 });
 
 const hash = (s: string) => {

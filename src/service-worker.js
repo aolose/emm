@@ -10,14 +10,14 @@ const RES_CACHE = 'res';
 const DATA_CACHE = 'emm-data';
 const ASSETS = [...build, ...files];
 
-// Navigation routes precached at install. The HTML contains SSR-embedded
-// API data (<script data-sveltekit-fetched>) which we extract and store
-// separately so req.ts can serve it offline.
+// Navigation routes precached at install.
 const PRECACHE_ROUTES = ['/', '/about', '/posts', '/tags'];
+
+// ── Content routes eligible for ETag-aware stale-while-revalidate ──
+const CONTENT_RE = /^\/($|about|posts(\/|$)|post\/|tags(\/|$)|tag\/)/;
 
 /**
  * Extract data-sveltekit-fetched payloads from an HTML string.
- * Returns [url, parsedBody][] tuples.
  */
 function extractFetchedData(html) {
 	const results = [];
@@ -33,7 +33,7 @@ function extractFetchedData(html) {
 				try {
 					data = JSON.parse(raw.body);
 				} catch {
-					data = raw.body; // plain-text response (e.g. /api/tags)
+					data = raw.body;
 				}
 			} else {
 				data = raw.body;
@@ -46,10 +46,9 @@ function extractFetchedData(html) {
 	return results;
 }
 
+// ── Install: precache static assets + warm content routes ──────────
 self.addEventListener('install', (event) => {
-	const {
-		registration: { active }
-	} = self;
+	const { registration: { active } } = self;
 
 	async function addFilesToCache() {
 		const cache = await caches.open(CACHE);
@@ -78,12 +77,7 @@ self.addEventListener('install', (event) => {
 						})
 					);
 				}
-				await cache.put(
-					route,
-					new Response(html, {
-						headers: { 'Content-Type': 'text/html; charset=utf-8' }
-					})
-				);
+				await cache.put(route, response);
 			} catch {
 				// 忽略错误
 			}
@@ -103,6 +97,7 @@ self.addEventListener('install', (event) => {
 	}
 });
 
+// ── Activate: purge old version caches ─────────────────────────────
 self.addEventListener('activate', (event) => {
 	async function deleteOldCaches() {
 		for (const key of await caches.keys()) {
@@ -112,101 +107,159 @@ self.addEventListener('activate', (event) => {
 	event.waitUntil(deleteOldCaches());
 });
 
+// ── Fetch: route-specific strategies ───────────────────────────────
 self.addEventListener('fetch', (event) => {
 	if (event.request.method !== 'GET') return;
 
 	const url = new URL(event.request.url);
 	const pathname = url.pathname;
-	// Exclude admin, login, feeds, API, and Turnstile challenge from SW caching.
-	// /ts-challenge must bypass SW so redirect-chains from Turnstile 307s reach
-	// the server and clear the abandon timer (prevents false-positive blacklisting).
+
+	// Admin, login, feeds, API, Turnstile — bypass SW entirely
 	if (/^\/(admin|login|feed|api|ts-challenge)/.test(pathname)) return;
 
 	if (DEV) {
-		async function devNetworkFirst() {
-			try {
-				const response = await fetch(event.request);
-				const cache = await caches.open(CACHE);
-				cache.put(event.request, response.clone());
-				return response;
-			} catch {
-				const cache = await caches.open(CACHE);
-				return cache.match(event.request);
-			}
-		}
-		event.respondWith(devNetworkFirst());
+		event.respondWith(devNetworkFirst(event.request));
 		return;
 	}
 
-	async function respond() {
-		let isRes = pathname.startsWith('/res/');
+	// R2 resource (same-origin /res or cross-origin r2-host)
+	const isRes = pathname.startsWith('/res/');
+	if (isRes) {
+		event.respondWith(resNetworkFirst(event.request));
+		return;
+	}
 
-		if (!isRes && url.hostname !== self.location.hostname) {
-			const configCache = await caches.open('sw-config');
-			const configResponse = await configCache.match('/__config/r2-host');
-			const r2Host = configResponse ? await configResponse.text() : '';
-			if (r2Host && url.hostname === r2Host) isRes = true;
-		}
+	// Content pages — cache-first, background ETag revalidation + notification
+	if (CONTENT_RE.test(pathname)) {
+		event.respondWith(contentStaleWhileRevalidate(event));
+		return;
+	}
 
-		const currentCacheName = isRes ? RES_CACHE : CACHE;
-		const cache = await caches.open(currentCacheName);
+	// Static assets — cache-first (immutable, hashed filenames)
+	event.respondWith(staticCacheFirst(event.request));
+});
 
-		try {
-			const cachedResponse = await cache.match(event.request, { ignoreSearch: true });
+// ── Strategy: Dev network-first ────────────────────────────────────
+async function devNetworkFirst(request) {
+	try {
+		const response = await fetch(request);
+		const cache = await caches.open(CACHE);
+		cache.put(request, response.clone());
+		return response;
+	} catch {
+		const cache = await caches.open(CACHE);
+		return cache.match(request);
+	}
+}
 
-			let requestToSend = event.request;
-			// Ensure same-origin background fetches follow redirects so Turnstile
-			// 307→200 chains reach /ts-challenge and clear the abandon timer.
-			if (event.request.redirect !== 'follow') {
-				requestToSend = new Request(event.request, { redirect: 'follow' });
-			}
-			if (isRes && url.hostname !== self.location.hostname && event.request.mode !== 'cors') {
-				requestToSend = new Request(event.request.url, {
-					method: event.request.method,
-					headers: event.request.headers,
-					mode: 'cors',
-					credentials: 'omit',
-					redirect: event.request.redirect
-				});
-			}
+// ── Strategy: R2 network-first ─────────────────────────────────────
+async function resNetworkFirst(request) {
+	const cache = await caches.open(RES_CACHE);
 
-			const networkFetch = fetch(requestToSend)
-				.then(async (networkResponse) => {
-					if (networkResponse) {
-						// /res/: cache 200 and 301 (permanent R2 redirects)
-						// Other routes: only cache 200 (307 = Turnstile, skip)
-						const cacheable = isRes
-							? networkResponse.status === 200 || networkResponse.status === 301
-							: networkResponse.status === 200;
-						if (cacheable) {
-							await cache.put(event.request, networkResponse.clone());
-						}
-					}
-					return networkResponse;
-				})
-				.catch((fetchErr) => {
-					console.warn('SW background fetch failed (offline):', fetchErr);
-				});
-
-			if (cachedResponse) {
-				event.waitUntil(networkFetch);
-				return cachedResponse;
-			}
-
-			const networkResponse = await networkFetch;
-			if (networkResponse) return networkResponse;
-
-			throw new Error('No cache and network failed');
-		} catch (err) {
-			console.error('SW crashed, safety fallback to network:', err);
-			// Never return a raw fetch() promise — it may reject offline.
-			// Return a proper error Response so event.respondWith() always gets a Response.
-			return new Response('Offline — resource not cached', {
-				status: 503,
-				statusText: 'Service Unavailable'
+	// Resolve cross-origin R2 host
+	let requestToSend = request;
+	if (new URL(request.url).hostname !== self.location.hostname) {
+		const configCache = await caches.open('sw-config');
+		const configResponse = await configCache.match('/__config/r2-host');
+		const r2Host = configResponse ? await configResponse.text() : '';
+		if (r2Host) {
+			requestToSend = new Request(request.url, {
+				method: request.method,
+				headers: request.headers,
+				mode: 'cors',
+				credentials: 'omit',
+				redirect: request.redirect
 			});
 		}
 	}
 
-	event.respondWith(respond());
-});
+	try {
+		const networkResponse = await fetch(requestToSend);
+		// Cache 200 and 301 (permanent R2 redirects)
+		if (networkResponse.status === 200 || networkResponse.status === 301) {
+			await cache.put(request, networkResponse.clone());
+		}
+		return networkResponse;
+	} catch {
+		const cached = await cache.match(request, { ignoreSearch: true });
+		if (cached) return cached;
+		throw new Error('R2 resource unavailable offline');
+	}
+}
+
+// ── Strategy: Static assets cache-first ────────────────────────────
+async function staticCacheFirst(request) {
+	const cache = await caches.open(CACHE);
+	const cached = await cache.match(request);
+	if (cached) return cached;
+
+	try {
+		const response = await fetch(request);
+		if (response.ok) {
+			await cache.put(request, response.clone());
+		}
+		return response;
+	} catch {
+		return cached || new Response('Offline', { status: 503 });
+	}
+}
+
+// ── Strategy: Content pages cache-first + background ETag refresh ──
+/**
+ * Return cached HTML immediately (fast FCP even on slow networks).
+ * Background: If-None-Match with stored ETag.
+ *   304 → page unchanged, just refresh cache timestamp.
+ *   200 → page changed, update cache, post CONTENT_UPDATED to page.
+ * Cache miss → wait for network.
+ */
+async function contentStaleWhileRevalidate(event) {
+	const request = event.request;
+	const cache = await caches.open(CACHE);
+	const cachedResponse = await cache.match(request, { ignoreSearch: true });
+
+	// ── Background revalidation (fire-and-forget) ──
+	const revalidate = async () => {
+		try {
+			const headers = new Headers(request.headers);
+			const etag = cachedResponse?.headers.get('etag');
+			if (etag) headers.set('if-none-match', etag);
+
+			const networkRequest = new Request(request.url, {
+				method: 'GET',
+				headers,
+				redirect: 'follow'
+			});
+			const networkResponse = await fetch(networkRequest);
+
+			if (networkResponse.status === 304) {
+				if (cachedResponse) await cache.put(request, cachedResponse.clone());
+				return;
+			}
+
+			if (networkResponse.ok) {
+				await cache.put(request, networkResponse.clone());
+				channel.postMessage({
+					type: 'CONTENT_UPDATED',
+					url: new URL(request.url).pathname
+				});
+			}
+		} catch (err) {
+			console.warn('[sw] background revalidate error:', err);
+		}
+	};
+
+	// ── Cache hit → return immediately, revalidate in background ──
+	if (cachedResponse) {
+		event.waitUntil(revalidate());
+		return cachedResponse;
+	}
+
+	// Cache miss → wait for network
+	try {
+		const networkResponse = await fetch(request);
+		if (networkResponse.ok) await cache.put(request, networkResponse.clone());
+		return networkResponse;
+	} catch {
+		return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+	}
+}

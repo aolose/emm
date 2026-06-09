@@ -137,6 +137,7 @@ const allowReadCache = () => {
 const reqCache = (
 	key: string,
 	fullUrl: string | null,
+	ttlMs: number,
 	run: (re?: cacheRecord) => Promise<reqData>
 ): Promise<reqData> => {
 	if (!key || !browser) return run();
@@ -181,7 +182,7 @@ const reqCache = (
 			return run(r);
 		})
 		.then(async (d) => {
-			if (fullUrl) cacheApiPut(fullUrl, d, 864e5);
+			if (fullUrl) cacheApiPut(fullUrl, d, ttlMs || 864e5);
 			return d;
 		})
 		.catch((err) => {
@@ -389,7 +390,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 			cache && cfg?.method === method.GET
 				? `/api/${url}${params ? '?' + body2query(params as Record<string, unknown>) : ''}`
 				: null;
-		p = reqCache(cache ? key : '', fullUrl, async (rec) => {
+		p = reqCache(cache ? key : '', fullUrl, cache || 0, async (rec) => {
 			const d = await query(url, params, cfg);
 			if (cache && rec) {
 				rec[0] = Date.now() + cache;

@@ -1,7 +1,7 @@
 import { apiLoad } from '$lib/req';
 import { method } from '$lib/enum';
 
-const baseLoad = apiLoad('home', undefined, { method: method.GET, cache: 1e3 * 3600 * 24 * 30 });
+const baseLoad = apiLoad('home', undefined, { method: method.GET, cache: 1e3 * 3600 });
 
 const hash = (s: string) => {
 	let h = 0;

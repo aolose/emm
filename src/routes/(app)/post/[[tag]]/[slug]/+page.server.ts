@@ -4,7 +4,7 @@ import { renderMermaidBlocks } from '$lib/server/mermaid-ssr';
 
 const baseLoad = apiLoad('post', ({ params: { slug, tag } }) => [slug, tag || ''].join(), {
 	method: method.GET,
-	cache: 1e3 * 3600 * 3
+	cache: 1e3 * 60 * 5
 });
 
 export const load = async (event) => {
@@ -16,8 +16,7 @@ export const load = async (event) => {
 		d.content = await renderMermaidBlocks(d.content);
 	}
 
-	const etag = `"${Bun.hash(JSON.stringify(d)).toString(36)}"`;
-	event.setHeaders({ etag, 'cache-control': 'private, must-revalidate' });
+	// ETag / cache-control handled globally by hooks.server.ts (addEtag)
 
 	// Resolve banner R2 info for direct URL
 	const { sys, db } = await import('$lib/server');

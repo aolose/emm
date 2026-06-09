@@ -9,7 +9,7 @@ const baseLoad = apiLoad(
 		if (!a) error(404);
 		else return { page: a, size: 12 };
 	},
-	{ method: method.GET, group: 'posts', cache: 1e3 * 3600 * 3 }
+	cache: 1e3 * 60 * 10 }
 );
 
 const hash = (s: string) => {
