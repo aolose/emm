@@ -75,6 +75,8 @@
 			if (!d) return;
 			fix(d);
 			let df = diffObj(da, d);
+			if (!df) df = {};
+			// @ts-ignore
 			df.id = da.id;
 			if (ta === 1 || ta === 3) df = { id: da.id, mark: df.mark };
 			const api = ['rule', 'blk', 'fwRsp', 'wlk'][ta];

@@ -148,6 +148,7 @@ export class BlackList {
 	mark = TEXT;
 	createAt = INT;
 	respId = INT;
+	log = false;
 	_geo?: string;
 
 	toRule(): FWRule {
@@ -155,6 +156,13 @@ export class BlackList {
 		r.ip = this.ip;
 		r.mark = this.mark;
 		r.respId = this.respId || -1;
+		r.log = this.log;
+		// Clear filter fields — TEXT type marker '-' must not act as a filter
+		r.path = '';
+		r.method = '';
+		r.headers = '';
+		r.status = '';
+		r.country = '';
 		return r;
 	}
 }
