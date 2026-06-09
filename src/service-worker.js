@@ -114,7 +114,10 @@ self.addEventListener('fetch', (event) => {
 
 	const url = new URL(event.request.url);
 	const pathname = url.pathname;
-	if (/^\/(admin|login|feed|api)/.test(pathname)) return;
+	// Exclude admin, login, feeds, API, and Turnstile challenge from SW caching.
+	// /ts-challenge must bypass SW so redirect-chains from Turnstile 307s reach
+	// the server and clear the abandon timer (prevents false-positive blacklisting).
+	if (/^\/(admin|login|feed|api|ts-challenge)/.test(pathname)) return;
 
 	if (DEV) {
 		async function devNetworkFirst() {
@@ -149,6 +152,11 @@ self.addEventListener('fetch', (event) => {
 			const cachedResponse = await cache.match(event.request, { ignoreSearch: true });
 
 			let requestToSend = event.request;
+			// Ensure same-origin background fetches follow redirects so Turnstile
+			// 307→200 chains reach /ts-challenge and clear the abandon timer.
+			if (event.request.redirect !== 'follow') {
+				requestToSend = new Request(event.request, { redirect: 'follow' });
+			}
 			if (isRes && url.hostname !== self.location.hostname && event.request.mode !== 'cors') {
 				requestToSend = new Request(event.request.url, {
 					method: event.request.method,
