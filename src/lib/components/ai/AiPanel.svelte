@@ -4,14 +4,10 @@
 	import { sendAiMessage, type SendOptions } from './chat';
 	import { getUserLocation, preloadLocation } from './location';
 	import { editorTools } from '$lib/store';
-	import { marked } from 'marked';
 	import { get } from 'svelte/store';
-	import { configureMarked } from '$lib/marked-config';
 	import { req } from '$lib/req';
 	import { SvelteSet } from 'svelte/reactivity';
-	import type { ToolCall } from './types';
-
-	configureMarked();
+	import AiMessage, { toolSummary } from './AiMessage.svelte';
 
 	// Pre-fetch location on mount so AI tool calls return instantly
 	preloadLocation();
@@ -175,7 +171,7 @@
 	let isAtBottom = $state(true);
 	let unreadCount = $state(0);
 	let lastMsgCount = $state(0);
-	const SCROLL_THRESHOLD = 60;
+	const SCROLL_THRESHOLD = 30;
 	let scrollObserver: MutationObserver | null = null;
 
 	function scrollToBottom() {
@@ -191,7 +187,9 @@
 	}
 
 	// User-initiated scroll up (wheel or touch) — stop auto-follow
-	function onUserScrollUp() {
+	function onUserScrollUp(e?: WheelEvent) {
+		// Ignore scroll-down events — only scroll-up breaks auto-follow
+		if (e && e.deltaY !== undefined && e.deltaY >= 0) return;
 		isAtBottom = false;
 	}
 
@@ -229,10 +227,7 @@
 	});
 
 	// ── Send ─────────────────────────────────────────────────────────
-	async function handleSend() {
-		const v = inputValue.trim();
-		if (!v || $aiLoading) return;
-		inputValue = '';
+	async function doSend(text: string) {
 		scrollToBottomAndReset();
 		const fns = {
 			...get(editorTools),
@@ -246,7 +241,19 @@
 		const opts: SendOptions = {};
 		if (selectedModel) opts.model = selectedModel;
 		opts.deepThink = get(deepThink);
-		await sendAiMessage(v, fns, opts);
+		await sendAiMessage(text, fns, opts);
+	}
+
+	async function handleSend() {
+		const v = inputValue.trim();
+		if (!v || $aiLoading) return;
+		inputValue = '';
+		await doSend(v);
+	}
+
+	async function quickSend(text: string) {
+		if ($aiLoading) return;
+		await doSend(text);
 	}
 
 	// Detect touch devices — disable Enter-send to avoid virtual-keyboard misfires
@@ -260,13 +267,27 @@
 		}
 	}
 
-	function renderMarkdown(text: string): string {
-		if (!text) return '';
-		const html = marked.parse(text) as string;
-		return html.replace(
-			/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
-			'<pre class="mermaid">$1</pre>'
-		);
+	// ── Quick-reply option parsing ────────────────────────────────────
+	function parseMessage(raw: string): { text: string; options: string[] } {
+		const jsonRegex = /```json\s*([\s\S]*?)\s*```/;
+		const match = raw.match(jsonRegex);
+		if (!match) return { text: raw, options: [] };
+
+		const textOnly = raw.replace(jsonRegex, '').trim();
+		try {
+			const parsed = JSON.parse(match[1]);
+			if (
+				Array.isArray(parsed) &&
+				parsed.every((v) => typeof v === 'string') &&
+				parsed.length >= 1 &&
+				parsed.length <= 6
+			) {
+				return { text: textOnly, options: parsed };
+			}
+		} catch {
+			// Invalid/incomplete JSON — strip the block anyway
+		}
+		return { text: textOnly, options: [] };
 	}
 
 	// ── Reasoning display ───────────────────────────────────────────
@@ -285,38 +306,6 @@
 		return len > REASONING_PREVIEW;
 	}
 
-	// ── Human-readable tool summaries ────────────────────────────────
-	function toolSummary(tc: ToolCall): string {
-		let args: Record<string, unknown> = {};
-		try {
-			args = JSON.parse(tc.function.arguments);
-		} catch {
-			/* keep empty */
-		}
-		const preview = (v: unknown, max = 60) => {
-			const s = String(v ?? '');
-			return s.length > max ? s.slice(0, max) + '…' : s;
-		};
-
-		switch (tc.function.name) {
-			case 'replaceSelection':
-				return `Replace selection with: ${preview(args.text)}`;
-			case 'replaceCurrentLine':
-				return `Replace current line with: ${preview(args.text)}`;
-			case 'replaceCurrentParagraph':
-				return `Replace current paragraph with: ${preview(args.text)}`;
-			case 'replaceText':
-				return `Replace "${preview(args.searchText, 30)}" → "${preview(args.newText, 30)}"`;
-			case 'replaceFullDocument':
-				return `Replace entire document (${String(args.text ?? '').length} chars)`;
-			case 'insertAtCursor':
-				return `Insert at cursor: ${preview(args.text)}`;
-			case 'setTitle':
-				return `Set title to: ${preview(args.title)}`;
-			default:
-				return `${tc.function.name}(${preview(tc.function.arguments, 40)})`;
-		}
-	}
 </script>
 
 <div class="ai-panel">
@@ -330,7 +319,7 @@
 		class="chat"
 		bind:this={chatEl}
 		onscroll={onChatScroll}
-		onwheel={onUserScrollUp}
+		onwheel={(e) => onUserScrollUp(e)}
 		ontouchstart={onUserScrollUp}
 	>
 		{#if $aiMessages.length === 0}
@@ -340,77 +329,28 @@
 			</div>
 		{/if}
 		{#each $aiMessages as msg, i (msg.tool_call_id || `${msg.role}-${i}-${(msg.content || '').slice(0, 20)}`)}
-			{#if msg.role === 'user'}
-				<div class="msg user">
-					<div class="bubble">{msg.content}</div>
-				</div>
-			{:else if msg.role === 'assistant' && msg.tool_calls && !msg.content}
-				<div class="msg assistant tool-call">
-					<div class="assistant-body">
-						{#if msg.reasoning_content}
-							{@const rlen = msg.reasoning_content.length}
-							<div class="reasoning">
-								{#if reasoningIsExpanded(i, rlen)}
-									{msg.reasoning_content}
-									{#if reasoningNeedsToggle(rlen)}
-										<button class="reasoning-toggle" onclick={() => toggleReasoningIdx(i)}
-											>Show less</button
-										>
-									{/if}
-								{:else}
-									{msg.reasoning_content.slice(0, REASONING_PREVIEW)}…
-									<button class="reasoning-toggle" onclick={() => toggleReasoningIdx(i)}
-										>Show more</button
-									>
-								{/if}
-							</div>
-						{/if}
-						<div class="bubble">Reading document...</div>
-					</div>
-				</div>
-			{:else if msg.role === 'assistant' && msg.content}
-				<div class="msg assistant">
-					<div class="assistant-body">
-						{#if msg.reasoning_content}
-							{@const rlen = msg.reasoning_content.length}
-							<div class="reasoning">
-								{#if reasoningIsExpanded(i, rlen)}
-									{msg.reasoning_content}
-									{#if reasoningNeedsToggle(rlen)}
-										<button class="reasoning-toggle" onclick={() => toggleReasoningIdx(i)}
-											>Show less</button
-										>
-									{/if}
-								{:else}
-									{msg.reasoning_content.slice(0, REASONING_PREVIEW)}…
-									<button class="reasoning-toggle" onclick={() => toggleReasoningIdx(i)}
-										>Show more</button
-									>
-								{/if}
-							</div>
-						{/if}
-						<div class="bubble">
-							<div class="ai-bubble-content">
-								{@html renderMarkdown(msg.content)}
-							</div>
-							<button
-								class="insert-btn icon"
-								class:i-ok={copiedIdx.has(i)}
-								class:i-copy={!copiedIdx.has(i)}
-								onclick={() => {
-									navigator.clipboard.writeText(msg.content);
-									copiedIdx.add(i);
-									setTimeout(() => {
-										copiedIdx.delete(i);
-									}, 3000);
-								}}
-								title="Copy to clipboard"
-							></button>
-						</div>
-					</div>
-				</div>
-			{:else if msg.role === 'tool'}
-				<!-- Tool results hidden from UI -->
+			{#if msg.role === 'tool'}
+				<!-- Tool results hidden -->
+			{:else}
+				{@const isLast = !$aiLoading && i === $aiMessages.length - 1}
+				{@const parsed = isLast && msg.role === 'assistant' && msg.content ? parseMessage(msg.content) : { text: msg.content || '', options: [] }}
+				{@const rlen = msg.reasoning_content?.length || 0}
+				<AiMessage
+					{msg}
+					displayContent={parsed.text}
+					options={parsed.options}
+					showOptions={isLast && parsed.options.length > 0}
+					copied={copiedIdx.has(i)}
+					reasoningExpanded={reasoningIsExpanded(i, rlen)}
+					reasoningToggleNeeded={reasoningNeedsToggle(rlen)}
+					oncopy={() => {
+						navigator.clipboard.writeText(msg.content || '');
+						copiedIdx.add(i);
+						setTimeout(() => copiedIdx.delete(i), 3000);
+					}}
+					ontogglereasoning={() => toggleReasoningIdx(i)}
+					onquickreply={(opt: string) => quickSend(opt)}
+				/>
 			{/if}
 		{/each}
 		{#if $aiLoading}
@@ -437,7 +377,7 @@
 
 		{#if !isAtBottom}
 			<button class="scroll-bottom-btn" onclick={scrollToBottomAndReset}>
-				↓ {unreadCount > 0 ? `${unreadCount} new` : 'Scroll to bottom'}
+				{unreadCount > 0 ? `${unreadCount}` : '↓'}
 			</button>
 		{/if}
 	</div>
@@ -556,119 +496,24 @@
 		}
 	}
 
-	.msg {
-		margin-bottom: 12px;
+	// ── Loading & pending bubbles (rendered in AiPanel) ──────────
+	.msg.assistant {
 		display: flex;
+		justify-content: flex-start;
+		padding-right: 40px;
+		margin-bottom: 12px;
 
-		&.user {
-			justify-content: flex-end;
-
-			.bubble {
-				background: rgba(64, 128, 255, 0.15);
-			}
-		}
-
-		&.assistant {
-			justify-content: flex-start;
-			// Reserve space for the absolutely-positioned copy button
-			padding-right: 40px;
-
-			.bubble {
-				background: rgba(255, 255, 255, 0.05);
-			}
-		}
-
-		.assistant-body {
-			display: flex;
-			flex-direction: column;
-			max-width: 85%;
+		.bubble {
+			border-radius: 12px;
+			font-size: 14px;
+			line-height: 1.6;
+			color: #c8d3ee;
+			word-break: break-word;
+			background: rgba(255, 255, 255, 0.05);
 		}
 
 		&.loading .bubble {
 			padding: 8px 16px;
-		}
-	}
-
-	.bubble {
-		position: relative; /* anchor for .insert-btn absolute positioning */
-		max-width: 85%;
-		padding: 10px 14px;
-		border-radius: 12px;
-		font-size: 14px;
-		line-height: 1.6;
-		color: #c8d3ee;
-		word-break: break-word;
-
-		.ai-bubble-content :global(p) {
-			margin: 4px 0;
-		}
-		.ai-bubble-content :global(ul),
-		.ai-bubble-content :global(ol) {
-			padding-left: 1.2em;
-			margin: 4px 0;
-		}
-		.ai-bubble-content :global(li) {
-			list-style-position: inside;
-		}
-		.ai-bubble-content :global(code) {
-			font-size: 12px;
-			background: rgba(0, 0, 0, 0.3);
-			padding: 1px 4px;
-			border-radius: 3px;
-		}
-		.ai-bubble-content :global(pre) {
-			font-size: 12px;
-			background: rgba(0, 0, 0, 0.3);
-			padding: 8px;
-			border-radius: 6px;
-			overflow-x: auto;
-		}
-	}
-
-	.insert-btn {
-		font-size: 14px;
-		padding: 8px;
-		border-radius: 4px;
-		color: #8a9bb5;
-		cursor: pointer;
-		transition: color 0.2s;
-		position: absolute;
-		right: -30px;
-		top: 8px;
-
-		&:hover {
-			color: #c8d3ee;
-		}
-
-		&:global(.i-ok) {
-			color: #5a9;
-		}
-	}
-
-	// ── Reasoning (thinking process) ──────────────────────────────
-	.reasoning {
-		font-size: 12px;
-		color: #5a6a7e;
-		line-height: 1.5;
-		padding: 6px 0 10px 4px;
-		max-width: 85%;
-		word-break: break-word;
-		white-space: pre-wrap;
-
-		:global(.reasoning-toggle) {
-			background: none;
-			border: none;
-			color: #6a8ab5;
-			font-size: 11px;
-			cursor: pointer;
-			padding: 0;
-			margin-left: 4px;
-			text-decoration: underline;
-			text-underline-offset: 2px;
-
-			&:hover {
-				color: #8aabdd;
-			}
 		}
 	}
 
@@ -736,18 +581,23 @@
 	// ── Scroll-to-bottom button ────────────────────────────────────
 	.scroll-bottom-btn {
 		position: sticky;
-		bottom: 8px;
-		display: block;
-		margin: 0 auto;
-		padding: 3px 10px;
-		border-radius: 10px;
+		bottom: 0;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		padding: 0;
+		width: 28px;
+		height: 28px;
 		border: none;
-		background: rgba(20, 25, 40, 0.85);
-		color: #4a5568;
+		margin:0 0 0 auto;
+		background: rgb(29 35 41 / 0.9);
+		color: #8797b5;
 		font-size: 11px;
+		font-weight: bolder;
 		cursor: pointer;
 		z-index: 2;
-		width: fit-content;
 		white-space: nowrap;
 
 		&:hover {
@@ -780,8 +630,8 @@
 
 	.input-area {
 		padding: 8px 16px 12px;
-		background: rgba(0, 0, 0, 0.2);
-		border-top: 1px solid rgba(255, 255, 255, 0.06);
+		background: rgba(0, 0, 0, 0.3);
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
 		flex-shrink: 0;
 	}
 
@@ -832,7 +682,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-top: 6px;
+		margin: 6px 0;
 		gap: 8px;
 	}
 
