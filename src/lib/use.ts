@@ -18,50 +18,310 @@ export const act = (node: HTMLAnchorElement, exact = true) => {
 };
 
 export const imageViewer = async (node: HTMLElement, slug: string) => {
-	const Viewer = (await import('viewerjs')).default;
-	Viewer.setDefaults({
-		button: true,
-		navbar: false,
-		title: false,
-		toolbar: false,
-		keyboard: false,
-		minWidth: 400,
-		loop: false,
-		minHeight: 200,
-		minZoomRatio: 0.1
-	});
+	let observer: MutationObserver | null = null;
+	let preparing = false;
 
-	let viewer: any = null;
-	let timeoutId: ReturnType<typeof setTimeout>;
+	const prepareElements = () => {
+		if (preparing) return;
+		preparing = true;
 
-	const init = () => {
-		if (viewer) {
-			viewer.destroy();
-			viewer = null;
-		}
-		viewer = new Viewer(node);
+		node.querySelectorAll('img, .mermaid-svg, .mermaid-rendered').forEach((el) => {
+			if (el.closest('a[data-custom-viewer]')) return;
+
+			const a = document.createElement('a');
+			a.dataset.customViewer = 'active';
+			a.style.display = 'block';
+			a.style.cursor = 'zoom-in';
+
+			el.parentNode!.insertBefore(a, el);
+			a.appendChild(el);
+		});
+
+		preparing = false;
 	};
 
-	timeoutId = setTimeout(init, 800);
+	prepareElements();
+
+	const openFullscreenViewer = (clickedAnchor: HTMLElement) => {
+		const targetElement = clickedAnchor.querySelector('img, svg') as HTMLElement;
+		if (!targetElement) return;
+
+		// 📍 FIRST: Record position and dimensions of target item
+		const origRect = targetElement.getBoundingClientRect();
+		const origCenterX = origRect.left + origRect.width / 2;
+		const origCenterY = origRect.top + origRect.height / 2;
+
+		const overlay = document.createElement('div');
+		overlay.style.cssText =
+			'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:999999; display:flex; align-items:center; justify-content:center; overflow:hidden; user-select:none; touch-action:none; opacity:0; transition:opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1);';
+
+		const transformContainer = document.createElement('div');
+		// ✅ CHANGED: Shift origin back to standard true center
+		transformContainer.style.cssText =
+			'transform-origin:center center; will-change:transform; display:flex; align-items:center; justify-content:center; max-width:92%; max-height:92%; cursor:grab;';
+
+		let clonedElement: HTMLElement;
+		if (targetElement.tagName.toLowerCase() === 'svg') {
+			clonedElement = targetElement.cloneNode(true) as HTMLElement;
+			const originalWidth =
+				targetElement.getAttribute('width') ||
+				targetElement.getBoundingClientRect().width.toString();
+			const originalHeight =
+				targetElement.getAttribute('height') ||
+				targetElement.getBoundingClientRect().height.toString();
+			if (!clonedElement.getAttribute('viewBox')) {
+				clonedElement.setAttribute('viewBox', `0 0 ${originalWidth} ${originalHeight}`);
+			}
+			clonedElement.removeAttribute('width');
+			clonedElement.removeAttribute('height');
+			clonedElement.style.cssText =
+				'width: 100%; height: 100%; max-width: 100%; max-height: 100%; pointer-events: none;';
+			clonedElement.setAttribute('shape-rendering', 'geometricPrecision');
+			clonedElement.setAttribute('text-rendering', 'geometricPrecision');
+			transformContainer.style.width = `${originalWidth}px`;
+			transformContainer.style.height = `${originalHeight}px`;
+		} else {
+			clonedElement = targetElement.cloneNode(true) as HTMLImageElement;
+			clonedElement.style.cssText =
+				'max-width:100%; max-height:100%; object-fit:contain; pointer-events:none;';
+		}
+
+		transformContainer.appendChild(clonedElement);
+		overlay.appendChild(transformContainer);
+		document.body.appendChild(overlay);
+
+		// ---- State Tracking Coordinates ----
+		let scale = 1;
+		let translateX = 0;
+		let translateY = 0;
+
+		const activePointers: PointerEvent[] = [];
+		let lastCenter = { x: 0, y: 0 };
+		let lastDistance = 0;
+		let hasMovedSignificant = false;
+		let rafId: number | null = null;
+
+		// 📍 LAST: Find structural target size values when scale = 1 at viewport center
+		const destRect = transformContainer.getBoundingClientRect();
+		const viewCenterX = window.innerWidth / 2;
+		const viewCenterY = window.innerHeight / 2;
+
+		// 📍 INVERT: Calculate sizing changes relative to structural centers
+		const startScaleX = origRect.width / destRect.width;
+		const startScaleY = origRect.height / destRect.height;
+		const startScale = Math.min(startScaleX, startScaleY);
+
+		// With a center origin, offset is simply distance from original layout center to screen center
+		const startX = origCenterX - viewCenterX;
+		const startY = origCenterY - viewCenterY;
+
+		// Snap to source location instantly
+		translateX = startX;
+		translateY = startY;
+		scale = startScale;
+
+		transformContainer.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
+
+		const render = () => {
+			transformContainer.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
+			rafId = null;
+		};
+
+		const requestRender = () => {
+			if (rafId === null) {
+				rafId = requestAnimationFrame(render);
+			}
+		};
+
+		// 📍 PLAY: Animate target forward
+		requestAnimationFrame(() => {
+			overlay.style.opacity = '1';
+			transformContainer.style.transition = 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)';
+
+			// Animate toward baseline zero offset positions (Dead Center)
+			translateX = 0;
+			translateY = 0;
+			scale = 1;
+
+			requestRender();
+		});
+
+		// Remove transition layout properties upon loading execution completion
+		setTimeout(() => {
+			if (activePointers.length === 0) {
+				transformContainer.style.transition = 'transform 0.1s cubic-bezier(0.25, 1, 0.5, 1)';
+			}
+		}, 350);
+
+		// 🖥️ Center-Aware Mouse Wheel Zoom
+		overlay.addEventListener(
+			'wheel',
+			(e: WheelEvent) => {
+				e.preventDefault();
+				transformContainer.style.transition = 'transform 0.12s cubic-bezier(0.25, 1, 0.5, 1)';
+
+				const zoomFactor = e.deltaY < 0 ? 1.25 : 1 / 1.25;
+				const targetScale = Math.max(0.4, Math.min(scale * zoomFactor, 15));
+
+				const mouseX = e.clientX;
+				const mouseY = e.clientY;
+
+				// ✅ ADJUSTED MATH: Adjust mouse tracking offsets to fit center-origin layouts
+				translateX =
+					mouseX - viewCenterX - (mouseX - viewCenterX - translateX) * (targetScale / scale);
+				translateY =
+					mouseY - viewCenterY - (mouseY - viewCenterY - translateY) * (targetScale / scale);
+				scale = targetScale;
+
+				requestRender();
+			},
+			{ passive: false }
+		);
+
+		// 📱 Universal Gesture Inputs
+		transformContainer.addEventListener('pointerdown', (e: PointerEvent) => {
+			e.preventDefault();
+			transformContainer.style.transition = 'none';
+			activePointers.push(e);
+			transformContainer.style.cursor = 'grabbing';
+			hasMovedSignificant = false;
+
+			if (activePointers.length === 1) {
+				lastCenter = { x: e.clientX, y: e.clientY };
+			} else if (activePointers.length === 2) {
+				lastDistance = Math.hypot(
+					activePointers[1].clientX - activePointers[0].clientX,
+					activePointers[1].clientY - activePointers[0].clientY
+				);
+				lastCenter = {
+					x: (activePointers[0].clientX + activePointers[1].clientX) / 2,
+					y: (activePointers[0].clientY + activePointers[1].clientY) / 2
+				};
+			}
+		});
+
+		window.addEventListener('pointermove', (e: PointerEvent) => {
+			const index = activePointers.findIndex((p) => p.pointerId === e.pointerId);
+			if (index === -1) return;
+			activePointers[index] = e;
+
+			if (activePointers.length === 1) {
+				const p = activePointers[0];
+				const movementX = p.clientX - lastCenter.x;
+				const movementY = p.clientY - lastCenter.y;
+
+				if (Math.hypot(movementX, movementY) > 3) {
+					hasMovedSignificant = true;
+				}
+
+				translateX += movementX;
+				translateY += movementY;
+				lastCenter = { x: p.clientX, y: p.clientY };
+			} else if (activePointers.length === 2) {
+				hasMovedSignificant = true;
+				const p1 = activePointers[0];
+				const p2 = activePointers[1];
+
+				const currentDistance = Math.hypot(p2.clientX - p1.clientX, p2.clientY - p1.clientY);
+				const currentCenter = {
+					x: (p1.clientX + p2.clientX) / 2,
+					y: (p1.clientY + p2.clientY) / 2
+				};
+
+				const zoomFactor = currentDistance / lastDistance;
+				const targetScale = Math.max(0.4, Math.min(scale * zoomFactor, 15));
+
+				// ✅ ADJUSTED MATH: Tracking pinch centers across localized focal coordinates
+				translateX =
+					currentCenter.x -
+					viewCenterX -
+					(currentCenter.x - viewCenterX - translateX) * (targetScale / scale);
+				translateY =
+					currentCenter.y -
+					viewCenterY -
+					(currentCenter.y - viewCenterY - translateY) * (targetScale / scale);
+
+				translateX += currentCenter.x - lastCenter.x;
+				translateY += currentCenter.y - lastCenter.y;
+
+				scale = targetScale;
+				lastDistance = currentDistance;
+				lastCenter = currentCenter;
+			}
+
+			requestRender();
+		});
+
+		const handlePointerUp = (e: PointerEvent) => {
+			const index = activePointers.findIndex((p) => p.pointerId === e.pointerId);
+			if (index !== -1) activePointers.splice(index, 1);
+
+			if (activePointers.length === 0) {
+				transformContainer.style.cursor = 'grab';
+				transformContainer.style.transition = 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1)';
+			} else if (activePointers.length === 1) {
+				const remaining = activePointers[0];
+				lastCenter = { x: remaining.clientX, y: remaining.clientY };
+			}
+		};
+
+		window.addEventListener('pointerup', handlePointerUp);
+		window.addEventListener('pointercancel', handlePointerUp);
+
+		// 📍 REVERSE PLAY: Smooth exit to target element position
+		const closeViewer = () => {
+			if (rafId) cancelAnimationFrame(rafId);
+
+			overlay.style.opacity = '0';
+			transformContainer.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+
+			translateX = startX;
+			translateY = startY;
+			scale = startScale;
+
+			requestRender();
+
+			overlay.addEventListener(
+				'transitionend',
+				() => {
+					overlay.remove();
+				},
+				{ once: true }
+			);
+		};
+
+		overlay.addEventListener('click', (e: MouseEvent) => {
+			if (e.target === overlay || !hasMovedSignificant) {
+				closeViewer();
+			}
+		});
+	};
+
+	const handleNodeClick = (e: MouseEvent) => {
+		const anchor = (e.target as HTMLElement).closest('a[data-custom-viewer="active"]');
+		if (anchor) {
+			e.preventDefault();
+			e.stopPropagation();
+			openFullscreenViewer(anchor as HTMLElement);
+		}
+	};
+
+	node.addEventListener('click', handleNodeClick, true);
+
+	observer = new MutationObserver(() => {
+		prepareElements();
+	});
+	observer.observe(node, { childList: true, subtree: true });
 
 	return {
-		update(newSlug: string) {
-			if (newSlug !== slug) {
-				slug = newSlug;
-				clearTimeout(timeoutId);
-				// Delay to let the Viewer component render new images into DOM
-				timeoutId = setTimeout(init, 600);
-			}
-		},
 		destroy: () => {
-			clearTimeout(timeoutId);
-			if (viewer) {
-				viewer.destroy();
-				viewer = null;
-			}
+			observer?.disconnect();
+			node.removeEventListener('click', handleNodeClick, true);
 		}
 	};
 };
+
+
 
 export const inner = (node: HTMLElement, child: unknown) => {
 	const getEl = (child: unknown) => {

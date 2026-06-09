@@ -8,7 +8,7 @@ export async function renderMermaidBlocks(markdown: string): Promise<string> {
 
 	try {
 		const mermaid = await import('mermaid');
-		mermaid.default.initialize({ startOnLoad: false, theme: 'dark' });
+		mermaid.default.initialize({ startOnLoad: false, theme: 'dark', suppressErrorRendering: true });
 
 		let result = markdown;
 		for (const block of blocks) {

@@ -257,8 +257,8 @@
 				editorTools.update((t) => ({
 					...t,
 					getTitle: () => ({ title: title || '' }),
-					setTitle: (t: string) => {
-						title = t;
+					setTitle: (args: unknown) => {
+						title = String((args as Record<string, unknown>)?.title || '');
 						return { ok: true };
 					}
 				}));
@@ -327,7 +327,7 @@
 	:global {
 		.toolbar .i-full {
 			display: none;
-			@include s() {
+			@media (max-width: 800px) {
 				display: inline;
 			}
 		}
@@ -335,7 +335,7 @@
 
 	.i-shrink {
 		display: none;
-		@include s() {
+		@media (max-width: 800px) {
 			transition: opacity 0.3s;
 			opacity: 0;
 			padding: 3px;
@@ -441,7 +441,7 @@
 	}
 
 	.fu {
-		@include s() {
+		@media (max-width: 800px) {
 			.t {
 				margin-bottom: -62px;
 				opacity: 0;
@@ -464,7 +464,7 @@
 	:global {
 		.toolbar .i-view {
 			display: none;
-			@include s() {
+			@media (max-width: 800px) {
 				display: inline-block;
 			}
 		}

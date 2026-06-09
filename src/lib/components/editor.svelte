@@ -3,7 +3,7 @@
 	import { filesUpload, selectFile, editorTools, h } from '$lib/store';
 	import { createEditorTools } from '$lib/components/ai/editorTools';
 	import { get } from 'svelte/store';
-	import { createFileMd, createUrl, file2Md, watch } from '$lib/utils';
+	import { createFileMd, createUrl, file2Md } from '$lib/utils';
 	import { htmlToMd } from '$lib/html-to-md';
 
 	import CodeMirror from 'svelte-codemirror-editor';
@@ -241,7 +241,7 @@
 		cm = v;
 		const tools = createEditorTools(cm);
 		if (editorRef) editorRef = tools;
-		editorTools.set(tools);
+		editorTools.set(tools as unknown as Record<string, (...args: unknown[]) => unknown>);
 	}
 
 	// ── Built-in toolbar buttons ─────────────────────────────────────
@@ -270,7 +270,6 @@
 			></button>
 		{/each}
 		{#each toolbar as btn (btn.name)}
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<button
 				onclick={btn.action}
 				title={btn.title}

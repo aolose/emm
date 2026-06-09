@@ -134,13 +134,13 @@
 			border-radius: 4px;
 			height: 34px;
 			width: 34px;
-			background: #6c7a93;
+			background: #171b22;
 		}
 	}
 
 	.o {
 		button {
-			background: #1c93ff;
+			background: #304472;
 			color: #fff;
 		}
 	}

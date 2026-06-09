@@ -8,6 +8,7 @@
 	import { req } from '$lib/req';
 	import { SvelteSet } from 'svelte/reactivity';
 	import AiMessage, { toolSummary } from './AiMessage.svelte';
+	import { initMermaid } from '$lib/mermaid';
 
 	// Pre-fetch location on mount so AI tool calls return instantly
 	preloadLocation();
@@ -142,19 +143,6 @@
 		}
 	}
 
-	function initMermaid(root: HTMLElement) {
-		// Only process blocks that haven't been rendered yet
-		const blocks = root.querySelectorAll('pre.mermaid:not(.mermaid-rendered)');
-		if (!blocks.length) return;
-		import('mermaid').then((m) => {
-			m.default.initialize({ startOnLoad: false, theme: 'dark', suppressErrorRendering: true });
-			Array.from(blocks).forEach((b) => {
-				b.classList.add('mermaid-rendered');
-				m.default.run({ nodes: [b] }).catch(() => {});
-			});
-		});
-	}
-
 	let {
 		close
 	}: {
@@ -187,9 +175,9 @@
 	}
 
 	// User-initiated scroll up (wheel or touch) — stop auto-follow
-	function onUserScrollUp(e?: WheelEvent) {
+	function onUserScrollUp(e?: Event) {
 		// Ignore scroll-down events — only scroll-up breaks auto-follow
-		if (e && e.deltaY !== undefined && e.deltaY >= 0) return;
+		if (e && 'deltaY' in e && (e as WheelEvent).deltaY >= 0) return;
 		isAtBottom = false;
 	}
 
@@ -229,14 +217,31 @@
 	// ── Send ─────────────────────────────────────────────────────────
 	async function doSend(text: string) {
 		scrollToBottomAndReset();
-		const fns = {
+		const fns: Record<string, (args: Record<string, unknown>) => unknown> = {
 			...get(editorTools),
-			getUserLocation,
+			getUserLocation: (args?: Record<string, unknown>) =>
+				getUserLocation((args as { bypassCache?: boolean } | undefined)?.bypassCache),
 			listModels,
 			getMemory,
-			analyzeWritingStyle,
-			saveMemory,
-			fetchUrl
+			analyzeWritingStyle: (args?: Record<string, unknown>) =>
+				analyzeWritingStyle(args as { tags?: string[]; count?: number } | undefined),
+			saveMemory: (args?: Record<string, unknown>) =>
+				saveMemory(
+					args as
+						| { persona?: Record<string, unknown>; style?: Record<string, unknown>; knowledge?: string[] }
+						| undefined
+				),
+			fetchUrl: (args?: Record<string, unknown>) =>
+				fetchUrl(
+					args as
+						| {
+								url?: string;
+								method?: string;
+								headers?: Record<string, string>;
+								body?: string;
+						  }
+						| undefined
+				)
 		};
 		const opts: SendOptions = {};
 		if (selectedModel) opts.model = selectedModel;

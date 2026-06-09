@@ -7,27 +7,10 @@
 	import { regElement } from '$lib/components/customent/reg';
 	import File from '$lib/components/post/File.svelte';
 	import { configureMarked } from '$lib/marked-config';
+	import { initMermaid, convertMermaidMarkup } from '$lib/mermaid';
 
 	configureMarked();
 	regElement('x-file', File);
-
-	function initMermaid(root) {
-		if (!root) return;
-		const blocks = root.querySelectorAll('pre.mermaid');
-		if (!blocks.length) return;
-		import('mermaid')
-			.then((m) => {
-				m.default.initialize({ startOnLoad: false, theme: 'dark', suppressErrorRendering: true });
-				Array.from(blocks).forEach((b) => {
-					m.default.run({ nodes: [b] }).catch((err) => {
-						console.error('[viewer] mermaid block error:', (b.textContent || '').slice(0, 50), err);
-					});
-				});
-			})
-			.catch((err) => {
-				console.error('[viewer] mermaid import error:', err);
-			});
-	}
 
 	let el = $state();
 	let mor = $state();
@@ -38,16 +21,14 @@
 
 	const fx = (s) => {
 		if (!s) return s;
-		return s
-			.replace(/<(\w+-\w+)([^>]*?)\/>/g, '<$1$2></$1>')
-			.replace(
-				/<(h\d) id="(.+?)">(.+?)<\/\1>/g,
-				'<a class=\'head\' href="#$2" id="$2"><$1>$3</$1></a>'
-			)
-			.replace(
-				/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
-				'<pre class="mermaid">$1</pre>'
-			);
+		return convertMermaidMarkup(
+			s
+				.replace(/<(\w+-\w+)([^>]*?)\/>/g, '<$1$2></$1>')
+				.replace(
+					/<(h\d) id="(.+?)">(.+?)<\/\1>/g,
+					'<a class=\'head\' href="#$2" id="$2"><$1>$3</$1></a>'
+				)
+		);
 	};
 
 	$effect(() => {
@@ -126,7 +107,6 @@
 <style lang="scss">
 	@use '../../lib/break' as *;
 	@import 'highlight.js/styles/github-dark.css';
-	@import 'viewerjs/dist/viewer.css';
 
 	// 基础容器：控制无预览和预览形态下的黄金阅读宽度
 	.a {
@@ -429,6 +409,10 @@
 			border: none;
 			color: rgba(255, 255, 255, 0.6);
 			cursor: pointer;
+			display: none;
+			@media (max-width: 800px) {
+				display: block;
+			}
 			&:hover {
 				color: #fff;
 			}

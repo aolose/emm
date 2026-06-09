@@ -38,6 +38,7 @@
 <script lang="ts">
 	import { marked } from 'marked';
 	import { configureMarked } from '$lib/marked-config';
+	import { convertMermaidMarkup } from '$lib/mermaid';
 	import type { AiMessage as AiMsg } from './types';
 
 	configureMarked();
@@ -46,11 +47,7 @@
 
 	function renderMd(text: string): string {
 		if (!text) return '';
-		const html = marked.parse(text) as string;
-		return html.replace(
-			/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
-			'<pre class="mermaid">$1</pre>'
-		);
+		return convertMermaidMarkup(marked.parse(text) as string);
 	}
 
 	let {

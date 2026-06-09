@@ -21,7 +21,7 @@
 	@use '../../lib/break' as *;
 
 	:global {
-		* {
+    *:not(svg):not(svg *){
 			color: #8d9cb5;
 		}
 		*::-webkit-scrollbar-thumb {

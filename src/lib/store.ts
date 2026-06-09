@@ -26,18 +26,19 @@ export const full = writable(0);
 export const fileManagerStore = writable(fileManagerCfg);
 export const confirmStore = writable({ ...confirmCfg });
 
-export const selectFile = (limit = 0, type = '') => {
-	return new Promise((resolve, reject) => {
+export const selectFile = (limit = 0, type = ''): Promise<File[] | fView[] | undefined> => {
+	return new Promise<File[] | fView[]>((resolve, reject) => {
 		fileManagerStore.set({
 			limit,
 			type,
 			show: true,
-			resolve,
-			reject
+			resolve: resolve as (v: unknown) => void,
+			reject: reject as (v: unknown) => void
 		});
 	}).catch((err) => {
 		// User cancelled or closed the file selector
 		if (err != null && err !== 'cancelled') console.error('selectFile error:', err);
+		return undefined;
 	});
 };
 
