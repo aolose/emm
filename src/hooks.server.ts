@@ -38,8 +38,40 @@ export const handle: Handle = async ({ event, resolve }) => {
 		};
 	}
 
-	return await firewallProcess(event, async () => await resolve(event, opts));
+	return await firewallProcess(event, async () => {
+		const response = await resolve(event, opts);
+		return await addEtag(event, response);
+	});
 };
+
+/**
+ * Add ETag / 304 caching for frontend SSR pages.
+ * Admin, API, and non-HTML responses are passed through unchanged.
+ */
+const FRONTEND_PAGE = /^\/($|about|posts(\/|$)|post\/|tags(\/|$)|tag\/)/;
+async function addEtag(event: Parameters<Handle>[0]['event'], response: Response): Promise<Response> {
+	const ct = response.headers.get('content-type') || '';
+	if (response.status !== 200 || !ct.includes('text/html')) return response;
+	if (!FRONTEND_PAGE.test(new URL(event.request.url).pathname)) return response;
+
+	const clone = response.clone();
+	const body = await clone.text();
+	const hasher = new Bun.CryptoHasher('sha256');
+	hasher.update(body);
+	const etag = `"${hasher.digest('hex')}"`;
+
+	const ifNoneMatch = event.request.headers.get('if-none-match');
+	if (ifNoneMatch === etag) {
+		const headers = new Headers(response.headers);
+		headers.set('etag', etag);
+		return new Response(null, { status: 304, headers });
+	}
+
+	const headers = new Headers(response.headers);
+	headers.set('etag', etag);
+	headers.set('cache-control', 'public, max-age=0, must-revalidate');
+	return new Response(body, { status: response.status, headers });
+}
 
 export const handleError = (({ error }) => {
 	console.error(error);
