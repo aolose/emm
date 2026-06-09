@@ -54,9 +54,12 @@ export async function regHjs(lan: Set<string>) {
 				case 'java':
 					reg = await import('highlight.js/lib/languages/java');
 					break;
-				case 'nginx':
-					reg = await import('highlight.js/lib/languages/nginx');
-					break;
+			case 'nginx':
+				reg = await import('highlight.js/lib/languages/nginx');
+				break;
+			case 'diff':
+				reg = await import('highlight.js/lib/languages/diff');
+				break;
 			}
 			if (reg) {
 				hjs.registerLanguage(a, reg.default);
