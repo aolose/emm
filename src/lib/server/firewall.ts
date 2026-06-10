@@ -879,14 +879,14 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 			pn
 		);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
-		// SW precache requests (X-SW-Precache header) still get a 307 but skip
-		// abandon timers — the SW won't follow redirects (redirect: 'manual') so the
-		// timer would always fire, causing false-positive blacklisting on deploy.
-		// Only the 4 routes the SW actually precaches (see service-worker.js PRECACHE_ROUTES)
-		const SW_PRECACHE = /^\/($|about|posts|tags)$/;
-		const isSwPrecache =
-			event.request.headers.get('X-SW-Precache') === '1' && SW_PRECACHE.test(pn);
-		if (!isSwPrecache) {
+		// SW background requests (X-SW-Precache for install-time, X-SW-Background
+		// for runtime revalidation) still get a 307 but skip abandon timers.
+		// Without this, SW background fetches without a valid _tsv cookie would
+		// trigger false-positive IP blacklisting on every deploy.
+		const isSwBackground =
+			event.request.headers.get('X-SW-Precache') === '1' ||
+			event.request.headers.get('X-SW-Background') === '1';
+		if (!isSwBackground) {
 			// Mark abandon: start timers for matching abandon trigger rules
 			const abandonTriggers = triggers.filter((t) => t.abandon && t.active && t.isInSchedule());
 			if (abandonTriggers.length) {

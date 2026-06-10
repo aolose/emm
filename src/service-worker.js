@@ -175,6 +175,7 @@ async function refreshPageInBackground(url, predictedEtag) {
 		const headers = new Headers();
 		if (predictedEtag) headers.set('if-none-match', predictedEtag);
 
+		headers.set('X-SW-Background', '1');
 		const response = await fetch(url, { headers, redirect: 'follow' });
 
 		if (response.status === 304) {
@@ -339,6 +340,7 @@ async function contentStaleWhileRevalidate(event) {
 			const etag = cachedResponse?.headers.get('etag');
 			if (etag) headers.set('if-none-match', etag);
 
+			headers.set('X-SW-Background', '1');
 			const networkRequest = new Request(request.url, {
 				method: 'GET',
 				headers,
