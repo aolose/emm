@@ -880,7 +880,7 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
 		// SW background requests (X-SW-Precache for install-time, X-SW-Background
-		// for runtime revalidation) still get a 307 but skip abandon timers.
+		// for runtime revalidation) skip abandon timers and get a 403 instead of 307.
 		// Without this, SW background fetches without a valid _tsv cookie would
 		// trigger false-positive IP blacklisting on every deploy.
 		const isSwBackground =
@@ -905,7 +905,11 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 			}
 		}
 
-		const cr = challengeResponse(event.url.href, isApi);
+		// SW background fetches can't follow 307 redirects (redirect: 'manual'),
+		// so return 403 directly instead of the challenge redirect.
+		const cr = isSwBackground
+			? new Response('', { status: 403 })
+			: challengeResponse(event.url.href, isApi);
 		log.status = cr.status;
 		if (!isLocalhost && !isAuthenticated && (fr?.log || log.log)) {
 			saveToDb(log);
