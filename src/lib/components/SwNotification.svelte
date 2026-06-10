@@ -2,54 +2,71 @@
 	import { onMount } from 'svelte';
 	import { dev } from '$app/environment';
 
-	let show = $state(false);
-	new BroadcastChannel('sw-messages').onmessage = (event) => {
-		if (event.data?.type === 'CACHE_DONE') {
-			show = true;
-		}
-	};
+	let {
+		text = 'The data has been updated. Do you want to reload it?',
+		actionLabel = 'Reload',
+		dismissLabel = 'Cancel',
+		show = $bindable(false),
+		onAction = () => { window.location.reload(); },
+		onDismiss = () => {},
+		manageSw = true
+	} = $props();
 
-	const reg = async () => {
-		const { serviceWorker } = navigator;
-		if (serviceWorker) {
-			let register = await serviceWorker.getRegistration();
-			if (!register) {
-				register = await serviceWorker.register('/service-worker.js', {
-					type: dev ? 'module' : 'classic',
-					scope: '/'
-				});
-			}
-			setInterval(() => {
-				const { waiting, installing } = register;
-				if (!waiting && !installing) {
-					register.update().catch(console.error);
-				}
-			}, 12e4);
-		}
-	};
+	function handleAction() {
+		setTimeout(() => {
+			show = false;
+			onAction();
+		});
+	}
+
+	function handleDismiss() {
+		show = false;
+		onDismiss();
+	}
+
 	onMount(() => {
+		if (!manageSw) return;
+
+		// Listen to CACHE_DONE from SW
+		const channel = new BroadcastChannel('sw-messages');
+		channel.onmessage = (event) => {
+			if (event.data?.type === 'CACHE_DONE') {
+				show = true;
+			}
+		};
+
+		// Register / update SW
+		const reg = async () => {
+			const { serviceWorker } = navigator;
+			if (serviceWorker) {
+				let register = await serviceWorker.getRegistration();
+				if (!register) {
+					register = await serviceWorker.register('/service-worker.js', {
+						type: dev ? 'module' : 'classic',
+						scope: '/'
+					});
+				}
+				setInterval(() => {
+					const { waiting, installing } = register;
+					if (!waiting && !installing) {
+						register.update().catch(console.error);
+					}
+				}, 12e4);
+			}
+		};
 		reg();
+
+		return () => channel.close();
 	});
 </script>
 
 <div id="k" class:a={show}>
-	<p>The data has been updated. Do you want to reload it?</p>
+	<p>{text}</p>
 	<div>
-		<button
-			onclick={() => {
-				setTimeout(() => {
-					show = false;
-					location.reload();
-				});
-			}}
-			>Reload
-		</button>
-		<button
-			onclick={() => {
-				show = false;
-			}}
-			>Cancel
-		</button>
+		<button onclick={handleAction}>{actionLabel}</button>
+		{#if dismissLabel}
+			<button onclick={handleDismiss}>{dismissLabel}</button>
+		{/if}
 	</div>
 </div>
 

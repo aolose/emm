@@ -13,7 +13,7 @@
 		"test:pw:ui": "playwright test --ui",
 		"test:pw:headed": "playwright test --headed",
 		"dev": "bun --bun run vite dev",
-		"build": "bun --bun run vite build",
+		"build": "bun --bun run vite build && bun --bun run scripts/generate-template-hashes.ts",
 		"preview": "bun --bun vite preview",
 		"check": "bun --bun svelte-kit sync && bun svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "bun --bun svelte-kit sync && bun svelte-check --tsconfig ./tsconfig.json --watch",

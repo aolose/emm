@@ -3,6 +3,81 @@ import { contentType, encryptIv, encTypeIndex } from '$lib/enum';
 import { firewallProcess } from '$lib/server/firewall';
 import { checkStatue, sysStatue } from '$lib/server/utils';
 import { server, sys } from '$lib/server';
+import { readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+
+// ── Load template hashes (generated at build time) ──────────────────
+let templateHashes: Record<string, string> = {};
+const hashPaths = ['dist/template-hashes.json', 'static/template-hashes.json'];
+for (const p of hashPaths) {
+	try {
+		if (existsSync(p)) {
+			templateHashes = JSON.parse(readFileSync(p, 'utf-8'));
+			break;
+		}
+	} catch {
+		/* not found, continue */
+	}
+}
+
+/** Extract data-sveltekit-fetched payloads from rendered HTML. */
+const FETCHED_RE =
+	/<script type="application\/json" data-sveltekit-fetched data-url="([^"]*)"[^>]*>([\s\S]*?)<\/script>/g;
+
+export function extractFetchedData(html: string): Array<{ url: string; data: unknown }> {
+	const results: Array<{ url: string; data: unknown }> = [];
+	let match: RegExpExecArray | null;
+	while ((match = FETCHED_RE.exec(html)) !== null) {
+		const url = match[1].replace(/&amp;/g, '&');
+		try {
+			const raw = JSON.parse(match[2]);
+			let data: unknown;
+			if (typeof raw.body === 'string') {
+				try {
+					data = JSON.parse(raw.body);
+				} catch {
+					data = raw.body;
+				}
+			} else {
+				data = raw.body;
+			}
+			results.push({ url, data });
+		} catch {
+			/* malformed */
+		}
+	}
+	return results;
+}
+
+/**
+ * Extract SvelteKit hydration data embedded in the HTML.
+ * For +page.server.ts pages, the page data is serialized inside the startup
+ * script as `data: [...nodes]` within a kit.start() / app.start() call.
+ */
+const HYDRATION_RE = /data:\s*(\[[\s\S]*?\])\s*[,}]/;
+
+export function extractHydrationData(html: string): string {
+	const m = HYDRATION_RE.exec(html);
+	return m ? m[1] : '';
+}
+
+/** Compute a deterministic data hash from fetched payloads + hydration data. */
+export function computeDataHash(
+	fetched: Array<{ url: string; data: unknown }>,
+	hydration?: string
+): string {
+	if (!fetched.length && !hydration) return '';
+	const parts: string[] = [];
+	// Fetched API payloads
+	if (fetched.length) {
+		const sorted = [...fetched].sort((a, b) => a.url.localeCompare(b.url));
+		parts.push(sorted.map((e) => `${e.url}␟${JSON.stringify(e.data)}`).join('␟'));
+	}
+	// Hydration data (page-server load output)
+	if (hydration) parts.push(hydration);
+	const payload = parts.join('\n');
+	return createHash('sha256').update(payload).digest('hex').slice(0, 6);
+}
 
 checkStatue();
 export const handle: Handle = async ({ event, resolve }) => {
@@ -46,30 +121,86 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 /**
  * Add ETag / 304 caching for frontend SSR pages.
- * Admin, API, and non-HTML responses are passed through unchanged.
+ * ETag format: "template_hash-data_hash"
+ *   - template_hash: from dist/template-hashes.json (build-time, layout chain hash)
+ *   - data_hash: SHA-256 of sorted data-sveltekit-fetched payloads
+ * Falls back to full-body SHA-256 when template hashes are unavailable (dev mode).
  */
 const FRONTEND_PAGE = /^\/($|about|posts(\/|$)|post\/|tags(\/|$)|tag\/)/;
+const DATA_JSON = /\/__data\.json/;
 async function addEtag(event: Parameters<Handle>[0]['event'], response: Response): Promise<Response> {
 	const ct = response.headers.get('content-type') || '';
-	if (response.status !== 200 || !ct.includes('text/html')) return response;
-	if (!FRONTEND_PAGE.test(new URL(event.request.url).pathname)) return response;
+	if (response.status !== 200) return response;
+	const url = new URL(event.request.url);
+	const isDataJson = DATA_JSON.test(url.pathname);
+
+	if (isDataJson && ct.includes('application/json')) {
+		// __data.json (CSR data endpoint): ETag = hash(body), no template component
+		return addDataJsonEtag(event, response);
+	}
+
+	if (url.pathname.startsWith('/api/')) {
+		// API endpoints: ETag = hash(body), regardless of content-type
+		return addDataJsonEtag(event, response);
+	}
+
+	if (!ct.includes('text/html')) return response;
+	if (!FRONTEND_PAGE.test(url.pathname)) return response;
 
 	const clone = response.clone();
 	const body = await clone.text();
-	const hasher = new Bun.CryptoHasher('sha256');
-	hasher.update(body);
-	const etag = `"${hasher.digest('hex')}"`;
 
-	const ifNoneMatch = event.request.headers.get('if-none-match');
-	if (ifNoneMatch === etag) {
-		const headers = new Headers(response.headers);
-		headers.set('etag', etag);
-		return new Response(null, { status: 304, headers });
+	// Compute template + data hash ETag
+	const routeId = event.route.id; // e.g. "/(app)/post/[[tag]]/[slug]"
+	const templateHash = templateHashes[routeId];
+	let etag: string;
+
+	let fetched: Array<{ url: string; data: unknown }> = [];
+	let hydration = '';
+	let dataHash = '';
+
+	if (templateHash) {
+		fetched = extractFetchedData(body);
+		// Supplement with SvelteKit hydration data (+page.server.ts pages embed data via __sveltekit_data)
+		hydration = extractHydrationData(body);
+		dataHash = computeDataHash(fetched, hydration);
+		etag = `"${templateHash}-${dataHash}"`;
+	} else {
+		// Fallback: full body hash (dev mode / template hashes not available)
+		etag = `"${createHash('sha256').update(body).digest('hex').slice(0, 6)}"`;
+	}
+
+	const prevEtag = event.request.headers.get('if-none-match') || '(none)';
+
+	if (prevEtag === etag) {
+		return new Response(null, { status: 304, headers: { etag } });
 	}
 
 	const headers = new Headers(response.headers);
 	headers.set('etag', etag);
 	headers.set('cache-control', 'public, max-age=0, must-revalidate');
+	return new Response(body, { status: response.status, headers });
+}
+
+/**
+ * ETag for __data.json (CSR data endpoint).
+ * Just hash the body — no template involved.
+ */
+async function addDataJsonEtag(
+	event: Parameters<Handle>[0]['event'],
+	response: Response
+): Promise<Response> {
+	const clone = response.clone();
+	const body = await clone.text();
+	const etag = `"${createHash('sha256').update(body).digest('hex').slice(0, 6)}"`;
+
+	if (event.request.headers.get('if-none-match') === etag) {
+		return new Response(null, { status: 304, headers: { etag } });
+	}
+
+	const headers = new Headers(response.headers);
+	headers.set('etag', etag);
+	headers.set('cache-control', 'private, max-age=0, must-revalidate');
 	return new Response(body, { status: response.status, headers });
 }
 

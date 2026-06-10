@@ -32,6 +32,27 @@ import { get } from 'svelte/store';
 
 const CACHE_BUCKET = 'emm-data';
 
+/** Fast non-crypto hash for data comparison (matching +page.ts convention). */
+const hashStr = (s: string): string => {
+	let h = 0;
+	for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+	return h.toString(36);
+};
+
+/** Notify SW that the current page may have updated data. */
+function notifyPageRefresh() {
+	try {
+		if (navigator?.serviceWorker?.controller) {
+			navigator.serviceWorker.controller.postMessage({
+				type: 'REFRESH_PAGE',
+				url: window.location.pathname
+			});
+		}
+	} catch {
+		/* silent */
+	}
+}
+
 /** Write API response to Cache API. TTL stored as x-cache-ttl header (epoch ms). */
 async function cacheApiPut(fullUrl: string, data: unknown, ttlMs: number) {
 	const cache = await caches.open(CACHE_BUCKET);
@@ -148,7 +169,11 @@ const reqCache = (
 	if (allowReadCache() && rec) {
 		const [n, d, p] = rec;
 		if (p) return p;
-		if (n > now) return Promise.resolve(d);
+		if (n > now) {
+			// Background revalidate: fire-and-forget fetch, update if changed
+			backgroundRevalidate(key, fullUrl, ttlMs, run, rec);
+			return Promise.resolve(d);
+		}
 		// Expired — evict from memory, fall through to L2/network.
 		reqCacheMap.delete(key);
 	}
@@ -195,6 +220,37 @@ const reqCache = (
 
 	return r[2];
 };
+
+/**
+ * Background revalidation for L1 cache hits.
+ * Fetches fresh data in the background. If the data changed,
+ * updates L1/L2 caches and notifies the SW to refresh the page.
+ */
+async function backgroundRevalidate(
+	key: string,
+	fullUrl: string | null,
+	ttlMs: number,
+	run: (re?: cacheRecord) => Promise<reqData>,
+	oldRec: cacheRecord
+) {
+	try {
+		const fresh = await run(undefined);
+		const newHash = hashStr(JSON.stringify(fresh));
+		const oldHash = oldRec[3] || '';
+
+		if (newHash !== oldHash) {
+			// Data changed — update caches
+			reqCacheMap.set(key, [Date.now() + ttlMs, fresh, undefined, newHash]);
+			if (fullUrl) cacheApiPut(fullUrl, fresh, ttlMs || 864e5);
+			notifyPageRefresh();
+		} else {
+			// Same data — just refresh TTL
+			oldRec[0] = Date.now() + (ttlMs || 864e5);
+		}
+	} catch {
+		/* silent — background failure shouldn't affect UX */
+	}
+}
 
 const getHooks = (url: string, method = 0) => {
 	const hks = hooks[url] || {};
@@ -334,7 +390,7 @@ export const saveCache = (
 	const key = reqKey(url, p, method, customKey);
 	if (groupKey) addGroupKey(groupKey, key);
 	const now = Date.now();
-	const r = [now + c, d, undefined] as cacheRecord;
+	const r = [now + c, d, undefined, hashStr(JSON.stringify(d))] as cacheRecord;
 	reqCacheMap.set(key, r);
 	// Also write to Cache API (SW shares this bucket)
 	const fullUrl = `/api/${url}${p ? '?' + body2query(p as Record<string, unknown>) : ''}`;
@@ -396,6 +452,7 @@ export const req = (url: ApiName, params?: reqParams, cfg?: reqOption) => {
 				rec[0] = Date.now() + cache;
 				rec[1] = d;
 				rec[2] = undefined;
+				rec[3] = hashStr(JSON.stringify(d));
 			}
 			return d;
 		})

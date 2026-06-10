@@ -93,7 +93,7 @@ export type APIRoutes = {
 
 export type reqData = object | string | number | boolean | null | void;
 export type reqParams = object | string | number | undefined;
-export type cacheRecord = [number, reqData, Promise<reqData> | undefined];
+export type cacheRecord = [number, reqData, Promise<reqData> | undefined, string?];
 export type reqCache = Map<string, cacheRecord>;
 
 export type fView = {

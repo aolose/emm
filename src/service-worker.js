@@ -18,6 +18,7 @@ const CONTENT_RE = /^\/($|about|posts(\/|$)|post\/|tags(\/|$)|tag\/)/;
 
 /**
  * Extract data-sveltekit-fetched payloads from an HTML string.
+ * Returns [apiUrl, parsedData][] pairs.
  */
 function extractFetchedData(html) {
 	const results = [];
@@ -46,6 +47,26 @@ function extractFetchedData(html) {
 	return results;
 }
 
+/**
+ * Update emm-data (Cache API) with extracted fetched payloads.
+ * TTL: 24 hours from now.
+ */
+async function updateDataCache(entries) {
+	const dataCache = await caches.open(DATA_CACHE);
+	const ttl = Date.now() + 864e5; // 24h
+	for (const [apiUrl, data] of entries) {
+		await dataCache.put(
+			new Request(apiUrl),
+			new Response(JSON.stringify(data), {
+				headers: {
+					'Content-Type': 'application/json',
+					'x-cache-ttl': String(ttl)
+				}
+			})
+		);
+	}
+}
+
 // ── Install: precache static assets + warm content routes ──────────
 self.addEventListener('install', (event) => {
 	const { registration: { active } } = self;
@@ -64,19 +85,8 @@ self.addEventListener('install', (event) => {
 				if (response.status >= 300 && response.status < 400) return;
 				if (!response.ok) return;
 				const html = await response.text();
-				// 提取并缓存 API 数据
 				const entries = extractFetchedData(html);
-				for (const [url, data] of entries) {
-					await dataCache.put(
-						new Request(url),
-						new Response(JSON.stringify(data), {
-							headers: {
-								'Content-Type': 'application/json',
-								'x-cache-ttl': String(Date.now() + 864e5)
-							}
-						})
-					);
-				}
+				await updateDataCache(entries);
 				await cache.put(route, response);
 			} catch {
 				// 忽略错误
@@ -129,6 +139,12 @@ self.addEventListener('fetch', (event) => {
 		return;
 	}
 
+	// CSR data endpoint (__data.json) — cache-first, bg ETag + triggers page refresh
+	if (/\/__data\.json/.test(pathname)) {
+		event.respondWith(dataJsonHandler(event));
+		return;
+	}
+
 	// Content pages — cache-first, background ETag revalidation + notification
 	if (CONTENT_RE.test(pathname)) {
 		event.respondWith(contentStaleWhileRevalidate(event));
@@ -138,6 +154,50 @@ self.addEventListener('fetch', (event) => {
 	// Static assets — cache-first (immutable, hashed filenames)
 	event.respondWith(staticCacheFirst(event.request));
 });
+
+// ── Message: listen for REFRESH_PAGE from main thread ──────────────
+self.addEventListener('message', (event) => {
+	if (event.data?.type === 'REFRESH_PAGE') {
+		const { url, etag } = event.data;
+		if (!url) return;
+		refreshPageInBackground(url, etag);
+	}
+});
+
+/**
+ * Background fetch a page with a predicted ETag.
+ * Called when CSR detects data has changed.
+ * 200 → page changed, update HTML cache.
+ * 304 → prediction was wrong (shouldn't happen), no-op.
+ */
+async function refreshPageInBackground(url, predictedEtag) {
+	try {
+		const headers = new Headers();
+		if (predictedEtag) headers.set('if-none-match', predictedEtag);
+
+		const response = await fetch(url, { headers, redirect: 'follow' });
+
+		if (response.status === 304) {
+			// ETag prediction was wrong — page didn't change as expected (race condition)
+			return;
+		}
+
+		if (response.ok) {
+			const cache = await caches.open(CACHE);
+			// Extract and update API data cache
+			const clone = response.clone();
+			const html = await clone.text();
+			const entries = extractFetchedData(html);
+			if (entries.length) {
+				await updateDataCache(entries);
+			}
+			// Update HTML cache
+			await cache.put(url, response);
+		}
+	} catch (err) {
+		console.warn('[sw] REFRESH_PAGE error:', err);
+	}
+}
 
 // ── Strategy: Dev network-first ────────────────────────────────────
 async function devNetworkFirst(request) {
@@ -204,12 +264,67 @@ async function staticCacheFirst(request) {
 	}
 }
 
+// ── Strategy: __data.json (CSR data endpoint) ──────────────────────
+/**
+ * Cache-first for __data.json responses.
+ * Background ETag revalidation.
+ * On 200 (data changed): update __data.json cache + trigger full page refresh
+ * so the HTML page cache gets the latest data.
+ */
+async function dataJsonHandler(event) {
+	const request = event.request;
+	const cache = await caches.open(CACHE);
+	const cachedResponse = await cache.match(request, { ignoreSearch: true });
+
+	const revalidate = async () => {
+		try {
+			const headers = new Headers(request.headers);
+			const etag = cachedResponse?.headers.get('etag');
+			if (etag) headers.set('if-none-match', etag);
+
+			const response = await fetch(request.url, { headers, redirect: 'follow' });
+
+			if (response.status === 304) {
+				if (cachedResponse) await cache.put(request, cachedResponse.clone());
+				return;
+			}
+
+			if (response.ok) {
+				await cache.put(request, response.clone());
+
+				// Trigger full page refresh to update HTML cache
+				const pageUrl = new URL(request.url).pathname.replace(/\/__data\.json.*$/, '') || '/';
+				channel.postMessage({ type: 'REFRESH_PAGE', url: pageUrl });
+			}
+		} catch (err) {
+			console.warn('[sw] __data.json revalidate error:', err);
+		}
+	};
+
+	if (cachedResponse) {
+		event.waitUntil(revalidate());
+		return cachedResponse;
+	}
+
+	try {
+		const response = await fetch(request);
+		if (response.ok) await cache.put(request, response.clone());
+		return response;
+	} catch {
+		return new Response(JSON.stringify({ error: 'Offline' }), {
+			status: 503,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
+}
+
 // ── Strategy: Content pages cache-first + background ETag refresh ──
 /**
  * Return cached HTML immediately (fast FCP even on slow networks).
  * Background: If-None-Match with stored ETag.
  *   304 → page unchanged, just refresh cache timestamp.
- *   200 → page changed, update cache, post CONTENT_UPDATED to page.
+ *   200 → page changed, update cache, extract API data → update emm-data,
+ *          post CONTENT_UPDATED to page.
  * Cache miss → wait for network.
  */
 async function contentStaleWhileRevalidate(event) {
@@ -237,10 +352,22 @@ async function contentStaleWhileRevalidate(event) {
 			}
 
 			if (networkResponse.ok) {
+				// Extract API data from new HTML and update emm-data
+				const clone = networkResponse.clone();
+				const html = await clone.text();
+				const entries = extractFetchedData(html);
+				if (entries.length) {
+					await updateDataCache(entries);
+				}
+
+				// Update HTML cache
 				await cache.put(request, networkResponse.clone());
+
+				// Notify page about update
 				channel.postMessage({
 					type: 'CONTENT_UPDATED',
-					url: new URL(request.url).pathname
+					url: new URL(request.url).pathname,
+					apiUrls: entries.map(([u]) => u)
 				});
 			}
 		} catch (err) {
