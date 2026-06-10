@@ -5,10 +5,15 @@ import { checkStatue, sysStatue } from '$lib/server/utils';
 import { server, sys } from '$lib/server';
 import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // ── Load template hashes (generated at build time) ──────────────────
 let templateHashes: Record<string, string> = {};
-const hashPaths = ['dist/template-hashes.json', 'static/template-hashes.json'];
+const hashPaths = [
+	'dist/template-hashes.json',
+	'static/template-hashes.json'
+];
 for (const p of hashPaths) {
 	try {
 		if (existsSync(p)) {
@@ -17,6 +22,18 @@ for (const p of hashPaths) {
 		}
 	} catch {
 		/* not found, continue */
+	}
+}
+// Fallback: resolve relative to compiled server file (e.g. server/chunks → ../../template-hashes.json)
+if (!Object.keys(templateHashes).length) {
+	try {
+		const serverDir = dirname(fileURLToPath(import.meta.url));
+		const fallback = join(serverDir, '..', '..', 'template-hashes.json');
+		if (existsSync(fallback)) {
+			templateHashes = JSON.parse(readFileSync(fallback, 'utf-8'));
+		}
+	} catch {
+		/* not found */
 	}
 }
 
