@@ -176,7 +176,7 @@ async function refreshPageInBackground(url, predictedEtag) {
 		if (predictedEtag) headers.set('if-none-match', predictedEtag);
 
 		headers.set('X-SW-Background', '1');
-		const response = await fetch(url, { headers, redirect: 'follow' });
+		const response = await fetch(url, { headers, redirect: 'manual' });
 
 		if (response.status === 304) {
 			// ETag prediction was wrong — page didn't change as expected (race condition)
@@ -344,7 +344,7 @@ async function contentStaleWhileRevalidate(event) {
 			const networkRequest = new Request(request.url, {
 				method: 'GET',
 				headers,
-				redirect: 'follow'
+				redirect: 'manual'
 			});
 			const networkResponse = await fetch(networkRequest);
 
