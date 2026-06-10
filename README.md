@@ -58,7 +58,7 @@ A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSee
 - **Tags** — Categorize content with a tag system; Chinese titles auto-generate pinyin slugs
 - **Comments** — Built-in comment management with moderation support
 - **File Management** — Upload and manage static files and images
-- **Image Viewer** — Click-to-zoom image preview powered by Viewer.js
+- **Image Viewer** — Click-to-zoom image preview with native fullscreen overlay (pan, zoom, gesture support)
 - **Image Compression** — Automatic client-side image compression on upload
 - **Visit Statistics** — Track page views (PUV) with an admin dashboard
 - **Blog Mode** — Publish posts publicly or keep them private
