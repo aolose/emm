@@ -179,6 +179,10 @@ function getCacheControl(pathname: string): string {
 const FRONTEND_PAGE = /^\/($|about|posts(\/|$)|post\/|tags(\/|$)|tag\/)/;
 const DATA_JSON = /\/__data\.json/;
 async function addEtag(event: Parameters<Handle>[0]['event'], response: Response): Promise<Response> {
+	// ETag only makes sense for cacheable GET/HEAD requests
+	const method = event.request.method.toUpperCase();
+	if (method !== 'GET' && method !== 'HEAD') return response;
+
 	const ct = response.headers.get('content-type') || '';
 	if (response.status !== 200) return response;
 	const url = new URL(event.request.url);
