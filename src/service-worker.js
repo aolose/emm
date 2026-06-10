@@ -286,7 +286,8 @@ async function dataJsonHandler(event) {
 			const response = await fetch(request.url, { headers, redirect: 'follow' });
 
 			if (response.status === 304) {
-				if (cachedResponse) await cache.put(request, cachedResponse.clone());
+				// Cache is already fresh — no need to re-put.
+				// Avoids clone() race with the page consuming cachedResponse.
 				return;
 			}
 
@@ -349,7 +350,8 @@ async function contentStaleWhileRevalidate(event) {
 			const networkResponse = await fetch(networkRequest);
 
 			if (networkResponse.status === 304) {
-				if (cachedResponse) await cache.put(request, cachedResponse.clone());
+				// Cache is already fresh — no need to re-put.
+				// Avoids clone() race with the page consuming cachedResponse.
 				return;
 			}
 
