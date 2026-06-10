@@ -260,9 +260,25 @@ const apis: APIRoutes = {
 			});
 
 			if (!response.ok) {
-				const err = await response.text();
+				const err = await response.clone().text().catch(() => '');
 				console.error('[AI] API error →', response.status, err);
-				return resp(`DeepSeek API error: ${err}`, response.status);
+				let detail = err;
+				try { detail = JSON.stringify(JSON.parse(err)); } catch { /* keep raw */ }
+				// Return structured error so the frontend can show a useful message
+				return resp({
+					error: 'AI_API_ERROR',
+					message: `DeepSeek API returned HTTP ${response.status}`,
+					detail: String(detail).slice(0, 2000),
+					model: selectedModel,
+					operation: 'chat_completion',
+					msgCount: messages.length,
+					hasTools: !!tools?.length,
+					// Extract last user message for context (truncated)
+					lastUserMsg: (() => {
+						const last = [...messages].reverse().find(m => m.role === 'user');
+						return String(last?.content || '').slice(0, 200);
+					})()
+				}, response.status);
 			}
 
 			if (stream) {
@@ -275,7 +291,37 @@ const apis: APIRoutes = {
 				});
 			}
 
-			const data = await response.json();
+			// Use text() first so we can safely inspect the body on parse failure
+			const responseText = await response.text();
+			let data: Record<string, unknown>;
+			try {
+				data = JSON.parse(responseText);
+			} catch (parseErr) {
+				console.error('[AI] JSON parse error →', {
+					model: selectedModel,
+					bodyPreview: responseText.slice(0, 500),
+					bodyLen: responseText.length,
+					error: String(parseErr)
+				});
+				return resp({
+					error: 'AI_JSON_PARSE_ERROR',
+					message: 'DeepSeek API returned a non-JSON response (possibly an empty body, truncated stream, or proxy error page).',
+					model: selectedModel,
+					operation: 'parse_response',
+					bodyPreview: responseText.slice(0, 500),
+					bodyLength: responseText.length,
+					parseError: String(parseErr),
+					lastUserMsg: (() => {
+						const last = [...messages].reverse().find(m => m.role === 'user');
+						return String(last?.content || '').slice(0, 200);
+					})()
+				}, 502);
+			}
+
+			// Guard against empty-but-valid JSON (e.g. empty string parsed as "")
+			if (!data || (typeof data === 'object' && !data.choices)) {
+				console.error('[AI] unexpected response shape →', JSON.stringify(data).slice(0, 500));
+			}
 			const choice = data?.choices?.[0];
 			const usage = data?.usage;
 			console.log('[AI] response ←', {

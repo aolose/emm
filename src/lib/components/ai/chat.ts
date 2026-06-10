@@ -54,12 +54,46 @@ export async function sendAiMessage(
 		// Shallow copy to avoid mutating the store's internal array reference
 		const ms = [...get(aiMessages)];
 		await runAiLoop(ms, tools, opts);
-	} catch (e) {
-		aiMessages.update((ms) => [...ms, { role: 'assistant', content: `Error: ${e}` }]);
+	} catch (e: unknown) {
+		let msg: string;
+		if (e && typeof e === 'object' && 'data' in e) {
+			const d = (e as { data: Record<string, unknown> }).data;
+			if (d?.error === 'AI_API_ERROR' || d?.error === 'AI_JSON_PARSE_ERROR') {
+				const parts = [
+					`⚠️ **AI 请求失败**`,
+					``,
+					`**原因**：${d.message || '未知错误'}`,
+					`**模型**：${d.model || '—'}`,
+				];
+				if (d.detail) parts.push(`**API 详情**：${String(d.detail).slice(0, 300)}`);
+				if (d.parseError) parts.push(`**解析错误**：${String(d.parseError)}`);
+				if (d.bodyPreview && String(d.bodyPreview).length > 0) parts.push(`**返回预览**：\`${String(d.bodyPreview).slice(0, 200)}\``);
+				if (d.lastUserMsg) parts.push(`**你的消息**：${String(d.lastUserMsg).slice(0, 150)}`);
+				msg = parts.join('\n');
+			} else {
+				msg = `Error: ${JSON.stringify(e)}`;
+			}
+		} else if (e instanceof Error) {
+			msg = `Error: ${e.message}`;
+		} else {
+			msg = `Error: ${String(e)}`;
+		}
+		aiMessages.update((ms) => [...ms, { role: 'assistant', content: msg }]);
 	} finally {
 		aiLoading.set(false);
 	}
 }
+
+// ── Tool classification for ping-pong detection ──────────────────
+const READ_TOOL_NAMES = new Set([
+	'getSelection', 'getCurrentLine', 'getCurrentParagraph',
+	'getCurrentSection', 'getFullDocument', 'getTitle',
+	'getUserLocation', 'listModels', 'getMemory', 'analyzeWritingStyle', 'fetchUrl'
+]);
+const WRITE_TOOL_NAMES = new Set([
+	'replaceSelection', 'replaceCurrentLine', 'replaceCurrentParagraph',
+	'replaceText', 'replaceFullDocument', 'insertAtCursor', 'setTitle', 'saveMemory'
+]);
 
 async function runAiLoop(
 	ms: AiMessage[],
@@ -67,13 +101,14 @@ async function runAiLoop(
 	opts?: SendOptions
 ): Promise<void> {
 	const lastCalls: string[] = [];
-	for (let i = 0; i < 15; i++) {
+	const lastOpKinds: string[] = []; // 'r' | 'w' | 'o' per turn, for ping-pong detection
+	for (let i = 0; i < 25; i++) {
 		const body: Record<string, unknown> = {
 			messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...ms],
 			tools: AI_TOOLS,
 			stream: false
 		};
-		body.max_tokens = 8192;
+		body.max_tokens = 32768;
 		if (opts?.model) body.model = opts.model;
 		// Always explicitly set thinking mode — API defaults to enabled otherwise
 		body.thinking = opts?.deepThink ? { type: 'enabled' } : { type: 'disabled' };
@@ -134,6 +169,33 @@ async function runAiLoop(
 				});
 				aiMessages.set([...ms]);
 				return;
+			}
+
+			// ── Ping-pong detection: alternating reads & writes across turns ─
+			const turnKind = toolCalls.some(tc => READ_TOOL_NAMES.has(tc.function.name)) ? 'r' :
+			                 toolCalls.some(tc => WRITE_TOOL_NAMES.has(tc.function.name)) ? 'w' : 'o';
+			lastOpKinds.push(turnKind);
+			if (lastOpKinds.length > 8) lastOpKinds.shift();
+
+			if (lastOpKinds.length >= 5) {
+				const recent = lastOpKinds.slice(-5);
+				const isAlternating = recent.every((k, idx) => idx === 0 || k !== recent[idx - 1]);
+				const allReadWrite = recent.every(k => k === 'r' || k === 'w');
+				const writeCount = recent.filter(k => k === 'w').length;
+				if (isAlternating && allReadWrite && writeCount >= 2) {
+					console.warn('[AI] ping-pong detected, breaking:', {
+						pattern: recent.join('→'),
+						turn: i,
+						tools: toolCalls.map(tc => tc.function.name)
+					});
+					ms.push({
+						role: 'assistant',
+						content: '(AI 在反复交替读写文档，可能是文章太长导致无法一次输出。试试要求 "润色全文" 或拆分任务，而不是逐段修改。)'
+					});
+					ms.push(...toolCalls.filter(tc => !WRITE_TOOL_NAMES.has(tc.function.name)).map(tc => ({ role: 'tool' as const, content: JSON.stringify({ ok: false, error: 'ping-pong aborted' }), tool_call_id: tc.id })));
+					aiMessages.set([...ms]);
+					return;
+				}
 			}
 
 			// Record assistant tool-call request & immediately sync to UI
@@ -230,7 +292,7 @@ async function runAiLoop(
 		...ms,
 		{
 			role: 'assistant',
-			content: '(AI took too many steps — please try rephrasing or breaking into smaller tasks.)'
+			content: '(AI 执行步骤过多（超过 25 轮工具调用）。请尝试用更具体的一句话描述需求，或拆分为多个小任务。)'
 		}
 	]);
 }
