@@ -137,6 +137,38 @@ export const handle: Handle = async ({ event, resolve }) => {
 	});
 };
 
+/** Unified Cache-Control header based on URL path. */
+const CACHE_RULES: Array<{ pattern: RegExp; value: string }> = [
+	// HTML pages — max-age=0 for browser (SW handles caching), s-maxage for CDN
+	{ pattern: /^\/$/,                     value: 'public, max-age=0, s-maxage=86400, must-revalidate, no-transform' },
+	{ pattern: /^\/about/,                 value: 'public, max-age=0, s-maxage=86400, must-revalidate, no-transform' },
+	{ pattern: /^\/posts/,                 value: 'public, max-age=0, s-maxage=3600, must-revalidate, no-transform' },
+	{ pattern: /^\/tag\//,                 value: 'public, max-age=0, s-maxage=3600, must-revalidate, no-transform' },
+	{ pattern: /^\/tags/,                  value: 'public, max-age=0, s-maxage=3600, must-revalidate, no-transform' },
+	{ pattern: /^\/post\//,                value: 'public, max-age=0, must-revalidate, no-transform' },
+	// API — blog content
+	{ pattern: /^\/api\/home/,             value: 'public, max-age=0, s-maxage=3600, must-revalidate, no-transform' },
+	{ pattern: /^\/api\/about/,            value: 'public, max-age=0, s-maxage=86400, must-revalidate, no-transform' },
+	{ pattern: /^\/api\/posts/,            value: 'public, max-age=0, s-maxage=600, must-revalidate, no-transform' },
+	{ pattern: /^\/api\/post/,             value: 'public, max-age=0, must-revalidate, no-transform' },
+	{ pattern: /^\/api\/tags/,             value: 'public, max-age=0, s-maxage=600, must-revalidate, no-transform' },
+	{ pattern: /^\/api\/hello/,            value: 'public, max-age=0, s-maxage=86400, must-revalidate, no-transform' },
+	// Auth-only endpoints — never cache
+	{ pattern: /^\/api\/(check|logout)/,   value: 'private, no-store, no-transform' },
+	// __data.json — public blog content
+	{ pattern: /\/__data\.json/,           value: 'public, max-age=0, must-revalidate, no-transform' },
+	// Other API — auth-gated
+	{ pattern: /^\/api\//,                 value: 'private, max-age=0, must-revalidate, no-transform' }
+];
+const DEFAULT_CACHE = 'public, max-age=0, must-revalidate, no-transform';
+
+function getCacheControl(pathname: string): string {
+	for (const rule of CACHE_RULES) {
+		if (rule.pattern.test(pathname)) return rule.value;
+	}
+	return DEFAULT_CACHE;
+}
+
 /**
  * Add ETag / 304 caching for frontend SSR pages.
  * ETag format: "template_hash-data_hash"
@@ -196,7 +228,7 @@ async function addEtag(event: Parameters<Handle>[0]['event'], response: Response
 
 	const headers = new Headers(response.headers);
 	headers.set('etag', etag);
-	headers.set('cache-control', 'public, max-age=0, must-revalidate, no-transform');
+	headers.set('cache-control', getCacheControl(url.pathname));
 	return new Response(body, { status: response.status, headers });
 }
 
@@ -218,7 +250,7 @@ async function addDataJsonEtag(
 
 	const headers = new Headers(response.headers);
 	headers.set('etag', etag);
-	headers.set('cache-control', 'private, max-age=0, must-revalidate, no-transform');
+	headers.set('cache-control', getCacheControl(new URL(event.request.url).pathname));
 	return new Response(body, { status: response.status, headers });
 }
 
