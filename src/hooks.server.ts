@@ -270,14 +270,25 @@ async function compressResponse(request: Request, response: Response): Promise<R
 	const ct = response.headers.get('content-type') || '';
 	if (!COMPRESSIBLE.test(ct)) return response;
 
-	// Don't compress small responses or already-compressed ones
+	// Don't compress already-encoded responses
 	if (response.headers.get('content-encoding')) return response;
+
+	// Skip small responses via Content-Length (Bun auto-sets it for string bodies).
+	// 1 KB threshold matches Express/Hono defaults — gzip header overhead (~20 bytes)
+	// makes compression counterproductive below this size.
+	const cl = response.headers.get('content-length');
+	if (cl && +cl < 1024) return response;
 
 	const body = await response.text();
 	const compressed = Bun.gzipSync(new TextEncoder().encode(body));
-	if (compressed.length >= body.length) return response; // no benefit
-
 	const headers = new Headers(response.headers);
+	if (compressed.length >= body.length) {
+		// No benefit — return a fresh Response since body was consumed by .text().
+		// Returning the original would trigger "Response body is locked".
+		headers.delete('content-length');
+		return new Response(body, { status: response.status, headers });
+	}
+
 	headers.set('content-encoding', 'gzip');
 	headers.delete('content-length');
 	return new Response(compressed, { status: response.status, headers });
