@@ -156,9 +156,9 @@ describe('ETag format integration', () => {
 		const templateHash = 'abc123';
 		const fetched = [{ url: '/api/home', data: { blogName: 'Test' } }];
 		const dataHash = computeDataHash(fetched, '');
-		const etag = `"${templateHash}-${dataHash}"`;
+		const etag = `W/"${templateHash}-${dataHash}"`;
 
-		expect(etag).toMatch(/^"abc123-[a-f0-9]{6}"$/);
+		expect(etag).toMatch(/^W\/"abc123-[a-f0-9]{6}"$/);
 	});
 
 	it('includes hydration data when no fetched scripts (server-only load)', () => {
@@ -167,8 +167,8 @@ describe('ETag format integration', () => {
 		const dataHash = computeDataHash([], hydration);
 		// With hydration data (but no fetched scripts), still produces a data hash
 		expect(dataHash).toMatch(/^[a-f0-9]{6}$/);
-		const etag = `"${templateHash}-${dataHash}"`;
-		expect(etag).toMatch(/^"abc123-[a-f0-9]{6}"$/);
+		const etag = `W/"${templateHash}-${dataHash}"`;
+		expect(etag).toMatch(/^W\/"abc123-[a-f0-9]{6}"$/);
 	});
 
 	it('same template + same data = same ETag', () => {
@@ -176,8 +176,8 @@ describe('ETag format integration', () => {
 		const d1 = computeDataHash([{ url: '/api/home', data: { x: 1 } }], '');
 		const d2 = computeDataHash([{ url: '/api/home', data: { x: 1 } }], '');
 		expect(d1).toBe(d2);
-		const etag1 = `"${t}-${d1}"`;
-		const etag2 = `"${t}-${d2}"`;
+		const etag1 = `W/"${t}-${d1}"`;
+		const etag2 = `W/"${t}-${d2}"`;
 		expect(etag1).toBe(etag2);
 	});
 
@@ -185,8 +185,8 @@ describe('ETag format integration', () => {
 		const t = 'abc';
 		const d1 = computeDataHash([{ url: '/api/home', data: { x: 1 } }], '');
 		const d2 = computeDataHash([{ url: '/api/home', data: { x: 2 } }], '');
-		const etag1 = `"${t}-${d1}"`;
-		const etag2 = `"${t}-${d2}"`;
+		const etag1 = `W/"${t}-${d1}"`;
+		const etag2 = `W/"${t}-${d2}"`;
 		expect(etag1).not.toBe(etag2);
 	});
 });
@@ -200,8 +200,8 @@ const sha256Slice = (s: string): string => {
 describe('__data.json ETag (addDataJsonEtag)', () => {
 	it('is just 6-char hex hash of body', () => {
 		const body = JSON.stringify({ p: { slug: 'new' }, d: { title: 'Hello' } });
-		const expected = `"${sha256Slice(body)}"`;
-		expect(expected).toMatch(/^"[a-f0-9]{6}"$/);
+		const expected = `W/"${sha256Slice(body)}"`;
+		expect(expected).toMatch(/^W\/"[a-f0-9]{6}"$/);
 	});
 
 	it('changes when data changes', () => {

@@ -164,10 +164,10 @@ async function addEtag(event: Parameters<Handle>[0]['event'], response: Response
 		// Supplement with SvelteKit hydration data (+page.server.ts pages embed data via __sveltekit_data)
 		hydration = extractHydrationData(body);
 		dataHash = computeDataHash(fetched, hydration);
-		etag = `"${templateHash}-${dataHash}"`;
+		etag = `W/"${templateHash}-${dataHash}"`;
 	} else {
 		// Fallback: full body hash (dev mode / template hashes not available)
-		etag = `"${createHash('sha256').update(body).digest('hex').slice(0, 6)}"`;
+		etag = `W/"${createHash('sha256').update(body).digest('hex').slice(0, 6)}"`;
 	}
 
 	const prevEtag = event.request.headers.get('if-none-match') || '(none)';
@@ -192,7 +192,7 @@ async function addDataJsonEtag(
 ): Promise<Response> {
 	const clone = response.clone();
 	const body = await clone.text();
-	const etag = `"${createHash('sha256').update(body).digest('hex').slice(0, 6)}"`;
+	const etag = `W/"${createHash('sha256').update(body).digest('hex').slice(0, 6)}"`;
 
 	if (event.request.headers.get('if-none-match') === etag) {
 		return new Response(null, { status: 304, headers: { etag } });
