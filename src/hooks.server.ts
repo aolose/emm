@@ -115,7 +115,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return await firewallProcess(event, async () => {
 		const response = await resolve(event, opts);
-		return await addEtag(event, response);
+		const etagged = await addEtag(event, response);
+		return compressResponse(event.request, etagged);
 	});
 };
 
@@ -202,6 +203,31 @@ async function addDataJsonEtag(
 	headers.set('etag', etag);
 	headers.set('cache-control', 'private, max-age=0, must-revalidate');
 	return new Response(body, { status: response.status, headers });
+}
+
+/**
+ * Compress response body with gzip if client supports it.
+ * ETag is computed before compression, so it remains valid.
+ */
+const COMPRESSIBLE = /text\/html|application\/json|text\/plain|text\/css|application\/javascript|text\/xml|application\/xml/;
+async function compressResponse(request: Request, response: Response): Promise<Response> {
+	const ae = request.headers.get('accept-encoding') || '';
+	if (!ae.includes('gzip')) return response;
+
+	const ct = response.headers.get('content-type') || '';
+	if (!COMPRESSIBLE.test(ct)) return response;
+
+	// Don't compress small responses or already-compressed ones
+	if (response.headers.get('content-encoding')) return response;
+
+	const body = await response.text();
+	const compressed = Bun.gzipSync(new TextEncoder().encode(body));
+	if (compressed.length >= body.length) return response; // no benefit
+
+	const headers = new Headers(response.headers);
+	headers.set('content-encoding', 'gzip');
+	headers.delete('content-length');
+	return new Response(compressed, { status: response.status, headers });
 }
 
 export const handleError = (({ error }) => {
