@@ -196,7 +196,7 @@ async function addEtag(event: Parameters<Handle>[0]['event'], response: Response
 
 	const headers = new Headers(response.headers);
 	headers.set('etag', etag);
-	headers.set('cache-control', 'public, max-age=0, must-revalidate');
+	headers.set('cache-control', 'public, max-age=0, must-revalidate, no-transform');
 	return new Response(body, { status: response.status, headers });
 }
 
@@ -218,7 +218,7 @@ async function addDataJsonEtag(
 
 	const headers = new Headers(response.headers);
 	headers.set('etag', etag);
-	headers.set('cache-control', 'private, max-age=0, must-revalidate');
+	headers.set('cache-control', 'private, max-age=0, must-revalidate, no-transform');
 	return new Response(body, { status: response.status, headers });
 }
 
