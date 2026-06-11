@@ -97,7 +97,9 @@
 		align-items: flex-start; /* 极其重要：防止列与列之间互相强行拉伸 */
 		margin: 0;
 		width: 100%;
+		gap: 8px;
 		@include s() {
+			gap: 0;
 			padding: 10px 0;
 		}
 	}
@@ -106,7 +108,7 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 12px; /* 每一个卡片之间完美的、绝对一致的纵向间距 */
+		gap: 8px; /* 每一个卡片之间完美的、绝对一致的纵向间距 */
 		align-items: flex-start; /* 极其重要：确保里面的卡片各自保持原本高度，决不纵向拉伸 */
 		min-width: 0; /* 规避某些弹性布局下的溢出边缘常态 bug */
 		@include s() {

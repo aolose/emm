@@ -18,9 +18,9 @@
 	@use '../../../lib/break' as *;
 	.r {
 		font-size: 14px;
-		margin: 10px;
+		margin: 0 10px;
 		display: flex;
-		padding: 10px 20px;
+		padding: 4px 20px;
 		flex-wrap: wrap;
 		gap: 8px;
 		@include s() {

@@ -69,12 +69,12 @@
 
 	.on {
 		.track {
-			background: rgba(64, 160, 100, 0.45);
+			background:#3b82f6;
 		}
 
 		.thumb {
 			transform: translateX(16px);
-			background: #8fc9a0;
+			background: #fff;
 		}
 	}
 
@@ -85,6 +85,6 @@
 	}
 
 	.on .label {
-		color: #8fc9a0;
+		color: #34d399;
 	}
 </style>

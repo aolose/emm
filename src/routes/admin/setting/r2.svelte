@@ -96,7 +96,7 @@
 		display: flex;
 		align-items: center;
 		gap: 10px;
-		padding: 8px 14px 4px;
+		padding: 8px 28px 4px;
 	}
 
 	.label-text {

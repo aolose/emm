@@ -443,15 +443,13 @@
 	.ipt-container {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
-		margin-bottom: 8px;
 	}
 
 	.status-row {
 		min-height: 52px;
 		font-size: 14px;
 		display: flex;
-		padding: 14px 30px;
+		padding: 4px 30px;
 		align-items: center;
 		justify-content: space-between;
 		gap: 16px;
@@ -483,8 +481,9 @@
 	}
 
 	.memory-status-value {
+		text-align: right;
 		font-size: 13px;
-		color: #8fc9a0;
+		color: #10b981;
 		flex: 1;
 	}
 
@@ -695,10 +694,12 @@
 	.balance-value {
 		display: flex;
 		align-items: center;
-		flex-wrap: wrap;
 		gap: 6px;
-		font-size: 13px;
 		color: $color-text-main;
+		span{
+      line-height: 1;
+      font-size: 12px;
+		}
 	}
 
 	.balance-currency {
@@ -709,8 +710,7 @@
 	}
 
 	.balance-total {
-		color: #10b981;
-		font-weight: 600;
+		color: #fff;
 	}
 
 	.balance-detail {

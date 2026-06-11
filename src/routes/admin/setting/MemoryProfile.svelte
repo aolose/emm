@@ -206,10 +206,19 @@
   }
 
   .profile-summary {
+		text-transform: uppercase;
     flex: 1;
     font-size: 13px;
-    color: #61738f;
+    color: #5f83b8;
     font-family: monospace;
+		border: 1px solid #0a3069;
+		border-radius: 4px;
+		padding: 2px 4px;
+		text-align: center;
+		&:hover{
+      color: #80a6dd;
+			background: rgb(56 112 197 / 0.1);
+		}
   }
 
   // NEW: Full body screen gradient backdrop cover

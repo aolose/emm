@@ -24,10 +24,12 @@
 		border-radius: 14px;
 		background: rgba(0, 0, 0, 0.8);
 		flex-direction: column;
+    border: 0.5px solid rgb(138 209 255 / 0.13);
 		padding-bottom: 20px;
 		@include s() {
 			margin: 0;
-			border-bottom: 1px dashed rgb(255 255 255 / 0.2);
+			border: none;
+			border-bottom: 0.5px solid rgb(138 209 255 / 0.2);
       border-radius: 0;
 		}
 	}

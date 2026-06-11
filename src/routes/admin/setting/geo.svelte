@@ -86,7 +86,7 @@
 
 <style>
 	span {
-		padding: 0 30px;
+		padding: 8px 30px;
 	}
 
 	b {
