@@ -247,7 +247,7 @@
     border: 1px solid rgb(31 109 255 / 0.2);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
     max-height: 85vh;
-		min-height: 640px;
+		height: 640px;
     padding: 12px 16px;
     background: #000;
     border-radius: 11px;
