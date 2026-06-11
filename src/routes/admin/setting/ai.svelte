@@ -47,18 +47,22 @@
 	let validating = $state(false);
 
 	// ── Memory polling — auto-detect when AI finishes learning ──────
+	// Tracks the lastUpdated before learning started, so polling can detect
+	// when the background task writes NEW data (not the stale old data).
+	let memoryLearningBaseline = $state<number | null>(null);
 	let memoryPollTimer: ReturnType<typeof setInterval> | null = null;
 
 	function startMemoryPolling() {
 		if (memoryPollTimer) return;
 		memoryPollTimer = setInterval(async () => {
-			const done = await checkMemoryStatus();
-			if (done) {
+			await checkMemoryStatus();
+			if (memoryInitialized && memoryLastUpdated !== memoryLearningBaseline) {
 				stopMemoryPolling();
 				memoryLearning = false;
 				act = 1;
 				err = 0;
 				msg = 'Memory learned.';
+				memoryLearningBaseline = null;
 			}
 		}, 3000);
 	}
@@ -149,6 +153,8 @@
 	async function learnMemory() {
 		if (memoryLearning || regenerating) return;
 		memoryLearning = true;
+		// Capture current timestamp so polling can detect when new data arrives
+		memoryLearningBaseline = memoryLastUpdated;
 		try {
 			await req('aiMemoryLearn', undefined, { method: 0 as never });
 			// Returns immediately: { ok: true, learning: true }
