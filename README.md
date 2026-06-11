@@ -27,14 +27,14 @@ A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSee
 ### Desktop
 
 <p>
-  <img src="doc/home.webp" width="750" alt="home" />
-  <img src="doc/list.webp" width="750" alt="file list" />
-  <img src="doc/view.webp" width="750" alt="file view" />
-  <img src="doc/login.webp" width="750" alt="login" />
-  <img src="doc/write.webp" width="750" alt="writing" />
-  <img src="doc/fw.webp" width="750" alt="file management" />
-  <img src="doc/manage.webp" width="750" alt="admin settings" />
-  <img src="doc/memory.webp" width="750" alt="ai memory card" />
+  <img src="doc/home.webp" width="750" alt="home" /><br>
+  <img src="doc/list.webp" width="750" alt="file list" /><br>
+  <img src="doc/view.webp" width="750" alt="file view" /><br>
+  <img src="doc/login.webp" width="750" alt="login" /><br>
+  <img src="doc/write.webp" width="750" alt="writing" /><br>
+  <img src="doc/fw.webp" width="750" alt="file management" /><br>
+  <img src="doc/manage.webp" width="750" alt="admin settings" /><br>
+  <img src="doc/memory.webp" width="750" alt="ai memory card" /><br>
   <img src="doc/ai.webp" width="750" alt="ai assistant" />
 </p>
 
@@ -43,7 +43,7 @@ A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSee
 <p>
   <img src="doc/list_m.webp" width="220" alt="file list on mobile" />
   <img src="doc/view_m.webp" width="220" alt="file view on mobile" />
-  <img src="doc/manage_m.webp" width="220" alt="admin on mobile" />
+  <img src="doc/manage_m.webp" width="220" alt="admin on mobile" /><br>
   <img src="doc/write_m.webp" width="220" alt="writing on mobile" />
   <img src="doc/fw_m.webp" width="220" alt="file management on mobile" />
   <img src="doc/ai_m.webp" width="220" alt="ai assistant on mobile" />
