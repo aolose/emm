@@ -161,7 +161,7 @@
 								{/if}
 
 								{#if k.length}
-									<div class="footer-meta-block">
+									<div class="footer-meta-block p-list">
 										<span class="id-label text-dim">{lang === 'zh' ? '知识库' : 'KNOWLEDGE BASE'} ({k.length})</span>
 										<ul class="profile-list">
 											{#each k as item (item)}
@@ -247,7 +247,8 @@
   .memory-profile-card {
     border: 1px solid rgb(31 109 255 / 0.2);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
-    max-height: 85vh;
+    max-height: 90vh;
+		height: 640px;
     padding: 12px 16px;
     background: #000;
     border-radius: 11px;
@@ -493,7 +494,12 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-
+		flex-grow: 1;
+		height: 0;
+   .p-list{
+		 height: 0;
+		 flex-grow: 1;
+	 }
     .footer-meta-block {
       display: flex;
       flex-direction: column;
@@ -532,7 +538,8 @@
   }
 
   .profile-list {
-    flex: 1;
+		height: 0;
+		flex-grow: 1;
     overflow-y: auto;
     list-style: none;
     padding: 0;
