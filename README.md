@@ -27,12 +27,12 @@ A modern self-hosted markdown blog system powered by SvelteKit, Bun, and DeepSee
 ### Desktop
 
 <p>
-  <img src="doc/home.webp" width="750" alt="home" /><br/><br/>
-  <img src="doc/list.webp" width="750" alt="file list" /><br/><br/>
-  <img src="doc/view.webp" width="750" alt="file view" /><br/><br/>
-  <img src="doc/login.webp" width="750" alt="login" /><br/><br/>
-  <img src="doc/write.webp" width="750" alt="writing" /><br/><br/>
-  <img src="doc/fw.webp" width="750" alt="file management" /><br/><br/>
+  <img src="doc/home.webp" width="750" alt="home" />
+  <img src="doc/list.webp" width="750" alt="file list" />
+  <img src="doc/view.webp" width="750" alt="file view" />
+  <img src="doc/login.webp" width="750" alt="login" />
+  <img src="doc/write.webp" width="750" alt="writing" />
+  <img src="doc/fw.webp" width="750" alt="file management" />
   <img src="doc/manage.webp" width="750" alt="admin settings" />
   <img src="doc/memory.webp" width="750" alt="ai memory card" />
   <img src="doc/ai.webp" width="750" alt="ai assistant" />
