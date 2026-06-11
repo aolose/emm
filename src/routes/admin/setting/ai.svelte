@@ -15,13 +15,17 @@
 	let model = $state('');
 	let memoryEnabled = $state(false);
 	let memoryInitialized = $state(false);
+	let memoryId = $state('');
 	let memoryLastUpdated = $state<number | null>(null);
 	let memoryLearning = $state(false);
 	let memoryPersona = $state<{ role: string; tone: string; readers: string } | null>(null);
+	let memoryPersona_zh = $state<{ role: string; tone: string; readers: string } | null>(null);
 	let memoryStyle = $state<{ language: string; preferences: string[]; avoid: string[] } | null>(
 		null
 	);
+	let memoryStyle_zh = $state<{ language: string; preferences: string[]; avoid: string[] } | null>(null);
 	let memoryKnowledge = $state<string[]>([]);
+	let memoryKnowledge_zh = $state<string[]>([]);
 	let memoryTags = $state('');
 	let availableTags = $state<string[]>([]);
 	let memoryLimit = $state(10);
@@ -103,17 +107,25 @@
 				};
 			};
 			memoryInitialized = !!data?.initialized;
+			memoryId = (data?.memory?.memoryId as string) || '';
 			memoryLastUpdated = data?.memory?.lastUpdated ?? null;
 			memoryPersona = data?.memory?.persona || null;
+			memoryPersona_zh = data?.memory?.persona_zh || null;
 			memoryStyle = data?.memory?.style || null;
+			memoryStyle_zh = data?.memory?.style_zh || null;
 			memoryKnowledge = data?.memory?.knowledge || [];
+			memoryKnowledge_zh = data?.memory?.knowledge_zh || [];
 			return memoryInitialized;
 		} catch {
 			memoryInitialized = false;
+			memoryId = '';
 			memoryLastUpdated = null;
 			memoryPersona = null;
+			memoryPersona_zh = null;
 			memoryStyle = null;
+			memoryStyle_zh = null;
 			memoryKnowledge = [];
+			memoryKnowledge_zh = [];
 			return false;
 		}
 	}
@@ -158,10 +170,14 @@
 			err = 0;
 			msg = 'Memory cleared.';
 			memoryInitialized = false;
+			memoryId = '';
 			memoryLastUpdated = null;
 			memoryPersona = null;
+			memoryPersona_zh = null;
 			memoryStyle = null;
+			memoryStyle_zh = null;
 			memoryKnowledge = [];
+			memoryKnowledge_zh = [];
 		} catch (e) {
 			act = 1;
 			err = 1;
@@ -356,7 +372,15 @@
 		</div>
 
 		<!-- 记忆画像 -->
-		<MemoryProfile persona={memoryPersona} style={memoryStyle} knowledge={memoryKnowledge} />
+		<MemoryProfile
+			memoryId={memoryId}
+			persona={memoryPersona}
+			persona_zh={memoryPersona_zh}
+			style={memoryStyle}
+			style_zh={memoryStyle_zh}
+			knowledge={memoryKnowledge}
+			knowledge_zh={memoryKnowledge_zh}
+		/>
 
 		<!-- 记忆库高级配置行 -->
 		<div class="status-row memory-config-row">

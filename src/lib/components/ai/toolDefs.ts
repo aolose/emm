@@ -88,21 +88,31 @@ export const AI_TOOLS: ToolDef[] = [
 				properties: {
 					persona: {
 						type: 'object',
-						description: 'The public writing persona — role, tone, and target audience',
+						description: 'Writing persona — English version',
 						properties: {
-							role: { type: 'string', description: 'e.g. "前端技术博主", "independent developer"' },
-							tone: { type: 'string', description: 'e.g. "口语化但有干货", "formal and academic"' },
+							role: { type: 'string', description: 'e.g. "independent developer"' },
+							tone: { type: 'string', description: 'e.g. "formal and academic"' },
+							readers: { type: 'string', description: 'e.g. "junior to mid-level developers"' }
+						},
+						required: ['role', 'tone', 'readers']
+					},
+					persona_zh: {
+						type: 'object',
+						description: 'Chinese translation of the persona',
+						properties: {
+							role: { type: 'string', description: 'e.g. "前端技术博主"' },
+							tone: { type: 'string', description: 'e.g. "口语化但有干货"' },
 							readers: { type: 'string', description: 'e.g. "初级到中级开发者"' }
 						},
 						required: ['role', 'tone', 'readers']
 					},
 					style: {
 						type: 'object',
-						description: 'Writing style preferences and constraints',
+						description: 'Writing style preferences — English version',
 						properties: {
 							language: {
 								type: 'string',
-								description: "e.g. 中文，口语化，避免使用'众所周知'、'值得一提'"
+								description: "e.g. \"casual English with technical depth\""
 							},
 							preferences: {
 								type: 'array',
@@ -117,14 +127,28 @@ export const AI_TOOLS: ToolDef[] = [
 						},
 						required: ['language']
 					},
+					style_zh: {
+						type: 'object',
+						description: 'Chinese translation of style preferences',
+						properties: {
+							language: { type: 'string', description: "e.g. 中文，口语化" },
+							preferences: { type: 'array', items: { type: 'string' }, description: '偏好的写作模式' },
+							avoid: { type: 'array', items: { type: 'string' }, description: '应避免的词汇或模式' }
+						},
+						required: ['language']
+					},
 					knowledge: {
 						type: 'array',
 						items: { type: 'string' },
-						description:
-							'Facts learned from articles, e.g. "已写过 React 18 入门系列（共3篇）", "读者常问如何优化首屏加载"'
+						description: 'Facts learned from articles — English'
+					},
+					knowledge_zh: {
+						type: 'array',
+						items: { type: 'string' },
+						description: 'Chinese translation of learned facts'
 					}
 				},
-				required: ['persona', 'style', 'knowledge']
+				required: ['persona', 'persona_zh', 'style', 'style_zh', 'knowledge', 'knowledge_zh']
 			}
 		}
 	},

@@ -3,8 +3,16 @@ import { db, sys } from '../index';
 import { auth } from './_common';
 import { resp, getClient } from '../utils';
 import { permission } from '$lib/enum';
+import { randomBytes } from 'node:crypto';
 
 const { Admin } = permission;
+
+/** Generate a short unique memory identifier like "A1B-C2D3-E4F5". */
+function genMemoryId(): string {
+	const b = randomBytes(5);
+	const hex = b.toString('hex').toUpperCase();
+	return hex.slice(0, 3) + '-' + hex.slice(3, 7) + '-' + hex.slice(7, 10);
+}
 
 // ── Retry wrapper for transient API errors (429 / 500 / 503) ────────
 async function fetchWithRetry(
@@ -420,9 +428,13 @@ const apis: APIRoutes = {
 			// Auto-initialize empty memory with a template structure
 			if (enabled && !memory.persona && !memory.style) {
 				memory = {
+					memoryId: '',
 					persona: { role: '', tone: '', readers: '' },
+					persona_zh: { role: '', tone: '', readers: '' },
 					style: { language: '', preferences: [], avoid: [] },
+					style_zh: { language: '', preferences: [], avoid: [] },
 					knowledge: [],
+					knowledge_zh: [],
 					lastUpdated: null
 				};
 				// Persist the template so subsequent calls see initialized=false until AI fills it
@@ -553,13 +565,21 @@ const apis: APIRoutes = {
 									content:
 										'Analyze these ' +
 										sample.length +
-										' articles and return a JSON object with:\n- persona: { role: string, tone: string, readers: string }\n- style: { language: string, preferences: string[], avoid: string[] }\n- knowledge: string[] (facts and recurring themes from the articles)\n\nArticles:\n' +
+										' articles and return a JSON object with BOTH Chinese (zh) and English (en) versions:\n' +
+										'- persona: { role, tone, readers }  ← English\n' +
+										'- persona_zh: { role, tone, readers }  ← Chinese\n' +
+										'- style: { language, preferences[], avoid[] }  ← English\n' +
+										'- style_zh: { language, preferences[], avoid[] }  ← Chinese\n' +
+										'- knowledge: string[]  ← English\n' +
+										'- knowledge_zh: string[]  ← Chinese\n' +
+										'The zh and en versions should be authentic translations, not literal word-for-word.\n\n' +
+										'Articles:\n' +
 										articlesBlock +
 										'\n\nRespond with ONLY the JSON object, no markdown, no explanation.'
 								}
 							],
 							response_format: { type: 'json_object' },
-							max_tokens: 2048,
+							max_tokens: 4096,
 							stream: false
 						})
 					});
@@ -588,9 +608,13 @@ const apis: APIRoutes = {
 					}
 
 					const memory = {
+						memoryId: genMemoryId(),
 						persona: parsed.persona || {},
+						persona_zh: parsed.persona_zh || parsed.persona || {},
 						style: parsed.style || {},
+						style_zh: parsed.style_zh || parsed.style || {},
 						knowledge: parsed.knowledge || [],
+						knowledge_zh: parsed.knowledge_zh || parsed.knowledge || [],
 						lastUpdated: Date.now(),
 						_readsConsumed: targetCount
 					};
