@@ -107,10 +107,7 @@
 							<div class="profile-meta-row">
 								<div class="card-photo-area">
 									<div class="avatar-placeholder">
-										<svg class="avatar-icon" viewBox="0 0 24 24" fill="currentColor">
-											<path
-												d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-4-8-4z" />
-										</svg>
+									  <span>🤖</span>
 										<div class="scan-line"></div>
 									</div>
 								</div>
@@ -218,17 +215,13 @@
   // NEW: Full body screen gradient backdrop cover
   .id-card-modal-backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.3);
+		inset: 0;
+    background: rgb(19 19 19 / 0.3);
     backdrop-filter: blur(8px);
     z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
     box-sizing: border-box;
   }
 
@@ -243,7 +236,7 @@
   }
 
   .memory-profile-card {
-    border: 1px solid rgb(31 109 255 / 0.2);
+    border: 1px solid rgb(128 173 255 / 0.4);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
     max-height: 85vh;
 		height: 640px;
@@ -277,11 +270,12 @@
     transition: .3s ease-in-out;
     position: absolute;
     padding: 0;
-    top: 10px;
-    right: 10px;
+    top: 9px;
+    right: 9px;
     width: 32px;
     height: 24px;
-    background: linear-gradient(135deg, #cfc9bd 0%, #fffaee 50%, #958c72 100%) !important;
+		border: 1px solid #b3b653;
+    background: linear-gradient(135deg, #93876f 0%, #ffffff 50%, #958659 100%) !important;
     border-radius: 4px;
     opacity: 0.3;
     box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
@@ -353,7 +347,7 @@
     transition: all 0.2s ease;
 
     &.active {
-      color: #89a7cf;
+      color: #d2dff3;
     }
 
     &:hover {
@@ -363,7 +357,7 @@
 
   .card-serial {
     font-size: 10px;
-    color: #4b5563;
+    color: #b2b6bd;
     font-family: monospace;
     margin-right: 36px;
   }
@@ -382,23 +376,21 @@
 
   .card-photo-area {
     .avatar-placeholder {
-      width: 54px;
-      height: 66px;
-      background: #040507;
-      border: 1px solid rgba(59, 130, 246, 0.15);
+      width: 60px;
+      height: 60px;
+      background: rgb(23 64 147 / 0.1);
+      border: 1px solid rgb(59 130 246 / 0.3);
       border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow: hidden;
-
-      .avatar-icon {
-        opacity: 0.5;
-        width: 38px;
-        color: rgb(53 76 120 / 0.5);
-      }
-
+      span{
+				opacity: .6;
+				font-size: 24px;
+				filter: grayscale(1);
+			}
       .scan-line {
         position: absolute;
         top: 0;
@@ -406,7 +398,7 @@
         width: 100%;
         height: 2px;
         background: linear-gradient(90deg, transparent, #3b82f6, transparent);
-        opacity: 0.25;
+        opacity: 0.4;
         animation: scan 3s linear infinite;
       }
     }
@@ -433,11 +425,12 @@
       color: #475569;
       font-weight: bold;
       letter-spacing: 0.5px;
-      margin-bottom: 2px;
     }
 
     .role-text-highlight {
       font-size: 15px;
+			font-family: monospace;
+			text-transform: uppercase!important;
       font-weight: 600;
       color: #c1a450;
     }
@@ -447,10 +440,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
-    background: rgb(1 255 14 / 0.01);
+    background: rgb(1 255 14 / 0.02);
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    border: 1px solid rgb(129 255 149 / 0.15);
 
     .profile-field-block {
       display: flex;
@@ -465,7 +458,7 @@
 
       .id-label {
         font-size: 9px;
-        color: #3d4959;
+        color: #44718e;
         font-weight: bold;
       }
 
@@ -475,12 +468,12 @@
 
       .id-value {
         font-size: 12px;
-        color: #b2bfcc;
+        color: #a6c5e4;
         word-break: break-all;
 
         &.line-height-relaxed {
-          line-height: 1.4;
-          color: #77b578;
+          line-height: 1.5;
+          color: #95cc96;
         }
       }
     }
@@ -508,14 +501,14 @@
         font-weight: bold;
 
         &.text-dim {
-          color: #475569;
+          color: #a9b8c6;
         }
       }
     }
 
     .avoid-box {
-      background: rgba(239, 68, 68, 0.01);
-      border: 1px dashed rgba(239, 68, 68, 0.1);
+      background: rgba(239, 68, 68, 0.03);
+      border: 1px dashed rgb(250 135 135 / 0.2);
       padding: 8px 10px;
       border-radius: 6px;
 
@@ -550,7 +543,7 @@
       align-items: center;
       gap: 6px;
       line-height: 1.4;
-      opacity: .5;
+      opacity: .6;
       transition: opacity .3s ease-in-out;
 
       &:hover {
@@ -558,20 +551,18 @@
       }
 
       span {
-        color: #dae3ef;
+        color: #8dbafb;
       }
 
       .list-indicator {
-				color: #206afb;
-        font-size: 8px;
-				line-height: 14px;
+				color: #72ceff;
+        font-size: 10px;
 				font-weight: 800;
 				height: 100%;
       }
 
       .list-content {
         font-size: 10px;
-				opacity: .5;
       }
 
       .knowledge-level-star {
@@ -590,7 +581,7 @@
     gap: 4px;
 
     .barcode-deco {
-      opacity: 0.08;
+      opacity: 0.1;
       height: 20px;
       width: 100%;
       background: repeating-linear-gradient(90deg, #fff, #fff 1px, transparent 2px, transparent 4px, #fff 2px, #fff 4px, transparent 4px, transparent 7px);
@@ -598,7 +589,7 @@
 
     .barcode-text {
       font-size: 8px;
-      color: #334155;
+      color: #384663;
       font-family: monospace;
       letter-spacing: 1.5px;
     }

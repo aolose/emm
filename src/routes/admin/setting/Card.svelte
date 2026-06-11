@@ -26,7 +26,9 @@
 		flex-direction: column;
 		padding-bottom: 20px;
 		@include s() {
-			margin: 0 12px;
+			margin: 0;
+			border-bottom: 1px dashed rgb(255 255 255 / 0.2);
+      border-radius: 0;
 		}
 	}
 	.e {

@@ -24,6 +24,7 @@
 		flex-wrap: wrap;
 		gap: 8px;
 		@include s() {
+      margin: 10px 0;
 			padding: 8px;
 		}
 	}
