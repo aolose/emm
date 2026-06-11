@@ -224,7 +224,6 @@
     height: 100vh;
     background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     z-index: 9999;
     display: flex;
     align-items: center;
