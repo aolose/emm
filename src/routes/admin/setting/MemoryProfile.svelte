@@ -73,7 +73,7 @@
 				onclick={(e) => e.stopPropagation()}
 			>
 				<div class="id-card-glow"></div>
-				<div class="memory-profile-card">
+				<div class="memory-profile-card" class:lang-en={lang === 'en'} class:lang-zh={lang === 'zh'}>
 
 					<!-- Close Action Hint for mobile users -->
 					<button class="modal-close-btn" onclick={() => (expanded = false)}></button>
@@ -89,7 +89,7 @@
 								class="lang-btn"
 								class:active={lang === 'en'}
 								onclick={() => (lang = 'en')}
-							>EN</button>
+							>EN</button><span>/</span>
 							<button
 								class="lang-btn"
 								class:active={lang === 'zh'}
@@ -249,7 +249,7 @@
 		border: 1px solid rgb(31 109 255 / 0.2);
 		box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
 		max-height: 85vh;
-		padding: 16px;
+		padding: 12px 16px;
 		background: #000;
 		border-radius: 11px;
 		display: flex;
@@ -257,6 +257,13 @@
 		gap: 14px;
 		position: relative;
 		overflow: hidden;
+
+		// English display: auto-capitalize tag-like values
+		&.lang-en {
+			.role-text-highlight { text-transform: capitalize; }
+			.id-value { text-transform: capitalize; }
+			.avoid-tag { text-transform: capitalize; }
+		}
 	}
 
 	.modal-close-btn {
@@ -316,34 +323,34 @@
 		}
 	}
 
-	// ── Language toggle ──────────────────────────────────────────
 	.lang-toggle {
+		margin-right: 32px;
 		display: flex;
-		gap: 2px;
-		border-radius: 4px;
+		align-items: center;
 		overflow: hidden;
-		border: 1px solid rgba(59, 130, 246, 0.25);
+		span{
+			color: #464a51;
+			font-size: 10px;
+			margin-right: -2px;
+		}
 	}
 
 	.lang-btn {
-		padding: 2px 8px;
-		font-size: 10px;
-		font-weight: 600;
+		padding: 2px 4px;
+		font-size: 12px;
 		font-family: monospace;
-		color: #475569;
-		background: transparent;
+		color: #414e60;
+		background: transparent!important;
 		border: none;
 		cursor: pointer;
 		transition: all 0.2s ease;
 
 		&.active {
-			background: #3b82f6;
-			color: #fff;
-			box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+			color: #89a7cf;
 		}
 
-		&:hover:not(.active) {
-			color: #93b4f5;
+		&:hover {
+			color: #fff;
 		}
 	}
 

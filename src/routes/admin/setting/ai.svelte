@@ -100,10 +100,14 @@
 			const data = (await req('aiMemory', undefined, { method: 1 as never })) as {
 				initialized: boolean;
 				memory: {
+					memoryId?: string;
 					lastUpdated: number | null;
 					persona?: { role: string; tone: string; readers: string } | null;
+					persona_zh?: { role: string; tone: string; readers: string } | null;
 					style?: { language: string; preferences: string[]; avoid: string[] } | null;
+					style_zh?: { language: string; preferences: string[]; avoid: string[] } | null;
 					knowledge?: string[];
+					knowledge_zh?: string[];
 				};
 			};
 			memoryInitialized = !!data?.initialized;

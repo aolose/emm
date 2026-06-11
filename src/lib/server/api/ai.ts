@@ -558,7 +558,7 @@ const apis: APIRoutes = {
 								{
 									role: 'system',
 									content:
-										"You are analyzing an author's writing style from their published blog articles. Extract the persona, style preferences, and knowledge. Output ONLY valid JSON."
+										"You are analyzing an author's writing style from their published blog articles. Extract the persona, style preferences, and knowledge.\n\nIMPORTANT: persona fields (role, tone, readers) must be SHORT tag-like labels — 2-5 words max, like badge titles. English versions MUST use Title Case (e.g. \"Tech Blogger\", \"Casual & Insightful\", \"Junior Developers\"). Chinese versions should be concise labels (e.g. \"技术博主\", \"轻松有料\").\n\nOutput ONLY valid JSON."
 								},
 								{
 									role: 'user',

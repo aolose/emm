@@ -88,21 +88,21 @@ export const AI_TOOLS: ToolDef[] = [
 				properties: {
 					persona: {
 						type: 'object',
-						description: 'Writing persona — English version',
+						description: 'Writing persona (English, Title Case, short label 2-5 words)',
 						properties: {
-							role: { type: 'string', description: 'e.g. "independent developer"' },
-							tone: { type: 'string', description: 'e.g. "formal and academic"' },
-							readers: { type: 'string', description: 'e.g. "junior to mid-level developers"' }
+							role: { type: 'string', description: 'e.g. "Tech Blogger"' },
+							tone: { type: 'string', description: 'e.g. "Casual & Insightful"' },
+							readers: { type: 'string', description: 'e.g. "Junior Developers"' }
 						},
 						required: ['role', 'tone', 'readers']
 					},
 					persona_zh: {
 						type: 'object',
-						description: 'Chinese translation of the persona',
+						description: 'Chinese version (concise label, 2-5 chars per field)',
 						properties: {
-							role: { type: 'string', description: 'e.g. "前端技术博主"' },
-							tone: { type: 'string', description: 'e.g. "口语化但有干货"' },
-							readers: { type: 'string', description: 'e.g. "初级到中级开发者"' }
+							role: { type: 'string', description: 'e.g. "技术博主"' },
+							tone: { type: 'string', description: 'e.g. "轻松有料"' },
+							readers: { type: 'string', description: 'e.g. "初中级开发者"' }
 						},
 						required: ['role', 'tone', 'readers']
 					},
