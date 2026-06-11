@@ -16,8 +16,8 @@
 		persona_zh?: { role: string; tone: string; readers: string } | null;
 		style?: { language: string; preferences: string[]; avoid: string[] } | null;
 		style_zh?: { language: string; preferences: string[]; avoid: string[] } | null;
-		knowledge?: string[];
-		knowledge_zh?: string[];
+		knowledge?: (string | { area: string; level: string; desc?: string })[];
+		knowledge_zh?: (string | { area: string; level: string; desc?: string })[];
 	} = $props();
 
 	let expanded = $state(false);
@@ -72,7 +72,6 @@
 				transition:fly={{ y: 50, duration: 350 }}
 				onclick={(e) => e.stopPropagation()}
 			>
-				<div class="id-card-glow"></div>
 				<div class="memory-profile-card" class:lang-en={lang === 'en'} class:lang-zh={lang === 'zh'}>
 
 					<!-- Close Action Hint for mobile users -->
@@ -164,10 +163,10 @@
 									<div class="footer-meta-block p-list">
 										<span class="id-label text-dim">{lang === 'zh' ? '知识库' : 'KNOWLEDGE BASE'} ({k.length})</span>
 										<ul class="profile-list">
-											{#each k as item (item)}
+											{#each k as item (typeof item === 'string' ? item : item.area)}
 												<li>
 													<span class="list-indicator">&gt;</span>
-													<span class="list-content">{item}</span>
+												<span class="list-content">{typeof item === 'string' ? item : (item.desc || item.area)}</span>
 												</li>
 											{/each}
 										</ul>
@@ -248,7 +247,7 @@
     border: 1px solid rgb(31 109 255 / 0.2);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
     max-height: 85vh;
-		height: 640px;
+		min-height: 640px;
     padding: 12px 16px;
     background: #000;
     border-radius: 11px;
@@ -489,11 +488,9 @@
   }
 
   .card-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding-top: 14px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 		flex-grow: 1;
 		height: 0;
    .p-list{
@@ -504,7 +501,8 @@
       display: flex;
       flex-direction: column;
       gap: 5px;
-
+      padding: 4px;
+      border-radius: 8px;
       .id-label {
         font-size: 9px;
         color: #64748b;
@@ -553,7 +551,7 @@
       align-items: center;
       gap: 6px;
       line-height: 1.4;
-      opacity: .2;
+      opacity: .5;
       transition: opacity .3s ease-in-out;
 
       &:hover {
@@ -565,12 +563,22 @@
       }
 
       .list-indicator {
-        font-size: 7px;
-        opacity: 0.6;
+				color: #206afb;
+        font-size: 8px;
+				line-height: 14px;
+				font-weight: 800;
+				height: 100%;
       }
 
       .list-content {
         font-size: 10px;
+				opacity: .5;
+      }
+
+      .knowledge-level-star {
+        margin-left: 4px;
+        font-size: 10px;
+        &.dim { opacity: 0.4; }
       }
     }
   }

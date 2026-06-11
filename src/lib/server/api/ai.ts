@@ -163,45 +163,150 @@ function getSmartModel(messages: Array<{ role: string; content?: string }>): str
 	return chosen;
 }
 
-// ── Time-stratified article sampling ────────────────────────────
-// Picks evenly across the timeline (oldest → newest) to capture
-// style evolution, instead of just the latest N articles.
-function timeStratifiedSample(
+// ── Smart article sampling ────────────────────────────────────
+// Full-pool sampling with tag coverage guarantee + time-interval random selection.
+// 1. Each requested tag gets at least 1 article (tag guarantee)
+// 2. Remaining slots are filled via time-interval random selection
+// 3. Content length < MIN_CONTENT is filtered out
+const MIN_CONTENT_LEN = 200;
+
+function smartArticleSample(
 	pool: Record<string, unknown>[],
+	tagPools: Map<string, Record<string, unknown>[]>,
 	count: number
 ): Record<string, unknown>[] {
+	// Filter short articles
+	pool = pool.filter((r) => (String(r.content ?? '')).length >= MIN_CONTENT_LEN);
+
 	if (pool.length <= count) return pool;
 
-	// pool is ordered by createAt DESC (newest first)
-	// Reverse to get chronological order for segment math
-	const chrono = [...pool].reverse();
-	const result: Record<string, unknown>[] = [];
+	const picked = new Map<number, Record<string, unknown>>();
 
-	if (count === 1) {
-		// Single article: pick the newest
-		result.push(pool[0]);
-	} else {
-		// Always include oldest (first in chrono) and newest (last in chrono)
-		result.push(chrono[0]);
-		if (count > 2) {
-			const middle = count - 2;
-			const step = (chrono.length - 1) / (middle + 1);
-			for (let i = 1; i <= middle; i++) {
-				const idx = Math.round(i * step);
-				result.push(chrono[Math.min(idx, chrono.length - 1)]);
+	// Step 1 — Tag guarantee: one article per tag (random within tag)
+	if (tagPools.size > 0) {
+		// Sort tags by article count descending; if tag count > count, only top N tags get a slot
+		const sortedTags = [...tagPools.entries()].sort(
+			(a, b) => b[1].length - a[1].length
+		);
+		const guaranteeSlots = Math.min(sortedTags.length, count);
+
+		for (let i = 0; i < guaranteeSlots; i++) {
+			const [, articles] = sortedTags[i];
+			const eligible = articles.filter(
+				(r) =>
+					(String(r.content ?? '')).length >= MIN_CONTENT_LEN &&
+					!picked.has(r.id as number)
+			);
+			if (eligible.length > 0) {
+				const pick = eligible[Math.floor(Math.random() * eligible.length)];
+				picked.set(pick.id as number, pick);
 			}
 		}
-		result.push(chrono[chrono.length - 1]);
 	}
 
-	// Deduplicate by id (oldest + newest might be same if only 1 article)
-	const seen = new Set<number>();
-	return result.filter((r) => {
-		const id = r.id as number;
-		if (seen.has(id)) return false;
-		seen.add(id);
-		return true;
+	// Step 2 — If we already have enough, return random subset
+	if (picked.size >= count) {
+		const arr = [...picked.values()];
+		// Fisher-Yates shuffle and slice
+		for (let i = arr.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[arr[i], arr[j]] = [arr[j], arr[i]];
+		}
+		return arr.slice(0, count);
+	}
+
+	const remaining = count - picked.size;
+
+	// Step 3 — Build remaining pool (chronological, excluding already picked)
+	const rest = pool.filter((r) => !picked.has(r.id as number));
+
+	if (rest.length <= remaining) {
+		return [...picked.values(), ...rest];
+	}
+
+	// Step 4 — Year-based proportional allocation + random within each year
+	// Group by year, allocate slots proportional to article count per year,
+	// then randomly pick within each year segment.
+	const byYear = new Map<number, Record<string, unknown>[]>();
+	for (const r of rest) {
+		const year = new Date(r.createAt as number).getFullYear();
+		const bucket = byYear.get(year);
+		if (bucket) bucket.push(r);
+		else byYear.set(year, [r]);
+	}
+
+	const years = [...byYear.keys()].sort();
+	const totalArticles = rest.length;
+
+	// Each year with articles gets at least 1 slot (if enough remaining),
+	// then extra slots are distributed proportionally by article count.
+	const yearCount = years.length;
+	const guaranteed = remaining >= yearCount ? 1 : 0;
+	const extraSlots = remaining - (guaranteed ? yearCount : 0);
+
+	const alloc: { year: number; quota: number; articles: Record<string, unknown>[] }[] = [];
+	let allocated = 0;
+	const remainders: { year: number; rem: number }[] = [];
+
+	for (const year of years) {
+		const articles = byYear.get(year)!;
+		const raw = guaranteed
+			? 1 + (articles.length / totalArticles) * extraSlots
+			: (articles.length / totalArticles) * remaining;
+		let floor = Math.floor(raw);
+		// In guaranteed mode, never give a year zero if it has articles
+		if (guaranteed && floor < 1 && articles.length > 0 && remaining >= yearCount) {
+			floor = 1;
+		}
+		alloc.push({ year, quota: floor, articles });
+		if (floor > 0) allocated += floor;
+		remainders.push({ year, rem: raw - floor });
+	}
+
+	// Distribute leftover slots by largest remainder
+	const needed = remaining - allocated;
+	if (needed > 0) {
+		remainders.sort((a, b) => b.rem - a.rem);
+		for (let i = 0; i < needed; i++) {
+			const entry = alloc.find((a) => a.year === remainders[i].year);
+			if (entry) {
+				entry.quota++;
+				allocated++;
+			}
+		}
+	}
+
+	// Random pick within each year segment
+	for (const { year, quota, articles } of alloc) {
+		if (quota <= 0) continue;
+		const take = Math.min(quota, articles.length);
+		// Fisher-Yates shuffle to pick random subset
+		const pool = [...articles];
+		for (let i = 0; i < take; i++) {
+			const j = i + Math.floor(Math.random() * (pool.length - i));
+			[pool[i], pool[j]] = [pool[j], pool[i]];
+			picked.set(pool[i].id as number, pool[i]);
+		}
+	}
+
+	const final = [...picked.values()].sort(
+		(a, b) => (a.createAt as number) - (b.createAt as number)
+	);
+
+	console.log('[AI] smartSample →', {
+		poolSize: rest.length + picked.size,
+		byYear: Object.fromEntries([...byYear].map(([y, a]) => [y, a.length])),
+		alloc: Object.fromEntries(alloc.map((a) => [a.year, a.quota])),
+		selected: final.map((r) => ({ title: r.title, year: new Date(r.createAt as number).getFullYear() }))
 	});
+	return final;
+}
+
+/** Parse comma-separated GROUP_CONCAT tag names */
+function parseTagNames(row: Record<string, unknown>): string[] {
+	const raw = row.tagNames as string | undefined;
+	if (!raw) return [];
+	return raw.split(',').map((t) => t.trim()).filter(Boolean);
 }
 
 const apis: APIRoutes = {
@@ -428,16 +533,19 @@ const apis: APIRoutes = {
 			// Auto-initialize empty memory with a template structure
 			if (enabled && !memory.persona && !memory.style) {
 				memory = {
-					memoryId: '',
-					persona: { role: '', tone: '', readers: '' },
-					persona_zh: { role: '', tone: '', readers: '' },
-					style: { language: '', preferences: [], avoid: [] },
-					style_zh: { language: '', preferences: [], avoid: [] },
-					knowledge: [],
-					knowledge_zh: [],
-					lastUpdated: null
+					memoryId:      '',
+					persona:       { role: '', tone: '', readers: '' },
+					persona_zh:    { role: '', tone: '', readers: '' },
+					style:         { language: '', preferences: [], avoid: [] },
+					style_zh:      { language: '', preferences: [], avoid: [] },
+					knowledge:     [],
+					knowledge_zh:  [],
+					structure:     {},
+					structure_zh:  {},
+					patterns:      [],
+					patterns_zh:   [],
+					lastUpdated:   null
 				};
-				// Persist the template so subsequent calls see initialized=false until AI fills it
 				sys.aiMemory = JSON.stringify(memory);
 			}
 
@@ -503,31 +611,46 @@ const apis: APIRoutes = {
 			const limit = Number(sys.aiMemoryLimit) || 10;
 
 			// 1. Query article pool
-			const poolSize = 50;
 			const targetCount = Math.min(5, limit);
 			let pool: Record<string, unknown>[];
+			const tagPools = new Map<string, Record<string, unknown>[]>();
+
 			if (tags.length) {
 				const placeholders = tags.map(() => '?').join(',');
-				pool = db.db
+				const rows = db.db
 					.prepare(
-						'SELECT DISTINCT p.id, p.title, p.content, p.createAt, p.slug FROM Post p INNER JOIN PostTag tp ON p.id = tp.postId INNER JOIN Tag t ON t.id = tp.tagId WHERE p.published = 1 AND t.name IN (' +
-							placeholders +
-							') ORDER BY p.createAt DESC LIMIT ?'
+						`SELECT p.id, p.title, p.content, p.createAt, p.slug, GROUP_CONCAT(t.name) AS tagNames
+						 FROM Post p
+						 INNER JOIN PostTag tp ON p.id = tp.postId
+						 INNER JOIN Tag t ON t.id = tp.tagId
+						 WHERE p.published = 1 AND t.name IN (${placeholders})
+						 GROUP BY p.id
+						 ORDER BY p.createAt ASC`
 					)
-					.all(...tags, poolSize) as Record<string, unknown>[];
+					.all(...tags) as (Record<string, unknown> & { tagNames: string })[];
+				pool = rows;
+
+				// Build per-tag pools for tag-guarantee sampling
+				for (const tag of tags) {
+					const articles = rows.filter((r) => parseTagNames(r).includes(tag));
+					if (articles.length > 0) tagPools.set(tag, articles);
+				}
 			} else {
 				pool = db.db
 					.prepare(
-						'SELECT id, title, content, createAt, slug FROM Post WHERE published = 1 ORDER BY createAt DESC LIMIT ?'
+						`SELECT id, title, content, createAt, slug
+						 FROM Post
+						 WHERE published = 1
+						 ORDER BY createAt ASC`
 					)
-					.all(poolSize) as Record<string, unknown>[];
+					.all() as Record<string, unknown>[];
 			}
 
 			if (!pool.length) {
 				return resp('No published articles found. Publish some posts first.', 400);
 			}
 
-			const sample = timeStratifiedSample(pool, targetCount);
+			const sample = smartArticleSample(pool, tagPools, targetCount);
 			const model = getSmartModel([{ role: 'user', content: 'memory learn' }]);
 
 			// 2. Fire-and-forget: kick off AI call in background, return immediately.
@@ -542,7 +665,7 @@ const apis: APIRoutes = {
 								': ' +
 								r.title +
 								'\n' +
-								((r.content as string)?.slice(0, 4000) || '')
+								((r.content as string)?.slice(0, 10000) || '')
 						)
 						.join('\n\n---\n\n');
 
@@ -558,21 +681,25 @@ const apis: APIRoutes = {
 								{
 									role: 'system',
 									content:
-										"You are analyzing an author's writing style from their published blog articles. Extract the persona, style preferences, and knowledge.\n\nIMPORTANT: persona fields (role, tone, readers) must be SHORT tag-like labels — 2-5 words max, like badge titles. English versions MUST use Title Case (e.g. \"Tech Blogger\", \"Casual & Insightful\", \"Junior Developers\"). Chinese versions should be concise labels (e.g. \"技术博主\", \"轻松有料\").\n\nOutput ONLY valid JSON."
+										"You are analyzing an author's writing style from their published blog articles. Extract persona, style, knowledge, writing structure, and signature sentence patterns.\n\nCRITICAL language rule: Fields WITHOUT \"_zh\" suffix (persona, style, knowledge, structure, patterns) MUST be written in English. Fields WITH \"_zh\" suffix (persona_zh, style_zh, knowledge_zh, structure_zh, patterns_zh) MUST be written in Chinese. Every string value in English fields — including preferences[], avoid[], area, desc, paragraphStyle, typicalLength, patterns[] — MUST be English. zh fields MUST be Chinese. Never mix.\n\nIMPORTANT:\n- persona (role, tone, readers): 2-5 words max, badge-style labels. English: Title Case. Chinese: concise.\n- style.preferences: 3-5 concrete writing habits (e.g. \"Short paragraphs\", \"Code-first\", \"Progressive argumentation\")\n- style.avoid: 2-4 things the author never/rarely does\n- style.language: output in the SAME language as the field version — English field gets English name (\"Simplified Chinese\"), Chinese field gets Chinese name (\"简体中文\")\n- knowledge: 5-10 items covering all major topics found in the articles. \"expert\" for frequently/depth-covered topics, \"familiar\" for occasionally mentioned topics\n- structure: infer paragraph length, article length, and formatting habits from the corpus as a whole\n- patterns: 3-5 most distinctive sentence templates or rhetorical devices the author repeats\n\nOutput ONLY valid JSON."
 								},
 								{
 									role: 'user',
 									content:
-										'Analyze these ' +
+										'Analyze the following ' +
 										sample.length +
-										' articles and return a JSON object with BOTH Chinese (zh) and English (en) versions:\n' +
+										' articles. Return a JSON object with both Chinese (zh) and English (en) versions.\nIMPORTANT for knowledge: output 5-10 items covering all major topics.\n\n' +
 										'- persona: { role, tone, readers }  ← English\n' +
 										'- persona_zh: { role, tone, readers }  ← Chinese\n' +
 										'- style: { language, preferences[], avoid[] }  ← English\n' +
 										'- style_zh: { language, preferences[], avoid[] }  ← Chinese\n' +
-										'- knowledge: string[]  ← English\n' +
-										'- knowledge_zh: string[]  ← Chinese\n' +
-										'The zh and en versions should be authentic translations, not literal word-for-word.\n\n' +
+										'- knowledge: [{ area: string, level: \"expert\"|\"familiar\", desc: string }]  ← English\n' +
+										'- knowledge_zh: [{ area: string, level: \"expert\"|\"familiar\", desc: string }]  ← Chinese\n' +
+										'- structure: { paragraphStyle: string, typicalLength: string, usesCodeBlocks: boolean, usesEmoji: boolean, usesBulletPoints: boolean }  ← English\n' +
+										'- structure_zh: { paragraphStyle: string, typicalLength: string, usesCodeBlocks: boolean, usesEmoji: boolean, usesBulletPoints: boolean }  ← Chinese\n' +
+										'- patterns: string[]  ← English (3-5 high-frequency sentence templates)\n' +
+										'- patterns_zh: string[]  ← Chinese\n\n' +
+										'Notes: NEVER mix languages — English fields (no _zh) use English, Chinese fields (with _zh) use Chinese. Chinese field descriptions should be authentic translations, not literal word-for-word. For each knowledge item, \"area\" is a short label (e.g. \"SvelteKit\"), \"desc\" is a natural one-line description (English fields: \"Full-stack framework with SSR/CSR hybrid rendering\" — max 20 words. Chinese fields: \"全栈框架，SSR/CSR 混合渲染\"). For structure, paragraphStyle is \"short\"|\"mixed\"|\"long\"; typicalLength describes the word/character count range.\n\n' +
 										'Articles:\n' +
 										articlesBlock +
 										'\n\nRespond with ONLY the JSON object, no markdown, no explanation.'
@@ -608,15 +735,19 @@ const apis: APIRoutes = {
 					}
 
 					const memory = {
-						memoryId: genMemoryId(),
-						persona: parsed.persona || {},
-						persona_zh: parsed.persona_zh || parsed.persona || {},
-						style: parsed.style || {},
-						style_zh: parsed.style_zh || parsed.style || {},
-						knowledge: parsed.knowledge || [],
-						knowledge_zh: parsed.knowledge_zh || parsed.knowledge || [],
-						lastUpdated: Date.now(),
-						_readsConsumed: targetCount
+						memoryId:        genMemoryId(),
+						persona:         parsed.persona || {},
+						persona_zh:      parsed.persona_zh || parsed.persona || {},
+						style:           parsed.style || {},
+						style_zh:        parsed.style_zh || parsed.style || {},
+						knowledge:       parsed.knowledge || [],
+						knowledge_zh:    parsed.knowledge_zh || parsed.knowledge || [],
+						structure:       parsed.structure || {},
+						structure_zh:    parsed.structure_zh || parsed.structure || {},
+						patterns:        parsed.patterns || [],
+						patterns_zh:     parsed.patterns_zh || parsed.patterns || [],
+						lastUpdated:     Date.now(),
+						_readsConsumed:  targetCount
 					};
 					sys.aiMemory = JSON.stringify(memory);
 
@@ -756,30 +887,39 @@ const apis: APIRoutes = {
 				};
 			}
 
-			// Fetch pool & apply time-stratified sampling
-			const poolSize = 50;
+			// Fetch pool & apply smart sampling (full pool, tag guarantee, interval random)
 			let pool: Record<string, unknown>[];
+			const tagPools = new Map<string, Record<string, unknown>[]>();
+
 			if (filterTags.length) {
 				const placeholders = filterTags.map(() => '?').join(',');
-				pool = db.db
+				const rows = db.db
 					.prepare(
-						`SELECT DISTINCT p.id, p.title, p.content, p.createAt, p.slug
+						`SELECT p.id, p.title, p.content, p.createAt, p.slug, GROUP_CONCAT(t.name) AS tagNames
 						 FROM Post p
 						 INNER JOIN PostTag tp ON p.id = tp.postId
 						 INNER JOIN Tag t ON t.id = tp.tagId
 						 WHERE p.published = 1 AND t.name IN (${placeholders})
-						 ORDER BY p.createAt DESC LIMIT ?`
+						 GROUP BY p.id
+						 ORDER BY p.createAt ASC`
 					)
-					.all(...filterTags, poolSize) as Record<string, unknown>[];
+					.all(...filterTags) as (Record<string, unknown> & { tagNames: string })[];
+				pool = rows;
+
+				// Build per-tag pools for tag-guarantee sampling
+				for (const tag of filterTags) {
+					const articles = rows.filter((r) => parseTagNames(r).includes(tag));
+					if (articles.length > 0) tagPools.set(tag, articles);
+				}
 			} else {
 				pool = db.db
 					.prepare(
 						`SELECT id, title, content, createAt, slug
 						 FROM Post
 						 WHERE published = 1
-						 ORDER BY createAt DESC LIMIT ?`
+						 ORDER BY createAt ASC`
 					)
-					.all(poolSize) as Record<string, unknown>[];
+					.all() as Record<string, unknown>[];
 			}
 
 			if (!pool.length) {
@@ -795,7 +935,7 @@ const apis: APIRoutes = {
 				};
 			}
 
-			const sample = timeStratifiedSample(pool, effectiveCount);
+			const sample = smartArticleSample(pool, tagPools, effectiveCount);
 			const articles = sample.map((r) => ({
 				title: r.title,
 				slug: r.slug,
