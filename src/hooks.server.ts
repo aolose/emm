@@ -154,11 +154,11 @@ const CACHE_RULES: Array<{ pattern: RegExp; value: string }> = [
 	{ pattern: /^\/api\/tags/,             value: 'public, max-age=0, s-maxage=600, must-revalidate, no-transform' },
 	{ pattern: /^\/api\/hello/,            value: 'public, max-age=0, s-maxage=86400, must-revalidate, no-transform' },
 	// Auth-only endpoints — never cache
-	{ pattern: /^\/api\/(check|logout)/,   value: 'private, no-store, no-transform' },
+	{ pattern: /^\/api\/(check|logout|ai)/,   value: 'private, no-store, no-transform' },
 	// __data.json — public blog content
 	{ pattern: /\/__data\.json/,           value: 'public, max-age=0, must-revalidate, no-transform' },
-	// Other API — auth-gated
-	{ pattern: /^\/api\//,                 value: 'private, max-age=0, must-revalidate, no-transform' }
+	// Other API — auth-gated, never cache
+	{ pattern: /^\/api\//,                 value: 'private, no-store, no-transform' }
 ];
 const DEFAULT_CACHE = 'public, max-age=0, must-revalidate, no-transform';
 
@@ -237,13 +237,25 @@ async function addEtag(event: Parameters<Handle>[0]['event'], response: Response
 }
 
 /**
- * ETag for __data.json (CSR data endpoint).
+ * ETag for __data.json (CSR data endpoint) and API endpoints.
  * Just hash the body — no template involved.
+ * Skips ETag entirely for no-store endpoints (auth-gated APIs).
  */
 async function addDataJsonEtag(
 	event: Parameters<Handle>[0]['event'],
 	response: Response
 ): Promise<Response> {
+	const cc = getCacheControl(new URL(event.request.url).pathname);
+
+	// Auth-gated endpoints (no-store) — never set ETag, never return 304
+	if (cc.includes('no-store')) {
+		const headers = new Headers(response.headers);
+		headers.set('cache-control', cc);
+		const clone = response.clone();
+		const body = await clone.text();
+		return new Response(body, { status: response.status, headers });
+	}
+
 	const clone = response.clone();
 	const body = await clone.text();
 	const etag = `W/"${createHash('sha256').update(body).digest('hex').slice(0, 6)}"`;
@@ -254,7 +266,7 @@ async function addDataJsonEtag(
 
 	const headers = new Headers(response.headers);
 	headers.set('etag', etag);
-	headers.set('cache-control', getCacheControl(new URL(event.request.url).pathname));
+	headers.set('cache-control', cc);
 	return new Response(body, { status: response.status, headers });
 }
 
