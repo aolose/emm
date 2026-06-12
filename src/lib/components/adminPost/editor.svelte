@@ -190,7 +190,7 @@
 	};
 	let saving = 0;
 	let i = 0;
-	const id = (a) => a._ || a.id;
+	const id = (a) => a.id;
 	export const autoSave = async (p, isPublish) => {
 		if (saving) return;
 		const now = get(saveNow);
@@ -206,11 +206,7 @@
 				ol.size === 0)
 		)
 			return (saving = 0);
-		const _ = p._;
-		const v = { ...o, _ };
-		if (p.id) {
-			v.id = p.id;
-		}
+		const v = { ...o, id: p.id };
 		const k = id(p);
 		const saveAt = p.save;
 		if (isPublish) v._p = isPublish;
@@ -228,8 +224,9 @@
 		if ('save' in r && r.save < saveAt) return;
 		if (v._tag) await loadTag();
 		const n = { ...ori, ...p, ...r };
+		// Update both originPost (editor reference) and posts (sidebar list)
 		if (id(get(originPost)) === k) originPost.set({ ...n });
-		else {
+		{
 			const ps = get(posts);
 			const p = ps.find((a) => a.id === k);
 			if (p) {
@@ -304,7 +301,7 @@
 	});
 </script>
 
-{#if $editPost._ || $editPost.id}
+{#if $editPost.id}
 	<div class="a" class:fu={$full} transition:fade|global>
 		<div class="t">
 			<input bind:value={title} />
@@ -312,7 +309,7 @@
 		</div>
 		<div class="e">
 			<button onclick={() => full.set(0)} class="icon i-shrink"></button>
-			{#key $editPost._ || $editPost.id}
+			{#key $editPost.id}
 				<Editor bind:value={draft} toolbar={tools} bind:editorRef />
 				{#if $editPost.save}
 					<span class="tm"

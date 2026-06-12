@@ -1,6 +1,6 @@
 <script>
 	import { editPost, originPost } from '$lib/store';
-	import { randNum, trim, delay } from '$lib/utils';
+	import { trim, delay } from '$lib/utils';
 
 	// Props from both parent components
 	let { change, done, a = $bindable('') } = $props();
@@ -25,9 +25,9 @@
 	function add() {
 		const title = trim(a);
 		if (title) {
-			const _ = randNum();
-			const o = { _, title_d: title, content_d: '' };
-			originPost.set({ _ });
+			const id = Date.now();
+			const o = { id, title_d: title, content_d: '' };
+			originPost.set({ id });
 			editPost.set({ ...o });
 			a = '';
 			if (done) done();

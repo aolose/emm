@@ -168,14 +168,14 @@ export const aiPanelTab = writable<'preview' | 'ai'>('preview');
 export const editorTools = writable<Record<string, (...args: unknown[]) => unknown>>({});
 
 editPost.subscribe((p) => {
-	if (!p._ && !p.id) return;
-	let ls = get(posts);
-	const c = ls.findIndex((o) => {
-		return (p._ && o._ === p._) || (p.id && p.id === o.id);
-	});
+	if (!p.id) return;
+	const ls = get(posts);
+	const c = ls.findIndex((o) => o.id === p.id);
 	if (c !== -1) {
 		ls[c] = { ...ls[c], ...p };
-	} else ls = [p].concat(ls);
+	} else {
+		ls.unshift(p);
+	}
 	posts.set([...ls]);
 });
 
