@@ -4,6 +4,27 @@ import { build, files, version } from '$service-worker';
 const DEV = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
 
 const channel = new BroadcastChannel('sw-messages');
+
+// ── Turnstile challenge dedup: prevent flood when multiple SW fetches hit 403 ──
+let _lastTsChallengeAt = 0;
+const TS_CHALLENGE_COOLDOWN = 5000; // 5s
+
+/**
+ * Post a TS_CHALLENGE message to the page (deduped).
+ * @param {string} redirectUrl - URL to redirect back to after challenge
+ */
+function postTsChallenge(redirectUrl) {
+	const now = Date.now();
+	if (now - _lastTsChallengeAt < TS_CHALLENGE_COOLDOWN) return;
+	_lastTsChallengeAt = now;
+	channel.postMessage({ type: 'TS_CHALLENGE', url: redirectUrl });
+}
+
+/** Extract the page path from a __data.json URL. */
+function dataJsonToPagePath(url) {
+	return new URL(url).pathname.replace(/\/__data\.json.*$/, '') || '/';
+}
+
 const cachePrefix = 'sw-';
 const CACHE = DEV ? 'sw-dev' : `${cachePrefix}${version}`;
 const RES_CACHE = 'res';
@@ -80,7 +101,7 @@ self.addEventListener('install', (event) => {
 			try {
 				const response = await fetch(route, {
 					redirect: 'manual',
-					headers: { 'X-SW-Precache': '1' }
+					headers: { 'X-SW-Background': '1' }
 				});
 				if (response.status >= 300 && response.status < 400) return;
 				if (!response.ok) return;
@@ -282,12 +303,19 @@ async function dataJsonHandler(event) {
 			const headers = new Headers(request.headers);
 			const etag = cachedResponse?.headers.get('etag');
 			if (etag) headers.set('if-none-match', etag);
+			headers.set('X-SW-Background', '1');
 
-			const response = await fetch(request.url, { headers, redirect: 'follow' });
+			const response = await fetch(request.url, { headers, redirect: 'manual' });
 
 			if (response.status === 304) {
 				// Cache is already fresh — no need to re-put.
 				// Avoids clone() race with the page consuming cachedResponse.
+				return;
+			}
+
+			// Turnstile challenge — notify page to redirect
+			if (response.status === 403) {
+				postTsChallenge(dataJsonToPagePath(request.url));
 				return;
 			}
 
@@ -309,7 +337,19 @@ async function dataJsonHandler(event) {
 	}
 
 	try {
-		const response = await fetch(request);
+		const swHeaders = new Headers(request.headers);
+		swHeaders.set('X-SW-Background', '1');
+		const response = await fetch(request.url, { headers: swHeaders, redirect: 'manual' });
+
+		// Turnstile challenge — notify page to redirect
+		if (response.status === 403) {
+			postTsChallenge(dataJsonToPagePath(request.url));
+			return new Response(JSON.stringify({ error: 'Challenge required' }), {
+				status: 403,
+				headers: { 'Content-Type': 'application/json' }
+			});
+		}
+
 		if (response.ok) await cache.put(request, response.clone());
 		return response;
 	} catch {
@@ -355,6 +395,12 @@ async function contentStaleWhileRevalidate(event) {
 				return;
 			}
 
+			// Turnstile challenge — notify page to redirect
+			if (networkResponse.status === 403) {
+				postTsChallenge(new URL(request.url).pathname);
+				return;
+			}
+
 			if (networkResponse.ok) {
 				// Extract API data from new HTML and update emm-data
 				const clone = networkResponse.clone();
@@ -387,7 +433,16 @@ async function contentStaleWhileRevalidate(event) {
 
 	// Cache miss → wait for network
 	try {
-		const networkResponse = await fetch(request);
+		const swHeaders = new Headers(request.headers);
+		swHeaders.set('X-SW-Background', '1');
+		const networkResponse = await fetch(request.url, { headers: swHeaders, redirect: 'manual' });
+
+		// Turnstile challenge — notify page to redirect
+		if (networkResponse.status === 403) {
+			postTsChallenge(new URL(request.url).pathname);
+			return new Response('Challenge required', { status: 403 });
+		}
+
 		if (networkResponse.ok) await cache.put(request, networkResponse.clone());
 		return networkResponse;
 	} catch {

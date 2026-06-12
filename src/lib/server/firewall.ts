@@ -890,12 +890,11 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 			pn
 		);
 	if (isTsProtected && !isTsExempt && !isTsVerified(event.request, ip)) {
-		// SW background requests (X-SW-Precache for install-time, X-SW-Background
-		// for runtime revalidation) skip abandon timers and get a 403 instead of 307.
+		// SW background requests (install precache, runtime revalidation, preload)
+		// skip abandon timers and get a 403 instead of 307.
 		// Without this, SW background fetches without a valid _tsv cookie would
 		// trigger false-positive IP blacklisting on every deploy.
 		const isSwBackground =
-			event.request.headers.get('X-SW-Precache') === '1' ||
 			event.request.headers.get('X-SW-Background') === '1';
 		if (!isSwBackground) {
 			// Mark abandon: start timers for matching abandon trigger rules
