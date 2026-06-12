@@ -86,6 +86,7 @@ export async function sendAiMessage(
 
 // ── Tool classification for ping-pong detection ──────────────────
 const READ_TOOL_NAMES = new Set([
+	'getCurrentDate', 'listTags', 'searchPosts', 'getPost',
 	'getSelection', 'getCurrentLine', 'getCurrentParagraph',
 	'getCurrentSection', 'getFullDocument', 'getTitle',
 	'getUserLocation', 'listModels', 'getMemory', 'analyzeWritingStyle', 'fetchUrl'

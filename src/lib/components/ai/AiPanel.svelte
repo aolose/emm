@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { aiMessages, aiLoading, aiPending, availableModels, deepThink } from './store';
+	import { aiMessages, aiLoading, aiPending, availableModels, deepThink, aiNewSession } from './store';
 	import Switch from '$lib/components/Switch.svelte';
 	import { sendAiMessage, type SendOptions } from './chat';
 	import { getUserLocation, preloadLocation } from './location';
@@ -79,6 +79,77 @@
 			// Only expose persona/style/knowledge — keep internal fields (_readsConsumed) private
 			const { persona, style, knowledge, lastUpdated } = data.memory;
 			return { ok: true, persona, style, knowledge, lastUpdated };
+		} catch (e) {
+			return { ok: false, error: String(e) };
+		}
+	}
+
+	function getCurrentDate() {
+		const now = new Date();
+		const fmt = (n: number) => String(n).padStart(2, '0');
+		return {
+			date: `${now.getFullYear()}-${fmt(now.getMonth() + 1)}-${fmt(now.getDate())}`,
+			time: `${fmt(now.getHours())}:${fmt(now.getMinutes())}:${fmt(now.getSeconds())}`,
+			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+			iso: now.toISOString()
+		};
+	}
+
+	async function listTags() {
+		try {
+			const data = (await req('aiListTags', undefined, { method: 1 as never })) as {
+				ok: boolean;
+				tags?: Array<{ id: number; name: string; desc?: string; postCount: number }>;
+				error?: string;
+			};
+			return data;
+		} catch (e) {
+			return { ok: false, error: String(e) };
+		}
+	}
+
+	async function searchPosts(args?: { query?: string; tag?: string; limit?: number }) {
+		if (!args?.query) return { ok: false, error: 'query is required' };
+		try {
+			const data = (await req('aiSearchPosts', {
+				query: args.query,
+				tag: args.tag,
+				limit: args.limit || 10
+			})) as {
+				ok: boolean;
+				articles?: Array<{
+					id: number;
+					title: string;
+					slug: string;
+					createAt: number;
+					snippet: string;
+				}>;
+				total: number;
+				error?: string;
+			};
+			return data;
+		} catch (e) {
+			return { ok: false, error: String(e) };
+		}
+	}
+
+	async function getPost(args?: { id?: number; slug?: string }) {
+		if (!args?.id && !args?.slug) return { ok: false, error: 'id or slug is required' };
+		try {
+			const data = (await req('aiGetPost', { id: args.id, slug: args.slug })) as {
+				ok: boolean;
+				post?: {
+					id: number;
+					title: string;
+					slug: string;
+					content: string;
+					createAt: number;
+					tags: Array<{ id: number; name: string }>;
+					published: number;
+				};
+				error?: string;
+			};
+			return data;
 		} catch (e) {
 			return { ok: false, error: String(e) };
 		}
@@ -219,6 +290,12 @@
 		scrollToBottomAndReset();
 		const fns: Record<string, (args: Record<string, unknown>) => unknown> = {
 			...get(editorTools),
+			getCurrentDate: () => getCurrentDate(),
+			listTags: () => listTags(),
+			searchPosts: (args?: Record<string, unknown>) =>
+				searchPosts(args as { query?: string; tag?: string; limit?: number } | undefined),
+			getPost: (args?: Record<string, unknown>) =>
+				getPost(args as { id?: number; slug?: string } | undefined),
 			getUserLocation: (args?: Record<string, unknown>) =>
 				getUserLocation((args as { bypassCache?: boolean } | undefined)?.bypassCache),
 			listModels,
@@ -316,9 +393,12 @@
 <div class="ai-panel">
 	<div class="ai-header">
 		<span>AI Assistant</span>
+		<div class="header-actions">
+			<button class="icon i-add" title="New session" onclick={() => aiNewSession()}></button>
 		{#if close}
 			<button class="icon i-close" onclick={close}></button>
 		{/if}
+		</div>
 	</div>
 	<div
 		class="chat"
@@ -453,20 +533,25 @@
 			color: #8a9bb5;
 		}
 
-		button {
+		.header-actions {
 			position: absolute;
 			right: 16px;
 			top: 50%;
 			transform: translateY(-50%);
-			font-size: 18px;
-			color: var(--darkgrey);
-			background: none;
-			border: none;
-			cursor: pointer;
+			display: flex;
+			gap: 8px;
+
+			button {
+				font-size: 18px;
+				color: var(--darkgrey);
+				background: none;
+				border: none;
+				cursor: pointer;
 
 			&:hover {
 				color: #c8d3ee;
 			}
+		}
 		}
 	}
 

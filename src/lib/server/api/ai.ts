@@ -966,6 +966,159 @@ const apis: APIRoutes = {
 				articles
 			};
 		})
+	},
+
+	// ── List tags ─────────────────────────────────────────────────────
+	aiListTags: {
+		get: auth(Admin, async () => {
+			const tags = db.db
+				.prepare(
+					`SELECT t.id, t.name, t.desc, COUNT(p.id) AS postCount
+					 FROM Tag t
+					 LEFT JOIN PostTag pt ON t.id = pt.tagId
+					 LEFT JOIN Post p ON pt.postId = p.id AND p.published = 1
+					 GROUP BY t.id
+					 ORDER BY t.name`
+				)
+				.all() as Array<{ id: number; name: string; desc: string | null; postCount: number }>;
+
+			return { ok: true, tags };
+		})
+	},
+
+	// ── Search posts ──────────────────────────────────────────────────
+	aiSearchPosts: {
+		post: auth(Admin, async (req) => {
+			const { query, tag, limit: reqLimit } = await req.json();
+			if (!query || typeof query !== 'string' || query.trim().length === 0) {
+				return { ok: false, error: 'query is required' };
+			}
+
+			const limit = Math.min(Math.max(1, Number(reqLimit) || 10), 20);
+			const like = `%${query.trim()}%`;
+
+			let rows: Array<{
+				id: number;
+				title: string;
+				slug: string;
+				content: string;
+				createAt: number;
+			}>;
+
+			if (tag && typeof tag === 'string') {
+				rows = db.db
+					.prepare(
+						`SELECT DISTINCT p.id, p.title, p.slug, p.content, p.createAt
+						 FROM Post p
+						 INNER JOIN PostTag pt ON p.id = pt.postId
+						 INNER JOIN Tag t ON t.id = pt.tagId
+						 WHERE (p.title LIKE ? OR p.content LIKE ?)
+						   AND t.name = ?
+						 ORDER BY p.createAt DESC
+						 LIMIT ?`
+					)
+					.all(like, like, tag, limit) as Array<{
+					id: number;
+					title: string;
+					slug: string;
+					content: string;
+					createAt: number;
+				}>;
+			} else {
+				rows = db.db
+					.prepare(
+						`SELECT p.id, p.title, p.slug, p.content, p.createAt
+						 FROM Post p
+						 WHERE p.title LIKE ? OR p.content LIKE ?
+						 ORDER BY p.createAt DESC
+						 LIMIT ?`
+					)
+					.all(like, like, limit) as Array<{
+					id: number;
+					title: string;
+					slug: string;
+					content: string;
+					createAt: number;
+				}>;
+			}
+
+			// Total count (separate query to avoid double-scan for snippet extraction)
+			const totalRow = db.db
+				.prepare(
+					tag
+						? `SELECT COUNT(DISTINCT p.id) AS cnt
+						   FROM Post p
+						   INNER JOIN PostTag pt ON p.id = pt.postId
+						   INNER JOIN Tag t ON t.id = pt.tagId
+						   WHERE (p.title LIKE ? OR p.content LIKE ?) AND t.name = ?`
+						: `SELECT COUNT(*) AS cnt FROM Post p
+						   WHERE p.title LIKE ? OR p.content LIKE ?`
+				)
+				.get(tag ? [like, like, tag] : [like, like]) as { cnt: number } | undefined;
+			const total = totalRow?.cnt ?? 0;
+
+			const qLower = query.trim().toLowerCase();
+		const articles = rows.map((r) => {
+				const combined = (r.title + ' ' + r.content).toLowerCase();
+				const idx = combined.indexOf(qLower);
+				if (idx === -1) {
+					// Fallback: LIKE matched but indexOf didn't (e.g. unicode fold differences)
+					const s = combined.slice(0, 200);
+					return {
+						id: r.id,
+						title: r.title,
+						slug: r.slug,
+						createAt: r.createAt,
+						snippet: s + (combined.length > 200 ? '…' : '')
+					};
+				}
+				const start = Math.max(0, idx - 100);
+				const end = Math.min(combined.length, idx + qLower.length + 100);
+				const snippet = (start > 0 ? '…' : '') + combined.slice(start, end) + (end < combined.length ? '…' : '');
+				return {
+					id: r.id,
+					title: r.title,
+					slug: r.slug,
+					createAt: r.createAt,
+					snippet
+				};
+			});
+
+			return { ok: true, articles, total };
+		})
+	},
+
+	// ── Get post ──────────────────────────────────────────────────────
+	aiGetPost: {
+		post: auth(Admin, async (req) => {
+			const { id, slug } = await req.json();
+			if (!id && !slug) return { ok: false, error: 'id or slug is required' };
+
+			const row = id
+				? db.db.prepare(`SELECT * FROM Post WHERE id = ?`).get(id) as Record<string, unknown> | undefined
+				: db.db.prepare(`SELECT * FROM Post WHERE slug = ?`).get(slug) as Record<string, unknown> | undefined;
+
+			if (!row) return { ok: false, error: 'Article not found' };
+
+			const tags = db.db.prepare(
+				`SELECT t.id, t.name FROM Tag t
+				 INNER JOIN PostTag pt ON t.id = pt.tagId
+				 WHERE pt.postId = ?`
+			).all(row.id) as Array<{ id: number; name: string }>;
+
+			return {
+				ok: true,
+				post: {
+					id: row.id,
+					title: row.title,
+					slug: row.slug,
+					content: row.content,
+					createAt: row.createAt,
+					tags,
+					published: row.published
+				}
+			};
+		})
 	}
 };
 

@@ -182,7 +182,12 @@ export class DB {
 		const kv = val(o[pk]);
 		let sql: string;
 		let values: SQLQueryBindings[];
-		if ((!kv || create) && !search) {
+		// Check existence: if kv is set but row doesn't exist, do INSERT (handles client-generated ids)
+		let exists = false;
+		if (kv && !create && !search) {
+			exists = !!this.db.prepare(`SELECT 1 FROM ${table} WHERE ${pk} = ?`).get(kv as SQLQueryBindings);
+		}
+		if ((!kv || create || (kv && !exists)) && !search) {
 			if (!override_create) setKey(a, 'createAt', now);
 			[sql, values] = insert(o);
 		} else [sql, values] = update(o);

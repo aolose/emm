@@ -13,7 +13,7 @@
 		aiPanelTab,
 		editorTools
 	} from '$lib/store';
-	import { aiStatus, validateAi, aiReset } from '$lib/components/ai';
+	import { aiStatus, validateAi, flushAiSession, loadAiSession, aiDeleteSession } from '$lib/components/ai';
 	import { get } from 'svelte/store';
 	import { api, req } from '$lib/req';
 	import { diffObj, getErr, watch, time } from '$lib/utils';
@@ -117,6 +117,7 @@
 				req('post', new Uint16Array([cid]), { method: method.DELETE })
 					.then((a) => {
 						if (a) {
+							aiDeleteSession(cid);
 							posts.update((u) => {
 								return u.filter((u) => u.id !== cid);
 							});
@@ -268,9 +269,12 @@
 			draft = p.content_d || '';
 			title = p.title_d || '';
 			const { id, save, published, modify, title: _title, content } = p;
-			// Reset AI conversation when switching posts
-			if (cid && cid !== id) {
-				aiReset();
+			// Save old + load new AI session when switching posts
+			if (cid != null && cid !== id) {
+				flushAiSession();
+			}
+			if (cid !== id) {
+				loadAiSession(id);
 			}
 			cid = id;
 			const up = modify || 0;

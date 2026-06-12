@@ -6,7 +6,7 @@ import type { ToolDef } from './types';
 export const SYSTEM_PROMPT = `You are an AI assistant integrated into a markdown editor. You help with writing, brainstorming, research, and general discussion.
 
 - Always respond in the same language as the user.
-- Read tools: getSelection, getCurrentLine, getCurrentParagraph, getCurrentSection, getFullDocument, getTitle, getUserLocation, listModels, getMemory, analyzeWritingStyle, fetchUrl.
+- Read tools: getCurrentDate, listTags, searchPosts, getPost, getSelection, getCurrentLine, getCurrentParagraph, getCurrentSection, getFullDocument, getTitle, getUserLocation, listModels, getMemory, analyzeWritingStyle, fetchUrl.
 - Memory tools: saveMemory (persists persona/style/knowledge after learning — MUST call after analyzeWritingStyle).
 - getUserLocation may fail: if status is USER_DENIED or TIMEOUT, do NOT show the error text. Instead, politely ask the user which city they are in (e.g. "I wasn't able to access your location. Which city are you in? I'll look it up for you."). Only when the user tells you a city name, proceed with the original request.
 - Write tools: replaceSelection(text), replaceCurrentLine(text), replaceCurrentParagraph(text), replaceText(searchText, newText), replaceFullDocument(text), insertAtCursor(text), setTitle({ title }).
@@ -22,6 +22,17 @@ export const SYSTEM_PROMPT = `You are an AI assistant integrated into a markdown
 - Do not make many small edits across the document — prefer one replaceFullDocument call.
 - Read once, apply once. Do not re-read between edits.
 - For greetings, general Q&A, advice, or brainstorming, just respond directly.
+
+**Which "read" tool to use:**
+- "This article" / "the current document" / editing requests → use getFullDocument (reads from the editor's open document).
+- "That blog post about X" / "find my article on Y" / past published posts → use searchPosts first, then getPost.
+- getPost reads from the DATABASE (published/saved posts). getFullDocument reads from the EDITOR (the document currently open in front of you). These are different — never confuse them.
+
+**Content management tools:**
+- getCurrentDate: returns current local date/time. Call this when the user asks about dates, times, or time-sensitive queries (e.g. "what time is it", "recent articles").
+- listTags: returns all tags with post counts. Use to help the user browse or filter by tags.
+- searchPosts: search by keyword + optional tag filter. Returns title, slug, snippet, and date. Use to help the user find specific past posts.
+- getPost: read a specific post by id or slug — you MUST pass id or slug, never call without one. Returns title, full content, tags, and metadata. Use to read posts the user asks about by name or after finding them via searchPosts.
 
 **Memory system:**
 - At the start of every conversation, call getMemory first.
@@ -342,7 +353,7 @@ export const AI_TOOLS: ToolDef[] = [
 			}
 		}
 	},
-	{
+		{
 		type: 'function',
 		function: {
 			name: 'replaceFullDocument',
@@ -357,6 +368,67 @@ export const AI_TOOLS: ToolDef[] = [
 					}
 				},
 				required: ['text']
+			}
+		}
+	},
+	{
+		type: 'function',
+		function: {
+			name: 'getCurrentDate',
+			description:
+				'Get the current local date and time. Use this when the user asks "what date is it", "what time is it", or mentions time-sensitive information without specifying a date. Returns date, time, timezone, and ISO string.',
+			parameters: { type: 'object', properties: {}, required: [] }
+		}
+	},
+	{
+		type: 'function',
+		function: {
+			name: 'listTags',
+			description:
+				'List all tags with their post counts. Use this when the user wants to browse, search, or filter by tags, or needs to know which tags are available.',
+			parameters: { type: 'object', properties: {}, required: [] }
+		}
+	},
+	{
+		type: 'function',
+		function: {
+			name: 'searchPosts',
+			description:
+				'Search past posts by keyword and optional tag filter. Searches title + content with SQL LIKE. Returns matching posts with title, slug, date, and a snippet around the first match.',
+			parameters: {
+				type: 'object',
+				properties: {
+					query: {
+						type: 'string',
+						description: 'Search keyword(s) — matched against title and content via LIKE'
+					},
+					tag: {
+						type: 'string',
+						description:
+							'Optional tag name to filter by. Only articles with this tag are searched.'
+					},
+					limit: {
+						type: 'number',
+						description: 'Maximum number of results to return (default 10, max 20)'
+					}
+				},
+				required: ['query']
+			}
+		}
+	},
+	{
+		type: 'function',
+		function: {
+			name: 'getPost',
+			description:
+				'Read a specific post by id or slug from the database. You MUST pass either "id" or "slug" — never call this tool without at least one of them. Use this to read the full content of a post found via searchPosts, or when the user asks to see a specific post by name. Returns full post with tags.',
+			parameters: {
+				type: 'object',
+				properties: {
+					id: { type: 'number', description: 'Post id. Pass this if you have the numeric id from searchPosts results.' },
+					slug: { type: 'string', description: 'Post slug (URL-friendly title). Pass this if the user mentions the post by name/slug.' }
+				},
+				required: []
 			}
 		}
 	}

@@ -19,7 +19,6 @@
 	let editor;
 	const getPost = api('posts');
 	let pages = $state(1);
-	let tmpMark = 1;
 	let view = $state(0);
 	let ld = $state(0);
 
@@ -34,7 +33,7 @@
 		view = 1;
 		const o = { ...p };
 		if (!o.id) {
-			o._ = tmpMark++;
+			o.id = Date.now();
 		}
 		if (!o.title_d) o.title_d = o.title;
 		if (!o.content_d) o.content_d = o.content;
@@ -98,7 +97,7 @@
 			$xsmall &&
 			$aiPanelTab === 'ai' &&
 			$aiStatus === 'available' &&
-			($editPost._ || $editPost.id)
+			$editPost.id
 		) {
 			view = 2;
 			visitor = 0;
@@ -131,7 +130,7 @@
 			</div>
 			<div class="l">
 				<div class="ls" bind:this={el}>
-					{#each $posts as p (p._ || p.id)}
+					{#each $posts as p (p.id)}
 						<PItem {p} {sel} />
 					{/each}
 					{#if $posts.length === 0 && !ld}
@@ -161,7 +160,7 @@
 			/>
 		</div>
 		<div class="c">
-			{#if ($editPost._ || $editPost.id) && $aiStatus === 'available' && $aiPanelTab === 'ai'}
+			{#if $editPost.id && $aiStatus === 'available' && $aiPanelTab === 'ai'}
 				<AiPanel close={() => aiPanelTab.set('preview')} />
 			{:else}
 				<Viewer preview={true} close={() => (view = 1)} />

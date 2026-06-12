@@ -10,8 +10,7 @@ import {
 	REQS_PAGE_SIZE,
 	POSTS_DEFAULT_SIZE,
 	VISITOR_PAGE_SIZE,
-	buildSearchWhere,
-	withDraftLock
+	buildSearchWhere
 } from './_common';
 import {
 	noAccessPosts,
@@ -174,20 +173,6 @@ const apis: APIRoutes = {
 		}),
 		post: auth(Admin, async (req) => {
 			const o = model(Post, await getReqJson(req)) as curPost;
-			if (!o.id && o._) {
-				const uuid = String(o._);
-				await withDraftLock(uuid, async () => {
-					const existing = db.get(model(Post, { draftUuid: uuid })) as Post | undefined;
-					if (existing) {
-						o.id = existing.id;
-					} else {
-						o.draftUuid = uuid;
-						const d = model(Post, o) as { id: number };
-						db.save(d);
-						if (!o.id && d.id) o.id = d.id;
-					}
-				});
-			}
 			const d = model(Post, o) as { id: number };
 			db.save(d);
 			if (o._p && o.id) {

@@ -1,0 +1,119 @@
+═══════════════════════════════════════════════════════════════
+  AI Assistant Enhancement — TODO List
+  Created: 2026-06-12
+═══════════════════════════════════════════════════════════════
+
+Architecture overview (files involved):
+  src/lib/components/ai/
+    toolDefs.ts      — SYSTEM_PROMPT + AI_TOOLS (tool schemas)
+    chat.ts          — chat loop, tool dispatch, ping-pong detection
+    AiPanel.svelte   — wires tool fns → sendAiMessage, UI
+    editorTools.ts   — CodeMirror read/write tools (client-side)
+    types.ts         — ToolDef, ToolCall, etc.
+  src/lib/server/api/
+    ai.ts            — server-side AI endpoints (proxy, memory,
+                        analyzeStyle, fetchUrl, balance, models)
+    tag.ts           — existing tag CRUD endpoints
+    post.ts          — existing post CRUD endpoints
+
+───────────────────────────────────────────────────────────────
+  PHASE 1 — User's Current Date/Time
+───────────────────────────────────────────────────────────────
+[ ] 1.1  Add `getCurrentDate` tool definition in toolDefs.ts
+         — No parameters needed (client computes local time)
+         — Returns: { date: "2026-06-12", time: "14:30:00",
+                      timezone: "Asia/Shanghai", iso: "..." }
+
+[ ] 1.2  Implement `getCurrentDate` function in AiPanel.svelte
+         — Uses `new Date()` / `Intl.DateTimeFormat()`
+         — No server call needed — pure client-side
+         — Add to the fns map in doSend()
+
+[ ] 1.3  Update SYSTEM_PROMPT in toolDefs.ts
+         — Document getCurrentDate tool
+         — Instruct AI: when user asks "what date is it" or
+           mentions time-sensitive info, call getCurrentDate
+
+───────────────────────────────────────────────────────────────
+  PHASE 2 — Tag List
+───────────────────────────────────────────────────────────────
+[ ] 2.1  Add `listTags` tool definition in toolDefs.ts
+         — No required params
+         — Returns: { ok, tags: [{ id, name, desc, postCount }] }
+
+[ ] 2.2  Add server endpoint: aiListTags in src/lib/server/api/ai.ts
+         — GET /api/aiListTags (auth Admin)
+         — Queries Tag table + tagPostCache for post counts
+         — Returns deduplicated tag list
+
+[ ] 2.3  Add client-side listTags wrapper in AiPanel.svelte
+         — Calls req('aiListTags', ...)
+         — Add to fns map in doSend()
+
+[ ] 2.4  Update SYSTEM_PROMPT — document listTags
+
+───────────────────────────────────────────────────────────────
+  PHASE 3 — Search Past Articles
+───────────────────────────────────────────────────────────────
+[ ] 3.1  Add `searchArticles` tool definition in toolDefs.ts
+         — Params: { query: string, tag?: string, limit?: number }
+         — Returns: { ok, articles: [{ id, title, slug,
+                       createAt, snippet }], total }
+
+[ ] 3.2  Add server endpoint: aiSearchArticles in ai.ts
+         — POST /api/aiSearchArticles (auth Admin)
+         — Searches Post.title + Post.content with LIKE
+         — Optional tag filter via PostTag join
+         — Returns title + slug + content snippet (~200 chars
+           around first match) + createAt
+         — Respects published=0/1 (admins see all)
+
+[ ] 3.3  Add client-side searchArticles wrapper in AiPanel.svelte
+         — Calls req('aiSearchArticles', { query, tag, limit })
+         — Add to fns map
+
+[ ] 3.4  Update SYSTEM_PROMPT — document searchArticles
+
+───────────────────────────────────────────────────────────────
+  PHASE 4 — Read Specific Article
+───────────────────────────────────────────────────────────────
+[ ] 4.1  Add `readArticle` tool definition in toolDefs.ts
+         — Params: { id?: number, slug?: string }
+         — Returns: { ok, article: { id, title, slug, content,
+                       createAt, tags[], published } }
+
+[ ] 4.2  Add server endpoint: aiReadArticle in ai.ts
+         — POST /api/aiReadArticle (auth Admin)
+         — Looks up by id OR slug
+         — Returns full article with tags (join PostTag+Tag)
+         — Admins see unpublished; non-admin sees only published
+
+[ ] 4.3  Add client-side readArticle wrapper in AiPanel.svelte
+         — Calls req('aiReadArticle', { id, slug })
+         — Add to fns map
+
+[ ] 4.4  Update SYSTEM_PROMPT — document readArticle
+
+───────────────────────────────────────────────────────────────
+  PHASE 5 — Integration & Verification
+───────────────────────────────────────────────────────────────
+[ ] 5.1  Update READ_TOOL_NAMES in chat.ts
+         — Add: getCurrentDate, listTags, searchArticles,
+           readArticle to the set
+
+[ ] 5.2  Register new API routes in api.ts or server index
+         — aiListTags, aiSearchArticles, aiReadArticle
+
+[ ] 5.3  Test each new tool end-to-end via AI panel
+
+───────────────────────────────────────────────────────────────
+  DEFERRED (Tomorrow)
+───────────────────────────────────────────────────────────────
+[ ] D1  AI reads current article's tags (getArticleTags)
+         — Read tags from PostTag join for the currently
+           open/active article
+
+[ ] D2  AI sets current article's tags (setArticleTags)
+         — Add/remove tags on the active post via tagPostCache
+         — Requires: knowing which post is "current" in editor
+           context (need to plumb currentPostId into ai tools)

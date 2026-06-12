@@ -13,7 +13,12 @@ export {
 	aiPending,
 	availableModels,
 	deepThink,
-	aiReset
+	aiPostId,
+	aiReset,
+	aiNewSession,
+	flushAiSession,
+	loadAiSession,
+	aiDeleteSession
 } from './store';
 
 // ── Chat loop ──────────────────────────────────────────────────────
