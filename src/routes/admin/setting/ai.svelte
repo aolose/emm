@@ -163,7 +163,7 @@
 			memoryLearning = false;
 			act = 1;
 			err = 1;
-			msg = getErr(e);
+			msg = getErr(e as Error);
 		}
 	}
 
@@ -191,7 +191,7 @@
 		} catch (e) {
 			act = 1;
 			err = 1;
-			msg = getErr(e);
+			msg = getErr(e as Error);
 		} finally {
 			regenerating = false;
 		}
@@ -234,7 +234,7 @@
 		} catch (e) {
 			act = 1;
 			err = 1;
-			msg = getErr(e);
+			msg = getErr(e as Error);
 		} finally {
 			ld = false;
 			validating = false;
@@ -396,23 +396,25 @@
 		<div class="status-row memory-config-row">
 			<span class="status-label">Memory Config</span>
 			<div class="config-inputs-group">
-				<label class="input-with-label flex-grow">
+				<label class="input-with-label">
 					<Tags tags={availableTags} bind:value={memoryTags} />
 				</label>
-				<span class="limit-label">Limit</span>
-				<input class="limit-input" type="number" bind:value={memoryLimit} min="1" max="50" />
-				{#if !memoryLearning}
-					<button class="learn-btn" onclick={learnMemory} disabled={regenerating}>
-						{memoryInitialized ? 'Relearn' : 'Learn Now'}
-					</button>
-				{:else}
-					<button class="learn-btn" disabled> Learning... </button>
-				{/if}
-				{#if memoryInitialized}
-					<button class="clear-btn" onclick={clearMemory} disabled={regenerating || memoryLearning}>
-						{regenerating ? 'Clearing...' : 'Clear'}
-					</button>
-				{/if}
+				<div>
+					<span class="limit-label">Limit</span>
+					<input class="limit-input" type="number" bind:value={memoryLimit} min="1" max="50" />
+					{#if !memoryLearning}
+						<button class="learn-btn" onclick={learnMemory} disabled={regenerating}>
+							{memoryInitialized ? 'Relearn' : 'Learn Now'}
+						</button>
+					{:else}
+						<button class="learn-btn" disabled> Learning... </button>
+					{/if}
+					{#if memoryInitialized}
+						<button class="clear-btn" onclick={clearMemory} disabled={regenerating || memoryLearning}>
+							{regenerating ? 'Clearing...' : 'Clear'}
+						</button>
+					{/if}
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -556,6 +558,7 @@
 	}
 
 	.input-with-label {
+		max-width: 280px;
 		background: $color-bg-input;
 		border-radius: $radius-sm;
 		min-height: 40px;

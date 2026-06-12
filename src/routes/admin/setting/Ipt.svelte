@@ -1,5 +1,5 @@
 <script>
-	let { label, value = $bindable(), placeholder, box, password } = $props();
+	let { label, value = $bindable(), placeholder, box=false, password=false } = $props();
 	const pwdName = Math.random().toString(36).slice(2);
 </script>
 

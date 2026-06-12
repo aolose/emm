@@ -1,7 +1,7 @@
 <script>
 	import Tip from './Tip.svelte';
 	import Ld from '$lib/components/loading.svelte';
-	let { ld, msg, act, err, title, save, saveText = 'Save', empty, btn, children } = $props();
+	let { ld, msg, act, err, title, save, saveText = 'Save', empty=false, btn=null, children } = $props();
 </script>
 
 <div class="a" class:e={empty}>
@@ -29,7 +29,7 @@
 		@include s() {
 			margin: 0;
 			border: none;
-			border-bottom: 0.5px solid rgb(138 209 255 / 0.2);
+			border-bottom: 0.5px solid rgb(138 209 255 / 0.13);
       border-radius: 0;
 		}
 	}
