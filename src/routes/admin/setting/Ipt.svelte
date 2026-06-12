@@ -8,7 +8,7 @@
 	{#if box}
 		<textarea bind:value {placeholder}></textarea>
 	{:else if password}
-		<input type="password" name={pwdName} autocomplete="new-password" bind:value {placeholder} />
+		<input type="text" name={pwdName} autocomplete="off" bind:value {placeholder} class="pwd-mask" />
 	{:else}
 		<input bind:value {placeholder} autocomplete="off" />
 	{/if}
@@ -37,5 +37,9 @@
 			width: 100%;
 			padding-left: 8px;
 		}
+	}
+
+	:global(.pwd-mask) {
+		-webkit-text-security: disc;
 	}
 </style>
