@@ -55,8 +55,9 @@ export async function flushAiSession(): Promise<void> {
 
 /** Load session by key (_aiSid or post id), replacing current messages. */
 export async function loadAiSession(sessionKey: number): Promise<void> {
-	aiPostId.set(sessionKey);
-	const msgs = await loadSession(sessionKey);
+	const key = sessionKey == null ? -1 : sessionKey;
+	aiPostId.set(key);
+	const msgs = await loadSession(key);
 	_lastSavedJson = JSON.stringify(msgs);
 	aiMessages.set(msgs);
 	aiStreaming.set('');

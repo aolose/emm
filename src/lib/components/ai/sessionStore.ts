@@ -56,7 +56,7 @@ export async function cleanupExpired(): Promise<void> {
 
 /** Load session messages for a postId. Returns empty array if none or expired. */
 export async function loadSession(postId: number): Promise<AiMessage[]> {
-	// Idle cleanup — removes all expired entries in one pass
+	if (postId == null) return [];
 	await cleanupExpired();
 
 	const db = await openDB();
@@ -85,6 +85,7 @@ export async function loadSession(postId: number): Promise<AiMessage[]> {
 
 /** Save session messages for a postId. */
 export async function saveSession(postId: number, messages: AiMessage[]): Promise<void> {
+	if (postId == null) return;
 	const db = await openDB();
 	const tx = db.transaction(STORE_NAME, 'readwrite');
 	const store = tx.objectStore(STORE_NAME);
@@ -98,6 +99,7 @@ export async function saveSession(postId: number, messages: AiMessage[]): Promis
 
 /** Delete session for a postId. */
 export async function deleteSession(postId: number): Promise<void> {
+	if (postId == null) return;
 	const db = await openDB();
 	const tx = db.transaction(STORE_NAME, 'readwrite');
 	tx.objectStore(STORE_NAME).delete(postId);

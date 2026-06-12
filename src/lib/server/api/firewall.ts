@@ -73,8 +73,12 @@ const apis: APIRoutes = {
 	},
 	bks: {
 		post: auth(Read, async (req) => {
-			const r = new Uint16Array(await req.arrayBuffer());
-			return blackLists(r[0], r[1]);
+			const body = await req.json();
+			return blackLists(
+				body.page || 1,
+				body.size || 20,
+				body.search || ''
+			);
 		})
 	},
 	blk: {

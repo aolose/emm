@@ -497,14 +497,25 @@ export const isIpWhitelisted = (ip: string): boolean => {
 	return false;
 };
 
-export const blackLists = (page = 1, size = 20) => {
+export const blackLists = (page = 1, size = 20, search = '') => {
 	blackList.sort((a, b) => b.createAt - a.createAt);
-	const bs = blackList.slice(size * (page - 1), size * page).map((a) => {
+	let filtered = blackList;
+	// Server-side fuzzy search on ip and mark
+	if (search) {
+		const q = search.toLowerCase();
+		filtered = blackList.filter(
+			(a) =>
+				(a.ip || '').toLowerCase().includes(q) ||
+				(a.mark || '').toLowerCase().includes(q)
+		);
+	}
+	const total = filtered.length;
+	const bs = filtered.slice(size * (page - 1), size * page).map((a) => {
 		a._geo = ipInfoStr(a.ip);
 		return a;
 	});
 	return {
-		total: Math.ceil(blackList.length / size),
+		total: Math.ceil(total / size),
 		items: arrFilter(bs, ['id', 'ip', 'mark', 'respId', 'createAt', '_geo'], false)
 	};
 };

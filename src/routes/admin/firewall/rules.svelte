@@ -29,9 +29,11 @@
 	let go = (n) => {
 		p = n;
 		const api = ['rules', 'bks', 'fwRsp', 'wls'][ta];
-		ld = 1;
+		const isBlk = ta === 1;
 		const isRsp = ta === 2;
-		req(api, isRsp ? undefined : new Uint16Array([p, 20]), {
+		ld = 1;
+		const body = isRsp ? undefined : isBlk ? { page: n, size: 20, search } : new Uint16Array([n, 20]);
+		req(api, body, {
 			method: isRsp ? method.GET : method.POST
 		})
 			.then((d) => {
@@ -93,10 +95,22 @@
 		});
 	};
 	let ls = $state([]);
+	let search = $state('');
+	let _searchTimer = 0;
+
+	function onSearchInput() {
+		clearTimeout(_searchTimer);
+		_searchTimer = setTimeout(() => go(1), 300);
+	}
 	const rspName = (id) => $fwRespLs.find((a) => a.id === id)?.name || '';
 	onMount(() => {
 		go(1);
 		return fwRespLs.subscribe(() => (ls = [...ls]));
+	});
+	// Clear search when switching tabs
+	$effect(() => {
+		ta;
+		search = '';
 	});
 	$effect(() => {
 		wa(() => {
@@ -122,6 +136,16 @@
 			<button onclick={close} class="icon i-close"></button>
 		</div>
 	</div>
+	{#if ta === 1}
+		<div class="search-bar">
+			<input
+				type="text"
+				value={search}
+				oninput={(e) => { search = e.target.value; onSearchInput(); }}
+				placeholder="Search IP or mark..."
+			/>
+		</div>
+	{/if}
 	<div class="e">
 		<div class="c">
 			<div class="q">
@@ -499,5 +523,28 @@
 	.i-cloud {
 		color: #3b82f6;
 		font-size: 12px;
+	}
+
+	.search-bar {
+		padding: 0 10px 8px 10px;
+
+		input {
+			width: 100%;
+			padding: 6px 10px;
+			border-radius: 6px;
+			border: 1px solid rgba(255, 255, 255, 0.08);
+			background: var(--bg1);
+			color: #bfc6d9;
+			font-size: 13px;
+			outline: none;
+
+			&::placeholder {
+				color: #4b555c;
+			}
+
+			&:focus {
+				border-color: rgba(96, 165, 250, 0.4);
+			}
+		}
 	}
 </style>
