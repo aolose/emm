@@ -918,7 +918,7 @@ export const firewallProcess = async (event: RequestEvent, handle: () => Promise
 		// SW background fetches can't follow 307 redirects (redirect: 'manual'),
 		// so return 403 directly instead of the challenge redirect.
 		const cr = isSwBackground
-			? new Response('', { status: 403 })
+			? new Response('', { status: 403, headers: { 'X-TS-Challenge': '1' } })
 			: challengeResponse(event.url.href, isApi);
 		log.status = cr.status;
 		if (!isLocalhost && !isAuthenticated && (fr?.log || log.log)) {

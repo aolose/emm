@@ -25,6 +25,11 @@ function dataJsonToPagePath(url) {
 	return new URL(url).pathname.replace(/\/__data\.json.*$/, '') || '/';
 }
 
+/** Check if a response is a turnstile challenge (via X-TS-Challenge header). */
+function isTsChallengeResponse(response) {
+	return response.headers.get('X-TS-Challenge') === '1';
+}
+
 const cachePrefix = 'sw-';
 const CACHE = DEV ? 'sw-dev' : `${cachePrefix}${version}`;
 const RES_CACHE = 'res';
@@ -314,7 +319,7 @@ async function dataJsonHandler(event) {
 			}
 
 			// Turnstile challenge — notify page to redirect
-			if (response.status === 403) {
+			if (isTsChallengeResponse(response)) {
 				postTsChallenge(dataJsonToPagePath(request.url));
 				return;
 			}
@@ -342,7 +347,7 @@ async function dataJsonHandler(event) {
 		const response = await fetch(request.url, { headers: swHeaders, redirect: 'manual' });
 
 		// Turnstile challenge — notify page to redirect
-		if (response.status === 403) {
+		if (isTsChallengeResponse(response)) {
 			postTsChallenge(dataJsonToPagePath(request.url));
 			return new Response(JSON.stringify({ error: 'Challenge required' }), {
 				status: 403,
@@ -396,7 +401,7 @@ async function contentStaleWhileRevalidate(event) {
 			}
 
 			// Turnstile challenge — notify page to redirect
-			if (networkResponse.status === 403) {
+			if (isTsChallengeResponse(networkResponse)) {
 				postTsChallenge(new URL(request.url).pathname);
 				return;
 			}
@@ -438,7 +443,7 @@ async function contentStaleWhileRevalidate(event) {
 		const networkResponse = await fetch(request.url, { headers: swHeaders, redirect: 'manual' });
 
 		// Turnstile challenge — notify page to redirect
-		if (networkResponse.status === 403) {
+		if (isTsChallengeResponse(networkResponse)) {
 			postTsChallenge(new URL(request.url).pathname);
 			return new Response('Challenge required', { status: 403 });
 		}
