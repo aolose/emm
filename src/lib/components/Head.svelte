@@ -39,11 +39,6 @@
 
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
-	<meta name="twitter:title" content={title || $h.title || ''} />
-	<meta name="twitter:description" content={description || $h.desc || ''} />
-	{#if ogImage}
-		<meta name="twitter:image" content={ogImage} />
-	{/if}
 
 	<link rel="alternate" type="application/rss+xml" href="/feed/rss" title="RSS" />
 	<link rel="alternate" type="application/atom+xml" href="/feed/atom" title="Atom" />
