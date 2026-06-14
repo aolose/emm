@@ -102,6 +102,13 @@
 				{#key ke}<i in:jump|global={{ y: -18, duration: 150 }}></i>{/key}
 			</div>
 			<div class="l">
+				<h1>
+					LOGIN
+					<a href="/">
+						<i/>
+						<i/>
+					</a>
+				</h1>
 				<div class="r" class:a={usr}>
 					<input oninput={go} bind:value={usr} bind:this={iu} onkeydown={nx} type="text" />
 					<label>Username</label>
@@ -119,19 +126,17 @@
 				</form>
 				<button class:dis onclick={login}>Login</button>
 			</div>
-			<a href="/">Back to home</a>
 		</div>
 	</div>
 </div>
 
 <style lang="scss">
 	.l {
+		display: flex;
+		flex-direction: column;
+		gap: 36px;
 		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		bottom: 0;
-		padding: 36px 0 0 0;
+		inset:  24px;
 	}
 
 	.v {
@@ -152,7 +157,7 @@
 		width: 200px;
 		transform: translate3d(50px, 0, 0);
 		text-align: center;
-		bottom: 150%;
+		bottom: 470px;
 		position: absolute;
 		font-size: 20px;
 	}
@@ -197,87 +202,148 @@
 		opacity: 0.5;
 	}
 
+  .cc {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    background: rgb(10 15 25 / 0.5);
+  }
+
 	label {
 		font-size: 15px;
 		pointer-events: none;
 	}
-
-	a {
-		position: absolute;
-		bottom: -50px;
-		color: var(--darkgrey-h);
-		right: 50%;
-		transform: translateX(50%);
-
-		&:hover {
-			color: #8db2e9;
-		}
-	}
-
-	.cc {
-		position: absolute;
-		left: 0;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		display: flex;
+  h1 {
+		margin-bottom: 16px;
+		width: 100%;
+		z-index: 10;
+    display: flex;
 		align-items: center;
-		justify-content: center;
-		backdrop-filter: blur(5px);
-		background: rgb(10 15 25 / 0.76);
+		justify-content: space-between;
+		font-size: 14px;
+	  color: #7d93ac;
+		font-family: monospace;
+		font-weight: 800;
+		letter-spacing: 3px;
 	}
+	a {
+		padding: 0;
+    width: 12px;
+    height: 12px;
+		cursor: pointer;
+		z-index: 999;
+    transition: .2s ease-in-out;
+    background-color: #f82c21;
+    border-radius: 50%;
+    display: flex;
+		line-height: 1;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+		transform: scale(.8);
+		i{
+			position: absolute;
+			width: 1px;
+			height: 80%;
+      background: transparent;
+			display: block;
+			left: 50%;
+			top: 50%;
+			translate: -50% -50%;
+			transform: rotate(45deg);
+			&+i{
+				transform: rotate(-45deg);
+			}
+		}
+		&:after{
+			content: '';
+			display: block;
+			inset: -8px;
+			position: absolute;
+		}
+    &:hover {
+			transform: scale(1);
+      background-color: #ff5f56;
+			i{
+				background: rgb(0 0 0 / 0.5);
+			}
+    }
+    &:active {
+      background-color: #bf433f;
+    }
+  }
 
 	.bx {
-		border-radius: 16px;
-		width: 300px;
-		height: 290px;
-		background: var(--bg0);
-		box-shadow: rgba(0, 0, 0, 0.3) 0 20px 40px -10px;
+		border-radius: 24px;
+		width: 280px;
+		height: 346px;
+		border: 1px solid rgb(108 163 246 / 0.15);
+		background: var(--bg7);
+		box-shadow: rgba(0, 0, 0, 0.7) 0 4px 24px -4px,
+		rgba(0, 0, 0, 0.4) 0 15px 60px;
 	}
 
 	.r {
 		display: block;
-		width: 80%;
-		margin: 20px auto 30px;
-
 		input {
-			padding: 0 5px;
-			background: none;
-			height: 30px;
+			text-align: center;
+			padding: 0 32px;
+			background: var(--bg2);
 			width: 100%;
-			border: 0;
+			border: 1px solid rgb(108 163 246 / 0.03);
 			color: #d3dbe8;
-			border-radius: 0;
-			border-bottom: 1px solid #1d314a;
+			border-radius: 50px;
 			transition: ease-in-out 0.3s;
 		}
 	}
 
 	label {
-		transition: 0.3s ease-in-out;
+		font-family: monospace;
+		font-weight: 200;
+		text-transform: uppercase;
+		transition:
+            color 0.2s ease-in-out,
+						transform 0.4s linear,
+						left .6s .2s ease-in-out;
 		position: absolute;
-		left: 10px;
+		left: 32px;
 		top: 0;
-		color: #497998;
+		line-height: 1;
+		pointer-events: none;
+		display: flex;
+		align-items: center;
+		height: 100%;
+		color: rgb(118 143 181 / 0.5);
 	}
-
+  input:focus {
+		box-shadow: 0 0 0 1px rgb(96 172 236 / 0.9);
+	}
 	input:focus + label,
 	.a label {
-		left: 3px;
-		top: -20px;
+		left: 0;
+		transform: translateY(-80%) scale(.8);
 		font-size: 13px;
+    color: rgb(141 174 223 / 0.4);
 	}
 
 	button {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin: 30px auto 0;
 		cursor: pointer;
 		transition: 0.3s ease-in-out;
-		width: 80%;
-		height: 40px;
-		border-radius: 111px;
+		height: 48px;
+		border-radius: 48px;
+		flex-shrink: 0;
+		&:focus {
+      box-shadow: 0 0 6px rgb(102 144 225 / 0.9);
+		}
 	}
 
 	i {
