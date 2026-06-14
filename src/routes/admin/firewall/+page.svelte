@@ -147,7 +147,7 @@
 						<div class="empty-state">No log entries.</div>
 					{/if}
 				</div>
-				<Pg {total} page={p} go={loadLog} />
+				<Pg {total} page={p} go={loadLog} loading={ld} />
 			</div>
 			<Ld act={ld} />
 		</div>
