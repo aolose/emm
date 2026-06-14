@@ -99,7 +99,7 @@
 				{#if $msg}
 					<div class="v"></div>
 				{/if}
-				{#key ke}<i in:jump|global={{ y: -18, duration: 150 }}></i>{/key}
+				{#key ke}<i in:jump|global={{ y: -12, duration: 120 }}></i>{/key}
 			</div>
 			<div class="l">
 				<h1>
@@ -157,7 +157,7 @@
 		width: 200px;
 		transform: translate3d(50px, 0, 0);
 		text-align: center;
-		bottom: 470px;
+		bottom: 450px;
 		position: absolute;
 		font-size: 20px;
 	}
@@ -165,9 +165,9 @@
 	.br {
 		transform: translate3d(-50%, 0, 0);
 		left: 50%;
-		top: -75px;
-		width: 80px;
-		height: 80px;
+		top: -60px;
+		width: 64px;
+		height: 64px;
 		position: absolute;
 		transition: 0.1s ease-in-out;
 
