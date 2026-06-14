@@ -528,6 +528,8 @@ export const getPain = async (src?: string) => {
 					{ selector: 'hr', format: 'skip' }
 				]
 			})
+			.replace(/\s+/g, ' ')
+			.trim()
 		: '';
 };
 export const rndAr = <T extends string | number>(a: T[]) => {
