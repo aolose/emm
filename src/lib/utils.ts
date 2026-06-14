@@ -524,7 +524,8 @@ export const getPain = async (src?: string) => {
 					{ selector: 'a', options: { ignoreHref: true } },
 					{ selector: 'img', format: 'skip' },
 					{ selector: 'code', format: 'skip' },
-					{ selector: 'table', format: 'skip' }
+					{ selector: 'table', format: 'skip' },
+					{ selector: 'hr', format: 'skip' }
 				]
 			})
 		: '';

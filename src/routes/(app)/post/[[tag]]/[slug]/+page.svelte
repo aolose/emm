@@ -89,17 +89,9 @@
 		<meta property="og:image:width" content="600" />
 		<meta property="og:image:height" content="400" />
 	{/if}
-	<script type="application/ld+json">
-		{JSON.stringify({
-			'@context': 'https://schema.org',
-			'@type': 'BlogPosting',
-			headline: d.title,
-			description: view,
-			datePublished: time(d.createAt),
-			url: $page.url.href,
-			...(d.banner ? { image: (d.bannerR2Synced && r2Enabled ? resUrl(r2Domain, d.bannerR2Key || d.banner, true, true) : `${$page.url.origin}/res/_${d.banner}`) } : {})
-		})}
-	</script>
+	{#if data.jsonLd}
+		{@html data.jsonLd}
+	{/if}
 </Head>
 
 {#snippet h()}
