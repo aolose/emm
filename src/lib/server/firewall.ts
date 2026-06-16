@@ -1010,6 +1010,9 @@ export async function runAggregate(): Promise<void> {
 
 	// Skip if count unchanged or new IPs < 200
 	if (lastCount > 0 && (newCount <= 0 || newCount < 200)) {
+		// Reset baseline when blacklist shrinks (e.g. manual clear),
+		// otherwise fwLastCount stays at old peak and aggregate deadlocks.
+		if (newCount < 0) sys.fwLastCount = currentCount;
 		sys.fwLastAggregateAt = now;
 		return;
 	}
