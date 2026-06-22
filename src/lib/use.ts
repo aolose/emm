@@ -60,8 +60,9 @@ export const imageViewer = async (node: HTMLElement, slug: string) => {
 		transformContainer.style.cssText =
 			'transform-origin:center center; will-change:transform; display:flex; align-items:center; justify-content:center; max-width:92%; max-height:92%; cursor:grab;';
 
+		const isSvg = targetElement.tagName.toLowerCase() === 'svg';
 		let clonedElement: HTMLElement;
-		if (targetElement.tagName.toLowerCase() === 'svg') {
+		if (isSvg) {
 			clonedElement = targetElement.cloneNode(true) as HTMLElement;
 			const originalWidth =
 				targetElement.getAttribute('width') ||
@@ -75,11 +76,13 @@ export const imageViewer = async (node: HTMLElement, slug: string) => {
 			clonedElement.removeAttribute('width');
 			clonedElement.removeAttribute('height');
 			clonedElement.style.cssText =
-				'width: 100%; height: 100%; max-width: 100%; max-height: 100%; pointer-events: none;';
+				'width: 100vw; height: 100vh; max-width: none; max-height: none; display:block; pointer-events: none;';
 			clonedElement.setAttribute('shape-rendering', 'geometricPrecision');
 			clonedElement.setAttribute('text-rendering', 'geometricPrecision');
-			transformContainer.style.width = `${originalWidth}px`;
-			transformContainer.style.height = `${originalHeight}px`;
+			transformContainer.style.width = '100vw';
+			transformContainer.style.height = '100vh';
+			transformContainer.style.maxWidth = 'none';
+			transformContainer.style.maxHeight = 'none';
 		} else {
 			clonedElement = targetElement.cloneNode(true) as HTMLImageElement;
 			clonedElement.style.cssText =
@@ -89,6 +92,219 @@ export const imageViewer = async (node: HTMLElement, slug: string) => {
 		transformContainer.appendChild(clonedElement);
 		overlay.appendChild(transformContainer);
 		document.body.appendChild(overlay);
+
+		if (isSvg) {
+			type SvgViewBox = {
+				x: number;
+				y: number;
+				width: number;
+				height: number;
+			};
+
+			const svgElement = clonedElement as unknown as SVGSVGElement;
+			const parseViewBox = (): SvgViewBox => {
+				const parts = (svgElement.getAttribute('viewBox') || '')
+					.trim()
+					.split(/[\s,]+/)
+					.map(Number);
+				if (parts.length === 4 && parts.every(Number.isFinite) && parts[2] > 0 && parts[3] > 0) {
+					return {
+						x: parts[0],
+						y: parts[1],
+						width: parts[2],
+						height: parts[3]
+					};
+				}
+
+				const rect = targetElement.getBoundingClientRect();
+				return {
+					x: 0,
+					y: 0,
+					width: rect.width || window.innerWidth,
+					height: rect.height || window.innerHeight
+				};
+			};
+
+			const baseViewBox = parseViewBox();
+			let viewBox: SvgViewBox = { ...baseViewBox };
+			let zoom = 1;
+			let rafId: number | null = null;
+			const activePointers: PointerEvent[] = [];
+			let lastCenter = { x: 0, y: 0 };
+			let lastDistance = 0;
+			let hasMovedSignificant = false;
+
+			const applyViewBox = () => {
+				svgElement.setAttribute(
+					'viewBox',
+					`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`
+				);
+				rafId = null;
+			};
+
+			const requestRender = () => {
+				if (rafId === null) {
+					rafId = requestAnimationFrame(applyViewBox);
+				}
+			};
+
+			const getRenderScale = () => {
+				const rect = svgElement.getBoundingClientRect();
+				return Math.min(rect.width / viewBox.width, rect.height / viewBox.height) || 1;
+			};
+
+			const clientToSvg = (clientX: number, clientY: number) => {
+				const rect = svgElement.getBoundingClientRect();
+				const renderScale = getRenderScale();
+				const renderedWidth = viewBox.width * renderScale;
+				const renderedHeight = viewBox.height * renderScale;
+				const offsetX = (rect.width - renderedWidth) / 2;
+				const offsetY = (rect.height - renderedHeight) / 2;
+
+				return {
+					x: viewBox.x + (clientX - rect.left - offsetX) / renderScale,
+					y: viewBox.y + (clientY - rect.top - offsetY) / renderScale
+				};
+			};
+
+			const panBy = (movementX: number, movementY: number) => {
+				const renderScale = getRenderScale();
+				viewBox.x -= movementX / renderScale;
+				viewBox.y -= movementY / renderScale;
+			};
+
+			const zoomAt = (clientX: number, clientY: number, targetZoom: number) => {
+				const nextZoom = Math.max(0.4, Math.min(targetZoom, 30));
+				const focalPoint = clientToSvg(clientX, clientY);
+				const focalRatioX = (focalPoint.x - viewBox.x) / viewBox.width;
+				const focalRatioY = (focalPoint.y - viewBox.y) / viewBox.height;
+				const nextWidth = baseViewBox.width / nextZoom;
+				const nextHeight = baseViewBox.height / nextZoom;
+
+				viewBox = {
+					x: focalPoint.x - nextWidth * focalRatioX,
+					y: focalPoint.y - nextHeight * focalRatioY,
+					width: nextWidth,
+					height: nextHeight
+				};
+				zoom = nextZoom;
+			};
+
+			applyViewBox();
+			requestAnimationFrame(() => {
+				overlay.style.opacity = '1';
+			});
+
+			overlay.addEventListener(
+				'wheel',
+				(e: WheelEvent) => {
+					e.preventDefault();
+					const zoomFactor = e.deltaY < 0 ? 1.25 : 1 / 1.25;
+					zoomAt(e.clientX, e.clientY, zoom * zoomFactor);
+					requestRender();
+				},
+				{ passive: false }
+			);
+
+			transformContainer.addEventListener('pointerdown', (e: PointerEvent) => {
+				e.preventDefault();
+				activePointers.push(e);
+				transformContainer.style.cursor = 'grabbing';
+				hasMovedSignificant = false;
+
+				if (activePointers.length === 1) {
+					lastCenter = { x: e.clientX, y: e.clientY };
+				} else if (activePointers.length === 2) {
+					lastDistance = Math.hypot(
+						activePointers[1].clientX - activePointers[0].clientX,
+						activePointers[1].clientY - activePointers[0].clientY
+					);
+					lastCenter = {
+						x: (activePointers[0].clientX + activePointers[1].clientX) / 2,
+						y: (activePointers[0].clientY + activePointers[1].clientY) / 2
+					};
+				}
+			});
+
+			const handlePointerMove = (e: PointerEvent) => {
+				const index = activePointers.findIndex((p) => p.pointerId === e.pointerId);
+				if (index === -1) return;
+				activePointers[index] = e;
+
+				if (activePointers.length === 1) {
+					const p = activePointers[0];
+					const movementX = p.clientX - lastCenter.x;
+					const movementY = p.clientY - lastCenter.y;
+
+					if (Math.hypot(movementX, movementY) > 3) {
+						hasMovedSignificant = true;
+					}
+
+					panBy(movementX, movementY);
+					lastCenter = { x: p.clientX, y: p.clientY };
+				} else if (activePointers.length === 2) {
+					hasMovedSignificant = true;
+					const p1 = activePointers[0];
+					const p2 = activePointers[1];
+					const currentDistance = Math.hypot(p2.clientX - p1.clientX, p2.clientY - p1.clientY);
+					const currentCenter = {
+						x: (p1.clientX + p2.clientX) / 2,
+						y: (p1.clientY + p2.clientY) / 2
+					};
+					const zoomFactor = currentDistance / lastDistance;
+
+					zoomAt(currentCenter.x, currentCenter.y, zoom * zoomFactor);
+					panBy(currentCenter.x - lastCenter.x, currentCenter.y - lastCenter.y);
+					lastDistance = currentDistance;
+					lastCenter = currentCenter;
+				}
+
+				requestRender();
+			};
+
+			const handlePointerUp = (e: PointerEvent) => {
+				const index = activePointers.findIndex((p) => p.pointerId === e.pointerId);
+				if (index !== -1) activePointers.splice(index, 1);
+
+				if (activePointers.length === 0) {
+					transformContainer.style.cursor = 'grab';
+				} else if (activePointers.length === 1) {
+					const remaining = activePointers[0];
+					lastCenter = { x: remaining.clientX, y: remaining.clientY };
+				}
+			};
+
+			window.addEventListener('pointermove', handlePointerMove);
+			window.addEventListener('pointerup', handlePointerUp);
+			window.addEventListener('pointercancel', handlePointerUp);
+
+			const cleanup = () => {
+				window.removeEventListener('pointermove', handlePointerMove);
+				window.removeEventListener('pointerup', handlePointerUp);
+				window.removeEventListener('pointercancel', handlePointerUp);
+			};
+
+			const closeViewer = () => {
+				if (rafId) cancelAnimationFrame(rafId);
+				cleanup();
+				overlay.style.opacity = '0';
+				overlay.addEventListener(
+					'transitionend',
+					() => {
+						overlay.remove();
+					},
+					{ once: true }
+				);
+			};
+
+			overlay.addEventListener('click', (e: MouseEvent) => {
+				if (e.target === overlay || !hasMovedSignificant) {
+					closeViewer();
+				}
+			});
+
+			return;
+		}
 
 		// ---- State Tracking Coordinates ----
 		let scale = 1;
