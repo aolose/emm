@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 
 	let { data } = $props();
 	const { redirect, siteKey } = data;
@@ -35,9 +36,8 @@
 			const body = await res.json();
 			if (body.success) {
 				status = 'success';
-				setTimeout(() => {
-					window.location.href = redirect;
-				}, 200);
+				navigator.serviceWorker.controller?.postMessage({ type: 'WARM_CACHE' });
+				goto(redirect);
 			} else {
 				status = 'error';
 				errorMsg = body.error || 'Verification failed. Please try again.';

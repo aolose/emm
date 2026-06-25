@@ -148,25 +148,30 @@ self.addEventListener('install', (event) => {
 	const p = addFilesToCache();
 	event.waitUntil(p);
 	if (active) {
+		// Activate immediately — warm runs in background to avoid blocking
 		event.waitUntil(
 			p.then(() => {
-				// Warm content cache on update (already verified, cookie present)
-				warmContentCache();
 				self.skipWaiting();
 				channel.postMessage({ type: 'CACHE_DONE' });
 			})
 		);
+		p.then(() => warmContentCache());
 	}
 });
 
-// ── Activate: purge old version caches ─────────────────────────────
+// ── Activate: purge old version caches + claim all clients ──────────
 self.addEventListener('activate', (event) => {
 	async function deleteOldCaches() {
 		for (const key of await caches.keys()) {
 			if (key !== CACHE && key !== DATA_CACHE && key.startsWith('sw-')) await caches.delete(key);
 		}
 	}
-	event.waitUntil(deleteOldCaches());
+	event.waitUntil(
+		(async () => {
+			await deleteOldCaches();
+			await self.clients.claim();
+		})()
+	);
 });
 
 // ── Fetch: route-specific strategies ───────────────────────────────
