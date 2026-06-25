@@ -47,7 +47,6 @@ let _contentWarmed = false;
  */
 async function warmContentCache() {
 	if (_contentWarmed) return;
-	_contentWarmed = true;
 
 	const cache = await caches.open(CACHE);
 	const dataCache = await caches.open(DATA_CACHE);
@@ -70,6 +69,17 @@ async function warmContentCache() {
 			await cache.put(route, response);
 		} catch { /* skip */ }
 	}
+
+	// Only mark as warmed when all routes are actually cached,
+	// so retries can happen when earlier calls failed (e.g. Turnstile 403).
+	let allReady = true;
+	for (const route of CONTENT_ROUTES) {
+		if (!(await cache.match(route, { ignoreSearch: true }))) {
+			allReady = false;
+			break;
+		}
+	}
+	_contentWarmed = allReady;
 }
 
 // ── Content routes eligible for ETag-aware stale-while-revalidate ──
