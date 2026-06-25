@@ -36,8 +36,38 @@ const RES_CACHE = 'res';
 const DATA_CACHE = 'emm-data';
 const ASSETS = [...build, ...files];
 
-// Navigation routes precached at install.
-const PRECACHE_ROUTES = ['/', '/about', '/posts', '/tags'];
+// ── Delayed content cache warming (post Turnstile verification) ─────
+const CONTENT_ROUTES = ['/', '/about', '/posts', '/tags'];
+let _contentWarmed = false;
+
+/**
+ * Warm the content cache by fetching all content routes.
+ * Called after first successful content page load (post-Turnstile).
+ * Idempotent — skips routes already cached and won't re-run once done.
+ */
+async function warmContentCache() {
+	if (_contentWarmed) return;
+	_contentWarmed = true;
+
+	const cache = await caches.open(CACHE);
+	const dataCache = await caches.open(DATA_CACHE);
+
+	for (const route of CONTENT_ROUTES) {
+		if (await cache.match(route, { ignoreSearch: true })) continue;
+
+		try {
+			const response = await fetch(route, { redirect: 'manual' });
+			if (response.status >= 300 && response.status < 400) continue;
+			if (!response.ok) continue;
+			if (isTsChallengeResponse(response)) continue;
+
+			const html = await response.text();
+			const entries = extractFetchedData(html);
+			if (entries.length) await updateDataCache(entries);
+			await cache.put(route, response);
+		} catch { /* skip */ }
+	}
+}
 
 // ── Content routes eligible for ETag-aware stale-while-revalidate ──
 const CONTENT_RE = /^\/($|about|posts(\/|$)|post\/|tags(\/|$)|tag\/)/;
@@ -93,32 +123,13 @@ async function updateDataCache(entries) {
 	}
 }
 
-// ── Install: precache static assets + warm content routes ──────────
+// ── Install: precache static assets ──────────────────────────────────
 self.addEventListener('install', (event) => {
 	const { registration: { active } } = self;
 
 	async function addFilesToCache() {
 		const cache = await caches.open(CACHE);
 		await cache.addAll(ASSETS);
-
-		const dataCache = await caches.open(DATA_CACHE);
-		const tasks = PRECACHE_ROUTES.map(async (route) => {
-			try {
-				const response = await fetch(route, {
-					redirect: 'manual',
-					headers: { 'X-SW-Background': '1' }
-				});
-				if (response.status >= 300 && response.status < 400) return;
-				if (!response.ok) return;
-				const html = await response.text();
-				const entries = extractFetchedData(html);
-				await updateDataCache(entries);
-				await cache.put(route, response);
-			} catch {
-				// 忽略错误
-			}
-		});
-		await Promise.allSettled(tasks);
 	}
 
 	const p = addFilesToCache();
@@ -126,6 +137,8 @@ self.addEventListener('install', (event) => {
 	if (active) {
 		event.waitUntil(
 			p.then(() => {
+				// Warm content cache on update (already verified, cookie present)
+				warmContentCache();
 				self.skipWaiting();
 				channel.postMessage({ type: 'CACHE_DONE' });
 			})
@@ -181,12 +194,15 @@ self.addEventListener('fetch', (event) => {
 	event.respondWith(staticCacheFirst(event.request));
 });
 
-// ── Message: listen for REFRESH_PAGE from main thread ──────────────
+// ── Message: listen for REFRESH_PAGE / WARM_CACHE from main thread ──
 self.addEventListener('message', (event) => {
 	if (event.data?.type === 'REFRESH_PAGE') {
 		const { url, etag } = event.data;
 		if (!url) return;
 		refreshPageInBackground(url, etag);
+	}
+	if (event.data?.type === 'WARM_CACHE') {
+		event.waitUntil(warmContentCache());
 	}
 });
 
@@ -448,7 +464,10 @@ async function contentStaleWhileRevalidate(event) {
 			return new Response('Challenge required', { status: 403 });
 		}
 
-		if (networkResponse.ok) await cache.put(request, networkResponse.clone());
+		if (networkResponse.ok) {
+			await cache.put(request, networkResponse.clone());
+			event.waitUntil(warmContentCache());
+		}
 		return networkResponse;
 	} catch {
 		return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
