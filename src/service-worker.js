@@ -56,7 +56,10 @@ async function warmContentCache() {
 		if (await cache.match(route, { ignoreSearch: true })) continue;
 
 		try {
-			const response = await fetch(route, { redirect: 'manual' });
+			const response = await fetch(route, {
+				headers: { 'X-SW-Background': '1' },
+				redirect: 'manual'
+			});
 			if (response.status >= 300 && response.status < 400) continue;
 			if (!response.ok) continue;
 			if (isTsChallengeResponse(response)) continue;
