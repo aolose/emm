@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import Nav from '$lib/components/nav.svelte';
 	import SwNotification from '$lib/components/SwNotification.svelte';
 	import { expand } from '$lib/store';
@@ -23,7 +24,7 @@
 				// Already on challenge page — ignore
 				if (window.location.pathname.startsWith('/ts-challenge')) return;
 				const redirect = e.data.url || window.location.pathname;
-				window.location.href = `/ts-challenge?redirect=${encodeURIComponent(redirect)}`;
+				goto(`/ts-challenge?redirect=${encodeURIComponent(redirect)}`);
 			}
 		};
 		return () => channel.close();
